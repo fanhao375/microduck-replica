@@ -3,7 +3,7 @@
 > 对 [Pollen Robotics Microduck](https://pollen-robotics.com/microduck/) 的第三方复刻研究。
 > 从官方公开的 MJCF 仿真模型反推出**装配图、爆炸图和可直接导入 CAD 的装配体**。
 
-Microduck 是一只 25cm 高、737g 的双足机器鸭，14 个 Dynamixel XL330 舵机，用强化学习走路。
+Microduck 是一只 25cm 高、737g 的双足机器鸭，15 个 Dynamixel XL330 舵机（14 个受策略控制），用强化学习走路。
 它的**软件开源（Apache-2.0），硬件不开源** —— 没有 BOM、没有可编辑 CAD、没有 PCB 原理图、
 没有任何装配文档。
 
@@ -44,7 +44,8 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 ## 关节参数
 
-每条腿 5 个自由度，头颈 4 个，共 **14 个 Dynamixel XL330**。
+每条腿 5 个自由度，头颈 4 个 —— **14 个受控**。
+整机实际装 **15 个 Dynamixel XL330**：第 15 个驱动喙/下颚，走被动连杆，不进动作空间。
 
 | 关节 | 行程 |
 |---|---|
@@ -78,12 +79,12 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 | 装配关系 | ✅ 精确到 0.1mm，已出图 |
 | 关节轴线 / 行程 | ✅ 14 个全有 |
 | 质量 / 惯量 | ✅ 15 个刚体全有 |
-| 舵机型号 | ✅ Dynamixel XL330 |
+| 舵机型号 | ✅ Dynamixel XL330 ×15 → [docs/执行器选型.md](docs/执行器选型.md) |
 | 轴承 | ✅ 22×16×4 |
 | 电池 | ✅ 索尼 NP-F970 |
 | **自制 PCB** | ❌ 只有外形网格，无原理图、无 Gerber |
 | **RK3566 主控载板** | ❌ 定制，买不到 |
-| **紧固件清单** | ❌ 需从 STL 孔位反推 |
+| **紧固件清单** | ✅ 已从 STL 孔位反推 → [docs/紧固件反推.md](docs/紧固件反推.md) |
 | **走线方案** | ❌ 无 |
 | **控制软件** | ⚠️ Rust 运行时绑定 RK3566，需自行移植 |
 | **官方策略 ONNX** | ⚠️ 只对原本体有效，换电控后需重训 |
@@ -114,6 +115,20 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 ## 重现
 
+## 深入文档
+
+| 文档 | 内容 |
+|---|---|
+| [紧固件反推](docs/紧固件反推.md) | 从 47 个 STL 扫描孔特征，反推出 M2 螺丝系统与采购量 |
+| [执行器选型](docs/执行器选型.md) | XL330 参数、BAM M6 配置、5 组标定 PD、回差建模 |
+
+结论速览：**整机是 M2 螺丝系统**（Ø2.2 过孔 ×77 + Ø4.4 沉头孔 ×28 + Ø1.6 攻丝底孔 ×20），
+结构件过孔约 146 个；轴承 Ø22×16×4 与 Ø15×10×3。
+
+---
+
+## 重现
+
 ```bash
 # 1. 拉上游仓库（本仓库不重复托管）
 bash scripts/fetch_upstream.sh
@@ -123,9 +138,12 @@ python scripts/render_assembly.py upstream/microduck_rl assembly-drawings
 
 # 3. 重新导出 CAD 装配体
 python scripts/export_assembly_stl.py upstream/microduck_rl cad
+
+# 4. 重新扫描孔特征
+python scripts/analyze_holes.py upstream/microduck_rl/src/mjlab_microduck/robot/microduck/assets
 ```
 
-依赖：`mujoco` `numpy` `pillow`。渲染需要可用的 OpenGL 上下文。
+依赖：`mujoco` `numpy` `pillow` `scipy`。渲染需要可用的 OpenGL 上下文。
 
 ---
 
