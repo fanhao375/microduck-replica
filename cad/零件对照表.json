@@ -1,0 +1,162 @@
+{
+  "01_躯干主体": {
+    "body": "trunk_base",
+    "源STL": [
+      "seeed_bearing__configuration__22x16x4",
+      "right_shell",
+      "banana_pcb_locker",
+      "trunk_base",
+      "xl330",
+      "power_support",
+      "np_f970",
+      "xl330",
+      "left_shell",
+      "seeed_bearing__configuration__22x16x4"
+    ],
+    "三角面": 131020
+  },
+  "02_左髋yaw-roll": {
+    "body": "yaw2roll",
+    "源STL": [
+      "yaw2roll",
+      "xl330",
+      "seeed_bearing__configuration__22x16x4",
+      "bearing_roll"
+    ],
+    "三角面": 39920
+  },
+  "03_左髋roll": {
+    "body": "hip_l",
+    "源STL": [
+      "seeed_bearing__configuration__22x16x4",
+      "hip_l"
+    ],
+    "三角面": 41940
+  },
+  "04_左大腿": {
+    "body": "upper_leg_left",
+    "源STL": [
+      "upper_leg_left",
+      "xl330",
+      "upper_leg_rigidity_plate",
+      "seeed_bearing__configuration__22x16x4",
+      "xl330"
+    ],
+    "三角面": 45072
+  },
+  "05_左小腿": {
+    "body": "leg",
+    "源STL": [
+      "leg",
+      "xl330"
+    ],
+    "三角面": 18902
+  },
+  "06_左踝脚": {
+    "body": "ankle_left",
+    "源STL": [
+      "sole_left",
+      "foot_left",
+      "seeed_bearing__configuration_default",
+      "ankle_left"
+    ],
+    "三角面": 61658
+  },
+  "07_颈根": {
+    "body": "neck",
+    "源STL": [
+      "neck",
+      "xl330",
+      "xl330",
+      "neck"
+    ],
+    "三角面": 11188
+  },
+  "08_颈俯仰": {
+    "body": "neck_pitch",
+    "源STL": [
+      "neck_pitch",
+      "seeed_bearing__configuration__22x16x4"
+    ],
+    "三角面": 28090
+  },
+  "09_头yaw-roll": {
+    "body": "yaw_roll_motion",
+    "源STL": [
+      "yaw_roll_motion",
+      "xl330",
+      "seeed_bearing__configuration__22x16x4",
+      "seeed_bearing__configuration__22x16x4"
+    ],
+    "三角面": 51880
+  },
+  "10_头部总成": {
+    "body": "jaw_soft",
+    "源STL": [
+      "lens",
+      "face_part",
+      "xl330",
+      "jaw_soft",
+      "motor_support",
+      "top_head_shell",
+      "xl330",
+      "seeed_bearing__configuration_default",
+      "elec_rpi_robot_hat_pcb",
+      "soft_mouth_top",
+      "noenoeil",
+      "jaw",
+      "bottom_head_shell",
+      "m12_lens_holder",
+      "pcb__raspberry_pi_zero_2_w",
+      "speaker"
+    ],
+    "三角面": 159540
+  },
+  "11_右髋yaw-roll": {
+    "body": "bearing_roll",
+    "源STL": [
+      "yaw2roll",
+      "xl330",
+      "bearing_roll",
+      "seeed_bearing__configuration__22x16x4"
+    ],
+    "三角面": 39920
+  },
+  "12_右髋roll": {
+    "body": "hip_l_2",
+    "源STL": [
+      "hip_l",
+      "seeed_bearing__configuration__22x16x4"
+    ],
+    "三角面": 41940
+  },
+  "13_右大腿": {
+    "body": "upper_leg_right",
+    "源STL": [
+      "xl330",
+      "seeed_bearing__configuration__22x16x4",
+      "upper_leg_rigidity_plate",
+      "upper_leg_right",
+      "xl330"
+    ],
+    "三角面": 45072
+  },
+  "14_右小腿": {
+    "body": "leg_2",
+    "源STL": [
+      "xl330",
+      "leg"
+    ],
+    "三角面": 18902
+  },
+  "15_右踝脚": {
+    "body": "ankle_right",
+    "源STL": [
+      "ankle_right",
+      "sole_right",
+      "seeed_bearing__configuration_default",
+      "foot_right"
+    ],
+    "三角面": 61748
+  }
+}
