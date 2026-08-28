@@ -1,0 +1,176 @@
+<title>STL 查看器</title>
+<style>
+  :root{--bg:#f2f3f5;--fg:#1c1d1f;--pan:#fff;--bd:#d8dade;--acc:#2f6fd0}
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+    --bg:#15171a;--fg:#e8eaed;--pan:#1e2126;--bd:#32363d;--acc:#5b9bf5}}
+  :root[data-theme=dark]{--bg:#15171a;--fg:#e8eaed;--pan:#1e2126;--bd:#32363d;--acc:#5b9bf5}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,"Microsoft YaHei",sans-serif;overflow:hidden}
+  #cv{display:block;width:100vw;height:100vh;cursor:grab}
+  #cv:active{cursor:grabbing}
+  #hud{position:fixed;top:14px;left:14px;background:var(--pan);border:1px solid var(--bd);
+       border-radius:10px;padding:12px 14px;max-width:min(340px,80vw);box-shadow:0 2px 10px #0002}
+  #hud h1{font-size:15px;margin:0 0 8px}
+  #info{font-size:12px;opacity:.8;white-space:pre-line;margin-top:8px}
+  #drop{position:fixed;inset:0;display:grid;place-items:center;background:#0008;color:#fff;
+        font-size:20px;pointer-events:none;opacity:0;transition:.15s}
+  #drop.on{opacity:1}
+  button,input[type=file]{font:inherit}
+  .hint{font-size:12px;opacity:.65;margin-top:6px}
+</style>
+<canvas id="cv"></canvas>
+<div id="hud">
+  <h1>STL 查看器</h1>
+  <input id="f" type="file" accept=".stl">
+  <div class="hint">或把 .stl 文件拖进窗口</div>
+  <div id="info">尚未加载</div>
+</div>
+<div id="drop">松开以载入</div>
+<script>
+const cv=document.getElementById('cv'),info=document.getElementById('info'),drop=document.getElementById('drop');
+const gl=cv.getContext('webgl',{antialias:true});
+if(!gl){info.textContent='此浏览器不支持 WebGL';}
+
+/* ---------- 迷你矩阵库 ---------- */
+const M={
+  ident:()=>[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],
+  mul:(a,b)=>{const o=new Array(16);
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;
+      for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s;}return o;},
+  persp:(fov,asp,n,f)=>{const t=1/Math.tan(fov/2);
+    return [t/asp,0,0,0, 0,t,0,0, 0,0,(f+n)/(n-f),-1, 0,0,2*f*n/(n-f),0];},
+  look:(e,c,u)=>{
+    const z=norm(sub(e,c)),x=norm(cross(u,z)),y=cross(z,x);
+    return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+            -dot(x,e),-dot(y,e),-dot(z,e),1];}
+};
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const norm=a=>{const l=Math.hypot(...a)||1;return [a[0]/l,a[1]/l,a[2]/l];};
+
+/* ---------- 着色器 ---------- */
+const VS=`attribute vec3 p;attribute vec3 n;uniform mat4 mvp,mv;varying vec3 vn,vp;
+void main(){vn=mat3(mv)*n;vp=(mv*vec4(p,1.)).xyz;gl_Position=mvp*vec4(p,1.);}`;
+const FS=`precision mediump float;varying vec3 vn,vp;uniform vec3 col;
+void main(){vec3 N=normalize(vn);
+  vec3 L1=normalize(vec3(.5,.7,1.)),L2=normalize(vec3(-.6,-.2,.4));
+  float d=max(dot(N,L1),0.)*.75+max(dot(N,L2),0.)*.3+.28;
+  vec3 V=normalize(-vp),H=normalize(L1+V);
+  float s=pow(max(dot(N,H),0.),36.)*.35;
+  gl_FragColor=vec4(col*d+s,1.);}`;
+function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(s);return s;}
+let prog;
+if(gl){prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+  gl.enable(gl.DEPTH_TEST);}
+
+/* ---------- 二进制 / ASCII STL 解析 ---------- */
+function parseSTL(buf){
+  const dv=new DataView(buf);
+  // 判定：二进制 STL 的 84 字节头之后应正好是 n*50 字节
+  let bin=false;
+  if(buf.byteLength>=84){const n=dv.getUint32(80,true);
+    bin = (84+n*50===buf.byteLength);}
+  if(bin){
+    const n=dv.getUint32(80,true),P=new Float32Array(n*9);
+    for(let i=0,o=84,k=0;i<n;i++,o+=50){
+      for(let v=0;v<3;v++){
+        P[k++]=dv.getFloat32(o+12+v*12,true);
+        P[k++]=dv.getFloat32(o+16+v*12,true);
+        P[k++]=dv.getFloat32(o+20+v*12,true);}}
+    return P;
+  }
+  // ASCII 回退
+  const txt=new TextDecoder().decode(buf),out=[];
+  const re=/vertex\s+([-\d.eE+]+)\s+([-\d.eE+]+)\s+([-\d.eE+]+)/g;let m;
+  while((m=re.exec(txt)))out.push(+m[1],+m[2],+m[3]);
+  return new Float32Array(out);
+}
+function faceNormals(P){
+  const N=new Float32Array(P.length);
+  for(let i=0;i<P.length;i+=9){
+    const ax=P[i+3]-P[i],ay=P[i+4]-P[i+1],az=P[i+5]-P[i+2];
+    const bx=P[i+6]-P[i],by=P[i+7]-P[i+1],bz=P[i+8]-P[i+2];
+    let nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+    const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;
+    for(let v=0;v<3;v++){N[i+v*3]=nx;N[i+v*3+1]=ny;N[i+v*3+2]=nz;}}
+  return N;
+}
+
+/* ---------- 场景状态 ---------- */
+let nTri=0,center=[0,0,0],radius=1,pb=null,nb=null;
+let yaw=-0.6,pitch=-0.25,dist=3,panX=0,panY=0;
+
+function load(buf,name){
+  const P=parseSTL(buf);
+  if(!P.length){info.textContent='解析失败：不是有效的 STL';return;}
+  nTri=P.length/9;
+  let mn=[1e30,1e30,1e30],mx=[-1e30,-1e30,-1e30];
+  for(let i=0;i<P.length;i+=3)for(let a=0;a<3;a++){
+    if(P[i+a]<mn[a])mn[a]=P[i+a]; if(P[i+a]>mx[a])mx[a]=P[i+a];}
+  center=[(mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2];
+  const size=[mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]];
+  radius=Math.hypot(...size)/2||1;
+  dist=radius*2.6; panX=panY=0;
+  const N=faceNormals(P);
+  if(pb)gl.deleteBuffer(pb); if(nb)gl.deleteBuffer(nb);
+  pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,P,gl.STATIC_DRAW);
+  nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,N,gl.STATIC_DRAW);
+  info.textContent=`${name}
+三角面 ${nTri.toLocaleString()}
+尺寸 ${size[0].toFixed(1)} × ${size[1].toFixed(1)} × ${size[2].toFixed(1)} mm
+左键旋转 · 右键平移 · 滚轮缩放`;
+  draw();
+}
+
+/* ---------- 渲染 ---------- */
+function draw(){
+  if(!pb)return;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const w=cv.clientWidth*dpr|0,h=cv.clientHeight*dpr|0;
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+  gl.viewport(0,0,w,h);
+  const dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  gl.clearColor(...(dark?[.082,.09,.102,1]:[.949,.953,.961,1]));
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const eye=[center[0]+dist*cp*sy, center[1]+dist*sp, center[2]+dist*cp*cy];
+  const tgt=[center[0]-panX,center[1]-panY,center[2]];
+  const V=M.look([eye[0]-panX,eye[1]-panY,eye[2]],tgt,[0,1,0]);
+  const Pm=M.persp(0.9,w/h,radius*0.02,radius*40);
+  const mvp=M.mul(Pm,V);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'mvp'),false,new Float32Array(mvp));
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'mv'),false,new Float32Array(V));
+  gl.uniform3fv(gl.getUniformLocation(prog,'col'),dark?[.62,.66,.72]:[.72,.75,.79]);
+  const ap=gl.getAttribLocation(prog,'p'),an=gl.getAttribLocation(prog,'n');
+  gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,0,0);
+  gl.drawArrays(gl.TRIANGLES,0,nTri*3);
+}
+
+/* ---------- 交互 ---------- */
+let down=0,lx=0,ly=0;
+cv.addEventListener('mousedown',e=>{down=e.button+1;lx=e.clientX;ly=e.clientY;e.preventDefault();});
+addEventListener('mouseup',()=>down=0);
+addEventListener('mousemove',e=>{if(!down)return;
+  const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
+  if(down===1){yaw-=dx*0.008;pitch=Math.max(-1.55,Math.min(1.55,pitch+dy*0.008));}
+  else{panX+=dx*dist*0.0016;panY-=dy*dist*0.0016;}
+  draw();});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('wheel',e=>{e.preventDefault();
+  dist=Math.max(radius*0.15,Math.min(radius*30,dist*(e.deltaY>0?1.12:0.893)));draw();},{passive:false});
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',draw);
+
+/* ---------- 文件载入 ---------- */
+function readFile(f){const r=new FileReader();
+  r.onload=()=>load(r.result,f.name);r.readAsArrayBuffer(f);}
+document.getElementById('f').addEventListener('change',e=>{if(e.target.files[0])readFile(e.target.files[0]);});
+addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('on');});
+addEventListener('dragleave',()=>drop.classList.remove('on'));
+addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('on');
+  const f=e.dataTransfer.files[0];if(f)readFile(f);});
+</script>
