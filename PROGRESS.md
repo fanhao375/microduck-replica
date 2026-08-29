@@ -77,7 +77,7 @@
   波特率和协议 —— 代码即规格书**
 - 从 `duck-control/src/{model,imu,bus}.rs`、`deploy/*.dts`、`deploy/robotd.toml`、
   `tof/`、`mediad/` 里逐项挖出完整电控方案
-- 产出：`docs/硬件方案逆向.md`（317 行）
+- 产出：`docs/硬件方案逆向.md`（394 行，完整推导）+ `docs/硬件规格速查.md`（270 行，一页纸速查）
 
 ### 第 5 批 · 执行器选型
 
@@ -187,5 +187,7 @@
 | `cad/` | 16 个 STL（整机 + 15 部件）+ 零件对照表 |
 | `docs/紧固件反推.md` | M2 螺丝系统、采购量、轴承规格 |
 | `docs/执行器选型.md` | XL330 参数、BAM M6、5 组标定 PD、回差建模 |
+| `docs/硬件规格速查.md` | 一页纸硬件规格表 |
+| `docs/硬件方案逆向.md` | 电控方案完整推导与证据 |
 | `docs/hole_analysis.json` | 孔扫描原始数据 |
 | `scripts/` | 拉上游 / 渲染 / 导出 CAD / 扫孔，4 个脚本 |
