@@ -1,5 +1,7 @@
 # Microduck 复刻
 
+**简体中文** · [English](README.en.md)
+
 > 对 [Pollen Robotics Microduck](https://pollen-robotics.com/microduck/) 的第三方复刻研究。
 > 从官方公开的 MJCF 仿真模型反推出**装配图、爆炸图和可直接导入 CAD 的装配体**。
 
