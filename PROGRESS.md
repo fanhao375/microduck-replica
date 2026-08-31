@@ -71,6 +71,18 @@
 - 47 个零件扫完耗时 2.5 秒
 - 产出：`docs/紧固件反推.md`、`docs/hole_analysis.json`、`scripts/analyze_holes.py`
 
+### 第 9 批 · 执行器选型分析
+
+- 回答两个高频问题：为什么用舵机不用闭环步进；能不能不改机械件换成便宜的 STS3215
+- **硬数据对照**：同为 15 刚体双足鸭，XL330 版 **737.2 g** vs STS3215 版 **2107.1 g**，
+  差 2.86 倍 —— Open Duck Mini v2 就是「STS3215 版的答案」（42cm / 2.1kg）
+- **执行器参数对照**：kp 差 32×、forcerange 差 3.5×、damping 与 frictionloss 各差 11×、
+  armature 差 15.5× —— 每一项都差一个数量级
+- 反直觉发现：XL330 建模的回差反而更大（±1.0° vs ±0.5°）
+- 结论：**没有中间路线** —— 保 XL330（舵机 ¥4500）或换 STS3215
+  （等于去做 Open Duck Mini v2）
+- 产出：重写 `docs/执行器选型.md`（106 → 249 行）
+
 ### 第 8 批 · X 社区情报与外部验证 ⭐
 
 - 通过 opencli 的 twitter read 命令（search / thread）读取 X 公开帖
