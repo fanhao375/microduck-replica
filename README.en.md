@@ -120,8 +120,8 @@ Dynamixel slave, so orientation arrives in the same bus transaction as the joint
 no second bus, no host-side sensor fusion (the LSM6DSV16X's on-chip SFLP block emits a game
 rotation quaternion and estimates its own gyro bias).
 
-**Full detail:** [Hardware Spec Sheet](docs/硬件规格速查.md) ·
-[Complete Derivation](docs/硬件方案逆向.md)
+**Full detail:** [Hardware Teardown](docs/hardware-teardown.en.md) (English) ·
+[Spec Sheet](docs/硬件规格速查.md) (Chinese)
 
 ---
 
@@ -179,14 +179,15 @@ Skip 100% replication and go **"copy the mechanics, build your own electronics"*
 | Document | Contents |
 |---|---|
 | [**Hardware Spec Sheet**](docs/硬件规格速查.md) | One-page reference — block diagram, part numbers, bus parameters, build list, pitfalls |
-| [Hardware Derivation](docs/硬件方案逆向.md) | Full reasoning with evidence citations |
+| [**Hardware Teardown**](docs/hardware-teardown.en.md) 🇬🇧 | **Full derivation with evidence citations — the main board, both custom boards, bus protocol, sensors, power** |
 | [Actuator Selection](docs/执行器选型.md) | XL330 parameters, BAM M6 config, five calibrated PD sets, backlash modeling — plus **why closed-loop steppers do not work here, what swapping to a Feetech STS3215 actually costs** (737 g vs 2107 g, measured), and a **cross-comparison of same-class servos** including a deep assessment of the Unitree S288 |
 | [Fastener Reconstruction](docs/紧固件反推.md) | Hole-feature scan across 47 STLs → M2 system and purchase quantities |
 | [Community Intelligence](docs/社区动态.md) | X / GitHub signals, independent verification, noise and scam warnings |
 | [Progress](PROGRESS.md) | Status, decisions, open work |
 
-> Documents are written in Chinese. The tables, part numbers, addresses and diagrams are
-> readable without it; machine translation handles the prose well.
+> 🇬🇧 marks documents available in English. The rest are Chinese-only for now — their
+> tables, part numbers, addresses and diagrams are readable without it, and machine
+> translation handles the prose well.
 
 ## Reproducing This
 
