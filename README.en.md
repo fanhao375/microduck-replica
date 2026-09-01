@@ -35,8 +35,11 @@ This repository is what falls out of reading both.
 
 ## 🔨 Build Progress
 
-**Someone is actually building this.** The first parts are on the printer and the rough
-form is taking shape.
+**Someone is actually building this.** The head shell, trunk shell, leg structure and feet
+are printed, and **the M2 screws go into the leg parts** — the conclusion in
+[Fastener Reconstruction](docs/fastener-reconstruction.en.md) holds on physical hardware.
+
+![First printed parts](build-log/photos/2026-09-02-首批打印件.jpg)
 
 The rest of this repository is **analysis on paper**, recovered from the public MJCF and
 source. The [Build Log](BUILD-LOG.en.md) records the hands-on side — print settings,

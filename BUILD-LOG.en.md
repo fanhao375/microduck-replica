@@ -3,7 +3,7 @@
 [简体中文](构建日志.md) · **English**
 
 > **Current status: 3D printing in progress**
-> Last updated: 2026-09-02
+> Last updated: 2026-09-02　|　first photos below ↓
 
 Everything else in this repository is **analysis on paper** — geometry, assembly
 relationships and an electronics stack recovered from the public MJCF and source.
@@ -21,7 +21,8 @@ went wrong.
 
 | Date | Stage | Status | Notes |
 |---|---|---|---|
-| 2026-09-01 | First parts printed | 🔨 in progress | rough form taking shape |
+| 2026-09-01 | First parts printed | 🔨 in progress | head shell, trunk shell, leg structure, feet |
+| 2026-09-02 | Leg parts trial-fitted | 🔨 in progress | **M2 screws installed — the hole pattern works** |
 
 Legend: 📋 planned · 🔨 in progress · ✅ done · ⚠️ problem hit · ❌ dead end
 
@@ -75,4 +76,22 @@ Whether the reverse-engineered numbers hold up on real parts:
 
 ## Photos
 
-*(TBD)*
+### 2026-09-02 · First printed parts
+
+![First printed parts](build-log/photos/2026-09-02-首批打印件.jpg)
+
+Printed and partly assembled:
+
+- **Head assembly** — multi-colour print (white / black / red), with the camera bezel and
+  indicator opening; surface quality is good
+- **Neck** — black, already joined to the head
+- **Trunk shell** — white
+- **Leg structural parts** — black, **with M2 screws already fitted**
+- **Feet** — red / yellow, two of them
+
+> 📌 **First real-world confirmation:** the **M2 screws go into the black leg parts.**
+> That means the conclusion in [Fastener Reconstruction](docs/fastener-reconstruction.en.md)
+> — that the whole robot is an M2 system — holds on physical parts, at least for these
+> holes.
+>
+> Precise measured hole diameters still to come; see the verification table above.
