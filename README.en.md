@@ -31,6 +31,24 @@ This repository is what falls out of reading both.
 
 ---
 
+---
+
+## 🔨 Build Progress
+
+**Someone is actually building this.** The first parts are on the printer and the rough
+form is taking shape.
+
+The rest of this repository is **analysis on paper**, recovered from the public MJCF and
+source. The [Build Log](BUILD-LOG.en.md) records the hands-on side — print settings,
+assembly problems, and whether the derived numbers hold up on real parts.
+
+> This repository states repeatedly that simulation STLs are not manufacturing files.
+> **The build log is the test of that claim.** The result gets recorded either way.
+
+**→ [Build Log](BUILD-LOG.en.md)**
+
+---
+
 ## Exploded Assembly View
 
 ![Exploded view](assembly-drawings/06_爆炸图_四分之三.png)
