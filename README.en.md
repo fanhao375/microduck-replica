@@ -113,6 +113,17 @@ passive linkage and never enters the action space.
 | `head_yaw` | ±170° |
 | `head_roll` | ±25° |
 
+## 📋 Bill of Materials
+
+**What to buy and how many** — [`BOM.en.md`](BOM.en.md)
+
+15 servos, 14 bearings, ~325 fasteners, 2 boards to fabricate. Quantities are counted from geom
+references in the upstream MJCF (38 mesh types / 75 instances), not estimated. Includes a per-board
+parts list with LCSC numbers.
+
+> ⚠️ Two corrections in there that stop you buying the wrong thing: **the battery is an NP-F550,
+> not an F970**, and **the XL330 is run over-voltage**.
+
 ## 3D-Printable Parts
 
 Every individual STL, split into print-these and buy-these, bilingual filenames — [`print/`](print/)

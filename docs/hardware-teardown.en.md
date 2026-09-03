@@ -366,7 +366,12 @@ the host does not care what is inside.
 
 | Item | Value |
 |---|---|
-| Battery | **Sony NP-F550 / NP-F970** (L-series camcorder pack), **2S Li-ion** |
+| Battery | **Sony NP-F550** (L-series camcorder pack), **2S Li-ion** |
+
+> ⚠️ **It is an NP-F550, not an F970.** The upstream mesh is named `np_f970`, but its bounding box
+> measures **70.8 × 38.6 × 20.6 mm** — NP-F550/F570 size — and the source only ever names the F550.
+> A real NP-F970 is ~60 mm thick and ~300 g: **it does not fit and blows the weight budget.**
+> See [BOM](../BOM.en.md).
 | Nominal | 7.2 V |
 | Full, under load | **8.2 V** |
 | Empty, under load | **6.6 V** |
@@ -593,7 +598,7 @@ to the standing policy.
 |---|---|---|
 | Main board | **Radxa Zero 3W** | stock module, **not custom** |
 | Servos | Dynamixel XL330 × 15 | |
-| Battery | Sony NP-F550 / F970 + holder | common camcorder pack, accessories everywhere |
+| Battery | **Sony NP-F550** + holder | common camcorder pack. **Not the F970 — it does not fit** |
 | Camera | Raspberry Pi Camera v2 (IMX219) | |
 | ToF | VL53L8CX module (Stemma/Qwiic) | |
 

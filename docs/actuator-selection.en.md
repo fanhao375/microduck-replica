@@ -11,7 +11,51 @@
 | Under policy control | **14**, in the action space: 5 left leg + 4 neck/head + 5 right leg |
 | The 15th | Drives the beak/jaw through a `passive_*` linkage — **not in the action space** |
 | Mounting | M2 screws (the servo body has 4× Ø2.0 clearance holes + 8× Ø1.6 tapping holes) |
-| Supply | 7.4 V class nominal (domain-randomised over 6.5–8.2 V) |
+| Supply | ⚠️ **Rated 3.7–6.0 V; the actual bus is 6.6–8.2 V — run over-voltage.** See below |
+
+## ⚠️ The voltage truth: the XL330 is run over-voltage
+
+> **Correction (2026-09-04)**: this document used to call the XL330 a "7.4 V class servo".
+> **That was wrong**, and it propagated into the rejection of the Feetech STS3032 and into the
+> torque comparison below.
+
+**Robotis official specification**
+([XL330-M288-T e-manual](https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/), checked 2026-09-04):
+
+| Item | Official |
+|---|---|
+| Input voltage | **3.7 – 6.0 V** |
+| Recommended | **5.0 V** |
+| Stall torque | 0.42 N·m @3.7 V / **0.52 N·m @5.0 V** / 0.60 N·m @6.0 V |
+| Gear ratio | 288.4 : 1 |
+| Size / weight | 20 × 34 × 26 mm / 18 g |
+
+**Microduck actually feeds them 6.6 – 8.2 V.** Three independent points in the source agree:
+
+| Source | Value |
+|---|---|
+| BAM config in `microduck_constants.py` | `vin_range=(6.5, 8.2)`, `vin_min=6.0` |
+| `robotd` voltage adaptation | clamped **6.0 – 9.5 V** |
+| Battery | NP-F550 is 2S Li-ion: 7.4 V nominal, 8.4 V full |
+
+**So Pollen run the XL330 continuously above its 6.0 V rated maximum, up to about 8.2 V.**
+
+### What that means
+
+- ✅ **More torque than the datasheet figure.** Stall torque rises roughly linearly with voltage, so
+  at 8 V it is well above 0.52 N·m. This is likely part of how an 18 g servo carries an 800 g robot.
+- ⚠️ **Lifetime and heat are the price.** Over-voltage stresses windings and MOSFETs. Pollen have
+  published nothing on this, so **the following is inference**: it may relate to the servo heating
+  users report, and to Pollen starting to consider selling repair kits (see [community notes](社区动态.md)).
+- ⚠️ **You have to make this call yourself.** Copy them and you over-volt too. Play safe with a
+  regulator down to 5–6 V and you lose torque — **which may mean retraining the policies**, since
+  the official ONNX files were trained under the over-volted condition.
+
+> This also explains the firmware's voltage adaptation: `scale × (7.4 / measured EMA)`. As the
+> battery falls from 8.4 V to 6.5 V the same PWM produces very different torque; without
+> compensation a policy would behave differently at different states of charge.
+
+---
 
 ## Joint Travel
 
@@ -287,20 +331,24 @@ weight class do exist, but none of them satisfies torque and voltage at the same
 
 | Model | Mass | Size (mm) | Stall torque | Voltage | Encoder | Ratio |
 |---|---|---|---|---|---|---|
-| **Dynamixel XL330-M288** ⭐ | **18 g** | 29 × 20 × 34 | **0.96 N·m**<br>(9.8 kg·cm) | ~7.4 V | 12-bit | 288.35:1 |
+| **Dynamixel XL330-M288-T** ⭐ | **18 g** | **20 × 34 × 26** | **0.52 N·m @5 V**<br>0.60 @6 V / 0.42 @3.7 V | **3.7–6.0 V**<br>5 V recommended | 12-bit | 288.4:1 |
 | **Feetech STS3032** | 20 g | **23.2 × 12.1 × 28.5** | 0.44 N·m<br>(4.5 kg·cm @6V) | **4.8–6 V** | 12-bit | — |
 | **Feetech SCS0009** | **11 g** | — | 0.23 N·m<br>(2.3 kg·cm) | 6 V | 10-bit | 1:416 metal |
 | Feetech STS3215 | ~55–60 g | larger class | 1.86 N·m<br>(19 kg·cm) | 7.4 V | 12-bit | — |
-| Dynamixel XL330-M077 | 18 g | same as M288 | low (high-speed variant) | ~7.4 V | 12-bit | 77.9:1 |
+| Dynamixel XL330-M077 | 18 g | same as M288 | low (high-speed variant) | same as M288 | 12-bit | 77.9:1 |
 | **Unitree S288** ⭐ | **19.5 g** | **34 × 20 × 23** | **unclear (see below)** | **12.6 V** | **15-bit dual<br>+ output-side** | **288.35:1** |
 | Unitree J288 | 35 g | 34 × 20 × 23 | unclear (metal-gear version) | 25.2 V | same as S288 | 288.35:1 |
 
-> ⚠️ **The XL330 row is not on the same footing as the others.** Its 0.96 N·m is the
-> `forcerange = ±0.96` from this repository's MJCF — a **MuJoCo simulation force limit** —
-> whereas every other row is a **vendor stall-torque specification** (ROBOTIS only publish a
-> stall figure for the XL330 at 5 V). **They are not the same quantity; compare with care.**
-> Its dimensions were measured from `xl330.stl`. The rest are vendor specifications.
-> **Prices are deliberately omitted** — they vary enormously by region.
+> **This table now uses vendor stall-torque figures throughout** (checked against each
+> manufacturer's site on 2026-09-04), so the rows are comparable.
+>
+> The `forcerange = ±0.96` in this repository's MJCF is a **MuJoCo simulation force limit, not a
+> vendor figure**, and has been removed from the table — earlier versions compared it directly
+> against other vendors' stall torques, which was wrong.
+>
+> XL330 dimensions are Robotis' official 20 × 34 × 26 mm; the 29 × 20 × 34 measured from
+> `xl330.stl` includes the horn and cable socket.
+>
 
 ### ⭐ Unitree S288: the only part that matches the XL330 across the board
 
@@ -318,7 +366,7 @@ the "288" in the model number:
 | Motor | brushed coreless | **brushless, FOC** | ⬆️ |
 | Encoder | 12-bit, rotor side | **15-bit dual + output-side** | ⬆️⬆️ |
 | Control mode | position loop + kp | **torque feedforward + adjustable stiffness/damping** | ⬆️⬆️ |
-| **Voltage** | ~7.4 V (2S) | **12.6 V (3S)** | ⚠️ **incompatible** |
+| **Voltage** | rated 3.7–6.0 V, **run at 6.6–8.2 V** | **12.6 V (3S)** | ⚠️ **incompatible** |
 | **Bus capacity** | 253 addresses | **15 (0–14; 15 is broadcast)** | ⚠️ |
 | Torque | **0.96 N·m** | **unclear** | ⚠️ |
 
