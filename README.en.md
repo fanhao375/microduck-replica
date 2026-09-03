@@ -209,9 +209,18 @@ rotation quaternion and estimates its own gyro bias).
 inertia — it guarantees nothing about fit tolerances, threads, heat-set insert bosses or
 cable clearance. Printing these directly will most likely not assemble.
 
-💰 **Building one costs more than buying one.** Dynamixel XL330-M288-T retails around
-€45.76 in Europe; 15 of them is roughly €686 — already well past the $399 retail price of
-the finished robot. $399 is a volume price an individual cannot reach.
+💰 **Building one probably costs more than buying one — but how much more depends entirely on
+your channel.** Fifteen XL330s run about **$359** at ROBOTIS international, **$412** at ROBOTIS US,
+and **€603–629** in Europe inc-VAT — anywhere from slightly under the robot's retail price to well
+above it. Add the compute module, battery, two boards to fabricate and filament, and it is certainly
+more. Full costing: [BOM.en.md](BOM.en.md).
+
+**The conclusion has been revised** from "the mechanics are copyable, the electronics are a wall"
+to **"the whole robot is reproducible"** — the main board is an off-the-shelf module, and the custom
+boards' function and protocol have been fully recovered from source.
+See [Hardware Teardown](docs/hardware-teardown.en.md).
+
+---
 
 ## The Realistic Path
 

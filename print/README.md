@@ -70,6 +70,6 @@ upper_leg_left_左上腿.stl
 ## 授权
 
 这些 STL 是上游 `pollen-robotics/microduck_rl` 公开发布文件的**衍生作品**（重命名与分类整理），
-遵循与上游一致的 **CC BY-SA-NC**：署名、相同方式共享、非商业使用。
+遵循与上游一致的 **CC BY-NC-SA 4.0**：署名、相同方式共享、非商业使用。
 
 详见 [`../NOTICE.md`](../NOTICE.md)。

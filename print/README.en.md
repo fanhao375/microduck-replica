@@ -57,7 +57,7 @@ A few things the geometry itself tells you:
 ## Licence
 
 These STLs are a **derivative** (renaming and sorting) of files published by upstream
-`pollen-robotics/microduck_rl`, and carry the same **CC BY-SA-NC** terms: attribution,
+`pollen-robotics/microduck_rl`, and carry the same **CC BY-NC-SA 4.0** terms: attribution,
 share-alike, non-commercial.
 
 See [`../NOTICE.md`](../NOTICE.md).

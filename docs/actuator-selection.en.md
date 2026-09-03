@@ -527,7 +527,9 @@ launch**, proving real demand at the 18–20 g scale.
 
 ## A Note on Cost
 
-The Dynamixel XL330-M288-T retails for about **€45.76** in Europe — roughly **€686** for
+The XL330-M288-T varies enormously by channel (checked 2026-09-04): **$23.90** at ROBOTIS
+international, **$27.49** at ROBOTIS US, **€40.20** inc-VAT at Generation Robots, **€41.95** at
+MyBotShop — that is **$359 / $412 / €603 / €629** for
 fifteen — and around ¥299 each domestically in China, about **¥4,500** for fifteen. Either
 way that exceeds the **$399** retail price of the finished robot. $399 is a volume price an
 individual cannot reach.
