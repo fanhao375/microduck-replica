@@ -226,6 +226,13 @@ Skip 100% replication and go **"copy the mechanics, build your own electronics"*
 
 ---
 
+## Ecosystem Map
+
+Microduck material is scattered across several GitHub orgs and three HuggingFace resource types —
+**the official hardware repos are especially easy to miss**. [`docs/ecosystem.en.md`](docs/ecosystem.en.md)
+annotates every official repo, simulator, policy, dataset and community project with what it is and
+what it is good for.
+
 ## Documentation
 
 | Document | Contents |

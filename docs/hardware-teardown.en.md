@@ -469,9 +469,12 @@ lives beside the script, and the standalone copy has nothing beside it on a firs
 
 ### The duck detector
 
-The model is trained in a **separate repository**,
-[`pollen-robotics/duck_detector`](https://github.com/pollen-robotics/duck_detector),
-and arrives here already quantised as `.rknn`.
+The model is trained in a separate repository, `pollen-robotics/duck_detector`, and arrives here
+already quantised as `.rknn`.
+
+> ⚠️ **That repository is not public** (404 as of 2026-09-04). Upstream docs reference it, but the
+> training code is not obtainable — only the finished `.rknn`. Training your own means building a
+> YOLO pipeline from scratch.
 
 | Item | Value |
 |---|---|
