@@ -40,7 +40,16 @@ This repository is what falls out of reading both.
 
 ---
 
----
+## Community
+
+A WeChat group for people working on the same thing — build progress, pitfalls, sourcing.
+
+<div align="center">
+  <img src="assets/wechat-group.png" alt="Microduck replica WeChat group" width="280">
+  <br>
+  <sub><b>This QR code expires on 2026-09-10</b> — WeChat group codes are valid for 7 days<br>
+  If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
+</div>
 
 ## 🔨 Build Progress
 
@@ -204,15 +213,6 @@ Skip 100% replication and go **"copy the mechanics, build your own electronics"*
 3. **The NPU ships disabled** in Armbian — flash the overlay and reboot to run RKNN models.
 
 ---
-
-## Community
-
-A WeChat group for people working on the same thing — build progress, pitfalls, sourcing.
-
-<img src="assets/wechat-group.png" alt="Microduck replica WeChat group" width="260">
-
-> **This QR code expires on 2026-09-10** — WeChat group codes are only valid for 7 days.
-> **If it has expired, open an [issue](https://github.com/fanhao375/microduck-replica/issues) and I will post a fresh one.**
 
 ## Documentation
 

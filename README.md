@@ -24,7 +24,16 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 ---
 
----
+## 交流群
+
+有人在做同样的事，凑了个微信群一起讨论复刻进度、踩过的坑、元件采购。
+
+<div align="center">
+  <img src="assets/wechat-group.png" alt="鸭子复刻 微信群" width="280">
+  <br>
+  <sub><b>二维码有效期到 2026-09-10</b>（微信群码 7 天自动失效）<br>
+  过期了请开个 <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> 说一声，我会换上新的</sub>
+</div>
 
 ## 🔨 实物进度
 
@@ -145,15 +154,6 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 详见 [docs/硬件方案逆向.md](docs/硬件方案逆向.md)。
 
 ---
-
-## 交流群
-
-有人在做同样的事，凑了个微信群一起讨论复刻进度、踩过的坑、元件采购。
-
-<img src="assets/wechat-group.png" alt="鸭子复刻 微信群" width="260">
-
-> **二维码有效期到 2026-09-10**（微信群码 7 天自动失效）。
-> **过期了请开个 [issue](https://github.com/fanhao375/microduck-replica/issues) 说一声，我会换上新的。**
 
 ## 深入文档
 
