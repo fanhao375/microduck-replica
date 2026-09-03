@@ -6,7 +6,7 @@
 
 | | |
 |---|---|
-| Model | **Dynamixel XL330** (`motor_name="xl330"` in `microduck_constants.py`) |
+| Model | **Dynamixel XL330-M288-T** (evidence below) |
 | Count | **15** — the `xl330` mesh is referenced 15 times in the full MJCF |
 | Under policy control | **14**, in the action space: 5 left leg + 4 neck/head + 5 right leg |
 | The 15th | Drives the beak/jaw through a `passive_*` linkage — **not in the action space** |
@@ -111,7 +111,30 @@ that box.
 
 ### Where the torque comes from: the gearbox, not the motor
 
-The **288** in **XL330-M288-T** is the gear ratio: **288.35:1** (the same family also has
+### How the model number was pinned down
+
+Pollen have never named the sub-model publicly — the source carries only
+`motor_name="xl330"`, **with no suffix**. One independent evidence chain narrows it to
+**M288-T**:
+
+1. `microduck_rl` simulates the servos with the **BAM** actuator model, configured as
+   `motor_name="xl330"`, `model="m6"` (`microduck_constants.py`), which loads
+   `bam/params/xl330/m6.json`
+2. BAM is [`Rhoban/bam`](https://github.com/Rhoban/bam), whose README lists its library of
+   **identified models**, and the entry for this servo reads
+   **`Dynamixel XL330-M288-T`**
+3. So the friction model the policies are trained against was **identified on a physical
+   XL330-M288-T on a test bench**
+
+Corroboration: on 2026-09-03 the Korean robotics observer
+[@Allyakutaku](https://x.com/Allyakutaku/status/2095331280233926948) reported identifying the
+motor as XL330-M288-T from official video footage.
+
+> ⚠️ Strictly, this proves the servo **the simulation was calibrated against** is an M288-T.
+> That the physical robot uses the same part is a very strong inference, but **not a
+> statement from Pollen**.
+
+The **288** in the model number is the gear ratio: **288.35:1** (the same family also has
 the M077 at 77.9:1).
 
 The coreless motor inside produces only a few **milli**newton-metres on its own; the
@@ -272,8 +295,11 @@ weight class do exist, but none of them satisfies torque and voltage at the same
 | **Unitree S288** ⭐ | **19.5 g** | **34 × 20 × 23** | **unclear (see below)** | **12.6 V** | **15-bit dual<br>+ output-side** | **288.35:1** |
 | Unitree J288 | 35 g | 34 × 20 × 23 | unclear (metal-gear version) | 25.2 V | same as S288 | 288.35:1 |
 
-> The XL330 torque figure is the measured `forcerange = ±0.96` from this repository's MJCF;
-> its dimensions were measured from `xl330.stl`. The rest are vendor specifications.
+> ⚠️ **The XL330 row is not on the same footing as the others.** Its 0.96 N·m is the
+> `forcerange = ±0.96` from this repository's MJCF — a **MuJoCo simulation force limit** —
+> whereas every other row is a **vendor stall-torque specification** (ROBOTIS only publish a
+> stall figure for the XL330 at 5 V). **They are not the same quantity; compare with care.**
+> Its dimensions were measured from `xl330.stl`. The rest are vendor specifications.
 > **Prices are deliberately omitted** — they vary enormously by region.
 
 ### ⭐ Unitree S288: the only part that matches the XL330 across the board

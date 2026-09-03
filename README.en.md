@@ -9,9 +9,18 @@
 Microduck is a 25 cm, 737 g bipedal robot duck driven by 15 Dynamixel XL330 servos
 (14 under policy control) that learns to walk with reinforcement learning.
 
-Its **software is open source (Apache-2.0). Its hardware is not** — no BOM, no editable
-CAD, no PCB schematics, no assembly documentation. Pollen Robotics
-[told the press not to call it "open-source hardware" (for now)](docs/社区动态.md).
+Its **software is open source (Apache-2.0)**. Its hardware is **partly** open:
+
+- ✅ **The RPI Robot HAT board is fully published** — [`pollen-robotics/elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)
+  (Apache-2.0): KiCad 9 project, Gerbers, BOM, pick-and-place and STEP. **You do not need to redraw this board.**
+- ❌ **The `imu_to_dxl` board is not published** — no public project exists anywhere; the reconstruction
+  in this repo is the only one available.
+- ❌ **No editable mechanical CAD**, no whole-robot BOM, no assembly documentation. Pollen Robotics
+  [told the press not to call it "open-source hardware" (for now)](docs/社区动态.md).
+
+> 📌 **Correction (2026-09-03)**: this document previously stated "its hardware is not [open], no PCB
+> schematics". **That was wrong** — it searched only `pollen-robotics/microduck` and missed the
+> organisation's `elec_`-prefixed hardware repositories.
 
 But two public artifacts turn out to be enough:
 
@@ -132,7 +141,7 @@ browser and drop an STL in.
 | SoC | RK3566, quad Cortex-A55, Mali-G52, 0.8 TOPS NPU, 1 GB RAM / 32 GB eMMC |
 | **Servo bus** | **Single-wire half-duplex TTL** — *not* RS-232, *not* RS-485. Dynamixel Protocol V2 @ 1 Mbps on `/dev/ttyS2` |
 | **Custom board 1** | **`imu_to_dxl` v2** — an LSM6DSV16X that speaks Dynamixel: bus ID 200, register 124, a 12-byte block read in the *same* `sync_read` as the servos |
-| **Custom board 2** | **RPI Robot HAT** — TLV320AIC3104 @ 0x18, a dormant BMI088, and a Stemma header for the ToF |
+| **Custom board 2** | **RPI Robot HAT** — TLV320AIC3104 @ 0x18, a dormant BMI088, a Stemma header for the ToF. **Published by Pollen** ([`elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)) |
 | Battery | Sony NP-F550, 2S Li-ion. **No fuel gauge, no ADC** — pack voltage is read from what the servos report as their own supply |
 | Sensors | LSM6DSV16X IMU · VL53L5CX/L8CX 8×8 ToF · IMX219 (Pi Camera v2) |
 
@@ -158,7 +167,8 @@ rotation quaternion and estimates its own gyro bias).
 | Bearings | ✅ Ø22×16×4 and Ø15×10×3 |
 | Battery / sensors | ✅ NP-F550 2S, IMX219, VL53L8CX, LSM6DSV16X |
 | Main board | ✅ **Radxa Zero 3W, off the shelf** |
-| **Custom PCBs** | ⚠️ No schematics, but **function and protocol fully recovered** |
+| **HAT board** | ✅ **Officially published** — KiCad + Gerbers + BOM → [`elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT) |
+| **`imu_to_dxl` board** | ⚠️ Not published; must be redrawn. Protocol and register layout fully recovered |
 | **Fastener list** | ✅ Reverse-engineered from hole features → M2 system |
 | **Cable routing** | ❌ Nothing published |
 | Control software | ⚠️ Rust runtime is Apache-2.0 and **runs as-is on the same main board** |
@@ -181,7 +191,7 @@ Skip 100% replication and go **"copy the mechanics, build your own electronics"*
 | Servos | XL330 × 15, off the shelf |
 | Main board | **Radxa Zero 3W**, same as the original |
 | IMU board | Roll your own `imu_to_dxl`: LSM6DSV16X + a small MCU + half-duplex transceiver. The protocol is fully documented here |
-| HAT | Substitute off-the-shelf modules; **skip it entirely if you don't need audio** |
+| HAT | **Order the official Gerbers** (4-layer); or skip it entirely if you don't need audio |
 | Software | Same main board → the official Rust runtime runs unmodified |
 | Policies | The nine shipped ONNX policies work; retrain with [microduck_rl](https://github.com/pollen-robotics/microduck_rl) if you change hardware |
 
@@ -194,6 +204,15 @@ Skip 100% replication and go **"copy the mechanics, build your own electronics"*
 3. **The NPU ships disabled** in Armbian — flash the overlay and reboot to run RKNN models.
 
 ---
+
+## Community
+
+A WeChat group for people working on the same thing — build progress, pitfalls, sourcing.
+
+<img src="assets/wechat-group.png" alt="Microduck replica WeChat group" width="260">
+
+> **This QR code expires on 2026-09-10** — WeChat group codes are only valid for 7 days.
+> **If it has expired, open an [issue](https://github.com/fanhao375/microduck-replica/issues) and I will post a fresh one.**
 
 ## Documentation
 

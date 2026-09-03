@@ -9,9 +9,15 @@
 | [pollen-robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl) | Pollen Robotics | 代码 Apache-2.0；**3D 模型 CC BY-SA-NC** |
 | [pollen-robotics/microduck](https://github.com/pollen-robotics/microduck) | Pollen Robotics | Apache-2.0 |
 
-Microduck 是 Pollen Robotics 的商业产品。**其硬件并未开源** —— 没有公开的 BOM、
-可编辑 CAD、PCB 原理图或装配文档。本仓库中的一切几何信息，均来自上游
-`microduck_rl` 仓库中公开发布的 **MJCF 仿真模型和 STL 网格**。
+Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
+
+- **RPI Robot HAT 板已由官方完整开源**（[`elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)，Apache-2.0，含 KiCad 工程与生产文件）
+- **`imu_to_dxl` 板、机械件的可编辑 CAD、整机 BOM 与装配文档**均未公开
+
+本仓库中的一切几何信息，均来自上游 `microduck_rl` 仓库中公开发布的
+**MJCF 仿真模型和 STL 网格**；电控结论来自 `microduck` 仓库的源码、设备树与配置文件。
+
+> 勘误（2026-09-03）：本文件此前称「其硬件并未开源」，该表述有误 —— HAT 板是开源的。
 
 ## 本仓库中的衍生内容
 

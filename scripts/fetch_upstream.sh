@@ -9,6 +9,9 @@ mkdir -p upstream && cd upstream
 # Microduck 板载运行时（Rust，绑定 Rockchip RK3566）
 [ -d microduck ] || git clone --depth 1 https://github.com/pollen-robotics/microduck.git
 
+# RPI Robot HAT 板 —— 官方开源的 KiCad 工程与生产文件（Gerber / BOM / 贴片坐标）
+[ -d elec_RPI_Robot_HAT ] || git clone --depth 1 https://github.com/pollen-robotics/elec_RPI_Robot_HAT.git
+
 cd ..
 echo ""
 echo "完成。重新生成装配图和 CAD 装配体："

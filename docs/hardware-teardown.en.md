@@ -21,7 +21,7 @@ config files in the `pollen-robotics/microduck` repository.
         ┌──────────────┘        │         └── IMX219 camera (mounted upside down)
         │                       │
         │              ┌────────▼─────────────────┐
-        │              │  Pollen RPI Robot HAT    │  65 × 30 mm, custom
+        │              │  Pollen RPI Robot HAT    │  65×30mm custom (published)
         │              │  i2c3 @ 400 kHz          │
         │              │   ├ TLV320AIC3104  0x18  │  audio codec
         │              │   ├ BMI088   0x19/0x68   │  fitted but unused
@@ -52,7 +52,7 @@ firmware simply reads what the servos report as their own supply.
 | Form factor | Pi Zero, 65×30 mm, 40-pin header | matches the size of `pcb__raspberry_pi_zero_2_w.stl` |
 | OS | **Armbian** (Debian-based), vendor kernel 6.1.115 | `armbianEnv.txt`, overlay comments |
 | Servo serial port | **`/dev/ttyS2`** | `deploy/robotd.toml` |
-| NPU | RK3566 NPU, **disabled by default in Armbian** | `deploy/overlays/rk3568-npu-enable.dts`; needs `setup-npu.sh` + reboot |
+| NPU | **0.8 TOPS / INT8 / single core**, node `npu@fde40000`, **disabled by default in Armbian** | `npu-bringup.md`; overlay + `setup-npu.sh` + reboot, see [§7b](#7b-the-npu-and-on-board-vision) |
 | Policy inference | ONNX Runtime ≥1.23 (installs 1.28.0), loaded with `dlopen` | `Cargo.toml` workspace metadata |
 | NPU inference | rknn-toolkit2 runtime | same |
 
@@ -62,7 +62,7 @@ firmware simply reads what the servos report as their own supply.
 
 ---
 
-## 3. Custom Board 1: `imu_to_dxl` v2
+## 3. `imu_to_dxl` v2 — the one board you must build
 
 **The most elegant piece of the design, and the easiest one to reproduce.**
 
@@ -103,18 +103,120 @@ clear logic, and the protocol is fully documented above.
 
 ---
 
-## 4. Custom Board 2: Pollen RPI Robot HAT
+## 4. Pollen RPI Robot HAT — **already published; do not redraw it**
 
-65 × 30 mm, Pi Zero form factor, plugs onto the Radxa's 40-pin header. (Corresponds to
-`elec_rpi_robot_hat_pcb.stl`, measured 65.02 × 30.02 × 0.84 mm.)
+> 📌 **Correction (2026-09-03)**: this section previously treated the board as unpublished and
+> in need of reverse engineering. **That was wrong.** The board is fully open at
+> [`pollen-robotics/elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)
+> (**Apache-2.0**): KiCad 9 schematic and PCB, Gerbers, BOM, pick-and-place, STEP, plus every
+> datasheet. The earlier search covered only the `microduck` repository and missed the
+> organisation's `elec_`-prefixed hardware repositories.
+
+**Download the official Gerbers and order the board. This section is kept as a
+reverse-engineering-versus-reality record.**
+
+### ⚠️ Four things to know before you order it
+
+**1. There is no charging circuit and no USB-C input on this board.**
+
+The repository contains a `pwr_supply_charge.kicad_sch`, which makes it easy to assume the board
+charges the battery. **It is an orphan sheet** — `main.kicad_sch` instantiates only
+`audio / dynamixel / power / sensors`, never it, and its title block still reads
+`Chromapi's Power Supply & Charge`, a leftover from another project.
+
+Checked against the production BOM: `CN3302` (Li-ion charger), `HY2120` (protection), the USB-C
+receptacle, the power switch, the indicator LEDs, `AO4435`/`FDS6630A` — **none of them are on it.**
+
+Only two power parts are actually fitted:
+
+| Ref | Part | Function |
+|---|---|---|
+| `U10` | **LM5050-1** | Ideal-diode controller (reverse protection / OR-ing) |
+| `U9` | **AP63205** | Buck converter |
+
+> **The battery must be charged with an external charger.** Plugging in USB-C will not charge the robot.
+
+**2. Opening the KiCad project needs a second repository.**
+
+The HAT repository has **no** `sym-lib-table`, no `fp-lib-table` and no `.pretty` directory, yet the
+schematic references `Library_Pollen`, `LCSC_parts_lib` and `Lib_Pollen`. Those live in
+[`pollen-robotics/lib_KiCAD`](https://github.com/pollen-robotics/lib_KiCAD).
+
+Without it the project opens as a field of unresolved symbols.
+**Not needed if you only want to fabricate** — use the Gerbers in `production/` directly.
+
+**3. Four layers, 118 placements, assembly service required.**
+
+The `kicad_pcb` layer stack is `F.Cu / In1.Cu / In2.Cu / B.Cu`. The BOM is 47 lines and 123 parts,
+including a **VQFN-32 codec** and an **LGA-16 BMI088** — hand soldering is not realistic; order it
+with SMT assembly.
+
+Five DNP lines: `C25`, `R10/R11`, `R16/R17/R41`, `R36/R37`, and **`U4`**.
+
+**4. `U4 = CAT24C32` is DNP → this is not a self-identifying HAT.**
+
+The EEPROM position is left empty, so the board does not follow the `hat-plus-specification`
+auto-detection flow. The device-tree overlay has to be applied by hand.
+
+### Also: the Dynamixel side is dual-standard
+
+| Ref | Interface | Note |
+|---|---|---|
+| `J13 / J14` | **TTL 3P** (JST EH 2.5 mm) | Microduck's XL330 servos use this |
+| `J3 / J11` | **RS-485 4P** (JST EH 2.5 mm) | driven by `U8 = SIT3088E` |
+| `TH1` | 100R thermistor | overcurrent protection |
+
+So the board drives **both TTL and RS-485 Dynamixels, and Feetech servos**, with a cable change.
+
+### Also: this is not a Microduck-only board
+
+It is a general-purpose HAT for small and medium robots. Three known users:
+
+- **Microduck** (this project)
+- Pollen's own **Grabette / Casquette** (running on a Pi 4)
+- Third-party **[`Rhoban/microban`](https://github.com/Rhoban/microban)** — a 19×XL330 + Pi Zero 2W
+  + 2×18650 biped with a **complete public BOM, assembly and printing guide** (~$567 total).
+  Worth cross-checking when sourcing parts.
+
+> One line from `Rhoban/microban`'s BOM is worth remembering:
+> *"Unlike the other components, the RPI Robot Hat is not an off-the-shelf part: it is an
+> open-source board that you need to have manufactured."*
+> — **open source ≠ purchasable.** You still have to fabricate it.
+
+### Reverse-engineered conclusions checked against the official BOM
+
+| Derived here | Actual official BOM | Result |
+|---|---|---|
+| Audio codec @ `0x18` | `U2 = TLV320AIC3104IRHBR` | ✅ |
+| BMI088 @ `0x19/0x68`, fitted but unused | `U11 = BMI088` | ✅ |
+| Pull-ups "a single 10k pair, **R12/R13**" | `R12, R13 = 10k` | ✅ **exact designators** |
+| "Stemma **J5** connector" | `J5–J8 = JST SH 1 mm 4P` | ✅ |
+| Pi Zero 40-pin form factor | `J4 = 2x20 rasp HAT zero SMD` | ✅ |
+
+### What the source code could **not** reveal
+
+| Part | Function |
+|---|---|
+| `U1 = PAM8406D` | Class-D audio amplifier |
+| `MK1 = LMA2718` | **On-board MEMS microphone** |
+| `U10 = LM5050-1` | Ideal-diode controller (reverse protection / OR-ing) |
+| `AP63205` | Buck converter |
+| `CAT24C32` | EEPROM — required by the Raspberry Pi HAT+ specification |
+| `J1/J2/J9 = Wago-2` | Screwless terminals: external speaker and second microphone |
+| `J3/J11`, `J13/J14` | Dynamixel 4P / 3P connectors (JST EH 2.5 mm) |
+
+Two more facts from the official README that the source code does not carry:
+
+- **Input range 5–28 V**, designed to be **powered through the motor connector**
+- Dynamixel **TTL and RS485 both supported** (cable change only; drives Feetech servos too)
 
 ### What is on it
 
 | Part | I²C address | Notes |
 |---|---|---|
 | **TLV320AIC3104** | `0x18` | TI audio codec, I²S data + I²C control |
-| **BMI088** | `0x19` / `0x68` | **Fitted but unused** — the device tree calls it "dormant", "unused but still connected" |
-| **ToF** | `0x29` | Not on the board; attaches via the **Stemma J5** connector |
+| **BMI088** | `0x19` / `0x68` | **Actually fitted, but unused by software** (BOM `U11`; the comments say "dormant", "unused but still connected"). This is the second of the "two IMUs" the press mentions |
+| **ToF** | `0x29` or `0x52` | Not on the board; via the **Stemma/Qwiic J5** header. The firmware supports **both VL53L5CX and VL53L8CX**, identified by revision ID |
 
 - I²C bus: header **pins 3 and 5** (`GPIO1_A0` = SDA, `GPIO1_A1` = SCL)
 - Bus speed **400 kHz** — capped by the codec and the BMI088; the VL53L5CX alone would
@@ -327,6 +429,122 @@ pitch, and the mouth opens with it. Playable band 0.10–0.70 m.
 
 ---
 
+## 7b. The NPU and On-Board Vision
+
+> Compiled from upstream `docs/project/npu-bringup.md` and `duck-detect/`.
+> It is currently the only material that states plainly what the RK3566's NPU can actually do.
+
+### NPU specification
+
+| Item | Value | Source |
+|---|---|---|
+| Compute | **0.8 TOPS, INT8, single core** | opening of `npu-bringup.md` |
+| Device-tree node | `npu@fde40000` | Armbian ships it `status = "disabled"` |
+| Runtime | rknn-toolkit2 runtime, `librknnrt.so` | driver 0.9.8 / runtime 2.3.2 (measured) |
+
+### ⚠️ Two hard constraints that will stop a replica dead
+
+**1. The driver exists only in the vendor kernel. Mainline has none.**
+
+> Upstream: *"The driver is the gate: it is part of the vendor kernel, mainline has none,
+> and nothing in userspace can work around its absence."*
+
+This is far more serious than "the NPU is off by default". Swap in a mainline-kernel distro —
+which most official Debian/Ubuntu images are — and **the NPU simply is not there, with no
+userspace workaround**. The OS image is not a free choice when reproducing this robot.
+
+**2. Armbian disables the NPU node on every Radxa Zero 3.**
+
+So a stock board has the hardware, the kernel and the driver, and still **no NPU**.
+
+```bash
+# Upstream runs this from the preinstall hook on every robotctl update, non-fatally
+sudo sh /opt/robot/daemon/current/scripts/setup-npu.sh
+# writes the overlay -> reboot required -> confirm with:
+dmesg | grep rknpu
+```
+
+Run the copy **inside the release**, not `/usr/local/sbin/robot-setup-npu`: the overlay source
+lives beside the script, and the standalone copy has nothing beside it on a first run.
+
+### The duck detector
+
+The model is trained in a **separate repository**,
+[`pollen-robotics/duck_detector`](https://github.com/pollen-robotics/duck_detector),
+and arrives here already quantised as `.rknn`.
+
+| Item | Value |
+|---|---|
+| Network | `yolo11n` @ **320×320** |
+| Classes | **1** (the duck) |
+| Training set | **150 frames from 3 sessions** |
+| mAP50 | **0.976** on a held-out session |
+| Size after INT8 quantisation | **3.9 MB** |
+| Quantisation loss | 2 of 2 detections kept at 95% box overlap vs the float model, on the desk |
+
+> 0.976 from 150 frames — single class, fixed subject, constrained scene. That data
+> requirement is good news for anyone reproducing this.
+
+### Measured performance (Radxa Zero 3, paced 2 Hz, 30 frames over 3 passes)
+
+| Item | Measured | Note |
+|---|---|---|
+| Latency p50 / p95 | **25.7 ms / 58.4 ms** | inference plus decode, not JPEG decoding |
+| CPU per frame | 20.7 ms | **not the NPU's cost** — see below |
+| SoC temperature | **63 °C** | at the end of a paced run |
+
+**That CPU figure invites misreading.** The latency column times `infer` + `decode`; the CPU
+column is the whole loop's process CPU divided by frames, so it **also carries `letterbox_rgb`**
+— a 1280×720 → 320×320 resample that runs on the CPU and is not in the latency column at all.
+Whether the remainder means `rknn_run` busy-waits (charging NPU wait to the CPU) is not yet known
+upstream either.
+
+> At 2 Hz it is **4% of one core** either way. But before anyone quotes that as the price of
+> perception, the two should be measured apart.
+
+For why the rate is 2 Hz, see [§8, Two engineering details worth stealing](#two-engineering-details-worth-stealing)
+— it is a **thermal limit, not a preference**; running flat out reaches 95 °C.
+
+### Three engineering decisions worth stealing
+
+**1. `dlopen`, not link.** `librknnrt.so` is a vendor blob in no Debian suite, and a crate that
+linked it could not be cross-compiled in CI. The cost is `duck-detect/src/rknn.rs`; the benefit is
+that `cargo board --bins` still works on a laptop. `robotd` reaches ONNX Runtime the same way.
+
+**2. Let the runtime dequantise.** A quantised model's output tensor is int8 with a scale and a
+zero point. `rknn_outputs_get` will convert to float if asked, and upstream asks — the alternative
+is carrying the scale into the decoder and **getting it wrong once, quietly**.
+
+**3. Triage in the order that matters: does it run → does it still see → what does it cost.**
+`duck-bench` reports in exactly that order. A model that runs and detects nothing looks exactly
+like one that works.
+
+> ⚠️ **A quantised model's scores are on their own scale.** The float model's 0.5 is not this
+> model's 0.5. When it detects nothing, try `--threshold 0.2` before believing the conversion
+> is broken.
+
+### What is still missing
+
+**Nothing on the robot can get a frame.** `mediad` has a raw NV12 tee branch that exists precisely
+for this, but **no IPC exposes it** — which is also why capturing a dataset has to stop `mediad`
+to take the camera.
+
+Upstream names two ways forward, not exclusive: add a `media.frame` call that answers with one
+frame; or put the detector inside `mediad`, subscribing to the raw branch, running at a few Hz and
+publishing detections on the state stream.
+
+> The second is where it ends up: **perception next to the sensor, deriving features rather than
+> shipping pixels.**
+
+### What this means if you are reproducing it
+
+1. **The OS image is not a free choice** — it must carry the Rockchip vendor kernel (Armbian family)
+2. First thing after you get a board: **enable the NPU node and reboot**, or every inference runs on the CPU
+3. Training your own model starts at roughly **150 frames** for usable accuracy — a lower bar than expected
+4. Do not plan on pulling frames off the robot for your own work yet — **upstream has not finished that path**
+
+---
+
 ## 8. Software Parameters You Must Match
 
 | Parameter | Value | Notes |
@@ -376,22 +594,21 @@ to the standing policy.
 | Camera | Raspberry Pi Camera v2 (IMX219) | |
 | ToF | VL53L8CX module (Stemma/Qwiic) | |
 
-### 🔧 Two boards to design yourself
+### 📥 One board you simply download
 
-**① `imu_to_dxl` — simple, and well worth doing**
-LSM6DSV16X + a small MCU (Dynamixel V2 slave) + a half-duplex TTL transceiver.
-The protocol and register layout are given in full above; implement to that.
+**RPI Robot HAT — do not draw it.**
+[`pollen-robotics/elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)
+(Apache-2.0) ships a `production/` folder with Gerbers, BOM and pick-and-place. Order it as is.
+Note it is a **4-layer** board.
 
-**② RPI Robot HAT — can be simplified**
-The original is TLV320AIC3104 + BMI088 (unused) + Stemma connector + power.
-**Drop the BMI088**, and the whole board can be replaced with off-the-shelf modules:
+If you want to simplify (no microphone, no speaker), you can also skip it entirely: put a stock
+VL53L8CX module straight onto i2c3 and use an off-the-shelf 5 V UBEC for power.
 
-- Audio: any I²S codec module (or a MAX98357A amplifier if you give up recording)
-- ToF: a stock VL53L8CX module straight onto i2c3
-- Power: a stock 5 V UBEC
+### 🔧 The one board you must build yourself
 
-> In other words: **if you do not need the microphone and speaker, you do not need to
-> build the HAT at all.**
+**`imu_to_dxl`** — no public project exists anywhere, so this is the only board that has to be
+rebuilt from scratch. LSM6DSV16X + a small MCU (Dynamixel V2 slave) + a half-duplex TTL
+transceiver. The protocol and 12-byte register layout are given in full above; implement to that.
 
 ### ⚠️ Traps to plan for
 
@@ -414,7 +631,7 @@ unobtainable, the PCB is a hard wall." **That conclusion was wrong:**
 - The main board is an **off-the-shelf Radxa Zero 3W**, not a custom carrier
 - Of the two custom boards, `imu_to_dxl` has very few components and its protocol is now
   fully recovered — it is straightforward to build
-- The HAT can be replaced with stock modules, or skipped entirely if you do not need audio
+- **The HAT board is fully published by Pollen** (KiCad + Gerbers + BOM) — no need to draw it
 
 **What actually remains is software.** The Rust runtime is open source (Apache-2.0) but
 bound to the Radxa Zero 3W's specific wiring — so if you build around the same main board,

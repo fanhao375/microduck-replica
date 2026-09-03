@@ -2,7 +2,7 @@
 
 [简体中文](紧固件反推.md) · **English**
 
-There is no BOM upstream and no screw list. Everything below was **recovered from the
+There is no mechanical BOM upstream and no screw list (the HAT board has an electronics BOM, but it covers no structural parts). Everything below was **recovered from the
 geometry of the 47 STL meshes.**
 
 ## Method
