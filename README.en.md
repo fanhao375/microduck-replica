@@ -113,6 +113,18 @@ passive linkage and never enters the action space.
 | `head_yaw` | ±170° |
 | `head_roll` | ±25° |
 
+## 3D-Printable Parts
+
+Every individual STL, split into print-these and buy-these, bilingual filenames — [`print/`](print/)
+
+| Directory | Count |
+|---|---|
+| [`print/打印件/`](print/打印件/) | **37** structural parts |
+| [`print/标准件-无需打印/`](print/标准件-无需打印/) | **9** bought-part models (for fit checking) |
+
+> Upstream's 7 test-bench fixtures and 1 duplicate are excluded. Printing notes:
+> [`print/README.en.md`](print/README.en.md).
+
 ## CAD Assemblies
 
 `cad/` holds STL files **with world transforms already applied** — import them and the
