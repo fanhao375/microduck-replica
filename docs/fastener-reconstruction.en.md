@@ -73,7 +73,14 @@ Weighted by how many times each mesh is actually used in the full robot:
 
 ## Purchase Estimate
 
-- Total M2 clearance holes across the robot: **213**, of which 60 are on the servo bodies
+- M2-class holes (Ø1.9–2.5 mm, ≥300° wrap) across the assembly, **weighted by usage: 237**,
+  of which 60 are on the servo bodies (15×4), 21 on bought parts (bearings / PCBs / battery),
+  and about 156 on printed structural parts
+
+  > ⚠️ **Correction (2026-09-04)**: earlier versions said "213", which does not reconcile. Two
+  > causes: the earlier count was **not weighted by how often each part is used** (`leg` is ×4,
+  > `hip_l` and `yaw2roll` are ×2), and it **included meshes no MJCF references**. The diameter
+  > and depth tables below are **unweighted** (each STL counted once) — the two cannot be summed.
   themselves (15 × 4)
 - Excluding servos and bought-in parts (bearings, PCBs, battery), the structural parts
   account for **roughly 146 clearance holes**

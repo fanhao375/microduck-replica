@@ -9,7 +9,10 @@ Everything needed to build one Microduck. Quantities come from geom references i
 > Rust source and KiCad project. Every entry cites its basis. Prices vary enormously by region and
 > date — treat them as **order of magnitude only**.
 >
-> Checked: **2026-09-04**, upstream `microduck_rl` @ `robot_walk.xml`.
+> Checked: **2026-09-04**. Upstream baseline: `pollen-robotics/microduck_rl` @ **`29e887e`**
+> (includes the full CAD re-export `8dfc08f` of 2026-09-01).
+> The geom counts in `robot_walk.xml` are **identical before and after** that re-export
+> (38 types / 75 instances), so the quantities here are unaffected.
 
 ---
 
@@ -17,7 +20,7 @@ Everything needed to build one Microduck. Quantities come from geom references i
 
 | Category | Qty | Order of magnitude |
 |---|---|---|
-| **Servos** | 15 | **$412 – €686** (huge regional spread, see below) |
+| **Servos** | 15 | **$359 – €629** (huge regional spread, see below) |
 | Compute and sensors | 4 items | ~$80 – 120 |
 | Battery and power | 2 items | ~$30 – 50 |
 | Bearings | 14 | ~$15 – 30 |
@@ -25,8 +28,9 @@ Everything needed to build one Microduck. Quantities come from geom references i
 | **PCB fabrication (2 boards)** | 2 | ~$60 – 150 with assembly |
 | Filament | — | ~$15 – 30 |
 
-**The servos dominate.** At Robotis US pricing ($27.49) fifteen come to **$412** — already about the
-$399 retail price of the whole robot. At European retail (€40–46) it is **€600–690**, far above.
+**The servos dominate**, and the channel spread is enormous: ROBOTIS international at $23.90 ×15 is
+**$359** (below the robot's retail price), ROBOTIS US at $27.49 is **$412** (about equal to it), and
+European inc-VAT retail runs **€603–629** (far above).
 
 > $399 is Seeed-scale manufacturing with Pollen's supply chain. **An individual build cannot reach it.**
 
@@ -63,7 +67,7 @@ $399 retail price of the whole robot. At European retail (€40–46) it is **�
 | Part | Model | Qty | Basis / note |
 |---|---|---|---|
 | Compute | **Radxa Zero 3W** | 1 | device tree `compatible = "radxa,zero-3w"`. ⚠️ Several RAM/eMMC SKUs — **the official one is 1 GB / 32 GB**; the OS image must carry the Rockchip vendor kernel (Armbian family) or the NPU does not exist |
-| Camera | Raspberry Pi Camera v2 (**IMX219**) | 1 | `setup-board.sh` applies the `radxa-zero3-rpi-camera-v2` overlay. ⚠️ **Mounted upside down** — `rotation=180` in software |
+| Camera | Raspberry Pi Camera v2 (**IMX219**) | 1 | `setup-board.sh` applies the `radxa-zero3-rpi-camera-v2` overlay. ⚠️ **Mounted off-axis; corrected in software.** `media-bringup.md` says the alpha was upside down (`180`), but the current code default in `mediad/src/main.rs` is `--rotate 90`. Check against your build |
 | Depth | **VL53L8CX** or VL53L5CX module | 1 | firmware supports both, identified by revision ID; address `0x29` or `0x52`; Stemma/Qwiic |
 | Battery | **Sony NP-F550** (2S, 7.4 V) | 1 | ⚠️ see correction below |
 | Battery holder | Any NP-F series holder | 1 | Upstream only has the printed `power_support` — **no contact model at all**; you must solve the pickup yourself |
@@ -94,9 +98,9 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 | Production files | `production/`: Gerbers, BOM, pick-and-place, schematic PDF, STEP |
 | **Layers** | **4** (`F.Cu / In1.Cu / In2.Cu / B.Cu`) |
 | **Thickness** | **1.0 mm** (KiCad `(thickness 1)`. The 0.84 mm measured from the STL is a simulation-mesh approximation — order to the KiCad value) |
-| Size | 65 × 30 mm, Pi Zero form factor |
+| Size | **65.0 × 30.9 mm** (measured from KiCad `Edge.Cuts`, R3.5 corners) — 0.9 mm wider than a Pi Zero |
 | BOM | 47 lines / **123 parts**, of which **5 lines are DNP** |
-| Placements | **117** (rows in `POS.csv`) |
+| Placements | **117 rows** in `POS.csv`, including 3 fiducials (FID1–3) and H3 → **113 actual components** |
 | Hand-solderable? | ❌ **No** — VQFN-32 codec and LGA-16 IMU. Order with assembly |
 
 **Key parts** (for costing and substitution):
@@ -141,12 +145,21 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 | J1/J2 | B3B-EH-A(LF)(SN) | `C160259` | Dynamixel 3P — **same part as the official HAT**, cables interchange |
 | J3 | PZ254V-11-04P | `C2691448` | SWD header |
 | C1–C5 | 100 nF 0402 | `C307331` | Decoupling (same part as the official HAT) |
-| C6/C7 | 10 µF 0603 | `C19702` | LDO input/output |
+| **C6** | 10 µF **≥25 V** | ⚠️ TBD | **LDO input** — sits directly on the 8.4 V bus |
+| C7 | 10 µF 0603 10 V | `C19702` | LDO output (3.3 V); 10 V is fine here |
 | R1/R2 | 10 kΩ 0402 | `C25744` | CS pull-up (**mandatory**), NRST pull-up |
 
-> ⚠️ **The LDO is a trap.** The bus reaches 8.4 V fully charged, and the usual suspects —
-> AP2112K (6 V), ME6211 (6.5 V), TLV75533 (5.5 V) — **are all under-rated and will fail**.
-> Use the HT7533-1 (30 V) or equivalent.
+> ⚠️ **Two traps on the input side, both of which destroy the board:**
+>
+> **1. LDO rating.** The bus reaches 8.4 V fully charged; the usual suspects fall short
+> (shown as **operating limit / absolute maximum**): AP2112K **6.0 / 6.5 V**,
+> ME6211 **6.0 / 6.5 V**, TLV75533 **5.5 / 6.0 V**. Use the HT7533-1 (30 V operating,
+> 33 V absolute) or equivalent.
+>
+> **2. Input capacitor rating — this table previously got it wrong.** `C19702` is a **10 V**
+> X5R. On an 8.4 V bus that is only 1.2× margin, and an X5R at 8.4 V DC bias retains **less than
+> half its nominal capacitance** — before the servo switching transients. **C6 must be a ≥25 V
+> part** (0805 is safer); C7, on the 3.3 V output, is fine at 10 V.
 
 ---
 
@@ -161,7 +174,17 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 
 ### Fasteners (mostly M2, ~325 pieces)
 
-**213 M2 through-holes** on the robot, 60 of them in the servo bodies (15 × 4).
+Across the assembly there are **237 M2-class holes** (Ø1.9–2.5 mm, ≥300° wrap), weighted by how
+many times each part is used: **60 in the servo bodies** (15 × 4), 21 in bought parts
+(bearings / PCBs / battery), and **about 156 in printed structural parts**.
+
+> ⚠️ **On the figure**: earlier versions of this repository said "213", which does not reconcile;
+> corrected to 237. The gap came from two things — the earlier count was **not weighted by usage**
+> (`leg` is actually ×4, `hip_l` ×2, and so on) and it **included unused meshes**. The
+> diameter-distribution table uses a different basis; see
+> [fastener reconstruction](docs/fastener-reconstruction.en.md).
+>
+> The quantities below total 325 pieces — still **1.37×** cover for 237 holes, so ordering is unaffected.
 
 | Size | Suggested qty | Use |
 |---|---|---|
@@ -175,7 +198,7 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 
 Derivation: [fastener reconstruction](docs/fastener-reconstruction.en.md).
 
-### Printed parts (30 types / 40 pieces)
+### Printed parts (29 types / 39 pieces)
 
 **Watch the quantities — 8 types need more than one:**
 
@@ -189,7 +212,7 @@ Derivation: [fastener reconstruction](docs/fastener-reconstruction.en.md).
 | `sole_right_右脚底` | ×2 |
 | `upper_leg_rigidity_plate_上腿加固板` | ×2 |
 | `yaw2roll_偏航转横滚` | ×2 |
-| The other 22 types | ×1 each |
+| The other 21 types | ×1 each |
 
 **Flexible-material parts** (from naming and function — TPU suggested):
 `jaw_soft_软下巴`, `soft_mouth_top_软嘴顶部`
