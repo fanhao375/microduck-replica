@@ -165,7 +165,7 @@ browser and drop an STL in.
   The one thing people get wrong: <b>the compute board, the HAT and the camera are all in the head</b> —
   the camera sits ~13 mm from the board centre with no joint between them,<br>
   so the MIPI ribbon never crosses the neck. What does cross it is the servo bus and the power line.<br>
-  <a href="docs/硬件入门.md">Full diagram set (Chinese) →</a></sub>
+  <a href="docs/硬件入门.md">Full diagram set (Chinese) →</a>　·　<a href="assets/hw/Microduck硬件图集.pdf">Download PDF (7 diagrams, A3)</a></sub>
 </div>
 
 
