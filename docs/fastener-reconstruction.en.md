@@ -1,5 +1,7 @@
 # Fastener Reconstruction
 
+> ⚠️ **This English version lags behind the Chinese original.** Several corrections (camera rotation, MK1 part number, U10 placement, STS3032 torque basis, board SKU) were applied to the Chinese docs first. **When the two disagree, the Chinese version wins.** Last sync: 2026-09-05.
+
 [简体中文](紧固件反推.md) · **English**
 
 There is no mechanical BOM upstream and no screw list (the HAT board has an electronics BOM, but it covers no structural parts). Everything below was **recovered from the

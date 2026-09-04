@@ -28,10 +28,12 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 有人在做同样的事，凑了个微信群一起讨论复刻进度、踩过的坑、元件采购。
 
+**一群已满 200 人**（微信满 200 后无法扫码进），下面是**二群**的码。
+
 <div align="center">
   <img src="assets/wechat-group.png" alt="鸭子复刻 微信群" width="280">
   <br>
-  <sub><b>二维码有效期到 2026-09-10</b>（微信群码 7 天自动失效）<br>
+  <sub><b>鸭子复刻群 2 · 二维码有效期到 2026-09-11</b>（微信群码 7 天自动失效）<br>
   过期了请开个 <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> 说一声，我会换上新的</sub>
 </div>
 
@@ -109,10 +111,10 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 | 目录 | 数量 |
 |---|---|
-| [`print/打印件/`](print/打印件/) | **37 个**结构件 |
+| [`print/打印件/`](print/打印件/) | **30 种 / 41 件**结构件 |
 | [`print/标准件-无需打印/`](print/标准件-无需打印/) | **9 个**外购件模型（对位用） |
 
-> 已排除上游的 7 个台架测试夹具和 1 个重复件。打印建议见 [`print/README.md`](print/README.md)。
+> 上游的 XL330 台架测试夹具在另一个目录，本来就不属于机器人。打印建议与数量表见 [`print/README.md`](print/README.md)，采购见 [机械采购清单](docs/机械采购清单.md)。
 
 ## CAD 装配体
 
@@ -129,6 +131,17 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 
 ## 从运行时反推出的电控方案
 
+<div align="center">
+  <img src="assets/hw/01-物理布局.png" alt="Microduck 电控总览：板子都装在哪" width="880">
+  <br>
+  <sub><b>五个模块的物理布局</b> —— 灰色虚线框是物理区域，实线框是模块，红色虚线框表示装在壳体<b>外面</b>。<br>
+  <b>橙色</b>是舵机总线（自上而下），<b>红色</b>是电池供电（自下而上）。<br>
+  最容易搞错的一条：<b>主控、HAT、摄像头三者都在头里</b>，摄像头距主控板中心约 13 mm 且中间没有关节 ——<br>
+  所以 MIPI 排线不穿过脖子，真正过颈的是舵机总线和供电线。<br>
+  <a href="docs/硬件入门.md">完整图集与讲解 →</a></sub>
+</div>
+
+
 **一条 1 Mbps 的 TTL 串行总线搞定一切。**
 
 ```
@@ -136,7 +149,7 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
                   ├── UART2  1 Mbps TTL 单线半双工 ── 15× XL330 + imu_to_dxl (ID 200)
                   ├── I2C3   400 kHz (pin 3/5) ────── AIC3104@0x18 · ToF@0x29 · BMI088（未用）
                   ├── I2S3   12.288 MHz ───────────── 音频
-                  ├── MIPI CSI ────────────────────── IMX219（I2C@0x10，倒装）
+                  ├── MIPI CSI ────────────────────── IMX219（I2C@0x10，转 90°）
                   ├── 蓝牙 ────────────────────────── 手柄 / 手机 App
                   ├── Wi-Fi ───────────────────────── WebRTC
                   └── USB-C ───────────────────────── 供电 + maskrom
@@ -145,7 +158,7 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 | | |
 |---|---|
 | **主控** | **Radxa Zero 3W** —— 市售模块，**不是定制载板** |
-| SoC | RK3566，四核 Cortex-A55，Mali-G52，0.8 TOPS NPU，1 GB RAM / 32 GB eMMC |
+| SoC | RK3566，四核 Cortex-A55，Mali-G52，0.8 TOPS NPU。官方公布 1 GB / 32 GB eMMC；复刻建议 2G/16G，见 [电控采购清单](docs/电控采购清单.md) |
 | **舵机总线** | **单线半双工 TTL** —— **不是** RS-232，**也不是** RS-485。Dynamixel Protocol V2 @ 1 Mbps，走 `/dev/ttyS2` |
 | **自制板 1** | **`imu_to_dxl` v2** —— 一颗会说 Dynamixel 的 LSM6DSV16X：总线 ID 200、寄存器 124，12 字节块在**同一次** `sync_read` 里和舵机一起读回 |
 | **自制板 2** | **RPI Robot HAT** —— TLV320AIC3104 @ 0x18、一颗休眠的 BMI088、接 ToF 的 Stemma 座。**官方已开源**（[`elec_RPI_Robot_HAT`](https://github.com/pollen-robotics/elec_RPI_Robot_HAT)） |
@@ -198,7 +211,7 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 | 舵机 | XL330 × 15，市售件照买 |
 | 主控 | **Radxa Zero 3W**，市售模块，与官方同款 |
 | IMU 板 | 自己画 `imu_to_dxl`：LSM6DSV16X + MCU + 半双工收发器，协议已还原 |
-| HAT 板 | **官方 Gerber 直接打样**（4 层板）；不要录音的话也可整块省略 |
+| HAT 板 | **官方 Gerber 直接打样**（4 层板）。不要录音可整块省略，但**半双工方向电路要另配转接板**，见 [电控采购清单](docs/电控采购清单.md#六两块-pcb) |
 | 软件 | 主控同款则官方 Rust 运行时可直接跑（Apache-2.0） |
 | 策略 | 官方 9 个 ONNX 可用；改硬件后用 [microduck_rl](https://github.com/pollen-robotics/microduck_rl) 重训 |
 

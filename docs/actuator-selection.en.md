@@ -1,5 +1,7 @@
 # Actuator Selection and Parameters
 
+> ⚠️ **This English version lags behind the Chinese original.** Several corrections (camera rotation, MK1 part number, U10 placement, STS3032 torque basis, board SKU) were applied to the Chinese docs first. **When the two disagree, the Chinese version wins.** Last sync: 2026-09-05.
+
 [简体中文](执行器选型.md) · **English**
 
 ## The Motor: Dynamixel XL330, 15 of Them
@@ -483,7 +485,7 @@ The closest of the Feetech parts: **smaller than the XL330** (23.2 × 12.1 × 28
 29 × 20 × 34), nearly the same mass (20 g vs 18 g), the same 12-bit encoder class, the same
 half-duplex bus architecture.
 
-**Two problems:** torque is only **46 %** (0.44 vs 0.96 N·m), and the **voltage ceiling is
+**Two problems:** torque is about **85 %** on a same-voltage basis (0.44 N·m @6 V vs XL330 0.52 N·m @5 V). The earlier "46 %" compared 0.44 against the MJCF **`forcerange` 0.96**, which is a simulation force limit, not a vendor figure — the two are not comparable. The **voltage ceiling is
 6 V** while Microduck is 2S at 7.4 V — connect it directly and it burns.
 
 ### Could you mix servo types?
@@ -512,7 +514,7 @@ torque.** 0.23 N·m is enough for a finger joint and not enough for a knee.
 Wanted:  18-20 g  .  >=0.9 N.m  .  7.4 V (2S)  .  bus daisy chain  .  integrated encoder + driver
 Today:   Robotis XL330     meets all of it
          Unitree S288      meets mass/size/ratio/bus, but 12.6 V (3S); torque unconfirmed
-         Feetech STS3032   meets mass/size, torque only 46 %, 6 V ceiling
+         Feetech STS3032   meets mass/size, torque ~85 % (same-voltage), 6 V ceiling
 ```
 
 **The gap is being squeezed — the Unitree S288 has closed most of it.** What still blocks

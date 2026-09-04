@@ -12,7 +12,6 @@
 > `microduck_rl` 工作副本逐字节相同，而该副本是 depth-1 浅克隆、HEAD = **`d424a0c`（2026-08-27）**。
 > 此前记录的基线 `29e887e` / 重导出 `8dfc08f` 在本地对象库中不存在，**因此"重导出前后 geom
 > 计数相同"这句无法验证**。下文所有计数均出自 `d424a0c`。
-> 重导出前后 `robot_walk.xml` 的 geom 计数**完全相同**（38 种 / 75 个），所以本表数量不受影响。
 
 ---
 
@@ -71,8 +70,8 @@
 
 | 部件 | 型号 | 数量 | 依据 / 备注 |
 |---|---|---|---|
-| 主控 | **Radxa Zero 3W** | 1 | 设备树 `compatible = "radxa,zero-3w"`。⚠️ 有多档 RAM/eMMC，**官方实际用哪档未知** —— 全库 grep 不到任何板卡规格；复刻建议 2G/16G，推算见 [电控采购清单](docs/电控采购清单.md)；系统镜像必须带 Rockchip 厂商内核（Armbian 系），否则 NPU 不存在 |
-| 摄像头 | 树莓派 Camera v2（**IMX219**） | 1 | `setup-board.sh` 用 `radxa-zero3-rpi-camera-v2` overlay。⚠️ **装歪了，要软件补偿**：`media-bringup.md` 写 alpha 机是倒装、`180`；但当前代码 `mediad/src/main.rs` 的 `--rotate` 默认是 **90**。以实机为准 |
+| 主控 | **Radxa Zero 3W** | 1 | 设备树 `compatible = "radxa,zero-3w"`。⚠️ 有多档 RAM/eMMC。官方 2026-08-27 发布页公布 **1 GB / 32 GB**，但 `microduck/` 源码中无佐证（源码本来就不体现板卡 SKU）；**复刻建议 2G/16G**，推算见 [电控采购清单](docs/电控采购清单.md#该买哪个配置)；系统镜像必须带 Rockchip 厂商内核（Armbian 系），否则 NPU 不存在 |
+| 摄像头 | 树莓派 Camera v2（**IMX219**） | 1 | `setup-board.sh` 用 `radxa-zero3-rpi-camera-v2` overlay。⚠️ **装歪了四分之一圈，要软件补偿**：当前代码 `mediad/src/main.rs:82` 的 `--rotate` 默认 **90**，注释原文「the head camera is mounted **a quarter turn off**, and this is the one place that fact is written down」。`media-bringup.md:472` 的 180° 是 **alpha 机**数据。**以代码为准 = 90°** |
 | 深度 | **VL53L8CX** 或 VL53L5CX 模块 | 1 | 固件两款都支持，按 revision ID 自动识别；地址 `0x29` 或 `0x52`；Stemma/Qwiic 接口 |
 | 电池 | **索尼 NP-F550**（2S，7.4 V） | 1 | ⚠️ 见下方勘误 |
 | 电池卡座 | NP-F 系列通用卡座 | 1 | 上游只有打印件 `power_support`，**没有触点模型** —— 取电方案需自行解决 |
@@ -117,7 +116,7 @@
 | MK1 | MEMS 麦克风（LCSC **C7587901**） | 板载。⚠️ 官方 BOM 的 Value 只写 `Microphone_MEMS`，原理图旁只有「Onboard Mic.」，**未给具体型号**；本仓库此前写的 LMA2718 无出处，已撤回 |
 | U11 | BMI088 | IMU —— **贴了但软件不用**（即所谓「第二颗 IMU」） |
 | U8 | SIT3088E | RS-485 收发器 |
-| U10 | LM5050-1 | 理想二极管（防反接） |
+| U10 | LM5050-1 | 理想二极管 OR-ing ＋ 关机检测。⚠️ 位于 buck 之后的 `+5V` 路，非电池输入端防反接 |
 | U9 | AP63205 | 降压 |
 | U4 | CAT24C32 | EEPROM —— **DNP 不贴**，所以这不是自识别 HAT |
 | J13/J14 | JST EH 3P | Dynamixel **TTL** |
@@ -142,7 +141,7 @@
 
 | 位号 | 器件 | 立创编号 | 说明 |
 |---|---|---|---|
-| U1 | **STM32G031F6P6** | `C529333` | MCU，TSSOP-20。做 Dynamixel V2 从机 |
+| U1 | **STM32G031F8P6** | 待核 | MCU，TSSOP-20。⚠️ **这是本仓库的选型建议，不是逆向所得** —— 官方那块板的 MCU 型号无从还原（见 [硬件方案逆向](docs/硬件方案逆向.md#那-imu_to_dxl-板上是什么-mcu)）。选 F8（64 KB Flash）而非 F6（32 KB）是为双协议固件留余量；立创编号需按最终型号重新确认 |
 | U2 | **LSM6DSV16XTR** | `C5267406` | 六轴 IMU + SFLP 硬件融合，LGA-14 |
 | U3 | **SN74LVC2G241DCUR** | `C10430` | 三态缓冲，做单线半双工 |
 | U4 | **HT7533-1** | `C14289` | 3.3V LDO，**耐压 30 V**（基础库免上料费） |

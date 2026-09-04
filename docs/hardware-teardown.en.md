@@ -1,5 +1,7 @@
 # Microduck Electronics, Reverse-Engineered
 
+> ⚠️ **This English version lags behind the Chinese original.** Several corrections (camera rotation, MK1 part number, U10 placement, STS3032 torque basis, board SKU) were applied to the Chinese docs first. **When the two disagree, the Chinese version wins.** Last sync: 2026-09-05.
+
 [简体中文](硬件方案逆向.md) · **English**
 
 **Method:** the Rust runtime is open source, and a runtime that drives real hardware has
@@ -198,7 +200,7 @@ It is a general-purpose HAT for small and medium robots. Three known users:
 | Part | Function |
 |---|---|
 | `U1 = PAM8406D` | Class-D audio amplifier |
-| `MK1 = LMA2718` | **On-board MEMS microphone** |
+| `MK1` | **On-board MEMS microphone** (LCSC `C7587901`). ⚠️ The official BOM only says `Microphone_MEMS`; the part number LMA2718 had no source and has been withdrawn |
 | `U10 = LM5050-1` | Ideal-diode controller (reverse protection / OR-ing) |
 | `AP63205` | Buck converter |
 | `CAT24C32` | EEPROM — required by the Raspberry Pi HAT+ specification |
@@ -417,7 +419,7 @@ pitch, and the mouth opens with it. Playable band 0.10–0.70 m.
 | Sensor | **IMX219** (= Raspberry Pi Camera v2) |
 | I²C address | `0x10` |
 | Device-tree overlay | `radxa-zero3-rpi-camera-v2` |
-| Mounting | **upside down**, needs `rotation = 180` |
+| Mounting | **a quarter turn off** — `mediad/src/main.rs:82` defaults `--rotate` to **90**.<br>⚠️ The 180° in `docs/project/media-bringup.md:472` is **alpha-unit** data. |
 | Sensor mode | pinned to 1920×1080@30 (its boot mode caps capture at 21 fps) |
 | Default output | 720p30, 2 Mb/s |
 | Encoding | GStreamer + **Rockchip MPP hardware encoder** → WebRTC |
@@ -624,7 +626,7 @@ transceiver. The protocol and 12-byte register layout are given in full above; i
    negotiation (plain 5 V charging still works). See section 4.
 2. **The NPU ships disabled** — Armbian does not enable it; flash the overlay and reboot
    before running RKNN models.
-3. **The camera is mounted upside down** — set `rotation=180` and let the hardware encoder
+3. **The camera is mounted a quarter turn off** — set `rotate=90` and let the hardware encoder
    do it; do *not* use `videoflip`, which is a full CPU pass over every frame.
 4. **The 50 Hz loop was never validated on the Radxa** — Pollen say so themselves; the
    number came from the Pi Zero 2W prototype.

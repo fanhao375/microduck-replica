@@ -1,5 +1,7 @@
 # Bill of Materials
 
+> ⚠️ **This English version lags behind the Chinese original.** Several corrections (camera rotation, MK1 part number, U10 placement, STS3032 torque basis, board SKU) were applied to the Chinese docs first. **When the two disagree, the Chinese version wins.** Last sync: 2026-09-05.
+
 [简体中文](BOM.md) · **English**
 
 Everything needed to build one Microduck. Quantities come from geom references in upstream
@@ -66,7 +68,7 @@ European inc-VAT retail runs **€603–629** (far above).
 
 | Part | Model | Qty | Basis / note |
 |---|---|---|---|
-| Compute | **Radxa Zero 3W** | 1 | device tree `compatible = "radxa,zero-3w"`. ⚠️ Several RAM/eMMC SKUs — **the official one is 1 GB / 32 GB**; the OS image must carry the Rockchip vendor kernel (Armbian family) or the NPU does not exist |
+| Compute | **Radxa Zero 3W** | 1 | device tree `compatible = "radxa,zero-3w"`. ⚠️ Several RAM/eMMC SKUs — the official spec page (2026-08-27) states **1 GB / 32 GB**, though the source tree carries no SKU evidence; **2G/16G recommended for a replica**. the OS image must carry the Rockchip vendor kernel (Armbian family) or the NPU does not exist |
 | Camera | Raspberry Pi Camera v2 (**IMX219**) | 1 | `setup-board.sh` applies the `radxa-zero3-rpi-camera-v2` overlay. ⚠️ **Mounted off-axis; corrected in software.** `media-bringup.md` says the alpha was upside down (`180`), but the current code default in `mediad/src/main.rs` is `--rotate 90`. Check against your build |
 | Depth | **VL53L8CX** or VL53L5CX module | 1 | firmware supports both, identified by revision ID; address `0x29` or `0x52`; Stemma/Qwiic |
 | Battery | **Sony NP-F550** (2S, 7.4 V) | 1 | ⚠️ see correction below |
@@ -109,7 +111,7 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 |---|---|---|
 | U2 | TLV320AIC3104IRHBR | Audio codec (I²C `0x18`) |
 | U1 | PAM8406D | Class-D amplifier |
-| MK1 | LMA2718 | On-board MEMS microphone |
+| MK1 | MEMS microphone (LCSC `C7587901`) | On-board. ⚠️ Official BOM gives no part number; the earlier LMA2718 has been withdrawn |
 | U11 | BMI088 | IMU — **fitted but unused by software** (the so-called "second IMU") |
 | U8 | SIT3088E | RS-485 transceiver |
 | U10 | LM5050-1 | Ideal diode (reverse protection) |
@@ -138,7 +140,7 @@ Earlier versions of this repository said "NP-F970" in several places; corrected 
 
 | Ref | Part | LCSC | Note |
 |---|---|---|---|
-| U1 | **STM32G031F6P6** | `C529333` | MCU, TSSOP-20. Runs the Dynamixel V2 slave |
+| U1 | **STM32G031F8P6** | TBD | MCU, TSSOP-20. ⚠️ **This is our suggestion, not a reverse-engineered fact** — the official board's MCU cannot be recovered. F8 (64 KB) over F6 (32 KB) leaves headroom for dual-protocol firmware |
 | U2 | **LSM6DSV16XTR** | `C5267406` | 6-axis IMU with SFLP fusion, LGA-14 |
 | U3 | **SN74LVC2G241DCUR** | `C10430` | Tri-state buffer for single-wire half-duplex |
 | U4 | **HT7533-1** | `C14289` | 3.3 V LDO, **30 V input rating** (JLC basic part — no setup fee) |
