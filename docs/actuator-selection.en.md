@@ -38,6 +38,24 @@
 | `robotd` voltage adaptation | clamped **6.0 – 9.5 V** |
 | Battery | NP-F550 is 2S Li-ion: 7.4 V nominal, 8.4 V full |
 
+#### Hard evidence: the official HAT schematic
+
+People reasonably ask: "the XL330 takes 5 V, where's the over-voltage?" 5 V is the
+**value recommended in the ROBOTIS datasheet**, not what Microduck actually wires up.
+The official HAT is open source (`pollen-robotics/elec_RPI_Robot_HAT`, Apache-2.0), and
+sheet 4/6 `dynamixel.kicad_sch` spells it out:
+
+| Circuit | Actual connection |
+|---|---|
+| Dynamixel connectors J11 / J13 / J14 | Power pin ties to **`+BATT`** (raw battery), annotated `3A max`, through TH1 100R thermistor |
+| Between `+BATT` and the servos | **No regulation at all** — J13/J14 through a TH1 100R thermistor, J3/J11 direct.<br>(U10 LM5050-1 sits *after* the buck on the `+5V` rail, not at the battery input.) |
+| The only converter on the board | **U9 AP63205** + **L4 6.8 µH** (Fsw 1.1 MHz, 2 A) → outputs `+5V` |
+| Where `+5V` goes | The **Raspberry Pi 40-way header J4**, the PAM8406D audio amp, the EEPROM — the schematic even carries a Pi power table next to it (Pi 5: 9–10 W / Pi 4B: 6–7.6 W / Pi Zero 2W: 1.5 W) |
+
+**The whole 47-line HAT BOM contains exactly one buck and one inductor.** There is no second
+rail. The 5 V is *for the Pi*; the servos hang directly off the battery — and a 2 A AP63205
+could not feed 15 XL330s anyway (~1.5 A each at stall).
+
 **So Pollen run the XL330 continuously above its 6.0 V rated maximum, up to about 8.2 V.**
 
 ### What that means

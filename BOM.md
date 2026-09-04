@@ -8,8 +8,10 @@
 > ⚠️ **官方从未公布过 BOM。** 这份清单是从公开的 MJCF、STL、Rust 源码和 KiCad 工程反推的。
 > 每一项都标了依据。价格随地区和时间变化很大，**只作量级参考**。
 >
-> 核对日期：**2026-09-04**。上游基线：`pollen-robotics/microduck_rl` @ **`29e887e`**
-> （已含 2026-09-01 的全量 CAD 重导出 `8dfc08f`）。
+> 核对日期：**2026-09-04**。⚠️ **上游基线待核**：本仓库 `print/` 下的 STL 与本地
+> `microduck_rl` 工作副本逐字节相同，而该副本是 depth-1 浅克隆、HEAD = **`d424a0c`（2026-08-27）**。
+> 此前记录的基线 `29e887e` / 重导出 `8dfc08f` 在本地对象库中不存在，**因此"重导出前后 geom
+> 计数相同"这句无法验证**。下文所有计数均出自 `d424a0c`。
 > 重导出前后 `robot_walk.xml` 的 geom 计数**完全相同**（38 种 / 75 个），所以本表数量不受影响。
 
 ---
@@ -39,7 +41,10 @@
 |---|---|---|
 | **Dynamixel XL330-M288-T** | **15** | `robot_walk.xml` 中 `xl330` 网格引用 15 次 |
 
-- 14 个进策略动作空间，**第 15 个驱动喙/下颚**，走 `passive_*` 连杆
+- 14 个进策略动作空间，**第 15 个是嘴**（`JOINT_NAMES[9] = "mouth"`，`MOUTH_INDEX = 9`），
+  不进策略动作空间（所有 alpha 策略都是 61 维观测 / 14 维动作）。
+  ⚠️ **MJCF 里根本没有这个关节** —— `robot_walk.xml` 只有 14 个 hinge joint / 14 个 actuator，
+  嘴在所有 MJCF 里都是刚性并进 `jaw_soft` body；`passive_*` default class 在步行模型里零引用
 - ID 分配：左腿 20–24 ／ 颈头嘴 30–34 ／ 右腿 10–14
 - ⚠️ **型号是推断**：源码只有 `motor_name="xl330"` 无后缀。M288-T 的依据见
   [执行器选型](docs/执行器选型.md#型号是怎么定下来的)
@@ -54,7 +59,11 @@
 | MyBotShop | €41.95 | €629 |
 
 > ⚠️ **超压运行警告**：XL330 额定 3.7–6.0 V，而 Microduck 给它 6.6–8.2 V。
+> 官方 HAT 原理图里 Dynamixel 接口直接接 `+BATT`（电池原电压），板上唯一的 5 V 降压是给树莓派的。
 > 这是官方的选择，不是笔误。详见 [电压真相](docs/执行器选型.md#-电压真相xl330-被超压运行)。
+
+> 🛒 **国内采购淘宝实链**：[电控采购清单](docs/电控采购清单.md)（主控/摄像头/ToF/电源/PCB/线材）、
+> [机械采购清单](docs/机械采购清单.md)（轴承/紧固件/热熔螺母/螺纹胶/耗材）。
 
 ---
 
@@ -62,7 +71,7 @@
 
 | 部件 | 型号 | 数量 | 依据 / 备注 |
 |---|---|---|---|
-| 主控 | **Radxa Zero 3W** | 1 | 设备树 `compatible = "radxa,zero-3w"`。⚠️ 有多档 RAM/eMMC，**官方用 1GB/32GB**；系统镜像必须带 Rockchip 厂商内核（Armbian 系），否则 NPU 不存在 |
+| 主控 | **Radxa Zero 3W** | 1 | 设备树 `compatible = "radxa,zero-3w"`。⚠️ 有多档 RAM/eMMC，**官方实际用哪档未知** —— 全库 grep 不到任何板卡规格；复刻建议 2G/16G，推算见 [电控采购清单](docs/电控采购清单.md)；系统镜像必须带 Rockchip 厂商内核（Armbian 系），否则 NPU 不存在 |
 | 摄像头 | 树莓派 Camera v2（**IMX219**） | 1 | `setup-board.sh` 用 `radxa-zero3-rpi-camera-v2` overlay。⚠️ **装歪了，要软件补偿**：`media-bringup.md` 写 alpha 机是倒装、`180`；但当前代码 `mediad/src/main.rs` 的 `--rotate` 默认是 **90**。以实机为准 |
 | 深度 | **VL53L8CX** 或 VL53L5CX 模块 | 1 | 固件两款都支持，按 revision ID 自动识别；地址 `0x29` 或 `0x52`；Stemma/Qwiic 接口 |
 | 电池 | **索尼 NP-F550**（2S，7.4 V） | 1 | ⚠️ 见下方勘误 |
@@ -105,7 +114,7 @@
 |---|---|---|
 | U2 | TLV320AIC3104IRHBR | 音频 codec（I²C `0x18`） |
 | U1 | PAM8406D | D 类功放 |
-| MK1 | LMA2718 | 板载 MEMS 麦克风 |
+| MK1 | MEMS 麦克风（LCSC **C7587901**） | 板载。⚠️ 官方 BOM 的 Value 只写 `Microphone_MEMS`，原理图旁只有「Onboard Mic.」，**未给具体型号**；本仓库此前写的 LMA2718 无出处，已撤回 |
 | U11 | BMI088 | IMU —— **贴了但软件不用**（即所谓「第二颗 IMU」） |
 | U8 | SIT3088E | RS-485 收发器 |
 | U10 | LM5050-1 | 理想二极管（防反接） |
@@ -189,9 +198,9 @@
 
 推导过程见 [紧固件反推](docs/紧固件反推.md)。
 
-### 打印件（29 种 / 39 件）
+### 打印件（30 种 / 41 件）
 
-**注意数量 —— 有 8 种要打多份：**
+**注意数量 —— 有 9 种要打多份：**
 
 | 零件 | 打几个 |
 |---|---|
@@ -203,11 +212,12 @@
 | `sole_right_右脚底` | ×2 |
 | `upper_leg_rigidity_plate_上腿加固板` | ×2 |
 | `yaw2roll_偏航转横滚` | ×2 |
+| `bearing_roll_横滚轴承压盖` | ×2 |
 | 其余 21 种 | 各 ×1 |
 
 **软性材料件**（从命名和用途判断，建议 TPU）：`jaw_soft_软下巴`、`soft_mouth_top_软嘴顶部`
 
-⚠️ **别搞混左右**：`upper_leg_left` 和 `upper_leg_right` 是镜像件（质心 +0.067 / −0.067），
+⚠️ **别搞混左右**：`upper_leg_left` 和 `upper_leg_right` 是镜像件（质心 X = **±0.006766 m ＝ ±6.77 mm**，质量同为 0.0482067 kg），
 两个都要打；`ankle_left`/`ankle_right`、`sole_left`/`sole_right`、`foot_left`/`foot_right` 同理。
 
 文件与分类见 [`print/`](print/)。
