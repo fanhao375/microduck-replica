@@ -1,2 +1,31 @@
-*.stl binary
-*.png binary
+# 二进制文件必须声明，否则在 core.autocrlf=true 的 Windows 上
+# clone / checkout 时会被做 LF→CRLF 转换，文件直接损坏。
+# git 的自动二进制探测靠采样前几 KB 有无 NUL 字节，对 PDF 这类
+# 头部多为 ASCII 的格式会误判成文本。
+
+# 三维与制造
+*.stl   binary
+*.stp   binary
+*.step  binary
+*.STEP  binary
+*.3mf   binary
+*.gbr   binary
+
+# 图像
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+
+# 文档与打包
+*.pdf   binary
+*.zip   binary
+*.7z    binary
+*.xlsx  binary
+*.docx  binary
+
+# EDA 工程
+*.eprj2 binary
+*.epro2 binary
