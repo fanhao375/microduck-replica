@@ -53,6 +53,35 @@ A WeChat group for people working on the same thing — build progress, pitfalls
   If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
 </div>
 
+## 🔌 imu_to_dxl Schematic — Review Wanted
+
+The one board Pollen **did not** open-source. This is a third-party reconstruction drawn
+in this repo. It has **never been fabricated or validated on hardware** — putting it out
+for review.
+
+<div align="center">
+  <img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl schematic" width="880">
+  <br>
+  <sub><b>STM32G031F8P6 + LSM6DSV16X + half-duplex buffer</b>, sitting on the servo bus as the 16th device<br>
+  <a href="hardware/imu_to_dxl/">Design notes &amp; review points</a>　·　
+  <a href="hardware/imu_to_dxl/imu_to_dxl-原理图.pdf">PDF</a>　·　
+  <a href="hardware/imu_to_dxl/imu_to_dxl-接线表.md">Netlist</a>　·　
+  <a href="hardware/imu_to_dxl/imu_to_dxl.eprj2">EasyEDA project</a></sub>
+</div>
+
+Connectivity has been checked net-by-net with a script (no floating pins, no shorts),
+but **whether the circuit itself is right is another matter**. Feedback especially welcome on:
+
+- **Half-duplex buffer enable logic** — `2OE` tied high (receiver always on, so the MCU
+  hears its own echo) vs. also driven by DE (RX floats while transmitting)
+- **Pass-through current on J1/J2** — 15 servos at rated load is 7.5 A, while JST EH is rated 3 A
+- **No crystal** — TSSOP-20 does not bring out `OSC_OUT`, so a passive crystal is impossible;
+  is HSI16 accurate enough at 1 Mbps?
+
+Please open an [issue](https://github.com/fanhao375/microduck-replica/issues) if you spot something.
+
+---
+
 ## 🔨 Build Progress
 
 **Someone is actually building this.** The head shell, trunk shell, leg structure and feet
