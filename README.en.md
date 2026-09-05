@@ -53,46 +53,60 @@ A WeChat group for people working on the same thing — build progress, pitfalls
   If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
 </div>
 
-## 🔌 imu_to_dxl Schematic — Review Wanted
+## Latest
 
-The one board Pollen **did not** open-source. This is a third-party reconstruction drawn
-in this repo. It has **never been fabricated or validated on hardware** — putting it out
-for review.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-<div align="center">
-  <img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl schematic" width="880">
-  <br>
-  <sub><b>STM32G031F8P6 + LSM6DSV16X + half-duplex buffer</b>, sitting on the servo bus as the 16th device<br>
-  <a href="hardware/imu_to_dxl/">Design notes &amp; review points</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl-原理图.pdf">PDF</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl-接线表.md">Netlist</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl.eprj2">EasyEDA project</a></sub>
-</div>
+### 🔌 Electronics · `imu_to_dxl` schematic
 
-Connectivity has been checked net-by-net with a script (no floating pins, no shorts),
-but **whether the circuit itself is right is another matter**. Feedback especially welcome on:
+<a href="hardware/imu_to_dxl/"><img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl schematic"></a>
 
-- **Half-duplex buffer enable logic** — `2OE` tied high (receiver always on, so the MCU
-  hears its own echo) vs. also driven by DE (RX floats while transmitting)
-- **Pass-through current on J1/J2** — 15 servos at rated load is 7.5 A, while JST EH is rated 3 A
-- **No crystal** — TSSOP-20 does not bring out `OSC_OUT`, so a passive crystal is impossible;
-  is HSI16 accurate enough at 1 Mbps?
+The one board Pollen **did not** open-source — a third-party reconstruction, now drawn.
+STM32G031F8P6 + LSM6DSV16X + half-duplex buffer, sitting on the servo bus as the **16th device**.
 
-Please open an [issue](https://github.com/fanhao375/microduck-replica/issues) if you spot something.
+Connectivity has been checked net-by-net (no floating pins, no shorts), but it has
+**never been fabricated or validated on hardware**. Two pull-ups (DE and DXL_DATA)
+were added after community review.
 
----
+**[Design notes &amp; review points](hardware/imu_to_dxl/)**　·　
+[PDF](hardware/imu_to_dxl/imu_to_dxl-原理图.pdf)　·　
+[Netlist](hardware/imu_to_dxl/imu_to_dxl-接线表.md)　·　
+[EasyEDA project](hardware/imu_to_dxl/imu_to_dxl.eprj2)
 
-## 🔨 Build Progress
+</td>
+<td width="50%" valign="top">
+
+### 🔨 Mechanical · first printed parts
+
+<a href="BUILD-LOG.en.md"><img src="build-log/photos/2026-09-02-首批打印件.jpg" alt="First printed parts"></a>
 
 **Someone is actually building this.** The head shell, trunk shell, leg structure and feet
 are printed, and **the M2 screws go into the leg parts** — the conclusion in
 [Fastener Reconstruction](docs/fastener-reconstruction.en.md) holds on physical hardware.
 
-![First printed parts](build-log/photos/2026-09-02-首批打印件.jpg)
-
 The rest of this repository is **analysis on paper**, recovered from the public MJCF and
-source. The [Build Log](BUILD-LOG.en.md) records the hands-on side — print settings,
-assembly problems, and whether the derived numbers hold up on real parts.
+source. The build log records the hands-on side: print settings, assembly problems,
+and whether the derived numbers hold up on real parts.
+
+**[Build Log](BUILD-LOG.en.md)**　·　
+[Printable parts](print/)　·　
+[Exploded views](assembly-drawings/)
+
+</td>
+</tr>
+</table>
+
+> **Schematic review wanted** — feedback especially welcome on: the half-duplex buffer
+> enable logic (`2OE` tied high, so the MCU hears its own echo, vs. also driven by DE,
+> which lets RX float while transmitting); copper width for the J1/J2 pass-through;
+> and running 1 Mbps off HSI16 with no crystal (TSSOP-20 does not bring out `OSC_OUT`).
+> Please open an [issue](https://github.com/fanhao375/microduck-replica/issues) if you spot something.
+
+---
+
+## 🔨 Build Progress
 
 > This repository states repeatedly that simulation STLs are not manufacturing files.
 > **The build log is the test of that claim.** The result gets recorded either way.

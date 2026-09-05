@@ -37,42 +37,58 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
   过期了请开个 <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> 说一声，我会换上新的</sub>
 </div>
 
-## 🔌 imu_to_dxl 原理图 —— 求评审
+## 最近更新
 
-官方唯一**没有开源**的那块板。这是本仓库画的第三方复刻版，
-**还没打样、没有实物验证**，先放出来求个评审。
+<table>
+<tr>
+<td width="50%" valign="top">
 
-<div align="center">
-  <img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl 原理图" width="880">
-  <br>
-  <sub><b>STM32G031F8P6 + LSM6DSV16X + 半双工缓冲</b>，作为第 16 个设备挂在舵机总线上<br>
-  <a href="hardware/imu_to_dxl/">设计说明与评审要点</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl-原理图.pdf">PDF</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl-接线表.md">接线表</a>　·　
-  <a href="hardware/imu_to_dxl/imu_to_dxl.eprj2">嘉立创工程</a></sub>
-</div>
+### 🔌 电气 · `imu_to_dxl` 原理图
 
-连通性已用脚本逐网络核对过（无悬空脚、无短路），但**电路本身对不对是另一回事**。
-特别想听听这几处的意见：
+<a href="hardware/imu_to_dxl/"><img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl 原理图"></a>
 
-- **半双工缓冲的使能逻辑** —— `2OE` 接常高（接收常开，发送时有回显）vs 也接 DE（发送时 RX 悬空）
-- **J1/J2 直通的过流** —— 15 个舵机额定就 7.5 A，而 JST EH 只有 3 A
-- **不上晶振** —— TSSOP-20 没引出 `OSC_OUT`，无源晶振接不了；HSI16 跑 1 Mbps 余量够不够
+官方唯一**没有开源**的那块板，第三方复刻版画完了。
+STM32G031F8P6 + LSM6DSV16X + 半双工缓冲，作为**第 16 个设备**挂在舵机总线上。
 
-发现问题请开 [issue](https://github.com/fanhao375/microduck-replica/issues)，或者在上面的群里说。
+连通性已逐网络核对（无悬空脚、无短路），**但没打样、没有实物验证**。
+已按社区评审补了 DE 与 DXL_DATA 两处上拉。
+
+**[设计说明与评审要点](hardware/imu_to_dxl/)**　·　
+[PDF](hardware/imu_to_dxl/imu_to_dxl-原理图.pdf)　·　
+[接线表](hardware/imu_to_dxl/imu_to_dxl-接线表.md)　·　
+[嘉立创工程](hardware/imu_to_dxl/imu_to_dxl.eprj2)
+
+</td>
+<td width="50%" valign="top">
+
+### 🔨 机械 · 首批打印件
+
+<a href="构建日志.md"><img src="build-log/photos/2026-09-02-首批打印件.jpg" alt="首批打印件"></a>
+
+**有人正在把它真的做出来。** 头壳、躯干壳、腿部结构件和脚已经打印出来，
+**腿部件上的 M2 螺丝已经装进去了** —— [紧固件反推](docs/紧固件反推.md)
+的结论在实物上成立。
+
+仓库其余部分都是从 MJCF 与源码反推的**纸上分析**，
+构建日志记录的是**动手做的过程**：打印参数、装配问题，
+以及那些反推数据在实物上到底对不对。
+
+**[构建日志](构建日志.md)**　·　
+[打印件清单](print/)　·　
+[装配爆炸图](assembly-drawings/)
+
+</td>
+</tr>
+</table>
+
+> **原理图求评审** —— 特别想听这几处的意见：半双工缓冲的使能逻辑（`2OE` 接常高、
+> 发送时有回显 vs 也接 DE、发送时 RX 悬空）；J1/J2 直通的铜皮宽度；
+> 不上晶振（TSSOP-20 没引出 `OSC_OUT`，HSI16 跑 1 Mbps 余量够不够）。
+> 发现问题请开 [issue](https://github.com/fanhao375/microduck-replica/issues)，或者在上面的群里说。
 
 ---
 
 ## 🔨 实物进度
-
-**有人正在把它真的做出来。** 头壳、躯干壳、腿部结构件和脚已经打印出来，
-**腿部件上的 M2 螺丝已经装进去了** —— [紧固件反推](docs/紧固件反推.md) 的结论在实物上成立。
-
-![首批打印件](build-log/photos/2026-09-02-首批打印件.jpg)
-
-本仓库其余部分都是从公开 MJCF 与源码反推的**纸上分析**；
-[构建日志](构建日志.md) 记录的是**动手做的过程** —— 打印参数、装配问题、
-以及那些反推数据在实物上到底对不对。
 
 > 本仓库反复强调「仿真 STL 不是可打印工程件」。**构建日志就是在验证这句话。**
 > 结论会如实记录，无论正反。
