@@ -43,18 +43,21 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 <tr>
 <td width="50%" valign="top">
 
-### 🔌 电气 · `imu_to_dxl` 原理图
+### 🔌 电气 · `imu_to_dxl` PCB 画完了
 
-<a href="hardware/imu_to_dxl/"><img src="assets/hw/imu_to_dxl-原理图.png" alt="imu_to_dxl 原理图"></a>
+<a href="hardware/imu_to_dxl/"><img src="assets/hw/imu_to_dxl-PCB.png" alt="imu_to_dxl PCB 顶层装配图"></a>
 
-官方唯一**没有开源**的那块板，第三方复刻版画完了。
+官方唯一**没有开源**的那块板，第三方复刻版从原理图一路做到了 PCB。
 STM32G031F8P6 + LSM6DSV16X + 半双工缓冲，作为**第 16 个设备**挂在舵机总线上。
 
-连通性已逐网络核对（无悬空脚、无短路），**但没打样、没有实物验证**。
-已按社区评审补了 DE 与 DXL_DATA 两处上拉。
+**45 × 22 mm，2 层板**，四角 R2 圆角，两个对角 M2 孔；底层整片 GND。
+22 个网络全部连通，**DRC 0 违规**，每个芯片电源脚 2.3 mm 内都有去耦。
+仍然**没打样、没有实物验证**。
 
-**[设计说明与评审要点](hardware/imu_to_dxl/)**　·　
-[PDF](hardware/imu_to_dxl/imu_to_dxl-原理图.pdf)　·　
+**[设计说明 · 评审要点 · 复查结果](hardware/imu_to_dxl/)**　·　
+[原理图 PDF](hardware/imu_to_dxl/imu_to_dxl-原理图.pdf)　·　
+[PCB PDF](hardware/imu_to_dxl/imu_to_dxl-PCB.pdf)　·　
+[3D STEP](hardware/imu_to_dxl/imu_to_dxl-PCB.step)　·　
 [接线表](hardware/imu_to_dxl/imu_to_dxl-接线表.md)　·　
 [嘉立创工程](hardware/imu_to_dxl/imu_to_dxl.eprj2)
 
