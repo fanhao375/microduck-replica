@@ -68,7 +68,7 @@ the way from schematic to PCB. STM32G031F8P6 + LSM6DSV16X + half-duplex buffer, 
 on the servo bus as the **16th device**.
 
 **45 × 22 mm, 2 layers**, R2 rounded corners, two diagonal M2 holes, solid GND plane on
-the bottom. All 22 nets connected, **DRC clean**, every IC power pin has a 100nF within
+the bottom. All 23 nets connected, **DRC clean**, every IC power pin has a 100nF within
 2.3 mm. Still **never fabricated or validated on hardware**.
 
 **[Design notes · review points · audit](hardware/imu_to_dxl/)**　·　
