@@ -64,19 +64,21 @@ A WeChat group for people working on the same thing — build progress, pitfalls
 <a href="hardware/imu_to_dxl/"><img src="assets/hw/imu_to_dxl-PCB.png" alt="imu_to_dxl PCB top assembly"></a>
 
 The one board Pollen **did not** open-source — a third-party reconstruction, taken all
-the way from schematic to PCB. STM32G031F8P6 + LSM6DSV16X + half-duplex buffer, sitting
-on the servo bus as the **16th device**.
+the way from schematic to fab files. STM32G030F6P6 + LSM6DSV16X + half-duplex buffer,
+sitting on the servo bus as the **16th device**.
 
-**45 × 22 mm, 2 layers**, R2 rounded corners, two diagonal M2 holes, solid GND plane on
-the bottom. All 23 nets connected, **DRC clean**, every IC power pin has a 100nF within
-2.3 mm. Still **never fabricated or validated on hardware**.
+**25 × 25 mm, 2 layers**, four plated M2 holes with φ3.0 GND rings; GND pour on both
+sides, all 23 parts on the top side for single-sided assembly. All 18 non-GND nets form
+a single connected component, **DRC clean**, every IC power pin has a 100nF within
+2.2 mm, and the LDO sits 16.4 mm diagonally away from the IMU.
+Still **never fabricated or validated on hardware**.
 
 **[Design notes · review points · audit](hardware/imu_to_dxl/)**　·　
 [Schematic PDF](hardware/imu_to_dxl/imu_to_dxl-原理图.pdf)　·　
 [PCB PDF](hardware/imu_to_dxl/imu_to_dxl-PCB.pdf)　·　
+[Gerber](hardware/imu_to_dxl/imu_to_dxl-Gerber.zip)　·　
 [3D STEP](hardware/imu_to_dxl/imu_to_dxl-PCB.step)　·　
-[Netlist](hardware/imu_to_dxl/imu_to_dxl-接线表.md)　·　
-[EasyEDA project](hardware/imu_to_dxl/imu_to_dxl.eprj2)
+[Netlist](hardware/imu_to_dxl/imu_to_dxl-接线表.md)
 
 </td>
 <td width="50%" valign="top">
