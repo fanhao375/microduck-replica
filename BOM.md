@@ -152,7 +152,8 @@
 | U2 | **LSM6DSV16XTR** | `C5267406` | 六轴 IMU + SFLP 硬件融合，LGA-14 |
 | U3 | **SN74LVC2G241DCUR** | `C10430` | 三态缓冲，做单线半双工 |
 | U4 | **HT7533-1** | `C14289` | 3.3V LDO，**耐压 30 V**（基础库免上料费） |
-| J1/J2 | B3B-EH-A(LF)(SN) | `C160259` | Dynamixel 3P，**与官方 HAT 同料号**，线束通用 |
+| J1/J2 | B3B-EH-A(LF)(SN) | `C160259` | Dynamixel 3P，**2.5 mm**，**与官方 HAT 同料号**，线束通用 |
+| **J4/J5** | **B3B-PH-K-S(LF)(SN)** | 待定 | **飞特 3P，2.0 mm 立式**（2026-09-08 新增）。飞特 `AMP2.0-3P` 与 JST EH **间距不同、插不进对方**，所以两套座子并存，用哪种舵机插哪一组。<br>⚠️ **脚序与 J1/J2 完全相反**：`1=DXL_BUS / 2=VDD_BUS / 3=GND`，见 [接线表](hardware/imu_to_dxl/imu_to_dxl-接线表.md)。<br>⚠️ **料号待定** —— 飞特规格书只给了线端型号，板端没给。焊盘阵是三孔 2.0 mm 间距，与其它 2.0 mm 系列通用，换系列只改封装不动焊盘。<br>本体高约 **6.0 mm**，比 EH 立式的 8 mm 更适合 6.65 mm 的躯干内腔 |
 | **J3** | **PZ254V-11-06P**（6P，2.54 mm） | `C492405` | **SWD + 串口 printf 合一**。脚序 `1=GND 2=SWDCLK 3=SWDIO 4=UART_TX 5=UART_RX 6=+3V3` —— 前 4 脚不变，原来的 4 针 SWD 排线插 1–4 仍可用。<br>UART 来自 U1 脚 16/17（`PA11[PA9]`/`PA12[PA10]`），经 `SYSCFG_CFGR1` 重映射成 **PA9 = `USART1_TX` / PA10 = `USART1_RX`**（DS12992 Rev 3, Table 12 脚注 4）。<br>**不上 USB**：G031 没有 USB 外设（手册全文零命中，Development support 只有 SWD），加 USB 要多一颗 CH340/CP2102，45×22 mm 板上不划算。调试走 SWD + RTT（`probe-rs` 支持 CMSIS-DAP 上跑 RTT，不停 CPU）；要普通 printf 就插 4/5 脚。<br>⚠️ Cortex-M0+ **没有 SWO/ITM**，别指望 SWO printf |
 | C1–C4, C8 | **100 nF 0603** 50 V | `C14663` | 去耦（同官方 HAT 料号）。C1/C2 贴 U2 的 8/5 脚，C3 贴 U3 的 8 脚，C4 贴 U1 的 4 脚 |
 | **C5** | **4.7 µF / 16 V / 0603 / X5R**<br>Samsung `CL10A475KO8NNNC` | `C19666` | **MCU 本地储能**，与 C4 一起构成 ST 要求的 `100 nF + 4.7 µF`。<br>依据 **DS12992 Rev 3, Figure 13「Power supply scheme」(p.44)**：`VDD/VDDA` 一路明确标注 `1 x 100 nF + 1 x 4.7 μF`，并 Caution 要求"尽可能贴近引脚，或放在 PCB 背面正对该脚"。<br>立创**基础库**。<br>⚠️ 本表此前把 C5 也写成 100 nF —— 两颗相同的 100 nF 并联只是容量翻倍，频响曲线不变、低频段仍然是空的，不符合手册 |
