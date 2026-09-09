@@ -64,19 +64,22 @@ STM32G031F8P6 + LSM6DSV16X + 半双工缓冲，作为**第 16 个设备**挂在�
 </td>
 <td width="50%" valign="top">
 
-### 🔨 机械 · 首批打印件
+### 🔨 机械 · 可编辑的 CAD 图纸完成了
 
-<a href="构建日志.md"><img src="build-log/photos/2026-09-02-首批打印件.jpg" alt="首批打印件"></a>
+<a href="https://github.com/fanhao375/microduck-replica-cad"><img src="assets/cad-solidworks-装配体.png" alt="SolidWorks 三维装配体"></a>
 
-**有人正在把它真的做出来。** 头壳、躯干壳、腿部结构件和脚已经打印出来，
-**腿部件上的 M2 螺丝已经装进去了** —— [紧固件反推](docs/紧固件反推.md)
-的结论在实物上成立。
+**整机三维图纸从网格变成了可编辑的参数模型** —— **16 个装配体 + 40 个零件**的
+SolidWorks 源文件，外加一份 **21 页装配安装说明书**：15 个组件逐个给出安装步骤、
+配图与注意事项，还标了装配顺序和左右件区分。
 
-仓库其余部分都是从 MJCF 与源码反推的**纸上分析**，
-构建日志记录的是**动手做的过程**：打印参数、装配问题，
-以及那些反推数据在实物上到底对不对。
+**由「机械行者Robo」建模并编写。** 本仓库的 `cad/` 与 `print/` 都是 STL ——
+能打印、能看、能量，但**改不动**；要改尺寸、改壁厚、重新出工程图，**去那边拿源文件**。
 
-**[构建日志](构建日志.md)**　·　
+同时首批打印件也已经装起来了：**腿部件上的 M2 螺丝装进去了**，
+[紧固件反推](docs/紧固件反推.md)的结论在实物上成立。
+
+**[SolidWorks 图纸 + 装配说明书](https://github.com/fanhao375/microduck-replica-cad)**　·　
+[构建日志](构建日志.md)　·　
 [打印件清单](print/)　·　
 [装配爆炸图](assembly-drawings/)
 
@@ -171,6 +174,17 @@ STM32G031F8P6 + LSM6DSV16X + 半双工缓冲，作为**第 16 个设备**挂在�
 - `零件对照表.json` —— 每个部件由哪些上游源网格组成
 
 单位 **毫米**。可直接用 FreeCAD / Fusion 360 / SolidWorks / Blender / 各类切片软件打开。
+
+### 📐 要可编辑的参数模型？在另一个仓库
+
+本仓库的 `cad/` 与 `print/` 都是**网格（STL）**—— 能打印、能看、能测量，但**改不动**。
+
+**[fanhao375/microduck-replica-cad](https://github.com/fanhao375/microduck-replica-cad)**
+是配套的三维图纸仓库，放的是**可编辑的 SolidWorks 源文件**：
+16 个装配体 + 40 个零件，外加一份 **21 页的装配安装说明书**（含每个组件的步骤、配图与注意事项）。
+
+> 那套图纸由 **[机械行者Robo](https://github.com/fanhao375/microduck-replica-cad#图纸作者机械行者Robo)**
+> 建模并编写说明书 —— 想改尺寸、改壁厚、重新出工程图的，从那边拿源文件。
 
 ---
 

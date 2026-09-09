@@ -81,19 +81,24 @@ the bottom. All 23 nets connected, **DRC clean**, every IC power pin has a 100nF
 </td>
 <td width="50%" valign="top">
 
-### 🔨 Mechanical · first printed parts
+### 🔨 Mechanical · editable CAD is done
 
-<a href="BUILD-LOG.en.md"><img src="build-log/photos/2026-09-02-首批打印件.jpg" alt="First printed parts"></a>
+<a href="https://github.com/fanhao375/microduck-replica-cad"><img src="assets/cad-solidworks-装配体.png" alt="SolidWorks assembly"></a>
 
-**Someone is actually building this.** The head shell, trunk shell, leg structure and feet
-are printed, and **the M2 screws go into the leg parts** — the conclusion in
-[Fastener Reconstruction](docs/fastener-reconstruction.en.md) holds on physical hardware.
+**The whole robot went from mesh to editable parametric models** — **16 assemblies +
+40 parts** of SolidWorks source, plus a **21-page assembly manual**: every one of the
+15 components gets its own steps, figures and cautions, with build order and
+left/right part warnings.
 
-The rest of this repository is **analysis on paper**, recovered from the public MJCF and
-source. The build log records the hands-on side: print settings, assembly problems,
-and whether the derived numbers hold up on real parts.
+**Modelled and written by 机械行者Robo.** Everything under `cad/` and `print/` here is
+STL — printable, viewable, measurable, but **not editable**. To change dimensions, wall
+thickness, or generate your own drawings, **get the source files there**.
 
-**[Build Log](BUILD-LOG.en.md)**　·　
+Meanwhile the first printed parts are assembled: **the M2 screws went into the leg parts**,
+so [Fastener Reconstruction](docs/fastener-reconstruction.en.md) holds on real hardware.
+
+**[SolidWorks drawings + assembly manual](https://github.com/fanhao375/microduck-replica-cad)**　·　
+[Build Log](BUILD-LOG.en.md)　·　
 [Printable parts](print/)　·　
 [Exploded views](assembly-drawings/)
 
@@ -197,6 +202,19 @@ importing those directly piles every part at the origin.)
 Units are **millimeters**. Opens in FreeCAD, Fusion 360, SolidWorks, Blender, or any slicer.
 No CAD installed? `tools/stl_viewer.html` is a zero-install WebGL viewer — open it in a
 browser and drop an STL in.
+
+### 📐 Want editable parametric models? Different repo
+
+Everything under `cad/` and `print/` here is **mesh** (STL) — printable, viewable,
+measurable, but **not editable**.
+
+**[fanhao375/microduck-replica-cad](https://github.com/fanhao375/microduck-replica-cad)**
+is the companion repo holding **editable SolidWorks source files**: 16 assemblies +
+40 parts, plus a **21-page assembly manual** with per-component steps, figures and cautions.
+
+> Those drawings were modelled — and the manual written — by
+> **[机械行者Robo](https://github.com/fanhao375/microduck-replica-cad#图纸作者机械行者Robo)**.
+> Go there if you want to change dimensions, wall thickness, or generate your own drawings.
 
 ---
 

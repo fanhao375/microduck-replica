@@ -49,6 +49,20 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 > 文档中引用的上游源码片段（注释、常量、寄存器定义）来自 `pollen-robotics/microduck`，
 > 遵循其 **Apache-2.0** 许可证，引用处均已标注文件路径。
 
+## 配套仓库：SolidWorks 三维图纸
+
+[**fanhao375/microduck-replica-cad**](https://github.com/fanhao375/microduck-replica-cad)
+存放可编辑的 SolidWorks 参数模型（16 个装配体 + 40 个零件）与 21 页装配安装说明书。
+
+| 内容 | 作者 | 许可证 |
+|---|---|---|
+| SolidWorks 图纸、装配安装说明书、组件图 | **机械行者Robo**（小红书 270594280 / 抖音 1852366168） | **CC BY-NC-SA 4.0** |
+
+那套图纸是**依据上游公开的 STL 网格重建的可编辑参数模型**，属于 CC BY-NC-SA 的衍生作品，
+因此以相同许可证发布。**著作权归作者本人**，转载与二次分发请保留署名。
+图纸放在独立仓库而不并入本仓，是因为 SolidWorks 源文件解压后约 340 MB，
+并入会让本仓每次 clone 都背上这个体积。
+
 ## 许可证名称说明
 
 规范名称是 **CC BY-NC-SA 4.0**（署名 - 非商业性使用 - 相同方式共享）。
