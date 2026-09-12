@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck 复刻 · 不打 HAT 接线图</title>
+<!--
+  这是源文件：接线拓扑是内联 SVG，其余是 HTML。
+  换模块、换脚位、改价格 —— 直接改这个文件，浏览器打开就是新图。
+  配套说明：../docs/不打HAT.md
+  打印：浏览器 Ctrl+P，纸张选 A3 横向，边距 0。
+-->
+<style>
+  body { margin: 0; background: #e6e3dd; }
+  .page { margin: 28px auto; box-shadow: 0 3px 16px rgba(0,0,0,.18); }
+  a { color: #1f5f7a; } a:hover { color: #164659; }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; }
+    @page { size: A3 landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page" style="width: 1587px; height: 1123px; box-sizing: border-box; background: #f6f4f0; color: #1a1815; font-family: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif; padding: 34px 40px 28px; display: flex; flex-direction: column; gap: 18px;">
+
+  <!-- ═══ 标题 ═══ -->
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 3px solid #1a1815; padding-bottom: 12px;">
+    <div>
+      <div style="font-size: 38px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1;">Microduck 复刻 · 整机接线图</div>
+      <div style="font-size: 19px; color: #57524a; margin-top: 7px;">飞特舵机路线 · <strong style="color:#1a1815;">不打 HAT</strong>，用降压模块 + 半双工转接板替代</div>
+    </div>
+    <div style="text-align: right; font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 13px; color: #6b655c; line-height: 1.7;">
+      主控 Radxa Zero 3W (RK3566)<br>
+      舵机 飞特 HD-1910-C001 × 15<br>
+      电池 NP-F550 2S
+    </div>
+  </div>
+
+  <!-- ═══ 两条警告 ═══ -->
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+
+    <div style="background: #fbf0e4; border: 2px solid #b3452f; border-left-width: 9px; padding: 15px 19px; display: flex; flex-direction: column; gap: 7px;">
+      <div style="font-size: 20px; font-weight: 700; color: #8f3524; display: flex; align-items: center; gap: 9px;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8f3524" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        电池满电 = 舵机电压上限，零余量
+      </div>
+      <div style="font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 15px; line-height: 1.85; background: #fff8ef; border: 1px solid #e0c3ab; padding: 9px 12px;">
+        NP-F550 满电 &nbsp;<strong style="color:#8f3524;">8.4 V</strong><br>
+        HD-1910 上限 <strong style="color:#8f3524;">8.4 V</strong> &nbsp;（范围 4 – 8.4 V）
+      </div>
+      <div style="font-size: 15px; line-height: 1.65; color: #4a443c;">
+        刚充满就贴着舵机的<strong>绝对上限</strong>跑。带载压降到 6.6–8.2 V 才回到安全区。
+        <strong style="color:#8f3524;">满电别直接堵转测试</strong>；长期存放按 3.8 V/cell 存。
+      </div>
+    </div>
+
+    <div style="background: #fbf0e4; border: 2px solid #b3452f; border-left-width: 9px; padding: 15px 19px; display: flex; flex-direction: column; gap: 7px;">
+      <div style="font-size: 20px; font-weight: 700; color: #8f3524; display: flex; align-items: center; gap: 9px;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8f3524" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        飞特脚序与 Dynamixel 完全相反
+      </div>
+      <div style="font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 14px; line-height: 1.85; background: #fff8ef; border: 1px solid #e0c3ab; padding: 9px 12px;">
+        飞特 AMP2.0-3P&nbsp;&nbsp;<span style="color:#1f5f7a;">1=Signal</span> &nbsp;2=Vcc &nbsp;<span style="color:#4a443c;">3=GND</span><br>
+        DXL &nbsp;JST EH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4a443c;">1=GND</span> &nbsp;&nbsp;&nbsp;&nbsp;2=Vcc &nbsp;<span style="color:#1f5f7a;">3=Signal</span>
+      </div>
+      <div style="font-size: 15px; line-height: 1.65; color: #4a443c;">
+        两种间距不同（<strong>2.0 vs 2.5 mm</strong>）<strong style="color:#8f3524;">插不进对方</strong> —— 物理上防了插错，只剩「自己压线时压反」这一种可能。
+        <strong>压完线先用万用表点一遍再上电。</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 主接线图 ═══ -->
+  <div style="flex-grow: 1; background: #fffefb; border: 2px solid #1a1815; padding: 16px 20px 10px; display: flex; flex-direction: column;">
+
+    <div style="display: flex; align-items: center; gap: 26px; margin-bottom: 6px;">
+      <div style="font-size: 17px; font-weight: 700;">接线拓扑</div>
+      <div style="display: flex; gap: 20px; font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 13px; color: #57524a;">
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:24px; height:5px; background:#b3452f; display:inline-block;"></span>电池原压 6.6–8.4 V</span>
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:24px; height:5px; background:#c07818; display:inline-block;"></span>+5 V</span>
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:24px; height:5px; background:#1f5f7a; display:inline-block;"></span>信号 3.3 V</span>
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:24px; height:5px; background:#3d3a35; display:inline-block;"></span>GND（必须共地）</span>
+      </div>
+    </div>
+
+    <svg viewBox="0 0 1500 452" style="width: 100%; height: auto;" font-family="ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+
+      <!-- ── 电池 ── -->
+      <rect x="8" y="150" width="196" height="132" rx="4" fill="#fbeeea" stroke="#b3452f" stroke-width="2.5"/>
+      <text x="106" y="180" text-anchor="middle" font-size="19" font-weight="600" fill="#1a1815">NP-F550</text>
+      <text x="106" y="203" text-anchor="middle" font-size="14" fill="#57524a">2S 锂电池</text>
+      <text x="106" y="234" text-anchor="middle" font-size="17" font-weight="600" fill="#8f3524">6.6 – 8.4 V</text>
+      <text x="106" y="258" text-anchor="middle" font-size="12.5" fill="#6b655c">满电 8.4 · 带载 6.6–8.2</text>
+      <text x="106" y="275" text-anchor="middle" font-size="12.5" fill="#6b655c">配电池仓 + 取电扣板</text>
+
+      <!-- 电池 → 降压 (5V 支路) -->
+      <path d="M 204 186 H 246 V 74 H 300" stroke="#b3452f" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+      <!-- 电池 → 开关 → 保险丝 → 舵机总线 (原压直供) -->
+      <path d="M 204 246 H 246 V 432 H 936" stroke="#b3452f" stroke-width="5.5" fill="none" marker-end="url(#ar)"/>
+      <rect x="180" y="306" width="132" height="72" rx="4" fill="#fff" stroke="#b3452f" stroke-width="2.5"/>
+      <text x="246" y="330" text-anchor="middle" font-size="14" font-weight="600" fill="#8f3524">电源开关</text>
+      <text x="246" y="352" text-anchor="middle" font-size="14" font-weight="600" fill="#8f3524">+ 保险丝 5 A</text>
+      <text x="246" y="370" text-anchor="middle" font-size="11.5" fill="#6b655c">锂电短路会喷火</text>
+      <text x="258" y="400" font-size="12.5" font-weight="600" fill="#8f3524">主干 18–20 AWG</text>
+      <text x="258" y="416" font-size="12.5" font-weight="600" fill="#8f3524">硅胶线，别用杜邦线</text>
+
+      <!-- ── 降压模块 ── -->
+      <rect x="300" y="26" width="212" height="96" rx="4" fill="#fdf4e6" stroke="#c07818" stroke-width="2.5"/>
+      <text x="406" y="52" text-anchor="middle" font-size="17" font-weight="600" fill="#1a1815">降压模块</text>
+      <text x="406" y="75" text-anchor="middle" font-size="14" fill="#57524a">6–9 V → 5 V ／ ≥2 A</text>
+      <text x="406" y="97" text-anchor="middle" font-size="12.5" fill="#6b655c">UBEC 或 MP1584 同步降压</text>
+      <text x="406" y="114" text-anchor="middle" font-size="12.5" fill="#8f3524">别用 LM2596 · 输入并 470µF</text>
+
+      <!-- 降压 → Radxa 5V -->
+      <path d="M 512 74 H 596" stroke="#c07818" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+      <text x="554" y="63" text-anchor="middle" font-size="12.5" font-weight="600" fill="#a06412">+5 V</text>
+
+      <!-- ── Radxa ── -->
+      <rect x="600" y="26" width="286" height="220" rx="4" fill="#eef4f7" stroke="#1f5f7a" stroke-width="2.5"/>
+      <text x="743" y="53" text-anchor="middle" font-size="18" font-weight="600" fill="#1a1815">Radxa Zero 3W</text>
+      <text x="743" y="73" text-anchor="middle" font-size="12.5" fill="#57524a">RK3566 · 40 针排针（需自焊）</text>
+      <line x1="618" y1="86" x2="868" y2="86" stroke="#b9cdd7" stroke-width="1.5"/>
+
+      <text x="620" y="110" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#a06412">pin 2 / 4</tspan>  +5V 输入</text>
+      <text x="620" y="135" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#1f5f7a">pin 8</tspan>  UART2_TX  GPIO0_D1</text>
+      <text x="620" y="160" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#1f5f7a">pin 10</tspan> UART2_RX  GPIO0_D0</text>
+      <text x="620" y="183" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#1f5f7a">pin 3 / 5</tspan> I2C SDA / SCL</text>
+      <text x="620" y="205" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#8f3524">pin 1</tspan>  3.3V → 转接板逻辑</text>
+      <text x="620" y="227" font-size="13.5" fill="#1a1815"><tspan font-weight="600" fill="#8f3524">pin 17</tspan> 3.3V → ToF</text>
+      <text x="620" y="243" font-size="12" fill="#6b655c">pin 3/5 板载已带上拉，外接 I²C 不用再加</text>
+
+      <!-- Radxa → ToF -->
+      <path d="M 886 150 H 936" stroke="#1f5f7a" stroke-width="3.5" fill="none" marker-end="url(#ar)"/>
+      <text x="911" y="140" text-anchor="middle" font-size="12" fill="#1f5f7a">I²C</text>
+
+      <!-- ── ToF ── -->
+      <rect x="940" y="98" width="196" height="120" rx="4" fill="#eef4f7" stroke="#1f5f7a" stroke-width="2.5"/>
+      <text x="1038" y="124" text-anchor="middle" font-size="16" font-weight="600" fill="#1a1815">VL53L8CX</text>
+      <text x="1038" y="146" text-anchor="middle" font-size="13" fill="#57524a">8×8 多区 ToF</text>
+      <text x="1038" y="166" text-anchor="middle" font-size="12.5" fill="#6b655c">地址 0x29 / 0x52 · 400 kHz</text>
+      <text x="1038" y="185" text-anchor="middle" font-size="12.5" fill="#1a1815">SDA←pin3 &nbsp;SCL←pin5</text>
+      <text x="1038" y="203" text-anchor="middle" font-size="12.5" font-weight="600" fill="#8f3524">3V3←pin 17 &nbsp;GND←pin 6</text>
+
+      <!-- Radxa → 转接板：信号 + 3.3V 逻辑供电 -->
+      <path d="M 700 246 V 292" stroke="#1f5f7a" stroke-width="3.5" fill="none" marker-end="url(#ar)"/>
+      <text x="712" y="268" font-size="12.5" fill="#1f5f7a">pin 8 / 10 / 6</text>
+      <text x="712" y="284" font-size="12" fill="#6b655c">TX↔RX 交叉</text>
+      <path d="M 840 246 V 292" stroke="#1f5f7a" stroke-width="3" stroke-dasharray="5 4" fill="none" marker-end="url(#ar)"/>
+      <text x="852" y="276" font-size="12.5" font-weight="600" fill="#8f3524">pin 1 · 3.3V</text>
+
+      <!-- ── 半双工转接板 ── -->
+      <rect x="600" y="296" width="286" height="118" rx="4" fill="#eef4f7" stroke="#1f5f7a" stroke-width="2.5"/>
+      <text x="743" y="322" text-anchor="middle" font-size="17" font-weight="600" fill="#1a1815">半双工转接板</text>
+      <text x="743" y="344" text-anchor="middle" font-size="13" fill="#57524a">ST/SC 系列 · TTL 版或 USB 版 ¥22</text>
+      <text x="743" y="366" text-anchor="middle" font-size="12.5" fill="#6b655c">替代 HAT 上的 1G125+1G126 方向电路</text>
+      <text x="743" y="386" text-anchor="middle" font-size="12.5" font-weight="600" fill="#8f3524">逻辑供电只能取 3.3V，取 5V 会打坏主控</text>
+      <text x="743" y="405" text-anchor="middle" font-size="12" fill="#6b655c">USB 版更省事，但串口变 /dev/ttyUSB0</text>
+
+      <!-- 转接板 → 总线 DATA -->
+      <path d="M 886 356 H 936" stroke="#1f5f7a" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+      <text x="911" y="346" text-anchor="middle" font-size="12" fill="#1f5f7a">DATA</text>
+
+      <text x="620" y="423" text-anchor="middle" font-size="13" font-weight="600" fill="#8f3524">VDD 6.6–8.4 V ← 舵机吃电池原压</text>
+
+      <!-- ── 舵机总线 ── -->
+      <rect x="940" y="296" width="552" height="146" rx="4" fill="#fbeeea" stroke="#b3452f" stroke-width="2.5"/>
+      <text x="1216" y="322" text-anchor="middle" font-size="17" font-weight="600" fill="#1a1815">飞特舵机总线　1 Mbps 半双工单线</text>
+      <line x1="958" y1="334" x2="1474" y2="334" stroke="#e0c3ab" stroke-width="1.5"/>
+      <text x="958" y="358" font-size="13.5" fill="#1a1815">HD-1910-C001 × 15　菊花链</text>
+      <text x="958" y="380" font-size="12.5" fill="#6b655c">额定 690 mA@6V · 堵转 1.6 A@6V · 静态 20 mA</text>
+      <text x="958" y="404" font-size="13.5" fill="#1a1815">imu_to_dxl 自制板　总线上第 16 个设备</text>
+      <text x="958" y="426" font-size="12.5" fill="#6b655c">J4 / J5 = PH 2.0 mm，脚序已按飞特画（1=DATA 2=VDD 3=GND）</text>
+
+      <!-- GND 共地母线 -->
+      <path d="M 106 282 V 452" stroke="#3d3a35" stroke-width="3" fill="none"/>
+      <path d="M 106 452 H 1216" stroke="#3d3a35" stroke-width="3" fill="none"/>
+      <path d="M 406 122 V 452" stroke="#3d3a35" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+      <path d="M 743 414 V 452" stroke="#3d3a35" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+      <path d="M 1216 442 V 452" stroke="#3d3a35" stroke-width="3" fill="none"/>
+      <text x="150" y="446" font-size="13" font-weight="600" fill="#3d3a35">GND 共地母线 —— 电池负极 · 降压输出地 · 主控 · 舵机总线，四者必须连在一起</text>
+    </svg>
+  </div>
+
+  <!-- ═══ 底部四栏 ═══ -->
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;">
+
+    <div style="background: #fffefb; border: 2px solid #1a1815; padding: 12px 15px;">
+      <div style="font-size: 15.5px; font-weight: 700; margin-bottom: 8px;">要买的（约 ¥70）</div>
+      <div style="font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 12px; line-height: 1.95; color: #33302b;">
+        降压模块 5V/2A 同步 ··· ¥15<br>
+        半双工转接板 ········ ¥22<br>
+        保险丝座 + 5A 管 ····· ¥5<br>
+        电源开关 ≥5A ········ ¥5<br>
+        2×20 2.54 排针 ······ ¥1<br>
+        18AWG 硅胶线（主干）·· ¥10<br>
+        杜邦线 / JST 线材 ···· ¥10
+      </div>
+      <div style="font-size: 12px; color: #57524a; margin-top: 8px; line-height: 1.55;">
+        对比 HAT 打样贴片（4 层 · 双面 · 110 器件）上千元。
+      </div>
+    </div>
+
+    <div style="background: #fbf0e4; border: 2px solid #b3452f; padding: 12px 15px;">
+      <div style="font-size: 15.5px; font-weight: 700; margin-bottom: 8px; color: #8f3524;">⚠ 会烧东西的三条</div>
+      <div style="display: grid; grid-template-columns: 15px minmax(0, 1fr); gap: 7px 8px; font-size: 12.5px; line-height: 1.5; color: #33302b;">
+        <strong style="color:#8f3524;">1</strong><span><strong>转接板逻辑供电只能取 3.3V</strong>（pin 1）。取 5V 它的 TX 会用 5V 电平打进主控 3.3V 的 RX 脚。</span>
+        <strong style="color:#8f3524;">2</strong><span><strong>5V 灌进 40 针是无保护的</strong>，绕过板子自己的输入保护，<strong>接反当场烧板</strong>。插之前先量极性和电压。</span>
+        <strong style="color:#8f3524;">3</strong><span><strong>舵机主干别用杜邦线。</strong>15 颗峰值好几安培，杜邦线 24–28AWG 只扛 1A 左右，会发烫甚至熔皮。</span>
+      </div>
+    </div>
+
+    <div style="background: #fffefb; border: 2px solid #1a1815; padding: 12px 15px;">
+      <div style="font-size: 15.5px; font-weight: 700; margin-bottom: 8px;">不打 HAT 会失去</div>
+      <div style="font-size: 12.5px; line-height: 1.75; color: #33302b;">
+        · 板载音频（codec + 功放 + 麦）<br>
+        · <strong style="color:#8f3524;">关机检测信号 LM5050-1 · IO_06</strong><br>
+        · Pi HAT+ 身份识别（EEPROM 本就不贴）<br>
+        · 板载 BMI088（官方软件本就不用）
+      </div>
+      <div style="font-size: 12px; color: #8f3524; margin-top: 8px; line-height: 1.55; border-top: 1px solid #e2ddd4; padding-top: 7px;">
+        没有关机信号 + microSD ＝ 硬断电容易损坏文件系统。<strong>先软件关机再断电。</strong>
+      </div>
+    </div>
+
+    <div style="background: #fffefb; border: 2px solid #1a1815; padding: 12px 15px;">
+      <div style="font-size: 15.5px; font-weight: 700; margin-bottom: 8px;">上电前逐条过</div>
+      <div style="display: grid; grid-template-columns: 15px minmax(0, 1fr); gap: 5px 8px; font-size: 12.5px; line-height: 1.45; color: #33302b;">
+        <strong>1</strong><span>四处共地是否连通（万用表通断档）</span>
+        <strong>2</strong><span>降压空载输出 5.0 V ±0.2，<strong>极性</strong></span>
+        <strong>3</strong><span>舵机线 Signal / Vcc / GND 是否压反</span>
+        <strong>4</strong><span>转接板 TX / RX 是否交叉<br><span style="color:#6b655c; font-size:11.5px;">模块丝印的 RX 接主控的 TX</span></span>
+        <strong>5</strong><span><span style="font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace; font-size: 11.5px;">systemctl mask serial-getty@ttyS2</span><br><span style="color:#6b655c; font-size:11.5px;">否则 agetty 占着串口，舵机不动</span></span>
+        <strong>6</strong><span>舵机 ID 是否已用调试板逐个设好</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #8a847a; font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace;">
+    <span><strong style="color:#8f3524;">⚠ 本图未经实物验证</strong> —— 由文档与规格书推导：引脚据 Radxa 官方硬件文档，舵机参数据飞特《HD-1910-C001 串型规格书》A/0（2026-09-07）</span>
+    <span>第三方复刻资料，与 Pollen Robotics 无隶属关系 · github.com/fanhao375/microduck-replica</span>
+  </div>
+
+</div>
+</body>
+</html>

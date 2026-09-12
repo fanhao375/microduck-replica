@@ -46,6 +46,12 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 | `build-log/` 照片 | 实物构建照片 | **CC BY-NC-SA 4.0**，由本项目参与者拍摄并授权 |
 | `assets/` | 封面与交流群二维码 | 同上 |
 
+**原样分发的第三方软件：**
+
+| 路径 | 内容 | 来源 | 许可证 |
+|---|---|---|---|
+| `tools/飞特/` | 飞特 FD 调试软件 1.9.8.5 + CH340 驱动 | [gitee.com/ftservo/fddebug](https://gitee.com/ftservo/fddebug)，2026-09-11 复制 | **MIT**（FTServo 2024，LICENSE 同目录） |
+
 > 文档中引用的上游源码片段（注释、常量、寄存器定义）来自 `pollen-robotics/microduck`，
 > 遵循其 **Apache-2.0** 许可证，引用处均已标注文件路径。
 
