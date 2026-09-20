@@ -1,13 +1,14 @@
-//! microduck — STS3215 舵机测试工具
+//! sts3215Servo_testtool — STS3215 舵机测试工具
 //!
 //! 用法：
-//!   microduck scan [--from 0 --to 253]     扫描总线上的舵机（带进度条）
-//!   microduck info <id>                    读取舵机状态（位置/电压/温度/电流/负载）
-//!   microduck read <id> <addr> <len>       读取任意寄存器（十六进制输出）
-//!   microduck move <id> <pos> [--speed N] [--time ms]   转到指定位置(0~4095)
-//!   microduck test <id>                    对单个舵机做完整测试
-//!   microduck test-all                     扫描并批量测试所有舵机
-//!   microduck raw [id]                     底层诊断：打印原始收发字节
+//!   sts3215Servo_testtool scan [--from 0 --to 253]     扫描总线上的舵机（带进度条）
+//!   sts3215Servo_testtool info <id>                    读取舵机状态（位置/电压/温度/电流/负载）
+//!   sts3215Servo_testtool read <id> <addr> <len>       读取任意寄存器（十六进制输出）
+//!   sts3215Servo_testtool set-id <旧id> <新id>         修改舵机 ID（总线上只能接一个！）
+//!   sts3215Servo_testtool move <id> <pos> [--speed N] [--time ms]   转到指定位置(0~4095)
+//!   sts3215Servo_testtool test <id>                    对单个舵机做完整测试
+//!   sts3215Servo_testtool test-all                     扫描并批量测试所有舵机
+//!   sts3215Servo_testtool raw [id]                     底层诊断：打印原始收发字节
 //!   全局选项: --port <路径>（默认 /dev/ttyUSB0）  --baud <波特率>（默认 1000000）
 
 mod sts;
@@ -53,6 +54,7 @@ fn main() {
         "raw" => cmd_raw(&mut bus, cfg.id.unwrap_or(1)),
         "read" => cmd_read(&mut bus, cfg.id.expect("read 需要 id"), cfg.pos.expect("read 需要 addr") as u8, cfg.len.unwrap_or(1)),
         "info" => cmd_info(&mut bus, cfg.id.expect("info 需要 id")),
+        "set-id" => cmd_set_id(&mut bus, cfg.id.expect("set-id 需要旧 id"), cfg.pos.expect("set-id 需要新 id") as u8),
         "move" => cmd_move(&mut bus, cfg.id.expect("move 需要 id"), cfg.pos.unwrap_or(2048), cfg.speed, cfg.time_ms),
         "test" => cmd_test(&mut bus, cfg.id.expect("test 需要 id")),
         "test-all" => cmd_test_all(&mut bus, cfg.from, cfg.to),
@@ -142,7 +144,7 @@ fn print_usage() {
     let doc: Vec<&str> = include_str!("main.rs")
         .lines()
         .take_while(|l| l.starts_with("//!"))
-        .map(|l| l.trim_start_matches("//! "))
+        .map(|l| l.trim_start_matches("//!").trim_start())
         .collect();
     eprintln!("{}", doc.join("\n"));
 }
@@ -250,6 +252,49 @@ fn cmd_info(bus: &mut StsBus, id: u8) -> i32 {
         }
         Err(e) => {
             eprintln!("读取舵机 {id} 失败: {e}");
+            1
+        }
+    }
+}
+
+/// 修改舵机 ID：写 EEPROM，流程为 解锁(LOCK=0) -> 写 ID -> 锁定(LOCK=1)。
+/// ⚠ 总线上必须只接要修改的那一个舵机！否则所有同 ID 舵机会被一起改掉。
+fn cmd_set_id(bus: &mut StsBus, old_id: u8, new_id: u8) -> i32 {
+    if new_id > 253 {
+        eprintln!("新 ID 必须在 0~253 之间（254 是广播地址）");
+        return 2;
+    }
+    match bus.ping(old_id) {
+        Ok(true) => println!("ID {old_id} 在线，准备修改为 {new_id} ..."),
+        Ok(false) => {
+            eprintln!("ID {old_id} 无应答，未做任何修改。");
+            return 1;
+        }
+        Err(e) => {
+            eprintln!("ping 失败: {e}");
+            return 1;
+        }
+    }
+    let steps = [
+        (reg::LOCK, 0u8),  // 解锁 EEPROM
+        (reg::ID, new_id), // 写入新 ID
+        (reg::LOCK, 1),    // 重新锁定
+    ];
+    for (addr, val) in steps {
+        if let Err(e) = bus.write_u8(old_id, addr, val) {
+            eprintln!("写寄存器 {addr} 失败: {e}");
+            return 1;
+        }
+        thread::sleep(Duration::from_millis(50)); // 等 EEPROM 写入完成
+    }
+    // 用新 ID 验证
+    match bus.ping(new_id) {
+        Ok(true) => {
+            println!("✅ 修改成功：ID {old_id} -> {new_id}（断电重启后依然有效）");
+            0
+        }
+        _ => {
+            eprintln!("❌ 新 ID {new_id} 无应答，修改可能失败，请重新扫描确认。");
             1
         }
     }
