@@ -1,0 +1,11 @@
+[package]
+name = "sts3215Servo_testtool"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serialport = "4"
+
+# 发布构建时保留一定调试信息，Pi 上编译也更快
+[profile.release]
+debug = false
