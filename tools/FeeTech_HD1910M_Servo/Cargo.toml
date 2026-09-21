@@ -1,0 +1,48 @@
+# =============================================================================
+# Cargo.toml —— Rust 项目的“身份证”与“采购清单”
+#
+# Cargo 是 Rust 的官方构建工具 + 包管理器（相当于 C 的 Makefile + 手动下载库，
+# 或者 Python 的 pip + venv，但全部集成在一个工具里）。
+# 这个文件告诉 Cargo：
+#   1. 我们这个包叫什么名字、什么版本（[package] 段）
+#   2. 需要从网上（crates.io，Rust 的官方仓库）下载哪些第三方库（[dependencies] 段）
+#
+# 构建命令：
+#   cargo build          # 调试构建（快编译，慢运行，产物在 target/debug/）
+#   cargo build --release# 发布构建（慢编译，快运行，产物在 target/release/）
+#   cargo run -- <参数>  # 编译并直接运行，-- 后面的参数传给我们的程序
+# =============================================================================
+
+[package]
+name = "feetech-HD1910M-tester" # 包名，生成的可执行文件也叫这个名字
+version = "0.1.0"
+edition = "2021"                # Rust 的“语法版本”，2021 是目前主流教学版本
+description = "飞特 HD1910M 串口舵机测试工具（FT-SCS 协议）"
+
+# 【库目标】src/lib.rs 会被编译成名为 feetech_servo 的库，
+# 供 GUI 项目（或其他任何 Rust 项目）通过路径依赖复用。
+[lib]
+name = "feetech_servo"
+path = "src/lib.rs"
+
+[dependencies]
+# serialport：跨平台串口库。舵机是通过 USB 转 TTL（CH340）挂在 /dev/ttyUSB0 上的，
+# 我们需要它来打开串口、设置波特率、收发字节流。
+serialport = "4.7"
+
+# thiserror：让我们用一行 #[error("...")] 注解就定义出专业的错误类型，
+# 避免手写大量样板代码。Rust 的错误处理是它的核心特色，值得好好学习。
+thiserror = "2"
+
+# ==================== 以下依赖只被 CLI（main.rs）使用 ====================
+# clap 和 indicatif 放在 [dev-dependencies] 之外的普通依赖里 CLI 才能用；
+# GUI 项目通过 [lib] 依赖本包时也会带上它们（体积代价可接受）。
+# 如果想做到极致精简，可以把 CLI 拆成独立包，但教学项目保持简单。
+
+# clap：命令行参数解析库。derive 特性让我们用“给结构体加注解”的方式声明
+# 命令行参数，自动帮我们生成 --help、参数校验等，非常省心。
+clap = { version = "4.5", features = ["derive"] }
+
+# indicatif：终端进度条库（Rust 生态的事实标准）。
+# 用于扫描总线时显示漂亮的进度条、旋转动画和预计剩余时间。
+indicatif = "0.17"
