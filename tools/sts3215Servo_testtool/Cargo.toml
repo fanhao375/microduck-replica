@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 serialport = "4"
+indicatif = "0.17"
 
 # 发布构建时保留一定调试信息，Pi 上编译也更快
 [profile.release]

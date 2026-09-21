@@ -190,27 +190,29 @@ fn cmd_read(bus: &mut StsBus, id: u8, addr: u8, len: u8) -> i32 {
     }
 }
 
-/// 带进度条的扫描。
+/// 带进度条的扫描（indicatif 渲染：百分比 + 动态条 + 耗时/预计剩余）。
 fn scan_with_progress(bus: &mut StsBus, from: u8, to: u8) -> Vec<u8> {
-    use std::io::Write as _;
-    let total = (to - from + 1) as usize;
+    use indicatif::{ProgressBar, ProgressStyle};
+    let total = (to - from + 1) as u64;
+    let pb = ProgressBar::new(total);
+    pb.set_style(
+        ProgressStyle::with_template(
+            "{spinner:.green} {msg} {wide_bar:.cyan/blue} {percent:>3}% ({pos}/{len}) 已用 {elapsed_precise} 剩余 {eta_precise}",
+        )
+        .unwrap()
+        .progress_chars("█▉▊▋▌▍▎▏ "),
+    );
+    pb.set_message(format!("扫描 ID {from}~{to}"));
     let mut found = Vec::new();
-    for (i, id) in (from..=to).enumerate() {
-        const WIDTH: usize = 30;
-        let done = (i + 1) * WIDTH / total;
-        eprint!(
-            "\r扫描中 [{}{}] {:>3}/{total}  已发现 {} 个",
-            "#".repeat(done),
-            "-".repeat(WIDTH - done),
-            i + 1,
-            found.len()
-        );
-        let _ = std::io::stderr().flush();
+    for id in from..=to {
         if bus.ping(id).unwrap_or(false) {
             found.push(id);
+            pb.println(format!("  ✔ 发现舵机 ID {id:>3}"));
+            pb.set_message(format!("扫描 ID {from}~{to}（已发现 {} 个）", found.len()));
         }
+        pb.inc(1);
     }
-    eprintln!(); // 进度条换行
+    pb.finish_with_message(format!("扫描完成，共发现 {} 个舵机", found.len()));
     found
 }
 
