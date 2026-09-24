@@ -141,17 +141,18 @@ waiting on the zero calibration before it goes on the board.
 </td>
 <td width="50%" valign="top">
 
-### 🧠 Algorithms · to be updated
+### 🧠 Algorithms · public 1910 M6 parameter integration
 
-The walking policy has not been started. Upstream trains in MuJoCo with
-[microduck_rl](https://github.com/apirrone/microduck_rl), exports ONNX, and the runtime infers at
-50 Hz. On the Feetech build the **zero position and joint directions** have to be calibrated first,
-or the policy means nothing — that is exactly where this build is stuck right now.
+The Feetech simulation baseline adopts the **1910 BAM M6 actuator parameters published by
+[LuwuDynamics/xgoduck_rl](https://github.com/LuwuDynamics/xgoduck_rl)**. Thank you to LuwuDynamics
+for sharing them. These parameters were not independently identified by this replica project.
+The [provenance record](docs/HD-1910-M6参数来源.md) includes the pinned source revision,
+original-file checksum and Apache-2.0 license.
 
-HD-1910 differs from XL330 in torque, gear ratio and damping, so the upstream pretrained policy will
-most likely need retraining. The parameters that retraining needs (torque constant, speed limit, PID,
-friction) are collected in the [pre-training data checklist](docs/HD-1910训练前数据清单.md): measured
-where measurable, flagged as to-do where not.
+Training builds on [Pollen Robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl)
+and [Rhoban/BAM](https://github.com/Rhoban/bam). Parameter integration and local simulation checks
+are in progress; there is no walking policy validated on this replica yet. Hardware testing still
+needs joint calibration, IMU/runtime integration, and checks of actual mass/inertia and servo response.
 
 **[HD-1910 pre-training data checklist](docs/HD-1910训练前数据清单.md)**　·　
 [Actuator selection](docs/执行器选型.md)

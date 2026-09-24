@@ -124,14 +124,15 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 </td>
 <td width="50%" valign="top">
 
-### 🧠 算法 · 待更新
+### 🧠 算法 · 接入公开的 1910 M6 参数
 
-走路策略还没开始。官方是 [microduck_rl](https://github.com/apirrone/microduck_rl) 在 MuJoCo 里训好导出 ONNX，
-运行时按 50 Hz 推理。飞特版要先把**零位和关节方向**标定准，策略才有意义 —— 现在卡在这一步。
+采用 **[LuwuDynamics/xgoduck_rl](https://github.com/LuwuDynamics/xgoduck_rl) 公开的 1910 BAM M6 动力学参数**，
+作为飞特版的仿真训练基线。感谢 LuwuDynamics 的分享；这份参数不是我们自行辨识的结果。
+出处、固定版本、原文件校验值和 Apache-2.0 许可见[参数来源说明](docs/HD-1910-M6参数来源.md)。
 
-HD-1910 跟 XL330 的力矩、减速比、阻尼都不一样，官方预训练的策略大概率要重训。
-重训要的参数（力矩常数、速度限、PID、摩擦）整理在[训练前数据清单](docs/HD-1910训练前数据清单.md)里，
-能测的已经测了，不能测的标了待办。
+训练沿用 [Pollen Robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl) 和
+[Rhoban/BAM](https://github.com/Rhoban/bam)。当前推进参数接入和本地仿真检查，尚无本机实测通过的走路策略。
+实机测试仍需完成**零位、关节方向、IMU 和主控接入**，并核对本机质量惯量与舵机响应。
 
 **[HD-1910 训练前数据清单](docs/HD-1910训练前数据清单.md)**　·
 [执行器选型](docs/执行器选型.md)
