@@ -62,12 +62,12 @@ The selection argument is in [Actuator Selection](docs/actuator-selection.en.md)
 
 A WeChat group for people working on the same thing — build progress, pitfalls, sourcing.
 
-**Groups 1–7 are full (200 members each — WeChat's cap for QR joins).** The code below is for **group 8**.
+The code below is for **Duck Replica Group 9** (WeChat disables QR joins once a group reaches 200 members).
 
 <div align="center">
-  <img src="assets/wechat-group-8.png" alt="Microduck replica WeChat group" width="280">
+  <img src="assets/wechat-group-9.png" alt="Duck Replica Group 9 WeChat QR code" width="280">
   <br>
-  <sub><b>Duck Replica Group 8 · expires 2026-09-27</b> — WeChat group codes are valid for 7 days<br>
+  <sub><b>Duck Replica Group 9 · expires 2026-10-01</b> — WeChat group codes are valid for 7 days<br>
   If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
 </div>
 
