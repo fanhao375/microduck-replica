@@ -1,0 +1,15 @@
+<mujoco model="microduck_ball">
+    <compiler angle="radian" autolimits="true"/>
+
+    <worldbody>
+        <!-- 70mm-diameter, 15g hollow plastic ball (floorball-like).
+             Inertia = (2/3) m r^2 (thin hollow sphere) = 1.225e-5 kg m^2.
+             friction = (sliding, torsional, rolling); low rolling resistance
+             so a kicked ball actually rolls away. -->
+        <body name="ball" pos="0.3 0 0.035">
+            <freejoint name="ball_free"/>
+            <inertial pos="0 0 0" mass="0.015" diaginertia="1.225e-5 1.225e-5 1.225e-5"/>
+            <geom type="sphere" name="ball_geom" size="0.035" rgba="1 0.55 0 1" friction="0.5 0.005 0.0001"/>
+        </body>
+    </worldbody>
+</mujoco>

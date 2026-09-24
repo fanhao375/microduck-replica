@@ -149,9 +149,12 @@ for sharing them. These parameters were not independently identified by this rep
 The [provenance record](docs/HD-1910-M6参数来源.md) includes the pinned source revision,
 original-file checksum and Apache-2.0 license.
 
+The complete training project is included in **[`software/training/`](software/training/)**:
+one clone includes the source, actuator parameters and simulation models. See the
+[run guide and controller initialization fix](software/training/docs/hd1910-baseline.md).
 Training builds on [Pollen Robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl)
-and [Rhoban/BAM](https://github.com/Rhoban/bam). Parameter integration and local simulation checks
-are in progress; there is no walking policy validated on this replica yet. Hardware testing still
+and [Rhoban/BAM](https://github.com/Rhoban/bam). Integration tests and a short training check
+have passed; there is no walking policy validated on this replica yet. Hardware testing still
 needs joint calibration, IMU/runtime integration, and checks of actual mass/inertia and servo response.
 
 **[HD-1910 pre-training data checklist](docs/HD-1910训练前数据清单.md)**　·　
@@ -428,7 +431,7 @@ what it is good for.
 ## Reproducing This
 
 ```bash
-# 1. Fetch upstream (not re-hosted here)
+# 1. Fetch upstream for the drawing scripts below (training is already in software/training/)
 bash scripts/fetch_upstream.sh
 
 # 2. Regenerate the drawings

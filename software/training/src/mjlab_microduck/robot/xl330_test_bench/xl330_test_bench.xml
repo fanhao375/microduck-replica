@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<!-- Generated using onshape-to-robot -->
+<!-- Onshape https://cad.onshape.com/documents/804927696f06d877f3f1803e/w/3df6f6a8dcea50fb5658e3c0/e/54c1186243f1b4db10e4bd59 -->
+<mujoco model="xl330_test_bench">
+  <compiler angle="radian" meshdir="assets" autolimits="true"/>
+  <default>
+    <default class="xl330_test_bench">
+      <joint frictionloss="0.1" armature="0.005"/>
+      <position kp="50" dampratio="1"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+      <default class="collision">
+        <geom group="3"/>
+      </default>
+    </default>
+  </default>
+  <!-- Additional joints_properties.xml -->
+  <default>
+    <default class="perfect_actuator">
+      <geom contype="0" conaffinity="0"/>
+      <joint damping="0.15" frictionloss="0.1" armature="0.001"/>
+      <position kp="10.0" kv="0.1" forcerange="-20.0 20.0"/>
+    </default>
+    <default class="chosen_actuator_old">
+      <geom contype="0" conaffinity="0"/>
+      <joint damping="0.048" frictionloss="0.006" armature="0.002"/>
+      <position kp="0.52" kv="0.0" forcerange="-0.91 0.91" ctrlrange="-10.0 10.0"/>
+    </default>
+    <default class="chosen_actuator">
+      <geom contype="0" conaffinity="0"/>
+      <joint damping="0.041" frictionloss="0.032" armature="0.002"/> 
+      <position kp="0.386" kv="0.0" forcerange="-0.67 0.67" ctrlrange="-10.0 10.0"/> 
+      <!-- <joint damping="0.0" frictionloss="0.0" armature="0.00"/> -->
+      <!-- <position kp="0" kv="0.0" forcerange="-0.0 0.0" ctrlrange="-10.0 10.0"/> -->
+    </default>
+    <default class="passive_wheel">
+      <geom contype="0" conaffinity="0"/>
+      <joint damping="0.0" frictionloss="0.0" armature="0.0001"/>
+    </default>
+  </default>
+  <worldbody>
+    <!-- Link bench_holder -->
+    <body name="bench_holder" pos="0 0 0" quat="1 0 0 0" childclass="xl330_test_bench">
+      <inertial pos="0.0653604 -0 0.239212" mass="0.0837449" fullinertia="1.99311e-05 9.51726e-05 8.54207e-05 0 1.62439e-05 0"/>
+      <!-- Part xl330 -->
+      <geom type="mesh" class="visual" pos="0.0905 0 0.211" quat="0 1 0 0" mesh="xl330" material="xl330_material"/>
+      <!-- Part bench_holder -->
+      <geom type="mesh" class="visual" pos="0.0906 -0 0.211" quat="1 0 0 0" mesh="bench_holder" material="bench_holder_material"/>
+      <!-- Link arm -->
+      <body name="arm" pos="0.105 0 0.211" quat="0.5 0.5 -0.5 -0.5">
+        <!-- Joint from bench_holder to arm -->
+        <joint axis="0 0 1" name="1" type="hinge" class="chosen_actuator" range="-1.3962634 1.3962634"/>
+        <!-- Real device has a 100 g payload on the arm.  Inertia scaled from the
+             onshape export (original mass 0.557207) by 0.1 / 0.557207 ≈ 0.17946. -->
+        <inertial pos="-0 -0.0965688 0.0140442" mass="0.1" fullinertia="8.6729e-05 6.5566e-05 1.43854e-04 0 0 -1.5639e-07"/>
+        <!-- Part weight -->
+        <geom type="mesh" class="visual" pos="-0 0 0.0215" quat="0.5 -0.5 0.5 0.5" mesh="weight" material="weight_material"/>
+        <!-- Part spacer -->
+        <geom type="mesh" class="visual" pos="0 0 0.0145" quat="0.5 -0.5 0.5 0.5" mesh="spacer" material="spacer_material"/>
+        <!-- Part arm -->
+        <geom type="mesh" class="visual" pos="-0 0 0.0145" quat="0.5 -0.5 -0.5 -0.5" mesh="arm" material="arm_material"/>
+        <!-- Part axis -->
+        <geom type="mesh" class="visual" pos="-0 0 -0.011" quat="0.5 -0.5 0.5 0.5" mesh="axis" material="axis_material"/>
+        <!-- Part spacer_2 -->
+        <geom type="mesh" class="visual" pos="-0.0196279 0 0.0145" quat="0.5 -0.5 0.5 0.5" mesh="spacer" material="spacer_material"/>
+        <!-- Part arm_2 -->
+        <geom type="mesh" class="visual" pos="0 0 0.0145" quat="0.5 -0.5 0.5 0.5" mesh="arm" material="arm_material"/>
+      </body>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="axis.stl"/>
+    <mesh file="weight.stl"/>
+    <mesh file="spacer.stl"/>
+    <mesh file="arm.stl"/>
+    <mesh file="xl330.stl"/>
+    <mesh file="bench_holder.stl"/>
+    <material name="xl330_material" rgba="0.286275 0.286275 0.286275 1"/>
+    <material name="bench_holder_material" rgba="0.231373 0.380392 0.705882 1"/>
+    <material name="weight_material" rgba="0.917647 0.917647 0.917647 1"/>
+    <material name="spacer_material" rgba="0.647059 0.647059 0.647059 1"/>
+    <material name="arm_material" rgba="0.615686 0.811765 0.929412 1"/>
+    <material name="axis_material" rgba="0.917647 0.917647 0.917647 1"/>
+  </asset>
+  <actuator>
+    <position class="chosen_actuator" name="1" joint="1"/>
+  </actuator>
+  <equality/>
+</mujoco>

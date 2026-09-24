@@ -8,6 +8,8 @@
 |---|---|---|
 | [pollen-robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl) | Pollen Robotics | 代码 Apache-2.0；**3D 模型 CC BY-NC-SA**（上游 README 写作 "BY-SA-NC"） |
 | [pollen-robotics/microduck](https://github.com/pollen-robotics/microduck) | Pollen Robotics | Apache-2.0 |
+| [LuwuDynamics/xgoduck_rl](https://github.com/LuwuDynamics/xgoduck_rl) 的 1910 M6 参数与配套配置参考 | LuwuDynamics | Apache-2.0 |
+| [Rhoban/BAM](https://github.com/Rhoban/bam) 执行器模型与辨识库（训练依赖） | Rhoban | Apache-2.0 |
 
 Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 
@@ -31,8 +33,7 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 | `print/` | 46 个单件 STL | **直接再分发**上游 STL，仅做重命名与分类 |
 | `docs/hole_analysis.json` | 孔位几何分析数据 | 由上游 STL 计算得出 |
 
-> ⚠️ **关于 `print/`**：本仓库的原则是「不重复托管上游代码」，但 `print/` 是个**有意的例外** ——
-> 打印件是复刻者最常需要、也最需要能在网页上逐个点开查看的东西。
+> **关于 `print/`**：本仓库直接提供整理后的打印件，方便复刻者下载和逐个查看。
 > CC BY-NC-SA 明确允许这种再分发，条件是署名、相同方式共享、非商业使用，本节即为此声明。
 > 上游基线：`pollen-robotics/microduck_rl` @ `2fa62b8`（2026-07-28，抓取时的 `assets/`）。
 
@@ -45,6 +46,24 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 | `docs/*.md`、`*.md` | 全部文档与逆向分析文本 | **CC BY-NC-SA 4.0** |
 | `build-log/` 照片 | 实物构建照片 | **CC BY-NC-SA 4.0**，由本项目参与者拍摄并授权 |
 | `assets/` | 封面与交流群二维码 | 同上 |
+
+## 内置训练工程
+
+[`software/training/`](software/training/) 完整收录训练工程，让复刻者一次下载即可获得
+代码、参数和仿真模型。导入固定版本与变更范围见 [UPSTREAM.md](software/training/UPSTREAM.md)。
+
+- Pollen Robotics 的训练代码、工具和原文档保留 **Apache-2.0**；本目录新增的 HD1910
+  任务、初始化适配、测试和说明也采用 Apache-2.0。许可证全文在
+  [`software/training/LICENSE`](software/training/LICENSE)。
+- 训练目录内的 **3D 模型和网格保留上游 CC BY-NC-SA 声明**，不受代码的 Apache 许可覆盖。
+- LuwuDynamics 的 `1910_m6.json` 原样保留，固定来源、校验值和许可证副本放在
+  [`software/training/src/mjlab_microduck/robot/hd1910/`](software/training/src/mjlab_microduck/robot/hd1910/)。
+  本项目没有自行辨识这份参数；以后用它训练策略，仍保留参数引用。
+- Rhoban/BAM 通过锁定版本的依赖安装，保留其来源与许可。
+
+上表对本项目文档的 CC BY-NC-SA 许可不覆盖训练目录内的 Apache 文档。
+
+## 其他第三方软件
 
 **原样分发的第三方软件：**
 
@@ -85,6 +104,7 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 - Pollen Robotics 公开发布的**源码与设备树**（`pollen-robotics/microduck`，Apache-2.0）
 - 公开发布的**仿真模型与网格**（`pollen-robotics/microduck_rl`）
 - 公开发布的**KiCad 工程**（`pollen-robotics/elec_RPI_Robot_HAT`，Apache-2.0）
+- LuwuDynamics 公开发布的 **1910 M6 参数与配套配置**（`LuwuDynamics/xgoduck_rl`，Apache-2.0）
 - 厂商公开的器件手册与规格页
 
 **未使用任何非公开资料，未拆解实物，未接触过任何未公开的设计文件。**

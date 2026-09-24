@@ -1,0 +1,19 @@
+{
+    "url": "https://cad.onshape.com/documents/804927696f06d877f3f1803e/w/3df6f6a8dcea50fb5658e3c0/e/54c1186243f1b4db10e4bd59",
+    "outputFormat": "mujoco",
+    "robot_name": "xl330_test_bench",
+    "output_filename": "xl330_test_bench",
+    "simplify_stls": true,
+    "max_stl_size": 1.0,
+    "ignore": {
+        "*": "collision",
+    },
+    "additional_xml": [
+        "joints_properties.xml",
+    ],
+    "joint_properties": {
+        "default": {
+            "class": "chosen_actuator"
+        }
+    }
+}

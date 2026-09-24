@@ -130,8 +130,10 @@ MJCF 里包含了完整的运动学树：每个零件挂在谁身上、相对位
 作为飞特版的仿真训练基线。感谢 LuwuDynamics 的分享；这份参数不是我们自行辨识的结果。
 出处、固定版本、原文件校验值和 Apache-2.0 许可见[参数来源说明](docs/HD-1910-M6参数来源.md)。
 
+完整训练工程已放入本仓库 **[`software/training/`](software/training/)**，一次克隆即可取得
+代码、参数和仿真模型；[运行说明与初始化修复解释](software/training/docs/hd1910-baseline.md)给出具体命令。
 训练沿用 [Pollen Robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl) 和
-[Rhoban/BAM](https://github.com/Rhoban/bam)。当前推进参数接入和本地仿真检查，尚无本机实测通过的走路策略。
+[Rhoban/BAM](https://github.com/Rhoban/bam)。已通过接入测试和短训练检查，尚无本机实测通过的走路策略。
 实机测试仍需完成**零位、关节方向、IMU 和主控接入**，并核对本机质量惯量与舵机响应。
 
 **[HD-1910 训练前数据清单](docs/HD-1910训练前数据清单.md)**　·
@@ -397,7 +399,7 @@ Microduck 的东西散在 GitHub 多个组织和 HuggingFace 三种资源里，*
 ## 重现
 
 ```bash
-# 1. 拉上游仓库（源码与仿真资产不重复托管，打印件除外 —— 见 NOTICE.md）
+# 1. 为下列装配图生成脚本拉取上游（训练工程已在 software/training/，无需此步骤）
 bash scripts/fetch_upstream.sh
 
 # 2. 重新生成装配图

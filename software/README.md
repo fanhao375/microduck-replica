@@ -1,6 +1,15 @@
 # software · 软件适配
 
-官方运行时 [`pollen-robotics/microduck`](https://github.com/pollen-robotics/microduck) 是照 Dynamixel XL330 写的，本仓库主线用飞特 HD-1910，软件要改。这个目录放**分析和方案**；官方运行时适配代码在 fork 出来的分支里。
+官方运行时 [`pollen-robotics/microduck`](https://github.com/pollen-robotics/microduck) 是照 Dynamixel XL330 写的，本仓库主线用飞特 HD-1910，软件要改。这个目录放**训练工程、分析和方案**；Rust 运行时适配代码仍在下方所列的 fork 分支里。
+
+## HD1910 仿真训练
+
+**[`training/`](training/)** 包含完整 Python 训练工程：模型、LuwuDynamics 的 1910 M6 参数、
+HD1910 任务配置、飞特控制器初始化适配、依赖锁文件和测试。克隆本仓库即可取得，
+不需要再下载 `microduck_rl` 分支。
+
+[快速开始](training/README.md) · [运行说明与初始化问题解释](training/docs/hd1910-baseline.md) ·
+[来源和许可证](training/UPSTREAM.md)。当前是仿真接入基线，尚未完成本机实测步态训练。
 
 ## IMU 裸板调试
 
@@ -8,7 +17,7 @@ STM32G031 + LSM6DSV16X 固件与硬件资料放在 [`hardware/imu_to_dxl/firmwar
 
 **范围：SWD 台架观察。** 附带固件仍是 Dynamixel Protocol 2.0 基线，尚未实现飞特地址 56、15 字节契约，不能据此宣布飞特 IMU 总线或整机验收通过。
 
-## 代码在哪
+## Rust 运行时代码在哪
 
 > ### 👉 [`fanhao375/microduck` · `feetech` 分支](https://github.com/fanhao375/microduck/tree/feetech)
 >
