@@ -86,6 +86,20 @@ pub struct Register {
     pub desc: &'static str,
 }
 
+impl Register {
+    /// 写入前的取值范围校验：越界返回 Err，在发送前拦截错误。
+    /// write_reg / sync_write / set --defer 等所有写入路径共用这一份校验。
+    pub fn check_value(&self, value: i64) -> crate::error::Result<()> {
+        if value < self.min || value > self.max {
+            return Err(crate::error::ServoError::InvalidParam(format!(
+                "值 {value} 超出 {}（{}）的合法范围 {} ~ {}",
+                self.key, self.cn, self.min, self.max
+            )));
+        }
+        Ok(())
+    }
+}
+
 /// 整张内存表（与官方 HLS_2 文档逐行对应）。
 ///
 /// 【Rust 知识点：常量数组】
@@ -260,5 +274,16 @@ mod tests {
         // 负载用 BIT10 做符号位：-500 → 0x0400 | 500
         let raw = encode_value(-500, Some(10));
         assert_eq!(decode_value(raw, Some(10)), -500);
+    }
+
+    #[test]
+    fn test_check_value() {
+        let reg = find_register("pos-p").unwrap(); // 范围 0~254
+        assert!(reg.check_value(254).is_ok());
+        assert!(reg.check_value(255).is_err());
+        assert!(reg.check_value(-1).is_err());
+        let offset = find_register("pos-offset").unwrap(); // 范围 -4095~4095
+        assert!(offset.check_value(-4095).is_ok());
+        assert!(offset.check_value(-4096).is_err());
     }
 }

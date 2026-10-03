@@ -121,7 +121,7 @@ impl Servo {
         // 校验应答的舵机 ID 是否就是我们请求的对象
         // （总线上可能有多个舵机，收到别人的应答说明时序出了问题）
         if status.id != id {
-            return Err(ServoError::Malformed("应答包 ID 与请求不符"));
+            return Err(ServoError::Malformed("应答包 ID 与请求不符".into()));
         }
         if status.error != 0 {
             return Err(ServoError::ServoStatus(
@@ -157,7 +157,7 @@ impl Servo {
             }
         }
         if !found {
-            return Err(ServoError::Malformed("找不到帧头 0xFF 0xFF"));
+            return Err(ServoError::Malformed("找不到帧头 0xFF 0xFF".into()));
         }
 
         // 第二步：读 ID 和 Length
@@ -243,12 +243,7 @@ impl Servo {
         if ids.is_empty() {
             return Err(ServoError::InvalidParam("同步写至少需要一个目标 ID".into()));
         }
-        if value < reg.min || value > reg.max {
-            return Err(ServoError::InvalidParam(format!(
-                "值 {value} 超出 {}（{}）的合法范围 {} ~ {}",
-                reg.key, reg.cn, reg.min, reg.max
-            )));
-        }
+        reg.check_value(value)?;
         let val = registers::encode_value(value, reg.sign_bit);
         let data: Vec<u8> = if reg.size == 1 {
             vec![val as u8]
@@ -275,6 +270,29 @@ impl Servo {
         Ok(())
     }
 
+    /// 重启舵机（0x08）：等效断电重上电，SRAM 从 EPROM 重新加载。
+    /// 用于验证 EPROM 写入是否真正落盘（robotd 换舵机流程也用它）。
+    pub fn reboot(&mut self, id: u8) -> Result<()> {
+        self.transact(id, Instruction::Reboot, &[], true)?;
+        Ok(())
+    }
+
+    /// 位置校准（0x0B）：把舵机的“当前位置”重新标定为 target 读数
+    /// （None = 中位 2048，与飞特 FD 调试软件的“设置零位”按钮一致）。
+    ///
+    /// 舵机收到后自动计算并修改 31 号位置偏移寄存器。
+    /// 【注意】HD-1910（HLS 系固件 ≥3.43）不支持老式“扭矩开关写 128”校准，
+    /// 必须用本指令。另外飞特对不支持的操作也可能回“成功”，
+    /// 所以调用方在校准后应回读位置和偏移寄存器确认（见 zero 命令）。
+    pub fn calibrate(&mut self, id: u8, target: Option<u16>) -> Result<()> {
+        let params = match target {
+            Some(t) => t.to_le_bytes().to_vec(), // 小端：低字节在前
+            None => Vec::new(),
+        };
+        self.transact(id, Instruction::Calibrate, &params, true)?;
+        Ok(())
+    }
+
     // =========================================================================
     // 寄存器级 API（结合内存表，自动处理多字节、符号位、范围校验）
     // =========================================================================
@@ -283,7 +301,7 @@ impl Servo {
     pub fn read_reg(&mut self, id: u8, reg: &Register) -> Result<i64> {
         let raw = self.read(id, reg.addr, reg.size)?;
         if raw.len() < reg.size as usize {
-            return Err(ServoError::Malformed("读到的数据长度不足"));
+            return Err(ServoError::Malformed("读到的数据长度不足".into()));
         }
         // 小端拼接：低地址是低字节（文档第 2 节：“低位字节在前面地址”）
         let val = if reg.size == 1 {
@@ -307,12 +325,7 @@ impl Servo {
                 reg.key, reg.cn
             )));
         }
-        if value < reg.min || value > reg.max {
-            return Err(ServoError::InvalidParam(format!(
-                "值 {value} 超出 {}（{}）的合法范围 {} ~ {}",
-                reg.key, reg.cn, reg.min, reg.max
-            )));
-        }
+        reg.check_value(value)?;
         let val = registers::encode_value(value, reg.sign_bit);
         let bytes = if reg.size == 1 {
             vec![val as u8]
@@ -352,7 +365,7 @@ impl Servo {
     pub fn read_feedback(&mut self, id: u8) -> Result<Feedback> {
         let raw = self.read(id, 56, 15)?;
         if raw.len() < 15 {
-            return Err(ServoError::Malformed("反馈数据长度不足"));
+            return Err(ServoError::Malformed("反馈数据长度不足".into()));
         }
         // 辅助闭包：取 2 字节小端值
         let u16le = |i: usize| u16::from_le_bytes([raw[i], raw[i + 1]]);
