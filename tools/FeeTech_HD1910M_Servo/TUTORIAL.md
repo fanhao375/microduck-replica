@@ -495,7 +495,10 @@ feetech-HD1910M-tester protect --min-voltage 40 --max-voltage 100     # 电压�
 feetech-HD1910M-tester protect --overcur-time 200                     # 过流持续 2 秒触发保护
 feetech-HD1910M-tester protect --unload 12 --led 12                   # 过热+过流时卸载并闪灯
 feetech-HD1910M-tester limits 0 4095 --save                           # 角度限制（多圈模式设 0 0）
-feetech-HD1910M-tester offset -100 --save                             # 位置偏移（校正机械零位）
+feetech-HD1910M-tester limits 90 270 --deg --save                     # 也可以按角度输入（0~360°）
+feetech-HD1910M-tester offset -100 --save                             # 位置偏移（手动校正零位）
+feetech-HD1910M-tester zero                                           # 零位校准：当前位置标定为中位 2048
+feetech-HD1910M-tester zero --to 1024                                 # 或标定为指定读数（自动回读确认）
 ```
 
 ---
@@ -529,6 +532,21 @@ feetech-HD1910M-tester monitor         # 另开一个终端观察：位置随手
 feetech-HD1910M-tester torque damp     # 阻尼模式：再用手转，有明显阻力
 feetech-HD1910M-tester torque on       # 恢复扭矩
 ```
+
+### 实验 3.5：零位校准（把当前机械位置设为中位）
+
+机械装配后零位往往对不上舵机中位 2048，这时用零位校准（等同飞特 FD 软件的“设置零位”）：
+
+```bash
+feetech-HD1910M-tester torque off      # 1. 松轴
+# 2. 用手把关节摆到你要的零位（中间不要等待，重力会把关节压偏）
+feetech-HD1910M-tester zero            # 3. 立即校准：当前位置被标定为 2048，掉电保存
+feetech-HD1910M-tester torque on       # 4. 恢复扭矩（校准后当前读数已是 2048，不会跳变）
+```
+
+观察点：命令会自动回读“当前位置 + 31 号位置偏移”确认校准生效。
+注意 HD-1910（HLS 系固件）**不支持**老式“扭矩开关写 128”的校准方式（写了也回成功但不生效），
+必须用 `zero` 命令对应的 0x0B 位置校准指令。多圈模式下不要校准。
 
 ### 实验 4：位置运动与反馈
 

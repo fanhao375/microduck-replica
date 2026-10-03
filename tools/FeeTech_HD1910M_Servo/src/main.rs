@@ -137,6 +137,9 @@ enum Cmd {
     /// 恢复出厂设置（EPROM 区域全部还原默认值，慎用！）
     FactoryReset,
 
+    /// 重启舵机（0x08，等效断电重上电：SRAM 从 EPROM 重新加载，可验证 EPROM 写入）
+    Reboot,
+
     /// 设置运行模式：0位置伺服 1电机恒速 2电机恒流 3PWM开环调速 4纯位置PD
     Mode { mode: u8 },
 
@@ -150,6 +153,40 @@ enum Cmd {
         /// 可选：同时设置加速度（8.7度/秒²每单位，0=最大）
         #[arg(long)]
         acc: Option<i64>,
+    },
+
+    /// 角度控制：输入角度直接转到对应位置，0°=中位(2048)，支持多舵机同步
+    Angle {
+        /// 目标角度（默认单位：度；加 --rad 则按弧度解析），范围 ±180°
+        angle: f64,
+        /// 输入单位是弧度（如 0.1745 ≈ 10°）
+        #[arg(long)]
+        rad: bool,
+        /// 目标 ID 列表，逗号分隔（默认右腿 11,12）
+        #[arg(long, default_value = "11,12")]
+        ids: String,
+        /// 可选：同时设置运行速度（0.732RPM/单位）
+        #[arg(long)]
+        speed: Option<i64>,
+    },
+
+    /// 右腿振荡测试：多个舵机绕中位小幅正弦摆动几次，结束后回到中位
+    Swing {
+        /// 目标 ID 列表，逗号分隔（默认右腿 11,12）
+        #[arg(long, default_value = "11,12")]
+        ids: String,
+        /// 摆动幅度（度，为防干涉上限 30°）
+        #[arg(long, default_value_t = 10.0)]
+        amplitude: f64,
+        /// 完整来回次数
+        #[arg(long, default_value_t = 3)]
+        cycles: u32,
+        /// 每个来回的时长（毫秒），越大越柔和
+        #[arg(long, default_value_t = 2000)]
+        period: u64,
+        /// 可选：限制运行速度（0.732RPM/单位）
+        #[arg(long)]
+        speed: Option<i64>,
     },
 
     /// 扭矩开关：on=打开输出 off=关闭输出(松轴) damp=阻尼模式
@@ -221,18 +258,31 @@ enum Cmd {
         save: bool,
     },
 
-    /// 设置角度限制（9/11号地址，多圈模式两者都应为 0）
+    /// 设置角度限制（9/11号地址，掉电保存需加 --save；多圈模式两者都应为 0）
     Limits {
-        /// 最小角度限制（0~4094）
-        min: i64,
-        /// 最大角度限制（1~4095）
-        max: i64,
-        /// 掉电保存
+        /// 最小角度限制（默认原始单位 0~4094；加 --deg 则按角度输入）
+        min: f64,
+        /// 最大角度限制（默认原始单位 1~4095；加 --deg 则按角度输入）
+        max: f64,
+        /// min/max 按角度（度）输入：0~360° 对应原始值 0~4095
+        #[arg(long)]
+        deg: bool,
+        /// 掉电保存（一次解锁流程写入两个寄存器）
         #[arg(long)]
         save: bool,
     },
 
-    /// 设置位置偏移（31号地址，-4095~4095，用于校正机械零位）
+    /// 零位校准（0x0B 指令）：把当前机械位置标定为中位 2048，等同飞特 FD 软件的“设置零位”
+    ///
+    /// 用法：torque off 松轴 → 用手把关节摆到零位 → 立即执行本命令 → torque on。
+    /// 舵机自动修改 31 号位置偏移寄存器并掉电保存，校准后自动回读确认。
+    Zero {
+        /// 校准目标读数（默认 2048 = 中位；范围 0~4095）。仅单圈位置模式有意义
+        #[arg(long)]
+        to: Option<i64>,
+    },
+
+    /// 设置位置偏移（31号地址，-4095~4095，手动校正零位；推荐用 zero 命令自动校准）
     Offset {
         value: i64,
         /// 掉电保存
@@ -328,6 +378,16 @@ fn main() -> Result<()> {
             println!("已发送恢复出厂设置指令，请重新上电舵机（ID 恢复为 1，波特率恢复为 1Mbps）");
             Ok(())
         }
+        Cmd::Reboot => {
+            // 有的固件重启前不应答，超时不算失败
+            match servo.reboot(cli.id) {
+                Ok(()) => println!("已发送重启指令并收到应答"),
+                Err(ServoError::Timeout) => println!("已发送重启指令（舵机未应答，可能已直接重启）"),
+                Err(e) => return Err(e),
+            }
+            println!("请等待约 1 秒让舵机完成重启再进行通信");
+            Ok(())
+        }
         Cmd::Mode { mode } => {
             let reg = find_register("mode").unwrap();
             servo.write_reg(cli.id, reg, mode as i64)?;
@@ -343,6 +403,12 @@ fn main() -> Result<()> {
             Ok(())
         }
         Cmd::Goto { target, speed, acc } => cmd_goto(&mut servo, cli.id, target, speed, acc),
+        Cmd::Angle { angle, rad, ids, speed } => {
+            cmd_angle(&mut servo, &ids, angle, rad, speed)
+        }
+        Cmd::Swing { ids, amplitude, cycles, period, speed } => {
+            cmd_swing(&mut servo, &ids, amplitude, cycles, period, speed)
+        }
         Cmd::Torque { state } => {
             let v = match state {
                 TorqueState::On => 1,
@@ -380,12 +446,8 @@ fn main() -> Result<()> {
         Cmd::Protect { max_temp, max_voltage, min_voltage, overcur_time, unload, led, save } => cmd_protect(
             &mut servo, cli.id, max_temp, max_voltage, min_voltage, overcur_time, unload, led, save,
         ),
-        Cmd::Limits { min, max, save } => {
-            cmd_write_eprom(&mut servo, cli.id, "min-angle", min, save)?;
-            cmd_write_eprom(&mut servo, cli.id, "max-angle", max, save)?;
-            println!("角度限制已设为 {min} ~ {max}{}", if save { "（已掉电保存）" } else { "" });
-            Ok(())
-        }
+        Cmd::Limits { min, max, deg, save } => cmd_limits(&mut servo, cli.id, min, max, deg, save),
+        Cmd::Zero { to } => cmd_zero(&mut servo, cli.id, to),
         Cmd::Offset { value, save } => {
             cmd_write_eprom(&mut servo, cli.id, "pos-offset", value, save)?;
             println!("位置偏移已设为 {value}{}", if save { "（已掉电保存）" } else { "" });
@@ -454,7 +516,7 @@ fn cmd_dump(servo: &mut Servo, id: u8) -> Result<()> {
     for (start, len) in blocks {
         let data = servo.read(id, start, len)?;
         if data.len() < len as usize {
-            return Err(ServoError::Malformed("块读取长度不足"));
+            return Err(ServoError::Malformed("块读取长度不足".into()));
         }
         // 拷贝进镜像缓冲区
         image[start as usize..(start + len) as usize].copy_from_slice(&data[..len as usize]);
@@ -513,7 +575,8 @@ fn cmd_set(servo: &mut Servo, id: u8, name: &str, value: i64, save: bool, defer:
         )));
     }
     if defer {
-        // 异步写：范围/编码校验逻辑复用 write_reg 之前先做检查，然后走 REG WRITE
+        // 异步写：写入前同样做范围校验（之前漏了，越界值会被直接编码发出）
+        reg.check_value(value)?;
         let val = registers::encode_value(value, reg.sign_bit);
         let bytes = if reg.size == 1 { vec![val as u8] } else { val.to_le_bytes().to_vec() };
         servo.reg_write(id, reg.addr, &bytes)?;
@@ -531,7 +594,7 @@ fn cmd_set(servo: &mut Servo, id: u8, name: &str, value: i64, save: bool, defer:
     Ok(())
 }
 
-/// 写 EPROM 寄存器的辅助函数（limits/offset 等命令共用）
+/// 写 EPROM 寄存器的辅助函数（offset 命令用）
 fn cmd_write_eprom(servo: &mut Servo, id: u8, key: &str, value: i64, save: bool) -> Result<()> {
     let reg = find_register(key).unwrap();
     if save {
@@ -539,6 +602,107 @@ fn cmd_write_eprom(servo: &mut Servo, id: u8, key: &str, value: i64, save: bool)
     } else {
         servo.write_reg(id, reg, value)
     }
+}
+
+/// 设置活动区间（角度限制）：9 号最小角度 + 11 号最大角度。
+///
+/// 与飞特 FD 软件的角度限制对应，支持按原始值或角度（--deg）输入。
+/// --save 时共用一次解锁/上锁流程（比逐个 save_reg 少一半 EPROM 往返），
+/// 写完回读确认 —— 飞特对不支持/未生效的写入也可能回“成功”，以回读为准。
+fn cmd_limits(servo: &mut Servo, id: u8, min: f64, max: f64, deg: bool, save: bool) -> Result<()> {
+    // 角度（度）→ 原始位置值；原始输入直接取整
+    let (min, max) = if deg {
+        ((min / DEG_PER_COUNT).round() as i64, (max / DEG_PER_COUNT).round() as i64)
+    } else {
+        (min as i64, max as i64)
+    };
+
+    // 范围校验。注意：多圈模式要求两者都为 0，而 max-angle 的名义下限是 1，
+    // 所以 0/0 组合要特判放行（官方文档原话：“多圈绝对位置控制时此值为0”）
+    let multico = min == 0 && max == 0;
+    if !(0..=4094).contains(&min) {
+        return Err(ServoError::InvalidParam(format!("最小角度限制 {min} 超出 0~4094")));
+    }
+    if !multico && !(1..=4095).contains(&max) {
+        return Err(ServoError::InvalidParam(format!("最大角度限制 {max} 超出 1~4095")));
+    }
+    if !multico && min >= max {
+        return Err(ServoError::InvalidParam(format!(
+            "最小角度限制 {min} 必须小于最大角度限制 {max}（多圈模式请设 0 0）"
+        )));
+    }
+
+    let min_reg = find_register("min-angle").unwrap();
+    let max_reg = find_register("max-angle").unwrap();
+    if save {
+        // 一次解锁流程写两个寄存器；任何一步失败都要保证重新上锁
+        let lock = find_register("lock").unwrap();
+        servo.write_reg(id, lock, 0)?;
+        let r1 = servo.write_reg(id, min_reg, min);
+        let r2 = servo.write_reg(id, max_reg, max);
+        let relock = servo.write_reg(id, lock, 1);
+        r1.and(r2).and(relock)?;
+    } else {
+        servo.write_reg(id, min_reg, min)?;
+        servo.write_reg(id, max_reg, max)?;
+    }
+
+    // 回读确认
+    let rb_min = servo.read_reg(id, min_reg)?;
+    let rb_max = servo.read_reg(id, max_reg)?;
+    println!(
+        "角度限制回读 = {rb_min} ~ {rb_max}（约 {:.1}° ~ {:.1}°）{}",
+        rb_min as f64 * DEG_PER_COUNT,
+        rb_max as f64 * DEG_PER_COUNT,
+        if save { "，已掉电保存" } else { "（仅本次有效，加 --save 可掉电保存）" }
+    );
+    Ok(())
+}
+
+/// 零位校准（0x0B 指令）：把当前机械位置标定为 target（默认中位 2048）。
+///
+/// 【流程要点】先解锁 EPROM 再校准，保证偏移写入掉电保存；
+/// 校准后回读“当前位置 + 位置偏移”双重确认（飞特的应答“成功”不可信，
+/// 实测 HD-1910 对不支持的写 128 校准也回成功）。
+fn cmd_zero(servo: &mut Servo, id: u8, to: Option<i64>) -> Result<()> {
+    let target = to.unwrap_or(CENTER_POS);
+    if !(0..=4095).contains(&target) {
+        return Err(ServoError::InvalidParam(format!(
+            "校准目标 {target} 超出 0~4095（仅单圈位置模式有意义）"
+        )));
+    }
+
+    // 校准前读一次，让用户看到“这个位置原来的读数是多少”
+    let before = servo.read_reg(id, find_register("pos").unwrap())?;
+    println!(
+        "校准前：当前位置 = {before}（相对中位 {:+.1}°），将标定为 {target}",
+        (before - CENTER_POS) as f64 * DEG_PER_COUNT
+    );
+
+    // 解锁 → 校准 → 上锁：保证 31 号位置偏移写入 EPROM 掉电保存
+    let lock = find_register("lock").unwrap();
+    servo.write_reg(id, lock, 0)?;
+    let result = servo.calibrate(id, Some(target as u16));
+    let relock = servo.write_reg(id, lock, 1);
+    result.and(relock)?;
+
+    // 舵机内部计算偏移并写入需要一点时间
+    thread::sleep(Duration::from_millis(100));
+
+    // 回读确认：位置应变为 target，偏移寄存器应被舵机自动修改
+    let after = servo.read_reg(id, find_register("pos").unwrap())?;
+    let offset = servo.read_reg(id, find_register("pos-offset").unwrap())?;
+    println!("校准后：当前位置 = {after}，位置偏移(31号) = {offset}（已掉电保存）");
+    if (after - target).abs() > 4 {
+        return Err(ServoError::Malformed(format!(
+            "校准疑似未生效：回读位置 {after} 与目标 {target} 偏差超过 4 个单位，\
+             请用 -v 重试并检查固件是否支持 0x0B 指令"
+        )));
+    }
+    println!("零位校准完成：现在的机械位置就是读数 {target}（相对中位 {:+.1}°）",
+        (target - CENTER_POS) as f64 * DEG_PER_COUNT);
+    println!("提示：若刚才 torque off 用手摆的位，请先 goto {target} 再 torque on，避免关节被拉回旧零位");
+    Ok(())
 }
 
 /// 设置舵机 ID —— 最重要的配置操作，必须掉电保存
@@ -600,6 +764,118 @@ fn cmd_goto(servo: &mut Servo, id: u8, target: i64, speed: Option<i64>, acc: Opt
     Ok(())
 }
 
+// =============================================================================
+// 右腿测试（角度 / 振荡）：以中位 2048 为 0°，按角度而不是原始位置值控制
+// =============================================================================
+
+/// 位置中位对应的原始值（0~4095 映射 0~360°）
+const CENTER_POS: i64 = 2048;
+/// 每个位置单位对应的角度（度）：360° / 4096
+const DEG_PER_COUNT: f64 = 360.0 / 4096.0;
+/// 振荡测试允许的最大幅度（度）。右腿结构件密集，幅度太大会干涉
+const MAX_SWING_AMPLITUDE_DEG: f64 = 30.0;
+
+/// 角度（度，相对中位）→ 舵机原始位置值
+fn deg_to_pos(deg: f64) -> i64 {
+    CENTER_POS + (deg / DEG_PER_COUNT).round() as i64
+}
+
+/// 解析逗号分隔的 ID 列表："11,12" → vec![11, 12]
+fn parse_ids(ids: &str) -> Result<Vec<u8>> {
+    let ids: std::result::Result<Vec<u8>, _> =
+        ids.split(',').map(|s| s.trim().parse::<u8>()).collect();
+    ids.map_err(|_| ServoError::InvalidParam("ID 列表格式应为 11,12".into()))
+}
+
+/// 角度控制：输入多少度（或弧度），舵机就转到相对中位多少度。
+/// 多个 ID 用同步写（SYNC WRITE）一条报文同时下发，两舵机动作一致。
+fn cmd_angle(servo: &mut Servo, ids: &str, angle: f64, rad: bool, speed: Option<i64>) -> Result<()> {
+    let ids = parse_ids(ids)?;
+    // 统一换算成“度”，弧度 × 180/π
+    let deg = if rad { angle.to_degrees() } else { angle };
+    // 单圈位置模式下目标值只有 ±180° 是确定有意义的，超出的直接拒绝
+    if !(-180.0..=180.0).contains(&deg) {
+        return Err(ServoError::InvalidParam(format!(
+            "角度 {deg}° 超出 ±180° 范围（相对中位）"
+        )));
+    }
+    let target = deg_to_pos(deg);
+    // 打开扭矩 + 可选限速 + 同步下发目标位置
+    servo.sync_write(&ids, find_register("torque-switch").unwrap(), 1)?;
+    if let Some(s) = speed {
+        servo.sync_write(&ids, find_register("speed").unwrap(), s)?;
+    }
+    servo.sync_write(&ids, find_register("goal-pos").unwrap(), target)?;
+    println!(
+        "目标角度 = {:.2}°（原始位置 {target}，中位 {CENTER_POS}），已同步下发到 {:?}",
+        deg, ids
+    );
+    Ok(())
+}
+
+/// 振荡测试：绕中位做平滑正弦摆动，幅度小、速度慢，避免腿部结构干涉。
+///
+/// 【实现思路】把每个来回切成若干小步（每步 50ms），
+/// 每步按 pos = 中位 + 幅度 × sin(相位) 计算目标位置并用同步写下发，
+/// 这样两个舵机走的是同一条平滑曲线，动作一致且柔和。
+fn cmd_swing(
+    servo: &mut Servo,
+    ids: &str,
+    amplitude: f64,
+    cycles: u32,
+    period: u64,
+    speed: Option<i64>,
+) -> Result<()> {
+    let ids = parse_ids(ids)?;
+    if amplitude <= 0.0 || amplitude > MAX_SWING_AMPLITUDE_DEG {
+        return Err(ServoError::InvalidParam(format!(
+            "幅度必须在 0 ~ {MAX_SWING_AMPLITUDE_DEG}° 之间（保护腿部结构，避免干涉）"
+        )));
+    }
+    if period < 400 {
+        return Err(ServoError::InvalidParam("周期太短（<400ms）动作会太急，请加大 --period".into()));
+    }
+
+    let goal_pos = find_register("goal-pos").unwrap();
+    // 打开扭矩，可选限速（小速度 = 更柔和）
+    servo.sync_write(&ids, find_register("torque-switch").unwrap(), 1)?;
+    if let Some(s) = speed {
+        servo.sync_write(&ids, find_register("speed").unwrap(), s)?;
+    }
+
+    // 先回中位，停稳再开始
+    println!("回到中位 {CENTER_POS}（0°）...");
+    servo.sync_write(&ids, goal_pos, CENTER_POS)?;
+    thread::sleep(Duration::from_millis(800));
+
+    println!(
+        "开始振荡：幅度 ±{amplitude}°，{cycles} 次，每周期 {period}ms（Ctrl+C 可随时中止）"
+    );
+    const STEP_MS: u64 = 50; // 每步 50ms，足以画出平滑的正弦
+    let steps_per_cycle = (period / STEP_MS).max(1);
+    for cycle in 1..=cycles {
+        for step in 0..steps_per_cycle {
+            // 相位从 0 走到 2π，正好一个完整来回
+            let phase = 2.0 * std::f64::consts::PI * step as f64 / steps_per_cycle as f64;
+            let target = deg_to_pos(amplitude * phase.sin());
+            servo.sync_write(&ids, goal_pos, target)?;
+            thread::sleep(Duration::from_millis(STEP_MS));
+        }
+        println!("  第 {cycle}/{cycles} 次完成");
+    }
+
+    // 收尾：回到中位并读回实际位置，方便核对
+    servo.sync_write(&ids, goal_pos, CENTER_POS)?;
+    thread::sleep(Duration::from_millis(500));
+    println!("振荡结束，已回中位。实际反馈：");
+    for &id in &ids {
+        let fb = servo.read_feedback(id)?;
+        let deg = (fb.pos - CENTER_POS) as f64 * DEG_PER_COUNT;
+        println!("  ID {id}: 位置 {}（相对中位 {deg:+.2}°），电压 {:.1}V，温度 {}°C", fb.pos, fb.voltage, fb.temp);
+    }
+    Ok(())
+}
+
 /// 设置 PID：按“环”选择写入哪些寄存器
 fn cmd_pid(
     servo: &mut Servo,
@@ -634,11 +910,7 @@ fn cmd_pid(
     for (value, key) in pairs {
         if let (Some(v), false) = (value, key.is_empty()) {
             let reg = find_register(key).unwrap();
-            if save || reg.area != Area::Eprom {
-                if save { servo.save_reg(id, reg, v)?; } else { servo.write_reg(id, reg, v)?; }
-            } else {
-                servo.write_reg(id, reg, v)?;
-            }
+            if save { servo.save_reg(id, reg, v)?; } else { servo.write_reg(id, reg, v)?; }
             println!("  {}（{}）= {v}", reg.key, reg.cn);
             wrote_any = true;
         }

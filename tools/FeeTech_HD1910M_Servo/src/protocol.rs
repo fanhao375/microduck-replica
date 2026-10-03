@@ -52,6 +52,18 @@ pub enum Instruction {
     Action = 0x05,
     /// 0x06 恢复出厂设置（EPROM 全部回到默认值）
     Reset = 0x06,
+    /// 0x08 重启舵机：等效断电重上电，SRAM 从 EPROM 重新加载。
+    /// 可用于不物理断电地验证 EPROM 写入是否真正落盘
+    Reboot = 0x08,
+    /// 0x0A 状态重置（重置多圈模式的圈数计数）
+    ResetTurns = 0x0A,
+    /// 0x0B 位置校准：无参数 = 把当前位置标定为中位 2048；
+    /// 带 2 字节参数（小端）= 标定为指定读数。
+    /// 舵机收到后自动计算并修改 31 号位置偏移寄存器，
+    /// 这就是飞特 FD 调试软件“设置零位”按钮对应的指令。
+    /// 注意：HD-1910（HLS 系固件 ≥3.43）不支持老式“扭矩开关写 128”校准，
+    /// 必须用本指令；且应答“成功”不代表生效，校准后务必回读确认。
+    Calibrate = 0x0B,
     /// 0x83 同步写：一条指令同时给多个舵机写同一个地址
     SyncWrite = 0x83,
 }
@@ -111,16 +123,16 @@ pub struct StatusPacket {
 pub fn parse_status(buf: &[u8]) -> Result<StatusPacket> {
     // 一帧最少 6 字节：帧头2 + ID + Length + Error + Checksum
     if buf.len() < 6 {
-        return Err(ServoError::Malformed("应答包太短，不足 6 字节"));
+        return Err(ServoError::Malformed("应答包太短，不足 6 字节".into()));
     }
     if buf[0] != HEADER[0] || buf[1] != HEADER[1] {
-        return Err(ServoError::Malformed("帧头不是 0xFF 0xFF"));
+        return Err(ServoError::Malformed("帧头不是 0xFF 0xFF".into()));
     }
     let id = buf[2];
     let length = buf[3] as usize;
     // Length 字段声称的总长度 = 帧头2 + ID + Length + Length的值
     if buf.len() != length + 4 {
-        return Err(ServoError::Malformed("包长度与 Length 字段不符"));
+        return Err(ServoError::Malformed("包长度与 Length 字段不符".into()));
     }
     // 重新计算校验和（范围同样是 ID 到校验字节之前）
     let expect = checksum(&buf[2..buf.len() - 1]);
@@ -196,5 +208,15 @@ mod tests {
     fn test_parse_bad_checksum() {
         let raw = [0xFF, 0xFF, 0x01, 0x04, 0x00, 0x00, 0x08, 0x00]; // 校验字节故意写错
         assert!(matches!(parse_status(&raw), Err(ServoError::Checksum)));
+    }
+
+    #[test]
+    fn test_build_calibrate_packet() {
+        // 位置校准 ID=1 标定为 2048(0x0800)：FF FF 01 04 0B 00 08 E7
+        let pkt = build_packet(1, Instruction::Calibrate, &2048u16.to_le_bytes());
+        assert_eq!(pkt, vec![0xFF, 0xFF, 0x01, 0x04, 0x0B, 0x00, 0x08, 0xE7]);
+        // 无参数 = 标定为中位 2048：FF FF 01 02 0B F1
+        let pkt = build_packet(1, Instruction::Calibrate, &[]);
+        assert_eq!(pkt, vec![0xFF, 0xFF, 0x01, 0x02, 0x0B, 0xF1]);
     }
 }
