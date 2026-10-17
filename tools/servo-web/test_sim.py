@@ -330,7 +330,8 @@ class SimImuTests(unittest.TestCase):
             self.assertTrue(server.open_bus("COM_TEST", 1_000_000)["ok"])
         self.assertIsNone(server.IMU_SERVICE)
         self.assertFalse(server.SIM_IMU_OWNED)
-        self.assertEqual(server.imu_config_frame(), {"type": "imu_config", "enabled": False, "sim_imu": None})
+        self.assertEqual(server.imu_config_frame(),
+                         {"type": "imu_config", "enabled": False, "protocol": None, "sim_imu": None})
 
     def test_imu_stream_dynamic_follows_plug_and_unplug(self):
         seen = []

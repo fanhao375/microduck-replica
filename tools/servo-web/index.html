@@ -111,6 +111,10 @@
     </section>
     <section id="imuPanel" hidden>
       <h2>躯干姿态 · IMU <span id="imuMode" class="badge"></span><span id="imuStatus" class="badge" aria-live="polite">等待数据</span></h2>
+      <div class="row">IMU 总线协议 <select id="imuProtocol" hidden onchange="changeImuProtocol(this.value)">
+        <option value="feetech">飞特协议（地址 56）</option>
+        <option value="dxl2">Dynamixel 2.0 兼容模式（地址 124）</option>
+      </select><span class="muted">仓库默认固件为飞特协议；仅在 IMU 板刷成 DXL2 固件时选兼容模式。舵机始终使用飞特协议。</span></div>
       <div id="imuAngles">横滚 —° · 俯仰 —° · 偏航 —°</div>
       <div class="row muted">采样 <b id="imuSamples">—</b> · 读取 <b id="imuHz">—</b> Hz · 参考电压 <b id="imuVoltage">—</b> V</div>
       <div class="row muted">加速度 g <span id="imuAccel">—</span> · 角速度 °/s <span id="imuGyro">—</span></div>
@@ -226,7 +230,7 @@
 
 <script>
 // 跟 server.py 的 VERSION 一起改。连上后比对，不一致说明浏览器拿的是旧页面
-const PAGE_VERSION = "0.15.4";
+const PAGE_VERSION = "0.15.5";
 const $ = id => document.getElementById(id);
 const v = id => Number($(id).value);
 let ws, names = {}, present = [], ids = [], lastDump = null, sendTimer = {}, lastSent = {};
@@ -245,6 +249,7 @@ function connect() {
     const m = JSON.parse(e.data);
     if (m.type === 'hello') {
       imuFeed.enabled=m.imu_enabled === true; imuFeed.connected=true; imuFeed.packet=null; announceImu();
+      setImuProtocol(m.imu_protocol);
       showSimImu(m.sim_imu);
       const sv = m.version || '旧版', same = sv === PAGE_VERSION;
       $('ver').textContent = same ? `v${PAGE_VERSION}` : `页面 v${PAGE_VERSION} · 服务 v${sv} 不一致`;
@@ -253,7 +258,7 @@ function connect() {
       if (!same) hint(`页面 v${PAGE_VERSION} 跟服务 v${sv} 不一致：重启 server.py 后按 Ctrl+F5`);
       dirs = {}; for (const [k, v] of Object.entries(m.dirs || {})) dirs[k] = v; names = m.names; ids = m.ids; present = m.present;  REGS = (m.regs || []).filter(r => r[3] === 'EEPROM' || r[3] === 'SRAM'); showPorts(m); fillLogCats(m.cats || []); build(); fillRegSelect(); (m.logs || []).forEach(pushLog); send({ op: 'poses' }); }
     else if (m.type === 'imu') { if (imuFeed.enabled) { imuFeed.packet=m; announceImu(); } }
-    else if (m.type === 'imu_config') { imuFeed.enabled = m.enabled === true; imuFeed.packet = null; announceImu(); showSimImu(m.sim_imu); }
+    else if (m.type === 'imu_config') { imuFeed.enabled = m.enabled === true; imuFeed.packet = null; announceImu(); showSimImu(m.sim_imu); setImuProtocol(m.protocol); }
     else if (m.type === 'ports') showPorts(m);
     else if (m.type === 'reconnect') {
       showPorts(m);
@@ -282,6 +287,15 @@ function showSimImu(mode) {
   sel.title = mode ? '' : '服务启动时用参数指定了 IMU，页面里不改';
 }
 function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
+function setImuProtocol(protocol) {
+  const sel = $('imuProtocol');
+  sel.hidden = !['dxl2', 'feetech'].includes(protocol);
+  if (!sel.hidden) { sel.value = protocol; sel.disabled = false; }
+}
+function changeImuProtocol(protocol) {
+  $('imuProtocol').disabled = true;
+  send({ op: 'imu_protocol', protocol });
+}
 // 串口：没连上时顶栏出现下拉 + 「连接」；连上了只显示口号。拔插 USB 后口号会变，点一下就能重连
 function showPorts(m) {
   if (m.fake === undefined) return;

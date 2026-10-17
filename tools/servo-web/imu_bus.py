@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""从舵机总线读 IMU 小板（ID 200）：跟主控每 tick 发的是同一条 sync_read。
+"""从舵机 TTL 总线读 IMU 小板（ID 200）。默认使用仓库配套的飞特协议 56/15；可选兼容 DXL2 的 124/12。
 
-地址 56、长度 15、ID 200 排第一，后面跟舵机（hardware/imu_to_dxl/总线协议.md §2/§3）。
-舵机状态照旧解，ID 200 的 15 字节块交给这里：判据照主控（fork 的 duck-control
+舵机与 IMU 可运行不同总线协议：舵机状态仍由 Feetech SCS 解码，IMU 块交给这里。
+飞特协议的 15 字节块判据照主控（fork 的 duck-control
 imu.rs / bus.rs）写，跟 tools/imu200/imu200.py 同一套：
 
 - 四元数三分量全 0 → 融合还没出数（主控沿用上一帧，不计入 ready）
@@ -10,9 +10,8 @@ imu.rs / bus.rs）写，跟 tools/imu200/imu200.py 同一套：
 - 前 12 字节连续 25 帧完全相同 → 主控报 orientation is frozen
 - 保留字节（byte 14）必须是 0；状态位 BIT1/BIT2 是板子自己报的故障
 
-板子不应答时，同一条 sync_read 里后面的舵机也会跟着丢（规格 §2），所以连续 5 帧
-没应答就把 200 移出列表、舵机单独读，每 2 秒单独 PING 一下 200，应答了再放回列表 ——
-调试台不会因为没接小板而瘫掉，重试也不会再连累舵机那一帧。
+板子不应答时连续 5 次暂缓读取，每 2 秒单独 PING 一下 200；舵机始终使用独立的 Feetech
+请求读取，因此 IMU 掉线不会连带丢舵机状态。
 """
 import math
 import struct
@@ -22,8 +21,12 @@ import time
 from imu_bridge import BridgeError, HOST_STALE_MS, decode_quaternion, empty_frame
 
 IMU_ID = 200
-BLOCK_ADDR = 56
-BLOCK_LEN = 15
+FEETECH_BLOCK_ADDR = 56
+FEETECH_BLOCK_LEN = 15
+DXL2_BLOCK_ADDR = 124
+DXL2_BLOCK_LEN = 12
+BLOCK_ADDR = FEETECH_BLOCK_ADDR
+BLOCK_LEN = FEETECH_BLOCK_LEN
 WINDOW = 12               # 主控只看前 12 字节，StaleImuTracker 也只比这 12 字节
 FROZEN_FRAMES = 25        # bus.rs: 连续 25 帧相同就报 frozen
 GYRO_DPS_PER_LSB = 0.0175
@@ -38,13 +41,15 @@ SLOW_READER_HZ = 30      # 固件 BIT3 = 两次读之间刷新 > 4 次（120 Hz 
 
 
 def decode_block(block):
-    """15 字节 → 陀螺（原始/°/s）、四元数位型、计数、状态、保留。不做任何坐标变换。"""
-    if len(block) != BLOCK_LEN:
-        raise BridgeError(f"块长度 {len(block)}，应为 {BLOCK_LEN}")
+    """解飞特 15 字节块或 DXL2 12 字节块，不做坐标变换。"""
+    if len(block) not in (FEETECH_BLOCK_LEN, DXL2_BLOCK_LEN):
+        raise BridgeError(f"块长度 {len(block)}，应为 12（DXL2）或 15（飞特）")
     gyro = struct.unpack_from("<3h", block, 0)
     packed = struct.unpack_from("<3H", block, 6)
+    is_dxl2 = len(block) == DXL2_BLOCK_LEN
     return {"gyro_raw": list(gyro), "gyro_dps": [v * GYRO_DPS_PER_LSB for v in gyro],
-            "quat_fp16": list(packed), "counter": block[12], "bits": block[13], "reserved": block[14],
+            "quat_fp16": list(packed), "counter": None if is_dxl2 else block[12],
+            "bits": 0 if is_dxl2 else block[13], "reserved": 0 if is_dxl2 else block[14],
             "window": bytes(block[:WINDOW])}
 
 
@@ -54,9 +59,10 @@ class BusImuService:
     demo = False
     backend = "bus"
 
-    def __init__(self, poll_hz=None):
+    def __init__(self, poll_hz=None, protocol="feetech"):
         # 调试台自己按 poll_hz 读（默认 10 Hz）。低于 30 Hz 时 BIT3 每帧都会亮，那是我们读得慢，不是主控，不提示
         self.poll_hz = poll_hz
+        self.protocol = protocol
         self.lock = threading.Lock()
         self.frame = self._frame("disconnected", "等待第一条带 ID 200 的 sync_read。")
         self.last_publish = time.monotonic()
@@ -76,6 +82,24 @@ class BusImuService:
 
     def stop(self):
         pass
+
+    def set_protocol(self, protocol):
+        if protocol not in ("dxl2", "feetech"):
+            raise ValueError(f"不支持的 IMU 总线协议：{protocol}")
+        with self.lock:
+            if protocol == self.protocol:
+                return False
+            self.protocol = protocol
+            self.misses = 0
+            self.excluded_since = None
+            self.last_probe = None
+            self.last_window = None
+            self.same_run = 0
+            self.previous_ok = None
+            self.smooth_hz = 0.0
+            self.frame = self._frame("disconnected", f"已切换到 {protocol}，等待 ID 200 应答。")
+            self.last_publish = time.monotonic()
+        return True
 
     def _frame(self, status, message, **extra):
         frame = empty_frame("live", status, message)
@@ -131,7 +155,7 @@ class BusImuService:
                 self.excluded_since = now
             frame = self._frame("disconnected",
                                 f"ID 200 连续 {self.misses} 帧没应答：检查小板供电、总线接线（J1/J2 的 DATA）"
-                                f"和固件是不是飞特协议版；舵机已改为单独读，每 {RETRY_S:.0f} 秒单独 PING 一次 200。",
+                                f"和 IMU 协议（当前 {self.protocol}）；舵机已改为单独读，每 {RETRY_S:.0f} 秒单独 PING 一次 200。",
                                 misses=self.total_misses)
             self._publish(frame)
             return frame
@@ -139,7 +163,8 @@ class BusImuService:
         self.excluded_since = None
         d = decode_block(block)
         extra = {"connected": True, "sample_count": d["counter"], "raw_gyro": d["gyro_raw"],
-                 "quat_fp16": d["quat_fp16"], "status_bits": d["bits"], "misses": self.total_misses,
+                 "quat_fp16": d["quat_fp16"], "status_bits": d["bits"] if self.protocol != "dxl2" else None,
+                 "misses": self.total_misses,
                  "errors": {"imu": d["bits"] & (BIT_IMU_COMM_FAIL | BIT_SELF_TEST_FAIL), "spi": None,
                             "fifo": None, "quaternion": None, "recovery": None}}
         self.same_run = self.same_run + 1 if d["window"] == self.last_window else 0

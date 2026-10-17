@@ -34,7 +34,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # 调试台版本。改了前端或后端就加一：index.html 里的 PAGE_VERSION 要跟这里一样，
 # 页面连上后会比对，不一样就提示"页面是旧的，Ctrl+F5"。改动记在 README 的「版本」一节。
-VERSION = "0.15.4"
+VERSION = "0.15.5"
 DEFAULT_IDS = "20-24,30-34,10-14"
 JOINT_NAMES = {
     20: "left_hip_yaw", 21: "left_hip_roll", 22: "left_hip_pitch", 23: "left_knee", 24: "left_ankle",
@@ -1058,7 +1058,8 @@ SIM_IMU_LOCK = threading.Lock()   # 两个标签页同时点、或者跟「连�
 
 
 def imu_config_frame():
-    return {"type": "imu_config", "enabled": IMU_SERVICE is not None, "sim_imu": sim_imu_mode()}
+    return {"type": "imu_config", "enabled": IMU_SERVICE is not None,
+            "protocol": getattr(IMU_SERVICE, "protocol", None), "sim_imu": sim_imu_mode()}
 
 
 def drop_sim_imu(why):
@@ -1117,6 +1118,22 @@ def handle(cmd):
     if op == "sim_imu":
         set_sim_imu(cmd.get("mode"))
         return None                  # ws_endpoint 把新配置广播给所有页面
+    if op == "imu_protocol":
+        service = IMU_SERVICE
+        if service is None or imu_backend(service) != "bus":
+            raise ValueError("只有启用 --imu-bus 时才能切换总线协议")
+        protocol = cmd.get("protocol")
+        if protocol not in ("dxl2", "feetech"):
+            raise ValueError("协议必须是 dxl2 或 feetech")
+        # Wait for an in-flight serial transaction to finish before changing
+        # protocol, so the old request cannot be mistaken for the new one.
+        if isinstance(BUS, FakeBus):
+            changed = service.set_protocol(protocol)
+        else:
+            with BUS._io:
+                changed = service.set_protocol(protocol)
+        log(f"IMU 总线协议{'切换为 ' + protocol if changed else '保持 ' + protocol}", "IMU")
+        return imu_config_frame()
     if op == "goal":
         BUS.write_u16(int(cmd["id"]), 42, int(cmd["pos"]) & 0xFFFF)
     elif op == "goals":  # {id: pos}
@@ -1287,23 +1304,45 @@ async def broadcast(text):
 
 
 def read_states_with_imu(ids, service):
-    """--imu-bus：跟主控每 tick 同一条 sync_read（地址 56、长度 15、200 排第一），
-    舵机状态照旧解，200 的块喂给 service。200 连续不应答时 service 会让它暂时出列。"""
+    """Read the IMU with its configured protocol and HD-1910 servos with Feetech."""
     import imu_bus
     servo_ids = [i for i in ids if i != imu_bus.IMU_ID]
     with_imu = service.include_in_sync()
     if not with_imu and service.due_probe():
-        if service.probe_result(BUS.ping(imu_bus.IMU_ID) is not None):
-            log("ID 200 的 PING 有应答了，重新跟舵机一起读", "IMU")
+        if isinstance(BUS, FakeBus):
+            answered = BUS.ping(imu_bus.IMU_ID) is not None
+        elif service.protocol == "dxl2":
+            import dxl2
+            answered = dxl2.Dxl2Bus(BUS).ping(imu_bus.IMU_ID) is not None
+        else:
+            answered = BUS.ping(imu_bus.IMU_ID) is not None
+        if service.probe_result(answered):
+            log(f"ID 200 的 {service.protocol} PING 有应答了，恢复 IMU 轮询", "IMU")
+        with_imu = service.include_in_sync()
     if isinstance(BUS, FakeBus):
-        # 虚拟小板：启动参数 --fake --imu-bus 时 fallback_fake 挂上，或者页面「模拟」里接上
         st = BUS.states(servo_ids)
         got = BUS.sync_read([imu_bus.IMU_ID], imu_bus.BLOCK_ADDR, imu_bus.BLOCK_LEN) if with_imu else {}
-    else:
-        ids_sent = ([imu_bus.IMU_ID] if with_imu else []) + servo_ids
-        # 台架上只接小板、200 又暂时出列时列表是空的：不发空 ID 表的 sync_read
-        got = BUS.sync_read(ids_sent, imu_bus.BLOCK_ADDR, imu_bus.BLOCK_LEN) if ids_sent else {}
-        st = {sid: (feetech.FeetechBus._decode_state(*got[sid]) if got.get(sid) else None) for sid in servo_ids}
+        v = got.get(imu_bus.IMU_ID)
+        if with_imu or v is not None:
+            block = v[1] if v else None
+            if block is not None and service.protocol == "dxl2":
+                block = block[:imu_bus.DXL2_BLOCK_LEN]
+            service.feed(block)
+        return st
+
+    if service.protocol == "dxl2":
+        import dxl2
+        imu_client = dxl2.Dxl2Bus(BUS)
+        if with_imu:
+            result = imu_client.sync_read([imu_bus.IMU_ID], imu_bus.DXL2_BLOCK_ADDR,
+                                          imu_bus.DXL2_BLOCK_LEN).get(imu_bus.IMU_ID)
+            service.feed(result[1] if result and result[0] == 0 and
+                         len(result[1]) == imu_bus.DXL2_BLOCK_LEN else None)
+        return BUS.states(servo_ids) if servo_ids else {}
+
+    ids_sent = ([imu_bus.IMU_ID] if with_imu else []) + servo_ids
+    got = BUS.sync_read(ids_sent, imu_bus.BLOCK_ADDR, imu_bus.BLOCK_LEN) if ids_sent else {}
+    st = {sid: (feetech.FeetechBus._decode_state(*got[sid]) if got.get(sid) else None) for sid in servo_ids}
     v = got.get(imu_bus.IMU_ID)
     if with_imu or v is not None:
         service.feed(v[1] if v else None)
@@ -1370,6 +1409,7 @@ async def ws_endpoint(ws):
                                    "port": PORT, "ports": list_ports(),
                                    "regs": [[a, *feetech.REGISTERS[a]] for a in sorted(feetech.REGISTERS)],
                                    "version": VERSION, "imu_enabled": IMU_SERVICE is not None,
+                                   "imu_protocol": getattr(IMU_SERVICE, "protocol", None),
                                    "sim_imu": sim_imu_mode()}))
     CLIENTS.add(ws)  # hello 必须先于后台广播，前端先收到功能配置
     try:
@@ -1386,7 +1426,7 @@ async def ws_endpoint(ws):
                 reply = {"type": "error", "msg": msg}
             if reply:
                 await ws.send_text(json.dumps(reply))
-            if op in ("sim_imu", "reconnect"):
+            if op in ("sim_imu", "reconnect", "imu_protocol"):
                 # 成功失败都广播：失败时页面下拉框要退回实际状态；别的标签页也跟着变
                 await broadcast(json.dumps(imu_config_frame()))
     except WebSocketDisconnect:
@@ -1544,8 +1584,10 @@ def parse_args(argv=None):
     imu.add_argument("--imu-swd", nargs="?", const="auto", metavar="UID",
                      help="用 pyOCD 经 ST-Link / DAPLink 读 IMU（只插一个调试器时可省略 UID；J-Link 用 --imu-jlink）")
     imu.add_argument("--imu-bus", action="store_true",
-                     help="从舵机总线读 IMU 小板 ID 200（跟主控同一条 sync_read，200 排第一；固件要是飞特协议版）")
+                     help="从舵机总线读 IMU 小板 ID 200（默认飞特协议；HD-1910 舵机仍走飞特协议）")
     imu.add_argument("--imu-demo", action="store_true", help="合成 IMU 数据，不连接 J-Link")
+    ap.add_argument("--imu-bus-protocol", choices=("dxl2", "feetech"), default="feetech",
+                    help="IMU 总线协议；默认 feetech；dxl2 用于兼容卖家提供的 DXL2 固件")
     return ap.parse_args(argv)
 
 
@@ -1558,7 +1600,8 @@ def create_imu_service(args):
     if imu_bus:
         from imu_bus import BusImuService
         # 跟 stream() 实际读总线的频率一致：模拟 30 Hz、真串口 50 Hz（启动时没给串口也按模拟算）
-        return BusImuService(poll_hz=FAKE_STREAM_HZ if args.fake or not args.port else STREAM_HZ)
+        return BusImuService(poll_hz=FAKE_STREAM_HZ if args.fake or not args.port else STREAM_HZ,
+                             protocol=getattr(args, "imu_bus_protocol", "feetech"))
     from imu_bridge import BridgeService, DEFAULT_FIRMWARE, validate_probe_settings
     if args.imu_demo:
         return BridgeService(demo=True)

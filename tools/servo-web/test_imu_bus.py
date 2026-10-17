@@ -10,9 +10,11 @@ import math
 import os
 import struct
 import sys
+import threading
 import unittest
 from unittest.mock import patch
 
+import dxl2
 import feetech
 import imu_bus
 import server
@@ -162,6 +164,7 @@ class ServerPollingTests(unittest.TestCase):
         self.assertEqual(calls[-1][0][0], 200)
         self.assertTrue(self.svc.get_status()["live"])
 
+
     def test_polls_without_servos_and_never_sends_an_empty_list(self):
         # 审查第 1 条：台架上只接小板，扫描没扫到舵机（PRESENT 空）也要轮询
         with patch.object(server, "CLIENTS", {object()}), patch.object(server, "PRESENT", []), \
@@ -190,10 +193,74 @@ class ServerPollingTests(unittest.TestCase):
         self.assertTrue(self.svc.get_status()["live"])
 
 
+class Dxl2CompatibilityTests(unittest.TestCase):
+    def test_dxl2_block_is_accepted_without_legacy_counters(self):
+        data = block()[:imu_bus.DXL2_BLOCK_LEN]
+        decoded = imu_bus.decode_block(data)
+        self.assertIsNone(decoded["counter"])
+        frame = imu_bus.BusImuService(protocol="dxl2").feed(data, now=1.0)
+        self.assertTrue(frame["live"], frame["message"])
+        self.assertIsNone(frame["sample_count"])
+        self.assertIsNone(frame["status_bits"])
+
+    def test_web_command_switches_bus_protocol(self):
+        service = imu_bus.BusImuService()
+        with patch.object(server, "BUS", server.FakeBus(JOINTS)), \
+                patch.object(server, "IMU_SERVICE", service), patch.object(server, "log"):
+            result = server.handle({"op": "imu_protocol", "protocol": "dxl2"})
+        self.assertEqual(service.protocol, "dxl2")
+        self.assertEqual(result["protocol"], "dxl2")
+
+    def test_dxl2_status_response_flows_through_bus_reader(self):
+        payload = block()[:imu_bus.DXL2_BLOCK_LEN]
+
+        class Serial:
+            def __init__(self):
+                self.rx = bytearray()
+                self.tx = []
+
+            @property
+            def in_waiting(self):
+                return len(self.rx)
+
+            def reset_input_buffer(self):
+                self.rx.clear()
+
+            def write(self, data):
+                self.tx.append(bytes(data))
+                self.rx.extend(dxl2.packet(imu_bus.IMU_ID, 0x55, b"\x00" + payload))
+                return len(data)
+
+            def read(self, count):
+                data = bytes(self.rx[:count])
+                del self.rx[:count]
+                return data
+
+        class Bus:
+            def __init__(self):
+                self.ser = Serial()
+                self._io = threading.Lock()
+                self.stats = {}
+
+            def states(self, ids):
+                return {sid: {"pos": 2048} for sid in ids}
+
+        bus, service = Bus(), imu_bus.BusImuService(protocol="dxl2")
+        with patch.object(server, "BUS", bus):
+            states = server.read_states_with_imu(JOINTS, service)
+        self.assertTrue(service.get_status()["live"], service.get_status()["message"])
+        self.assertIsNone(service.get_status()["sample_count"])
+        self.assertEqual(states[20]["pos"], 2048)
+        self.assertEqual(bus.ser.tx[0][7], dxl2.SYNC_READ)
+        self.assertEqual(struct.unpack_from("<HH", bus.ser.tx[0], 8),
+                         (imu_bus.DXL2_BLOCK_ADDR, imu_bus.DXL2_BLOCK_LEN))
+
+
 class CliTests(unittest.TestCase):
     def test_flag_and_service(self):
         args = server.parse_args(["--fake", "--imu-bus"])
         self.assertTrue(args.imu_bus)
+        self.assertEqual(args.imu_bus_protocol, "feetech")
         svc = server.create_imu_service(args)
         self.assertEqual((svc.backend, svc.demo), ("bus", False))
         self.assertEqual(server.imu_backend(svc), "bus")

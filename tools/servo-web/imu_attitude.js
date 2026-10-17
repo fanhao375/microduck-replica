@@ -30,9 +30,14 @@ export function eulerDegrees(q) {
 }
 export function validPacket(p) {
   const q = p?.quaternion_xyzw;
-  return p?.live === true && p.status === 'live' && p.ready === 1 && p.configured === 1 &&
-    (p.mode === 'demo' || (p.mode === 'live' && p.connected === true)) &&
-    Array.isArray(q) && q.length === 4 && q.every(finite) && Math.hypot(...q) > .5 && Math.hypot(...q) < 1.5 &&
+  if (p?.live !== true || p.status !== 'live' ||
+      !(p.mode === 'demo' || (p.mode === 'live' && p.connected === true)) ||
+      !Array.isArray(q) || q.length !== 4 || !q.every(finite) ||
+      Math.hypot(...q) <= .5 || Math.hypot(...q) >= 1.5) return false;
+  // DXL2 bus packets expose gyro + quaternion only; the legacy ready/configured
+  // flags and sample counter are absent. A fresh live packet is the validity signal.
+  if (p.backend === 'bus' && p.sample_count == null) return true;
+  return p.ready === 1 && p.configured === 1 &&
     Number.isSafeInteger(p.sample_count) && p.sample_count >= 0;
 }
 export class ImuAttitude {
@@ -51,8 +56,12 @@ export class ImuAttitude {
     this.valid = validPacket(packet);
     this.status = this.valid ? 'live' : (packet.status === 'live' ? 'error' : packet.status || 'disconnected');
     if (!this.valid) return;
-    if (this.sampleCount !== null && packet.sample_count < this.sampleCount) this.reference = null;
-    if (this.sampleCount !== packet.sample_count) this.lastProgress = now;
+    if (packet.sample_count == null) {
+      this.lastProgress = now; // DXL2 IMU has no sample counter; each packet is a fresh bus read.
+    } else {
+      if (this.sampleCount !== null && packet.sample_count < this.sampleCount) this.reference = null;
+      if (this.sampleCount !== packet.sample_count) this.lastProgress = now;
+    }
     this.sampleCount = packet.sample_count;
     if (this.expire(now)) return;
     this.lastValid = normalized(packet.quaternion_xyzw);
