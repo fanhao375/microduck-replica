@@ -1156,21 +1156,28 @@
         {
           "tag": "daemon-dev-codex/gamepad-connection",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-codex/gamepad-connection",
-          "published_at": "2026-10-27T16:34:38Z",
-          "version": "daemon 0.17.9-dev.1464.bcd2f70 (codex/gamepad-connection)",
-          "head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+          "published_at": "2026-10-31T21:54:56Z",
+          "version": "daemon 0.17.9-dev.1534.789ec47 (codex/gamepad-connection)",
+          "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
           "prerelease": true,
           "related_pull_request": 477,
-          "change": "Standalone Bluetooth status/exactMAC reconnect only, API46 with currentmain; diagnostics/session notes/temporary CI removed. Home is normal reconnect; connect does not guarantee remote wake, and HID match does not prove padd opened the input.",
+          "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46.",
           "priority": "review_candidate_only_not_stable",
-          "replica_integration": "not_integrated; standalone development branch, no tracker download/deployment",
-          "previous_head_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+          "replica_integration": "not_integrated; doc-only review, no downloaded binaries/tests/installation",
+          "previous_head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
           "head_history": [
             "f169c3dc1fa042229461f7f3691245cfcdf48d19",
             "61f4ad5882243c1bcb34500a59974308684ada28",
-            "f72c19bf7e58cf0d16e00591728b39f887d4c8e0"
+            "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+            "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1"
           ],
-          "development_api_version": 46
+          "development_api_version": 46,
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1...789ec47e00d743f0909ba5e71e09b9731f38cac2",
+          "comparison_to_recorded_main": {
+            "status": "diverged",
+            "ahead_by": 8,
+            "behind_by": 50
+          }
         },
         {
           "tag": "daemon-dev-codex/robot-diagnostics-design",
@@ -1980,6 +1987,34 @@
           "prerelease": true,
           "scope_note": "Existing October 20 development release newly indexed as provenance context for PR467; not a newly published release, not integrated into replica.",
           "priority": "reference_only"
+        },
+        {
+          "tag": "daemon-dev-ep5-footsteps",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-ep5-footsteps",
+          "published_at": "2026-11-01T00:27:49Z",
+          "version": "daemon 0.18.0-dev.1536.a9f70e5 (ep5-footsteps)",
+          "head_sha": "a9f70e5581feabd617cac50186023080d5ff8ed5",
+          "prerelease": true,
+          "api_version": 47,
+          "source_version": "0.18.0",
+          "fixed_new_commit_url": "https://github.com/pollen-robotics/microduck/commit/a9f70e5581feabd617cac50186023080d5ff8ed5",
+          "comparison_to_recorded_main": {
+            "status": "diverged",
+            "ahead_by": 26,
+            "behind_by": 24
+          },
+          "merge_sources": [
+            "1b64c8bf412b5b4aed126f513bc03d990ff52276",
+            "abc903c7dc0610718756f2e05d421a340fee18c9"
+          ],
+          "change": "Episode5 combines existing footsteps and ground-grasp/phase/audio/precision experiments; new policy.footstep_stick defaults true while footstep_control remains false. Turning stick flag off leaves normal gait for manual drive, goals/patterns still use footsteps; existing stick cancellation remains. Inherits explicitly personal Select short-release reboot/3s shutdown.",
+          "new_commit_file_count": 4,
+          "new_test_functions": 1,
+          "new_test_requires_ORT": true,
+          "tracker_ran_tests": false,
+          "model_metadata_changed": false,
+          "priority": "medium_prototype_reference; high_contract_and_motion_safety_review_before_adoption",
+          "replica_integration": "not_integrated; not same API47 as official0.18.3telemetry or local0182extensions; no binary/model download/install or hardware test"
         }
       ],
       "pending_pull_requests": [
@@ -3262,9 +3297,9 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-27T13:25:40Z",
-          "updated_at": "2026-10-28T13:53:25Z",
+          "updated_at": "2026-10-31T21:47:09Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/477",
-          "head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+          "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
           "base_sha": "5def2f3e66501f0f365d4fb1183020b8ee875443",
           "base_branch": "main",
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/5def2f3e66501f0f365d4fb1183020b8ee875443...bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
@@ -3336,7 +3371,103 @@
             "change": "Description clarifies targetedRust1.94.1components/independentreview already recorded; no new source or robotdeployment, positiveexplicitreconnect stillunverified.",
             "counts_as_new_implementation_or_hardware_acceptance": false
           },
-          "previous_priority_text": "high_contract_review_before_any_adoption; requiresHD1910_native_register_mapping and combined daemon release evaluation"
+          "previous_priority_text": "high_contract_review_before_any_adoption; requiresHD1910_native_register_mapping and combined daemon release evaluation",
+          "history": [
+            {
+              "number": 477,
+              "title": "Improve gamepad connection status and add targeted reconnect",
+              "state": "open",
+              "draft": false,
+              "merged_at": null,
+              "created_at": "2026-10-27T13:25:40Z",
+              "updated_at": "2026-10-28T13:53:25Z",
+              "url": "https://github.com/pollen-robotics/microduck/pull/477",
+              "head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+              "base_sha": "5def2f3e66501f0f365d4fb1183020b8ee875443",
+              "base_branch": "main",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/5def2f3e66501f0f365d4fb1183020b8ee875443...bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+              "replica_integration": "not_integrated; non-draft open PR is not merged or stable; no tracker code/model/image/device update",
+              "this_review": "Read-only currentbase fixed diff and relevant incremental changes; no downloaded implementation or tests executed.",
+              "scope_note": "Standalone Bluetooth status/exactMAC reconnect only, API46 with currentmain; diagnostics/session notes/temporary CI removed. Home is normal reconnect; connect does not guarantee remote wake, and HID match does not prove padd opened the input.",
+              "changed_file_count": 16,
+              "priority": "higher_gamepad_contract_review; matching_daemons_and_service_state; no_native_diagnostic_register_mapping_in_this_Bluetooth_only_scope",
+              "comparison_with_PR474": "PR474 automatic classic re-page/background sweep remains separate pending work; PR477 provides exact targeted manual reconnect/status, not that background loop.",
+              "submitter_validation": {
+                "targeted_components_formatting_and_independent_review_reported": true,
+                "earlier_combined_build_Home_HID_idempotent_connect_reported": true,
+                "outgoing_attempt": "HCI Page Timeout; awake/connectable state not established",
+                "positive_explicit_reconnect_from_proven_awake_disconnected_controller": false,
+                "latest_standalone_deployed_during_review": false,
+                "verified_by_tracker": false
+              },
+              "previous_head_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+              "previous_bluetooth_only_validation": {
+                "workspace_tests_passed_excluding_nfcd_macos": 1744,
+                "nfc_library_tests_passed": 22,
+                "final_connection_source_subset_passed": 478,
+                "monitor_tests_passed": 60,
+                "host_and_linux_target_checks_reported": true,
+                "submitter_robot": "Temporary Linux binaries on graphite-boom; exact HID identity/Home reconnection/USB transitions reported",
+                "negative_reconnect_seconds": 10.404,
+                "negative_reconnect_error": "BlueZ Host is down; bond keys retained",
+                "positive_explicit_reconnect_from_disconnected_available_controller_tested": false,
+                "production_services_replaced": false,
+                "verified_by_tracker": false
+              },
+              "previous_scope": "Original pure gamepad draft used API45 and17files; current combined draft API46 and34files. Prior checkpoint preserved below.",
+              "head_history": [
+                {
+                  "sha": "f169c3dc1fa042229461f7f3691245cfcdf48d19",
+                  "scope": "Original pure gamepad draft, API45"
+                },
+                {
+                  "sha": "61f4ad5882243c1bcb34500a59974308684ada28",
+                  "scope": "Combined diagnostics plus targeted gamepad, API46"
+                }
+              ],
+              "latest_increment": {
+                "from_sha": "61f4ad5882243c1bcb34500a59974308684ada28",
+                "to_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+                "file": ".github/workflows/ci.yml",
+                "change": "Run CI for direct pushes on codex/gamepad-connection as well as main. No additional gamepad/motor runtime behavior in this increment."
+              },
+              "revision_history": [
+                {
+                  "head_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+                  "draft": true,
+                  "title": "Combine targeted gamepad connection and motor diagnostics",
+                  "scope_note": "Expanded draft combines targeted gamepad status/connect fromf169 with raw maintenance through38d0331, both sets of routes retained. IPC now46 because independent development branches used45; this is not a stable46 release. Hardware-native diagnostics remain XL330-specific, notHD1910 port.",
+                  "submitter_validation": {
+                    "targeted_rust1941_checks_reported": true,
+                    "strict_clippy_reported": true,
+                    "macos_existing_concurrent_start_test_stalled_and_was_stopped": true,
+                    "combined_build_installed_on_robot": false,
+                    "positive_explicit_reconnect_from_disconnected_available_controller_tested": false,
+                    "verified_by_tracker": false
+                  }
+                }
+              ],
+              "development_api_version": 46,
+              "latest_body_review": {
+                "checked_at_utc": "2026-10-28T14:33:35.344006+00:00",
+                "source_head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+                "change": "Description clarifies targetedRust1.94.1components/independentreview already recorded; no new source or robotdeployment, positiveexplicitreconnect stillunverified.",
+                "counts_as_new_implementation_or_hardware_acceptance": false
+              },
+              "previous_priority_text": "high_contract_review_before_any_adoption; requiresHD1910_native_register_mapping and combined daemon release evaluation"
+            }
+          ],
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1...789ec47e00d743f0909ba5e71e09b9731f38cac2",
+          "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46.",
+          "incremental_review": {
+            "commits": 3,
+            "files": 4,
+            "new_test_functions": 3,
+            "source_tests_run_by_tracker": false,
+            "author_reported": "configd66 tests at489637c; robotctl234pass/5ignored and aarch64clippy at hardware-guard followup. Author beta still ran1533; marker removal was manual, new guard not yet installed; fresh Sync test pending.",
+            "local_0182_adoption": "not_integrated_at785254e; staticBlueZ lacks new helpers, robotctl marker check has no hardware conjunct",
+            "priority": "high_boundary_review_for_Radxa_pairing; no release/device readiness claim"
+          }
         },
         {
           "number": 476,
@@ -5687,6 +5818,33 @@
           "updated_at": "2026-10-04T13:07:44Z",
           "head_sha": "8b12c34378860d962a7fbe3b43c2f2c354c9167d",
           "draft": false
+        },
+        {
+          "number": 89,
+          "url": "https://github.com/pollen-robotics/microduck_rl/pull/89",
+          "title": "Battery redesign",
+          "state": "closed",
+          "draft": false,
+          "created_at": "2026-10-31T23:58:49Z",
+          "updated_at": "2026-10-31T23:59:33Z",
+          "closed_at": "2026-10-31T23:59:33Z",
+          "merged_at": null,
+          "head_sha": "8bce48af5e93680516c96ad52682fafdd992d72a",
+          "base_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "head_repository": "qilinxiaoxiang/microduck_rl",
+          "author": "linok-bc",
+          "changed_files": 913,
+          "change": "Closed unmerged community CMU snapshot:913files, not a curated/default-branch battery release. Current redesign moves battery cradle to cap, retains with two screwed bars, and uses roof lead openings; also adds CMU task registrations and optional camera/serial dependencies.",
+          "limitations": [
+            "No numbered print release",
+            "Battery dimensions/lead exits still listing-based",
+            "Top plug not retained; head/neck clearance unchecked",
+            "Hip sweep/native slicing/release pipeline not rerun",
+            "Redesign not yet propagated into battery mass variant or resimulated",
+            "Existing V1.20 checks do not prove redesign acceptance"
+          ],
+          "priority": "low_closed_unmerged_reference; requires separate HD1910power/mass/geometry validation",
+          "replica_integration": "not_integrated; no CAD/model download, execution, rewiring or training"
         }
       ],
       "previous_head": {
@@ -5788,7 +5946,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-10-31T15:28:49.939818+00:00",
+  "checked_at_utc": "2026-11-01T04:15:03.680970+00:00",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -5797,353 +5955,682 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "previous_tracked_prs_merged": false,
-    "new_pull_requests": {},
-    "updated_pull_requests": {},
-    "new_development_releases": [],
+    "new_pull_requests": {
+      "pollen-robotics/microduck_rl": [
+        89
+      ]
+    },
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        477
+      ]
+    },
+    "new_development_releases": [
+      "daemon-dev-ep5-footsteps"
+    ],
     "moved_development_tags": [
-      "daemon-dev-ground-grasp-x"
+      "daemon-dev-codex/gamepad-connection"
     ],
     "retired_development_tags": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
-    "local_migration_record_changed": false,
+    "model_metadata_changed": false,
+    "local_migration_record_changed": true,
     "local_public_software_release_recorded": false,
     "runtime_code_changed_by_heartbeat": false,
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Ground-grasp-x actual source advances to abc903: two commits/four files, old 0.17.8/API44 ahead 11/behind 64 versus stable 0.18.3. Relax/reboot one-shot stop fix and explicitly personal Select behavior must be assessed separately. One mapper test definition only, no tests run. Local 0182 and published 0.15 software records preserved; all other heads/releases/dev tags/PRs/model metadata/blog unchanged."
+    "notes": "Read fixed upstream patches/currentrefs and committed local0a61/068/785records only. Pairing fix+hardwareguard remains PR477/dev0.17.9API46; newep5 is0.18.0API47 divergent prototype with inherited personalSelect, not officialtelemetrycontract. RL89 closedunmergedCMU snapshot. Fourdefaultheads/formal18.3assets/HFmetadata/blog unchanged. Local software-stage completion does not enable catalogue/image/device migration."
   },
   "replica_migration": {
-    "recorded_on": "2026-10-31",
-    "scope": "User-authorized isolated0.18.2 source integration and available Windows source-checkpoint verification; final Linux acceptance pending. This heartbeat only reads committed records.",
-    "runtime_branch": "codex/runtime-0182-20261030",
-    "runtime_source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
-    "project_branch": "codex/replica-0182-20261030",
-    "project_checkpoint_sha": "3b8646835bd56a3c4af01aff6191f88c5ff5425b",
-    "project_code_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
-    "broader_project_regression_source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
+    "recorded_on": "2026-11-01",
+    "read_committed_at_utc": "2026-11-01T04:15:03.680970+00:00",
+    "recorded_by_user_authorized_work_at_utc": "2026-11-01T04:04:42.241281+00:00",
+    "scope": "User-authorized isolated0182 published-feature source integration and software acceptance; this heartbeat only reads committed records and publishes this tracking summary. No migration branch push/merge.",
+    "project_branch": "codex/replica-0182-features-20261101",
+    "project_checkpoint_sha": "0a61aa568a712bbb33e81c9b348049dd118fa37f",
+    "project_code_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+    "broader_project_regression_source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+    "runtime_branch": "codex/runtime-0182-features-20261101",
+    "runtime_source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+    "runtime_production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+    "runtime_new_changes_are_test_only": true,
     "upstream_tag": "daemon-v0.18.2",
     "upstream_sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
     "migration_api": 47,
     "model_api": 2,
-    "contract_note": "Local0.18.2/API47 diagnostic+motion contract is not official0.18.3main/API47telemetry contract. No telemetry.* orPostHog endpoint in fixed local runtime.",
+    "contract_note": "Local0182/API47 is not official0183telemetry/API47 or ep5footsteps/API47. No API-number-only equivalence.",
     "local_only": true,
-    "runtime_branch_pushed": false,
     "project_branch_pushed": false,
+    "runtime_branch_pushed": false,
+    "software_acceptance_complete": true,
     "software_checks": [
       {
-        "scope": "Windows Studio focused including 20 new official0182 regressions, pad/motion/model/IMU/sensor/onboarding/gains",
-        "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
-        "run": 442,
-        "passed": 441,
-        "skipped": 1,
-        "exit": 0,
-        "log": "final-windows-studio-focused.log"
-      },
-      {
-        "scope": "Windows updater packages/bootstrap/control subset",
-        "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
-        "run": 28,
-        "passed": 21,
-        "skipped": 7,
-        "exit": 0,
-        "log": "final-windows-updater-focused.log"
-      },
-      {
-        "scope": "Windows voice suite",
-        "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
-        "run": 165,
-        "passed": 147,
-        "skipped": 18,
-        "exit": 0,
-        "log": "final-windows-voice.log"
-      },
-      {
-        "scope": "Windows Rust1.94.1 protocol and parameter crates",
-        "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
-        "passed": 253,
-        "filtered": 4,
-        "exit": 0,
-        "log": "native-final-core-3a696c7-1941.log"
-      },
-      {
-        "scope": "Windows Rust1.94.1 duck-control",
-        "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
-        "passed": 221,
-        "ignored": 15,
-        "exit": 0,
-        "log": "native-final-control-3a696c7-1941.log"
-      },
-      {
-        "scope": "Rust1.94.1 rustfmt --all",
-        "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
-        "exit": 0,
-        "log": "native-final-fmt-3a696c7-1941.log"
-      },
-      {
-        "scope": "Private Linux genuine Gst1.22.12 C linking and appsrc/appsink loopback",
-        "source_sha": null,
-        "status": "build_environment_only_not_native_final_acceptance",
-        "exit": 0,
-        "log": "build-env-private-loopback.log"
-      },
-      {
-        "scope": "Windows current-line message follow-up: disabled catalogue +0182 regressions",
-        "source_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
-        "run": 25,
-        "passed": 25,
+        "scope": "Fresh Windows Edge SSH/pad/camera fixtures",
+        "source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 3,
+        "passed": 3,
         "skipped": 0,
         "exit": 0,
-        "log": "final-display-studio.log"
+        "log": "browser-acceptance.log"
       },
       {
-        "scope": "Windows package refusal-message follow-up",
-        "source_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
-        "run": 5,
-        "passed": 5,
+        "scope": "Fresh Edge updater lifecycle / legacy helper fixture",
+        "source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "production_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 1,
+        "passed": 1,
+        "skipped": 0,
+        "report_checks_true": 24,
+        "exit": 0,
+        "log": "app-browser-updates-fixture-green.log"
+      },
+      {
+        "scope": "Linux Studio canonical source",
+        "source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "production_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 1558,
+        "passed": 1484,
+        "skipped": 74,
+        "exit": 0,
+        "archive_kind": "canonical Git blob bytes",
+        "log": "linux-canonical-full-studio.log"
+      },
+      {
+        "scope": "Linux voice canonical source",
+        "source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "production_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 181,
+        "passed": 181,
         "skipped": 0,
         "exit": 0,
-        "log": "final-display-updater.log"
+        "archive_kind": "canonical Git blob bytes",
+        "log": "linux-canonical-full-duck-echo.log"
+      },
+      {
+        "scope": "Linux updater canonical source",
+        "source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "production_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 59,
+        "passed": 59,
+        "skipped": 0,
+        "exit": 0,
+        "archive_kind": "canonical Git blob bytes",
+        "log": "linux-canonical-full-updater.log"
+      },
+      {
+        "scope": "Linux image assembly software canonical source",
+        "source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "production_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "run": 128,
+        "passed": 128,
+        "skipped": 0,
+        "exit": 0,
+        "archive_kind": "canonical Git blob bytes",
+        "log": "linux-canonical-full-image.log"
+      },
+      {
+        "scope": "Canonical ARM binaries / identity / neutral mapping",
+        "source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "exit": 0,
+        "log": "linux-arm-lf-verification.json",
+        "passed": true
+      },
+      {
+        "scope": "Canonical ARM real ORT deployment policy in coherent CPU fixture",
+        "source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "exit": 0,
+        "log": "linux-arm-ort-cpu-fixture-lf-verification.json",
+        "passed": 3,
+        "neutral_inference_steps": 12
+      },
+      {
+        "scope": "Canonical ARM signed pure-software transactions",
+        "source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": "2779771447f73b0bbdf22fbeed6e45bb235bc0fe",
+        "exit": 0,
+        "log": "linux-arm-updater-0182-lf-evidence/result.json",
+        "checks_passed": 26,
+        "native_payload_included": false
+      },
+      {
+        "scope": "Canonical native full workspace, serial",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "passed": 2390,
+        "ignored": 71,
+        "failed": 0,
+        "test_threads": 1,
+        "exit": 0,
+        "log": "linux-native-workspace-final.log",
+        "details": "native-workspace-evidence-final.json"
+      },
+      {
+        "scope": "Canonical explicit ORT deployment_policy",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": null,
+        "passed": 3,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-deployment_policy.log"
+      },
+      {
+        "scope": "Canonical explicit ORT recurrent_policy",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": null,
+        "passed": 8,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-recurrent_policy.log"
+      },
+      {
+        "scope": "Canonical explicit ORT pickup_detector",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": null,
+        "passed": 2,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-pickup_detector.log"
+      },
+      {
+        "scope": "Canonical explicit ORT duck_control",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": null,
+        "passed": 2,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-duck_control.log"
+      },
+      {
+        "scope": "Canonical explicit ORT robotd",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "passed": 44,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-robotd.log"
+      },
+      {
+        "scope": "Canonical explicit ORT feetech_runtime",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+        "application_source_sha": null,
+        "passed": 2,
+        "failed": 0,
+        "default_ignored_executed": true,
+        "exit": 0,
+        "log": "linux-canonical-ort-feetech_runtime.log"
+      },
+      {
+        "scope": "Canonical actual full-workspace padd / Studio / voice contract",
+        "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+        "application_source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+        "checks_true": 10,
+        "exit": 0,
+        "log": "linux-canonical-cross-language.log",
+        "executables": "linux-canonical-consumer-executables.json"
       }
     ],
-    "reviews": {
-      "application_spec": "PASS",
-      "application_quality": "PASS",
-      "native_spec": "PASS",
-      "native_quality": "PASS",
-      "integrated_checkpoint": "PASS",
-      "reviewed_application_record_head": "f6e6214162cd3c76913eac9bae90d2f280b01aa6",
-      "application_code": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
-      "runtime_code": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
-      "scope": "Reviewable source checkpoint and recorded focused software scopes; not final Linux/ARM/device acceptance."
+    "native_workspace": {
+      "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+      "archive_sha256": "1c8090e79292432262f3144b7560f49555c2718dc1a9e6fe6164c1a3dc639603",
+      "test_threads": 1,
+      "passed": 2390,
+      "failed": 0,
+      "ignored": 71,
+      "harness_sections": 78,
+      "ignored_ort": 61,
+      "ignored_manual": 10,
+      "manual_probes": [
+        "test udp_pad::voice::tests::plays_here ... ignored, plays sound on this machine's default output",
+        "test time_site_pose ... ignored, perf probe, run manually with --release --nocapture",
+        "test time_tof_reprojection ... ignored, perf probe, run manually with --release --nocapture",
+        "test tests::dump_reference_trajectory ... ignored, reference dump for the Python replica, run by hand",
+        "test tests::update_cost_per_anchor_set ... ignored, timing, run by hand",
+        "test imu_view::tests::show_me_the_pad ... ignored, visual probe, run manually with --ignored --nocapture",
+        "test monitor::tests::show_the_pad_block ... ignored, prints the pad block for a human to read",
+        "test path_map::tests::show_me_a_loop_walk ... ignored, visual probe, run manually with --nocapture",
+        "test path_map::tests::time_the_map ... ignored, perf probe, run manually with --release --nocapture",
+        "test tests::dump_the_listing ... ignored"
+      ],
+      "evidence": "native-workspace-evidence-final.json",
+      "nested_and_repeat_results_excluded": true,
+      "format": {
+        "command": "cargo fmt --all -- --check",
+        "platform": "Windows",
+        "toolchain": "1.94.1",
+        "rustfmt": "1.8.0-stable (e408947bfd 2026-03-25)",
+        "passed": true,
+        "git_diff_check_passed": true
+      },
+      "ignored_explicitly_reverified_ORT": 61,
+      "manual_ignored_unexecuted": 10
     },
-    "full_Linux_software_acceptance": false,
-    "new_ARM_delivery_built": false,
-    "test_image_built": false,
-    "hardware_acceptance_passed": false,
-    "published_image_updated": false,
-    "published_image_tag": "microduck-replica-image-20261027",
-    "image_runtime_family": "0.15.1/API40",
+    "canonical_source_archives": {
+      "application_source_sha": "0680ebbe283873b75f394063ae8c75bc3b626d76",
+      "application_sha256": "a57418af7c82cdd66ea96e14dfd83da3782ee2234ea95871d0f72d71e47fbb20",
+      "native_source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+      "native_sha256": "1c8090e79292432262f3144b7560f49555c2718dc1a9e6fe6164c1a3dc639603",
+      "note": "Git blob-byte canonical LF archives; earlier Windows autocrlf exports remain historical."
+    },
+    "arm_build": {
+      "count": 3,
+      "production_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+      "artifacts": {
+        "padd-feetech": {
+          "sha256": "72d547271864fb0da9fc7748f4bd2a9432753f5991e448ab50ebf98f0bbdf9fc",
+          "size": 4679440,
+          "machine": "AArch64",
+          "maximum_direct_glibc": "2.30",
+          "needed": [
+            "libudev.so.1",
+            "libm.so.6",
+            "libpthread.so.0",
+            "libc.so.6",
+            "libdl.so.2"
+          ],
+          "historical_crlf_sha256": "72d547271864fb0da9fc7748f4bd2a9432753f5991e448ab50ebf98f0bbdf9fc",
+          "changed_from_historical_crlf": false
+        },
+        "robotd": {
+          "sha256": "82f4ba539ed2173a23e55c4f0aa1761f6a68aa16f7be8b0b19f2c4a2daf7bb3a",
+          "size": 8150432,
+          "machine": "AArch64",
+          "maximum_direct_glibc": "2.30",
+          "needed": [
+            "libm.so.6",
+            "libpthread.so.0",
+            "libc.so.6",
+            "libdl.so.2"
+          ],
+          "historical_crlf_sha256": "215668ecbc578c895c9a5650cf86f9facef1771139b8b92a9d56042d0317a9e3",
+          "changed_from_historical_crlf": true
+        },
+        "updaterd": {
+          "sha256": "06f08510cbc471c41bdd9c9d8899dee18d32a44f1cc4602297792ec4030aabaf",
+          "size": 12158672,
+          "machine": "AArch64",
+          "maximum_direct_glibc": "2.30",
+          "needed": [
+            "libm.so.6",
+            "libpthread.so.0",
+            "libc.so.6",
+            "libdl.so.2",
+            "ld-linux-aarch64.so.1"
+          ],
+          "historical_crlf_sha256": "06f08510cbc471c41bdd9c9d8899dee18d32a44f1cc4602297792ec4030aabaf",
+          "changed_from_historical_crlf": false
+        }
+      },
+      "policy_tests_passed": 3,
+      "software_transaction_checks_passed": 26,
+      "scope": "QEMU/privatefixtures; explicit coherent ARM CPU view, service capture, throwaway signing. No stock27cardABI/full-native-bundle/hardware/installation acceptance.",
+      "accepted_for_install": false
+    },
     "native_catalogue_enabled": false,
+    "companion_catalogue_enabled": false,
     "legacy_live_migration_supported": false,
-    "robot_connected": false,
     "pending": [
-      "final Linux Rust1.94.1 workspace including Unix CLI validator integration tests",
-      "final actual native API47 Python/Node consumers and configuration roundtrip",
-      "final ORT ignored-test whitelist",
-      "final Linux full Studio/updater/image/voice regression",
-      "ARM delivery build",
-      "test image",
-      "physical acceptance",
-      "publish/deploy",
-      "new API47/0.18.2 ARM update harness; existing integration_qemu.py remains historical API45/0.17.9"
+      "Native companion catalogue acceptance and signed release assembly",
+      "27-card stock runtime/dependency/configuration/service migration vectors",
+      "Independent test-card image and physical HD-1910/camera/ToF/pad/audio acceptance",
+      "Production publication and activation remain unperformed"
     ],
+    "published_image_updated": false,
+    "online_services_updated": false,
+    "robot_connected": false,
+    "verification_document_in_local_branch": "docs/superpowers/verification/2026-11-01-official0182-features.md",
+    "baseline_document_in_local_branch": "docs/migrations/0182-features-baseline.json",
     "environment_record": {
-      "source": "committed local0182baseline",
-      "known_failure": "WSL backing-volume exhaustion/read-only/SIGBUS during normal integration testing; user already informed. No recovery or repeat testing in heartbeat.",
-      "online_availability": "unverified; earlier18081no-listener observation in committed record. Source unchanged; do not assert service healthy."
+      "scope": "Prior user-authorized work only; no tests/repair/restarts repeated by this heartbeat.",
+      "QEMU_ORT": "Same ELF/ORT runtime crashes with host x86 CPU information and passes with coherent private ARM CPU metadata; not hardware inference proof.",
+      "historical_WSL_failure": "Old Oct30 record retained in previous checkpoint; no claim about present preview availability."
     },
-    "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-30-official0182.md",
-    "record_publication": "Only this tracking summary is published; independent migration branches/files are not merged or pushed.",
+    "record_publication": "Tracking summary only; local candidate files/branches remain unmerged/unpushed.",
     "previous_local_migration_checkpoint": {
-      "recorded_on": "2026-10-30",
-      "scope": "Human-authorized local0.17.9 October28-30 feature port and software verification; not a new ARM delivery, image, deployment or hardware acceptance. Tracker reads committed records only.",
-      "runtime_branch": "codex/runtime-0179-oct30",
-      "runtime_source_sha": "238999cfef753fb9114793489169372acd99c81d",
-      "runtime_new_changes_are_test_only": false,
-      "project_branch": "codex/replica-0179-oct30",
-      "project_checkpoint_sha": "6dfc452c1e4bc09cdb7cdb1dd437cb01aa43075d",
-      "project_code_sha": "856c171298af3822e811d25c59783e6db4c067c0",
-      "upstream_tag": "daemon-v0.17.9",
-      "upstream_sha": "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
-      "migration_api": 46,
-      "contract_note": "LocalAPI46 diagnostics are not official0.18.2API46contract equivalence; official0.18.2 not integrated.",
-      "published_feature_source_sha": "2ba8e5d8ae4a4cf42f6284baf5dd817b412c4a5d",
-      "published_native_feature_source_sha": "931ce978f2efb27c157b7a583ee402793131a0d2",
-      "published_software_tag": "microduck-software-v2026.10.30",
-      "published_software_runtime_family": "0.15.1/API42",
-      "published_image_tag": "microduck-replica-image-20261027",
-      "image_runtime_family": "0.15.1/API40",
+      "recorded_on": "2026-10-31",
+      "scope": "User-authorized isolated0.18.2 source integration and available Windows source-checkpoint verification; final Linux acceptance pending. This heartbeat only reads committed records.",
+      "runtime_branch": "codex/runtime-0182-20261030",
+      "runtime_source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
+      "project_branch": "codex/replica-0182-20261030",
+      "project_checkpoint_sha": "3b8646835bd56a3c4af01aff6191f88c5ff5425b",
+      "project_code_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
+      "broader_project_regression_source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
+      "upstream_tag": "daemon-v0.18.2",
+      "upstream_sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
+      "migration_api": 47,
+      "model_api": 2,
+      "contract_note": "Local0.18.2/API47 diagnostic+motion contract is not official0.18.3main/API47telemetry contract. No telemetry.* orPostHog endpoint in fixed local runtime.",
       "local_only": true,
       "runtime_branch_pushed": false,
       "project_branch_pushed": false,
-      "software_matrix": {
-        "project_source_sha": "856c171298af3822e811d25c59783e6db4c067c0",
-        "runtime_source_sha": "238999cfef753fb9114793489169372acd99c81d",
-        "scope": "Relevant software regression only, exact frozen checkpoints in verification document; no new ARM delivery/image/device claims.",
-        "full_project_regression_source_sha": "0a4f8910caeb4e5a07bf9b416ea581856f007190",
-        "project_full": {
-          "studio_run": 1417,
-          "studio_skipped": 72,
-          "voice_run": 165,
-          "updater_run": 40,
-          "image_run": 128,
-          "exit_codes": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        "application_followup": {
-          "source_sha": "856c171298af3822e811d25c59783e6db4c067c0",
-          "run": 285,
+      "software_checks": [
+        {
+          "scope": "Windows Studio focused including 20 new official0182 regressions, pad/motion/model/IMU/sensor/onboarding/gains",
+          "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
+          "run": 442,
+          "passed": 441,
           "skipped": 1,
-          "exit_code": 0
+          "exit": 0,
+          "log": "final-windows-studio-focused.log"
         },
-        "native_initial": {
-          "source_sha": "a39803ebab088b7bbb9c7ac8295849bb762a9d64",
-          "passed": 878,
-          "ignored": 61,
-          "ORT_passed": 59,
-          "consumer_tests_passed": 2
+        {
+          "scope": "Windows updater packages/bootstrap/control subset",
+          "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
+          "run": 28,
+          "passed": 21,
+          "skipped": 7,
+          "exit": 0,
+          "log": "final-windows-updater-focused.log"
         },
-        "native_mount_followup": {
-          "source_sha": "7ef8c3ddb04924ffb19d34e475f415693f8b18ae",
-          "control_passed": 93,
-          "daemon_passed": 34,
-          "daemon_ignored": 18
+        {
+          "scope": "Windows voice suite",
+          "source_sha": "0eca8fcc5abb585a228fa5d2c9fd51634f3715fe",
+          "run": 165,
+          "passed": 147,
+          "skipped": 18,
+          "exit": 0,
+          "log": "final-windows-voice.log"
         },
-        "native_coherence_followup": {
-          "source_sha": "238999cfef753fb9114793489169372acd99c81d",
-          "RPC_report_passed": 10,
-          "bus_status_passed": 3,
-          "startup_passed": 16,
-          "consumer_tests_passed": 2,
-          "consumer_application_source": "856c171298af3822e811d25c59783e6db4c067c0"
+        {
+          "scope": "Windows Rust1.94.1 protocol and parameter crates",
+          "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
+          "passed": 253,
+          "filtered": 4,
+          "exit": 0,
+          "log": "native-final-core-3a696c7-1941.log"
         },
-        "full_native_workspace_passed": false,
-        "full_native_workspace_limitation": "Offline uncached async-stream0.3.6 before remaining workspace compilation.",
-        "hardware_acceptance_passed": false,
-        "test_image_built": false,
-        "new_ARM_delivery_built": false,
-        "independent_spec_quality_and_final_review": "passed; exact reviewer checkpoints retained in local review-results.json"
+        {
+          "scope": "Windows Rust1.94.1 duck-control",
+          "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
+          "passed": 221,
+          "ignored": 15,
+          "exit": 0,
+          "log": "native-final-control-3a696c7-1941.log"
+        },
+        {
+          "scope": "Rust1.94.1 rustfmt --all",
+          "source_sha": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
+          "exit": 0,
+          "log": "native-final-fmt-3a696c7-1941.log"
+        },
+        {
+          "scope": "Private Linux genuine Gst1.22.12 C linking and appsrc/appsink loopback",
+          "source_sha": null,
+          "status": "build_environment_only_not_native_final_acceptance",
+          "exit": 0,
+          "log": "build-env-private-loopback.log"
+        },
+        {
+          "scope": "Windows current-line message follow-up: disabled catalogue +0182 regressions",
+          "source_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
+          "run": 25,
+          "passed": 25,
+          "skipped": 0,
+          "exit": 0,
+          "log": "final-display-studio.log"
+        },
+        {
+          "scope": "Windows package refusal-message follow-up",
+          "source_sha": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
+          "run": 5,
+          "passed": 5,
+          "skipped": 0,
+          "exit": 0,
+          "log": "final-display-updater.log"
+        }
+      ],
+      "reviews": {
+        "application_spec": "PASS",
+        "application_quality": "PASS",
+        "native_spec": "PASS",
+        "native_quality": "PASS",
+        "integrated_checkpoint": "PASS",
+        "reviewed_application_record_head": "f6e6214162cd3c76913eac9bae90d2f280b01aa6",
+        "application_code": "bbf19382bc3ea7a6981837c8bd84242f954f0b92",
+        "runtime_code": "3a696c711b78d63e4e8dcb65420e192bbe588c2e",
+        "scope": "Reviewable source checkpoint and recorded focused software scopes; not final Linux/ARM/device acceptance."
       },
+      "full_Linux_software_acceptance": false,
       "new_ARM_delivery_built": false,
+      "test_image_built": false,
+      "hardware_acceptance_passed": false,
+      "published_image_updated": false,
+      "published_image_tag": "microduck-replica-image-20261027",
+      "image_runtime_family": "0.15.1/API40",
       "native_catalogue_enabled": false,
       "legacy_live_migration_supported": false,
-      "pending": [
-        "NewARMdeliverybuild",
-        "SeparateTestImage/P3",
-        "Hardware/media/acoustic/newcardacceptance/P4",
-        "Stablepublication/P5"
-      ],
-      "published_image_updated": false,
-      "online_services_updated": false,
       "robot_connected": false,
-      "evidence_local_root": "F:\\chengshenzhilu\\Robot\\Microduck\\artifacts\\image30-to0179-20261030",
-      "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-30-image30-to0179.md",
-      "old_migration_worktrees_advanced": false,
+      "pending": [
+        "final Linux Rust1.94.1 workspace including Unix CLI validator integration tests",
+        "final actual native API47 Python/Node consumers and configuration roundtrip",
+        "final ORT ignored-test whitelist",
+        "final Linux full Studio/updater/image/voice regression",
+        "ARM delivery build",
+        "test image",
+        "physical acceptance",
+        "publish/deploy",
+        "new API47/0.18.2 ARM update harness; existing integration_qemu.py remains historical API45/0.17.9"
+      ],
+      "environment_record": {
+        "source": "committed local0182baseline",
+        "known_failure": "WSL backing-volume exhaustion/read-only/SIGBUS during normal integration testing; user already informed. No recovery or repeat testing in heartbeat.",
+        "online_availability": "unverified; earlier18081no-listener observation in committed record. Source unchanged; do not assert service healthy."
+      },
+      "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-30-official0182.md",
+      "record_publication": "Only this tracking summary is published; independent migration branches/files are not merged or pushed.",
       "previous_local_migration_checkpoint": {
-        "recorded_on": "2026-10-27",
-        "scope": "Human-authorized local isolated feature migration and software evidence; not a migrated image or physical acceptance.",
-        "runtime_branch": "codex/runtime-0178-feetech",
-        "runtime_source_sha": "c615e500a58bbc932f8d70b9345ba8cadc1ecc5f",
-        "runtime_production_source_sha": "59d95132b6bc13b4acf5772afad7cf974a5d5aba",
-        "runtime_new_changes_are_test_only": true,
-        "project_branch": "codex/replica-0178-migration",
-        "project_checkpoint_sha": "5a70e6ae9e83a0cf0101efb06d89aac2f7e4a799",
-        "project_code_sha": "de33f94e2057b8d7d6338e448dba6ce86480c202",
+        "recorded_on": "2026-10-30",
+        "scope": "Human-authorized local0.17.9 October28-30 feature port and software verification; not a new ARM delivery, image, deployment or hardware acceptance. Tracker reads committed records only.",
+        "runtime_branch": "codex/runtime-0179-oct30",
+        "runtime_source_sha": "238999cfef753fb9114793489169372acd99c81d",
+        "runtime_new_changes_are_test_only": false,
+        "project_branch": "codex/replica-0179-oct30",
+        "project_checkpoint_sha": "6dfc452c1e4bc09cdb7cdb1dd437cb01aa43075d",
+        "project_code_sha": "856c171298af3822e811d25c59783e6db4c067c0",
         "upstream_tag": "daemon-v0.17.9",
         "upstream_sha": "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
-        "new_upstream_main_PR476_integrated": false,
-        "published_feature_source_sha": "85636b8aa60780f8efe4d344eedc5cc794a003aa",
+        "migration_api": 46,
+        "contract_note": "LocalAPI46 diagnostics are not official0.18.2API46contract equivalence; official0.18.2 not integrated.",
+        "published_feature_source_sha": "2ba8e5d8ae4a4cf42f6284baf5dd817b412c4a5d",
+        "published_native_feature_source_sha": "931ce978f2efb27c157b7a583ee402793131a0d2",
+        "published_software_tag": "microduck-software-v2026.10.30",
+        "published_software_runtime_family": "0.15.1/API42",
         "published_image_tag": "microduck-replica-image-20261027",
         "image_runtime_family": "0.15.1/API40",
-        "migration_api": 45,
         "local_only": true,
         "runtime_branch_pushed": false,
         "project_branch_pushed": false,
         "software_matrix": {
-          "full_project_source": "339f1385eb1850bfe5304d3b5b8cdf6979c3fb5e",
-          "studio_run": 1222,
-          "studio_skipped": 72,
-          "voice_passed": 160,
-          "image_passed": 128,
-          "latest_updater_passed": 37,
-          "latest_component_subset_passed": 11,
-          "windows_browser_passed": 70,
-          "arm_updater_checks": 26,
-          "runtime_groups": "runtime-final-summary.json",
-          "counting": "Commands overlap; no combined grand total."
+          "project_source_sha": "856c171298af3822e811d25c59783e6db4c067c0",
+          "runtime_source_sha": "238999cfef753fb9114793489169372acd99c81d",
+          "scope": "Relevant software regression only, exact frozen checkpoints in verification document; no new ARM delivery/image/device claims.",
+          "full_project_regression_source_sha": "0a4f8910caeb4e5a07bf9b416ea581856f007190",
+          "project_full": {
+            "studio_run": 1417,
+            "studio_skipped": 72,
+            "voice_run": 165,
+            "updater_run": 40,
+            "image_run": 128,
+            "exit_codes": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "application_followup": {
+            "source_sha": "856c171298af3822e811d25c59783e6db4c067c0",
+            "run": 285,
+            "skipped": 1,
+            "exit_code": 0
+          },
+          "native_initial": {
+            "source_sha": "a39803ebab088b7bbb9c7ac8295849bb762a9d64",
+            "passed": 878,
+            "ignored": 61,
+            "ORT_passed": 59,
+            "consumer_tests_passed": 2
+          },
+          "native_mount_followup": {
+            "source_sha": "7ef8c3ddb04924ffb19d34e475f415693f8b18ae",
+            "control_passed": 93,
+            "daemon_passed": 34,
+            "daemon_ignored": 18
+          },
+          "native_coherence_followup": {
+            "source_sha": "238999cfef753fb9114793489169372acd99c81d",
+            "RPC_report_passed": 10,
+            "bus_status_passed": 3,
+            "startup_passed": 16,
+            "consumer_tests_passed": 2,
+            "consumer_application_source": "856c171298af3822e811d25c59783e6db4c067c0"
+          },
+          "full_native_workspace_passed": false,
+          "full_native_workspace_limitation": "Offline uncached async-stream0.3.6 before remaining workspace compilation.",
+          "hardware_acceptance_passed": false,
+          "test_image_built": false,
+          "new_ARM_delivery_built": false,
+          "independent_spec_quality_and_final_review": "passed; exact reviewer checkpoints retained in local review-results.json"
         },
-        "actual_ort_tests": {
-          "daemon_passed": 409,
-          "core_passed": 15,
-          "version": "1.28.0",
-          "overlapping_groups_not_summed": true
-        },
-        "broad_tests": {
-          "passed": 1345,
-          "ignored": 68,
-          "failed": 0,
-          "rust": "1.94.1"
-        },
-        "arm_binaries": {
-          "count": 16,
-          "source_mode": "immutable git archive",
-          "hashes_reverified": true,
-          "installed": false,
-          "executed": "updaterd only under QEMU0.17.9/API45;26checks, notboard",
-          "board_dependencies_verified": false
-        },
+        "new_ARM_delivery_built": false,
+        "native_catalogue_enabled": false,
+        "legacy_live_migration_supported": false,
         "pending": [
-          "Separate17testimage/P3",
+          "NewARMdeliverybuild",
+          "SeparateTestImage/P3",
           "Hardware/media/acoustic/newcardacceptance/P4",
           "Stablepublication/P5"
         ],
-        "unsupported_inplace_legacy_bootstrap": "Live legacycurrent or active/uncertain updater services are refused before writes; offline assembly supported.",
         "published_image_updated": false,
         "online_services_updated": false,
         "robot_connected": false,
-        "evidence_local_root": "F:/chengshenzhilu/Robot/Microduck/artifacts/image15-to0179-20261027",
-        "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-27-image15-to0179.md",
+        "evidence_local_root": "F:\\chengshenzhilu\\Robot\\Microduck\\artifacts\\image30-to0179-20261030",
+        "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-30-image30-to0179.md",
+        "old_migration_worktrees_advanced": false,
         "previous_local_migration_checkpoint": {
-          "recorded_on": "2026-10-26",
-          "scope": "Human-authorized local isolated integration; not the published image or running robot.",
+          "recorded_on": "2026-10-27",
+          "scope": "Human-authorized local isolated feature migration and software evidence; not a migrated image or physical acceptance.",
           "runtime_branch": "codex/runtime-0178-feetech",
-          "runtime_source_sha": "59d95132b6bc13b4acf5772afad7cf974a5d5aba",
+          "runtime_source_sha": "c615e500a58bbc932f8d70b9345ba8cadc1ecc5f",
+          "runtime_production_source_sha": "59d95132b6bc13b4acf5772afad7cf974a5d5aba",
+          "runtime_new_changes_are_test_only": true,
+          "project_branch": "codex/replica-0178-migration",
+          "project_checkpoint_sha": "5a70e6ae9e83a0cf0101efb06d89aac2f7e4a799",
+          "project_code_sha": "de33f94e2057b8d7d6338e448dba6ce86480c202",
           "upstream_tag": "daemon-v0.17.9",
           "upstream_sha": "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
-          "previous_runtime_checkpoint": "b1c2d8bd5a9b980b59792b080ed56c024dae94fa",
-          "replica_documentation_commit": "6df47576f2f64751183786cd9223d4352b390ddb",
+          "new_upstream_main_PR476_integrated": false,
+          "published_feature_source_sha": "85636b8aa60780f8efe4d344eedc5cc794a003aa",
+          "published_image_tag": "microduck-replica-image-20261027",
+          "image_runtime_family": "0.15.1/API40",
           "migration_api": 45,
           "local_only": true,
           "runtime_branch_pushed": false,
-          "broad_tests": {
-            "passed": 1345,
-            "failed": 0,
-            "ignored": 65,
-            "rust": "1.94.1"
+          "project_branch_pushed": false,
+          "software_matrix": {
+            "full_project_source": "339f1385eb1850bfe5304d3b5b8cdf6979c3fb5e",
+            "studio_run": 1222,
+            "studio_skipped": 72,
+            "voice_passed": 160,
+            "image_passed": 128,
+            "latest_updater_passed": 37,
+            "latest_component_subset_passed": 11,
+            "windows_browser_passed": 70,
+            "arm_updater_checks": 26,
+            "runtime_groups": "runtime-final-summary.json",
+            "counting": "Commands overlap; no combined grand total."
           },
           "actual_ort_tests": {
-            "daemon_passed": 406,
-            "core_ignored_subset_passed": 15,
+            "daemon_passed": 409,
+            "core_passed": 15,
             "version": "1.28.0",
             "overlapping_groups_not_summed": true
           },
-          "official_console_offline_cases_passed": 9,
+          "broad_tests": {
+            "passed": 1345,
+            "ignored": 68,
+            "failed": 0,
+            "rust": "1.94.1"
+          },
           "arm_binaries": {
             "count": 16,
-            "source_mode": "git_archive",
-            "target": "aarch64-unknown-linux-gnu.2.31",
+            "source_mode": "immutable git archive",
             "hashes_reverified": true,
             "installed": false,
-            "executed": false,
+            "executed": "updaterd only under QEMU0.17.9/API45;26checks, notboard",
             "board_dependencies_verified": false
           },
-          "media_limit": "ARM compile only; native media tests blocked by unavailable offline async-stream and native GStreamer/GLib development metadata; no real camera, exposure, ICE or live Studio test.",
-          "endurance_limit": "Not invoked. Feetech HOME/enable readiness must be satisfied; imported enable timeout can continue logging without the intended workload. Guard retained.",
           "pending": [
-            "Full Studio and configuration integration",
-            "Separate test image",
-            "Hardware acceptance"
+            "Separate17testimage/P3",
+            "Hardware/media/acoustic/newcardacceptance/P4",
+            "Stablepublication/P5"
           ],
+          "unsupported_inplace_legacy_bootstrap": "Live legacycurrent or active/uncertain updater services are refused before writes; offline assembly supported.",
           "published_image_updated": false,
           "online_services_updated": false,
-          "robot_connected": false
+          "robot_connected": false,
+          "evidence_local_root": "F:/chengshenzhilu/Robot/Microduck/artifacts/image15-to0179-20261027",
+          "verification_document_in_local_branch": "docs/superpowers/verification/2026-10-27-image15-to0179.md",
+          "previous_local_migration_checkpoint": {
+            "recorded_on": "2026-10-26",
+            "scope": "Human-authorized local isolated integration; not the published image or running robot.",
+            "runtime_branch": "codex/runtime-0178-feetech",
+            "runtime_source_sha": "59d95132b6bc13b4acf5772afad7cf974a5d5aba",
+            "upstream_tag": "daemon-v0.17.9",
+            "upstream_sha": "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
+            "previous_runtime_checkpoint": "b1c2d8bd5a9b980b59792b080ed56c024dae94fa",
+            "replica_documentation_commit": "6df47576f2f64751183786cd9223d4352b390ddb",
+            "migration_api": 45,
+            "local_only": true,
+            "runtime_branch_pushed": false,
+            "broad_tests": {
+              "passed": 1345,
+              "failed": 0,
+              "ignored": 65,
+              "rust": "1.94.1"
+            },
+            "actual_ort_tests": {
+              "daemon_passed": 406,
+              "core_ignored_subset_passed": 15,
+              "version": "1.28.0",
+              "overlapping_groups_not_summed": true
+            },
+            "official_console_offline_cases_passed": 9,
+            "arm_binaries": {
+              "count": 16,
+              "source_mode": "git_archive",
+              "target": "aarch64-unknown-linux-gnu.2.31",
+              "hashes_reverified": true,
+              "installed": false,
+              "executed": false,
+              "board_dependencies_verified": false
+            },
+            "media_limit": "ARM compile only; native media tests blocked by unavailable offline async-stream and native GStreamer/GLib development metadata; no real camera, exposure, ICE or live Studio test.",
+            "endurance_limit": "Not invoked. Feetech HOME/enable readiness must be satisfied; imported enable timeout can continue logging without the intended workload. Guard retained.",
+            "pending": [
+              "Full Studio and configuration integration",
+              "Separate test image",
+              "Hardware acceptance"
+            ],
+            "published_image_updated": false,
+            "online_services_updated": false,
+            "robot_connected": false
+          }
         }
       }
     }
