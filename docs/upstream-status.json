@@ -3297,7 +3297,7 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-27T13:25:40Z",
-          "updated_at": "2026-10-31T21:47:09Z",
+          "updated_at": "2026-11-01T09:40:23Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/477",
           "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
           "base_sha": "5def2f3e66501f0f365d4fb1183020b8ee875443",
@@ -3467,6 +3467,47 @@
             "author_reported": "configd66 tests at489637c; robotctl234pass/5ignored and aarch64clippy at hardware-guard followup. Author beta still ran1533; marker removal was manual, new guard not yet installed; fresh Sync test pending.",
             "local_0182_adoption": "not_integrated_at785254e; staticBlueZ lacks new helpers, robotctl marker check has no hardware conjunct",
             "priority": "high_boundary_review_for_Radxa_pairing; no release/device readiness claim"
+          },
+          "latest_consumer_review": {
+            "checked_at_utc": "2026-11-01T09:09:02.372170+00:00",
+            "source_head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
+            "review_comment_id": 4434936078,
+            "review_comment_url": "https://github.com/pollen-robotics/microduck/pull/477#discussion_r4434936078",
+            "review_created_at_utc": "2026-11-01T09:40:23Z",
+            "review_updated_at_utc": "2026-11-01T09:42:35Z",
+            "state": "unresolved_review_concern; no source/tag/state change; not a formal release or hardware acceptance",
+            "finding": "Static contract mismatch: PadStatus lists every paired device on the selected adapter; nfcd passes status.pads through and exits on any connected entry before chirp/pair/greet. A bonded connected non-HID phone can therefore suppress an NFC pad tag attempt under these conditions.",
+            "fixed_sources": {
+              "producer": "https://github.com/pollen-robotics/microduck/blob/789ec47e00d743f0909ba5e71e09b9731f38cac2/configd/src/bluez.rs#L936-L944",
+              "consumer_adapter": "https://github.com/pollen-robotics/microduck/blob/789ec47e00d743f0909ba5e71e09b9731f38cac2/nfc/src/main.rs#L286-L290",
+              "consumer_gate": "https://github.com/pollen-robotics/microduck/blob/789ec47e00d743f0909ba5e71e09b9731f38cac2/nfc/src/pairing.rs#L87-L105",
+              "hid_evidence": "https://github.com/pollen-robotics/microduck/blob/789ec47e00d743f0909ba5e71e09b9731f38cac2/configd/src/pad_hid.rs#L4-L34",
+              "official_stable_filter": "https://github.com/pollen-robotics/microduck/blob/b2b0d213a402caeac492dd662ea891faa17f67c0/configd/src/bluez.rs#L961-L973"
+            },
+            "proposed_remedy_status": "Reviewer suggests ignoring hid_recognized=false. No accepted fix is recorded; None/unknown sysfs and explicitly addressed pads need a defined policy. HID identity does not prove padd opened the device.",
+            "recommended_regression_cases": [
+              "bonded connected phone with no HID must not suppress intended pad pairing",
+              "a connected recognized controller must preserve the no-takeover rule",
+              "unreadable or incomplete sysfs (None) needs explicit policy",
+              "explicit-address pads outside the heuristic must retain intended support"
+            ],
+            "priority": "high before adopting PR477 PadStatus expansion and its consumers",
+            "local_0182_comparison": {
+              "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+              "path": "configd/src/bluez.rs",
+              "lines": "961-973",
+              "filter": "device.paired && device.is_gamepad()",
+              "nfc_consumer_connected_gate_still_present": true,
+              "broadened_all_bonded_list_integrated": false,
+              "verification": "read committed source only; no test run or robot/webpage access"
+            },
+            "impact": {
+              "HD_1910": "No motor/register/control change; review concerns the controller pairing entry path.",
+              "camera_ToF_model_management_training": "No implementation or model changes.",
+              "actions_and_sound": "NFC path may return before chirp, pairing and greet; no action mapping, motion or audio asset change."
+            },
+            "tests_executed_by_tracker": false,
+            "runtime_changed_by_tracker": false
           }
         },
         {
@@ -5946,8 +5987,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-01T04:15:03.680970+00:00",
+  "checked_at_utc": "2026-11-01T09:09:02.372170+00:00",
   "latest_review": {
+    "previous_substantive_review_utc": "2026-11-01T04:15:03.680970+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
@@ -5955,34 +5997,40 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "previous_tracked_prs_merged": false,
-    "new_pull_requests": {
-      "pollen-robotics/microduck_rl": [
-        89
-      ]
-    },
+    "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
         477
       ]
     },
-    "new_development_releases": [
-      "daemon-dev-ep5-footsteps"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-codex/gamepad-connection"
-    ],
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "retired_development_tags": [],
+    "new_review_concerns": [
+      {
+        "repository": "pollen-robotics/microduck",
+        "number": 477,
+        "comment_id": 4434936078,
+        "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
+        "kind": "NFC consumer of expanded paired-device status"
+      }
+    ],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
-    "model_metadata_changed": false,
-    "local_migration_record_changed": true,
+    "model_metadata_changed": null,
+    "supplementary_model_metadata_check": {
+      "checked_at_utc": "2026-11-01T09:05:38.934653+00:00",
+      "status": "same previously notified HTTP429; stopped after first limited source; last-known metadata preserved, not reverified unchanged",
+      "new_failure": false
+    },
+    "local_migration_record_changed": false,
     "local_public_software_release_recorded": false,
     "runtime_code_changed_by_heartbeat": false,
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Read fixed upstream patches/currentrefs and committed local0a61/068/785records only. Pairing fix+hardwareguard remains PR477/dev0.17.9API46; newep5 is0.18.0API47 divergent prototype with inherited personalSelect, not officialtelemetrycontract. RL89 closedunmergedCMU snapshot. Fourdefaultheads/formal18.3assets/HFmetadata/blog unchanged. Local software-stage completion does not enable catalogue/image/device migration."
+    "notes": "Read new PR477 review comment and fixed producer/NFC/HID source, plus committed local785 source. All default heads/stable18.3 assets/development tag SHAs/PR merge states/blog remain unchanged. Local0182 retains gamepad classification; no integration, tests, environment repair or webpage/device access. Existing HF429 is not a new alert."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
