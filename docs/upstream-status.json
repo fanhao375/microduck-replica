@@ -3362,7 +3362,7 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-27T13:25:40Z",
-          "updated_at": "2026-11-02T11:56:33Z",
+          "updated_at": "2026-11-02T12:49:34Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/477",
           "head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
           "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
@@ -3654,7 +3654,53 @@
               "change": "Description clarifies targetedRust1.94.1components/independentreview already recorded; no new source or robotdeployment, positiveexplicitreconnect stillunverified.",
               "counts_as_new_implementation_or_hardware_acceptance": false
             }
-          ]
+          ],
+          "latest_design_review": {
+            "checked_at_utc": "2026-11-02T13:13:25.775161+00:00",
+            "comment_id": 6577559077,
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/477#issuecomment-6577559077",
+            "comment_created_at_utc": "2026-11-02T12:49:34Z",
+            "comment_updated_at_utc": "2026-11-02T12:49:34Z",
+            "author": "pierre-rouanet",
+            "source_head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+            "status": "maintainer suggestion only; source, API48 and development tag unchanged; no accepted implementation recorded",
+            "proposal": "Keep a manual reconnect entry but wake the existing pad_reconnect_loop and reset backoff rather than maintain a second paging path. CLI waits for link/status. Optional or removed MAC, removed PadConnectPhase/connect_existing are suggestions, not current API behavior.",
+            "fixed_sources": {
+              "loop_and_backoff": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/main.rs#L198-L228",
+              "sweep_mutex_and_connect": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/bluez.rs#L728-L764",
+              "sweep_no_takeover_filter": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/bluez.rs#L933-L946",
+              "manual_target_path": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/bluez.rs#L1093-L1166",
+              "manual_deadline_and_phases": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/pad.rs#L629-L719"
+            },
+            "actual_current_behavior": {
+              "sweep_interval_floor_s": 12,
+              "sweep_interval_ceiling_s": 120,
+              "backoff": "Sleep then sweep; double interval while a pad stays down, reset on false/error. No Notify wake in current loop.",
+              "sweep_candidates": "paired trusted disconnected classic gamepads; skip when any recognized paired gamepad is connected; LE excluded",
+              "sweep_lock": "try_lock on the shared pairing mutex; skip if occupied",
+              "manual_lock": "same mutex acquired within the shared15s deadline; cannot infer concurrent page calls",
+              "manual_scope": "exact paired MAC; restore target trust and connect/verify that target. Does not apply needs_reconnect global connected-pad gate.",
+              "radio_effect": "Maintainer warns independent schedules can page back-to-back and consume shared Wi-Fi/Bluetooth airtime; no project throughput/latency measurement or observed regression in this review."
+            },
+            "contract_review": "Before adoption define target selection, no-takeover, backoff wake/rate limits, trust, timeout/error and status-result semantics. An unchanged numeric API version would not prove equivalent exact-MAC behavior.",
+            "local_0182_comparison": {
+              "source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+              "background_loop_floor_s": 12,
+              "background_loop_ceiling_s": 120,
+              "proto_has_PadConnect": false,
+              "configd_has_PadConnect_route": false,
+              "status": "Existing sweep only; not a newly introduced second reconnect implementation and not modified by tracker"
+            },
+            "priority": "high contract and shared-radio review before adopting manual reconnect",
+            "impact": {
+              "HD_1910_actions": "Controller ownership/no-takeover boundary; no servo/register, gain or motion mapping patch.",
+              "camera_ToF": "Potential shared-radio effect is a review concern, not a camera/ToF change or project measurement.",
+              "models_training_sound": "No model/weight, training or audio asset change."
+            },
+            "new_source_implementation": false,
+            "tests_executed_by_tracker": false,
+            "hardware_validation_added": false
+          }
         },
         {
           "number": 476,
@@ -6344,59 +6390,35 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+  "checked_at_utc": "2026-11-02T13:13:25.775161+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-02T02:03:07.205885+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-02T12:19:20.042616+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
     "stable_release_actual_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
     "stable_assets_changed": false,
     "stable_asset_count": 8,
-    "previous_tracked_prs_merged": true,
-    "merged_pull_requests": {
-      "pollen-robotics/microduck": [
-        513
-      ]
-    },
-    "closed_without_merge": {
-      "pollen-robotics/microduck": [
-        450,
-        500,
-        331,
-        390
-      ]
-    },
+    "previous_tracked_prs_merged": false,
     "new_pull_requests": {},
-    "newly_indexed_existing_closed_prs": [
-      331,
-      390
-    ],
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        477,
-        513,
-        450,
-        500
+        477
       ]
     },
-    "new_development_releases": [
-      "daemon-dev-pad-pairing-cleanup"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-main",
-      "daemon-dev-codex/gamepad-connection"
-    ],
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "retired_development_tags": [],
-    "new_review_concerns": [],
-    "source_remedies_for_recorded_concerns": [
+    "new_review_concerns": [
       {
-        "pr": 477,
-        "source_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
-        "kind": "NFC consumer no longer receives arbitrary bonded phone in pad status",
-        "status": "unmerged source remedy only"
+        "repository": "pollen-robotics/microduck",
+        "number": 477,
+        "comment_id": 6577559077,
+        "head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+        "kind": "Unify manual reconnect with existing sweep; no-takeover and shared-radio scheduling"
       }
     ],
+    "source_remedies_for_recorded_concerns": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
@@ -6407,17 +6429,7 @@
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "non_substantive_prs": [
-      {
-        "number": 514,
-        "reason": "closed unmerged empty diff; identical tree to previous stablemain"
-      },
-      {
-        "number": 515,
-        "reason": "closed unmerged empty diff; identical tree to previous stablemain"
-      }
-    ],
-    "notes": "Merged513 main997 is unreleased simulator/xtask change, not a new formal release. PR477 source is0.18.3/API48 and repairs phone/NFC listing concern, still unmerged; separate cleanup devb69 staysAPI47 and lacks hardware guard/full status contract. Related simulation PR closures do not adopt action_scale1.0,0.30m/s defaults or keyboard/race extras. Stable assets, other default heads, model metadata, blog and committed local software checkpoints unchanged; no tracker tests or runtime/webpage/device changes."
+    "notes": "New maintainer PR477 design comment only; source remainsd6/API48, main997 and formal18.3/8assets and dev refs unchanged. Read source: shared mutex already serializes page paths; exact-MAC path lacks sweep global connected-pad guard, suggested Notify/backoff nudge not implemented. Local785 has existing sweep but no PadConnect route. No tracker tests, radio/camera measurements or runtime changes."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
