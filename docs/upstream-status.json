@@ -5109,6 +5109,151 @@
             "closed_without_merge": true
           },
           "replica_integration": "not integrated by tracker; closure is not adoption of every proposed feature"
+        },
+        {
+          "number": 271,
+          "title": "sdk: a python client, and a loop to write behaviours in",
+          "state": "open",
+          "draft": false,
+          "merged_at": null,
+          "created_at": "2026-09-12T04:32:50Z",
+          "updated_at": "2026-11-02T14:18:49Z",
+          "url": "https://github.com/pollen-robotics/microduck/pull/271",
+          "head_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
+          "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+          "base_branch": "main",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...75748cc23dea863df2930c653a39d42bea4156a2",
+          "classification": "Existing September SDK proposal newly indexed after November2 review/revision; unmerged source, not an SDK or daemon release",
+          "changed_file_count": 33,
+          "commit_count": 12,
+          "previous_observed_head_sha": "55864186ef41887aaf46fb7bc315cda12c90b03f",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/55864186ef41887aaf46fb7bc315cda12c90b03f...5c4360acec8b92d92fe9ed8be51f8963c7b3876b",
+          "latest_increment": {
+            "from_sha": "55864186ef41887aaf46fb7bc315cda12c90b03f",
+            "to_sha": "5c4360acec8b92d92fe9ed8be51f8963c7b3876b",
+            "commits": 4,
+            "files": 29,
+            "scope": "Rename sdk/duck to sdk/microduck and update imports/Space links; add SDK CI and tagged PyPI workflow; replace ball-only vision example with typed targets and example-only periodic look. Most files are rename/reference changes.",
+            "comparison_to_current_main": {
+              "main_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+              "head_sha": "5c4360acec8b92d92fe9ed8be51f8963c7b3876b",
+              "ahead_by": 11,
+              "behind_by": 5,
+              "files": 33
+            }
+          },
+          "package_source": {
+            "distribution": "microduck",
+            "import": "from microduck import Duck",
+            "declared_version": "0.1.0",
+            "requires_python": ">=3.10",
+            "native_api_changed": false,
+            "package_and_import_revision": "actual source; package and examples import microduck"
+          },
+          "fixed_sources": {
+            "package": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/pyproject.toml",
+            "sdk_ci": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/.github/workflows/ci.yml",
+            "pypi_workflow": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/.github/workflows/sdk-pypi.yml",
+            "publisher_setup": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/docs/project/ci-setup.md",
+            "vision_example": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/examples/find_it.py",
+            "client_move_look_watch": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/microduck/client.py",
+            "scope_and_constraints": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/README.md"
+          },
+          "ci_and_publication": {
+            "configured_python_matrix": [
+              "3.10",
+              "3.15"
+            ],
+            "configured_test_command": "pytest sdk/tests",
+            "configured_extras": [
+              "test",
+              "frames",
+              "video"
+            ],
+            "workflow_trigger": "sdk-v* tag or manual dispatch from that tag; SDK version checked against tag",
+            "artifacts": "pure Python wheel and sdist in separate build job",
+            "publisher": "OIDC trusted publishing in pypi environment; repository docs say pending publisher setup is not done yet",
+            "sdk_tag_refs_seen": [],
+            "publication_claim": "No sdk-v refs seen on GitHub in this check; adding a workflow does not establish a PyPI release",
+            "tests_executed_by_tracker": false,
+            "ci_success_claimed_by_tracker": false
+          },
+          "vision_example": {
+            "path": "sdk/examples/find_it.py",
+            "targets": "user-supplied names, look left/ahead/right, describe picture and ask yes/no, call existing chirp on yes",
+            "host_model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+            "model_revision_pinned": false,
+            "load": "from_pretrained called lazily by main, not imported or executed by tracker",
+            "head_hold": "Example helper calls duck.look then sleeps0.5s while the model thinks; client look remains one RPC. SDK-wide held gaze/robot.head resend is only a suggested later PR.",
+            "source_only": true,
+            "model_downloaded_or_executed_by_tracker": false
+          },
+          "preexisting_proposal_behavior": {
+            "not_new_in_this_increment": true,
+            "transport": "Hugging Face account and rendezvous control lane, including LAN use",
+            "move": "HOLD1.0s and RESEND0.15s in client worker; previous claimed roughly1.5s hung-script stop is not a new daemon guarantee or local hardware test",
+            "look": "single robot.look RPC",
+            "ToF": "watch depth=False by default because of lane queue concerns; no new depth transport fix in these commits",
+            "video": "optional aiortc-based offer answer; old author same-host simulation report does not establish relay or replica camera acceptance"
+          },
+          "review_sources": [
+            {
+              "url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6578472553",
+              "created_at_utc": "2026-11-02T13:32:15Z",
+              "updated_at_utc": "2026-11-02T13:32:15Z",
+              "author": "pierre-rouanet"
+            },
+            {
+              "url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6579225798",
+              "created_at_utc": "2026-11-02T14:08:55Z",
+              "updated_at_utc": "2026-11-02T14:09:37Z",
+              "author": "Nixxx19"
+            },
+            {
+              "url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6579324173",
+              "created_at_utc": "2026-11-02T14:13:26Z",
+              "updated_at_utc": "2026-11-02T14:13:26Z",
+              "author": "pierre-rouanet"
+            }
+          ],
+          "replica_integration": {
+            "status": "not integrated or installed by tracker",
+            "native_checkpoint": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+            "native_sdk_directory_present": false,
+            "app_checkpoint": "0a61aa568a712bbb33e81c9b348049dd118fa37f",
+            "direct_from_microduck_import_Duck_found": false,
+            "verification_scope": "read committed tree and Python imports only; existing application/native/ARM validation is not SDK271 validation"
+          },
+          "impact": {
+            "HD_1910_actions": "Future behavior control needs explicit joint/route/ownership/deadman and gaze-hold verification; no motor/register/runtime mapping change.",
+            "camera_ToF": "Example camera-head timing and cloud/optional-video contracts need verification; ToF still default-off; no new replica camera/depth acceptance.",
+            "model_management_training": "Optional host-side pretrained VLM demo, not robot policy weights or a training update; model revision and reproducible setup need pinning before future adoption.",
+            "sound": "Uses existing robot.sound chirp; no new voice/audio assets."
+          },
+          "priority": "medium SDK reference; high contract, stop/gaze and camera/depth validation priority before future use",
+          "this_review": "Read four-commit increment, current package/client/example/CI source and publication setup, fixed local tree/imports and GitHub SDK refs only. No install, SDK tests, workflow run, model execution, robot or webpage access. Later main merge verified: eight reviewed source blobs unchanged across5c and757; no new execution.",
+          "sdk_production_source_sha": "5c4360acec8b92d92fe9ed8be51f8963c7b3876b",
+          "main_sync_followup": {
+            "from_sha": "5c4360acec8b92d92fe9ed8be51f8963c7b3876b",
+            "to_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/5c4360acec8b92d92fe9ed8be51f8963c7b3876b...75748cc23dea863df2930c653a39d42bea4156a2",
+            "commits": 6,
+            "changed_files": [
+              "docs/design/simulation.md",
+              "scripts/duck-sim",
+              "xtask/src/main.rs"
+            ],
+            "scope": "Only previously archived main997 simulation merge history; all eight reviewed SDK/package/workflow sources retain exact Git blob hashes. Not another SDK behavior change or test run."
+          },
+          "author_hardware_validation_status": "Maintainer said at2026-11-02T14:13:26Z that robot testing is planned; no new result recorded in this check.",
+          "source_reviewed_at_utc": "2026-11-02T14:22:25.205206+00:00",
+          "comparison_to_recorded_main": {
+            "main_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+            "head_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
+            "ahead_by": 12,
+            "behind_by": 0,
+            "files": 33
+          }
         }
       ],
       "previous_stable_releases": [
@@ -6390,9 +6535,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-02T13:13:25.775161+00:00",
+  "checked_at_utc": "2026-11-02T14:22:25.205206+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-02T12:19:20.042616+00:00",
+    "previous_substantive_review_utc": "2026-11-02T13:13:25.775161+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
@@ -6401,24 +6546,18 @@
     "stable_asset_count": 8,
     "previous_tracked_prs_merged": false,
     "new_pull_requests": {},
+    "newly_indexed_existing_prs": [
+      271
+    ],
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        477
+        271
       ]
     },
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "new_review_concerns": [
-      {
-        "repository": "pollen-robotics/microduck",
-        "number": 477,
-        "comment_id": 6577559077,
-        "head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
-        "kind": "Unify manual reconnect with existing sweep; no-takeover and shared-radio scheduling"
-      }
-    ],
-    "source_remedies_for_recorded_concerns": [],
+    "new_review_concerns": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
@@ -6429,7 +6568,7 @@
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "New maintainer PR477 design comment only; source remainsd6/API48, main997 and formal18.3/8assets and dev refs unchanged. Read source: shared mutex already serializes page paths; exact-MAC path lacks sweep global connected-pad guard, suggested Notify/backoff nudge not implemented. Local785 has existing sweep but no PadConnect route. No tracker tests, radio/camera measurements or runtime changes."
+    "notes": "Newly indexed existing unmerged SDK271 at75748 after merge of recordedmain997; actual SDK revision5c436 is4-commit29-file rename/CI/publisher/example revision over observed5586418, full PR33files. Actual importmicroduck and package0.1.0 source; no sdk-v GitHub ref found, workflow is not publication. Gaze hold only in example; SDK look still one RPC. Native/ToF transport unchanged. No tests/installation/model/device/webpage operation; official heads/releases/dev tags/model metadata/blog and committed local validation unchanged. Eight reviewed SDK blobs identical across5c436 and75748; maintainer robot test remains planned."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
