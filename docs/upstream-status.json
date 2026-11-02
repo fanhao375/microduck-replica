@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-01",
+  "recorded_on": "2026-11-02",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -4741,6 +4741,80 @@
             "release_status": "Open unmerged PR; no formal or matching development release observed."
           },
           "review_history": []
+        },
+        {
+          "number": 513,
+          "title": "duck-sim: the twin walks — velstand, on the robot with backlash",
+          "state": "open",
+          "draft": false,
+          "merged_at": null,
+          "created_at": "2026-11-01T15:18:35Z",
+          "updated_at": "2026-11-01T15:18:35Z",
+          "url": "https://github.com/pollen-robotics/microduck/pull/513",
+          "head_sha": "6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+          "base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "base_branch": "main",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+          "author": "first-it-consulting",
+          "classification": "community unmerged simulator proposal; not a daemon release or robot acceptance",
+          "changed_file_count": 3,
+          "changed_files": [
+            "AGENTS.md",
+            "docs/design/simulation.md",
+            "scripts/duck-sim"
+          ],
+          "commit_count": 2,
+          "change": "duck-sim defaults to backlash scene and velstand walk with stand=none; checks velstand.onnx when selecting a policy directory; drive reports simulator trunk displacement and accumulated quaternion yaw, with a low-displacement warning.",
+          "model_selection": "A local policies/ folder wins only if velstand.onnx exists. Otherwise use state/policies/current and try seed-policies.sh if missing; existing custom alpha-only folders are not selected. File existence is not a policy contract or HD1910 compatibility check.",
+          "runtime_or_api_implementation_changed": false,
+          "new_model_weight_files": false,
+          "fixed_sources": {
+            "scene_and_model_selection": "https://github.com/pollen-robotics/microduck/blob/6eb8525135abbd7cd9cdc2b468c74ef967e51793/scripts/duck-sim#L59-L65",
+            "policy_directory": "https://github.com/pollen-robotics/microduck/blob/6eb8525135abbd7cd9cdc2b468c74ef967e51793/scripts/duck-sim#L217-L228",
+            "generated_config": "https://github.com/pollen-robotics/microduck/blob/6eb8525135abbd7cd9cdc2b468c74ef967e51793/scripts/duck-sim#L248-L255",
+            "drive_measurement": "https://github.com/pollen-robotics/microduck/blob/6eb8525135abbd7cd9cdc2b468c74ef967e51793/scripts/duck-sim#L739-L768",
+            "training_registry": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/tasks/__init__.py#L239-L263",
+            "scene_model": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/robot/microduck/scene_backlash.xml#L1-L28",
+            "body_server_control": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/sim/body_server.py#L359-L388"
+          },
+          "source_review_limits": [
+            "math.dist of start/end XY is net displacement, not signed forward progress or accumulated path length.",
+            "The quarter-distance check applies only when abs(vx)>=0.05; it prints a warning, not a nonzero acceptance result or an independent turn gate.",
+            "Current RL registration uses robot_allcollisions_backlash for VelStand, while scene_backlash includes robot_groundcontact_backlash; shared backlash family does not mean byte-identical training model.",
+            "Body server still writes MJCF position controls; this PR does not add the fitted BAM actuator backend or HD1910 dynamics."
+          ],
+          "author_reported_validation": {
+            "host": "macOS only",
+            "shell_syntax_and_shellcheck_passed": true,
+            "cold_start_and_policy_selection_checked": true,
+            "forward_command_m_s": 0.15,
+            "forward_reported_m_s": 0.061,
+            "nominal_duration_s": 8,
+            "reported_forward_distance_cm": 48,
+            "reported_turn_only_deg_s": 50,
+            "linux_host_checked": false,
+            "forward_speed_shortfall_resolved": false,
+            "BAM_mismatch_as_cause": "author first suspect, not established root cause",
+            "verified_by_tracker": false
+          },
+          "priority": "medium simulator reference; high priority for model/actuator/measurement boundaries before future Linux simulation acceptance",
+          "replica_integration": {
+            "status": "not integrated at fixed native checkpoint",
+            "runtime_source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
+            "script": "scripts/duck-sim",
+            "scene_default": "empty override, simulator default",
+            "walk": "alpha_walking.onnx",
+            "stand": "alpha_stand.onnx",
+            "new_displacement_measurement_present": false,
+            "verification": "read committed source only; existing Linux/ORT/ARM software validation is not a run of this simulator proposal"
+          },
+          "impact": {
+            "HD_1910": "No servo/register implementation change. Official XL330-oriented dynamics and policy choice require independent HD1910 fit, mass/geometry and backlash checks.",
+            "camera_ToF": "No new camera or ToF implementation; existing simulated sensors do not establish physical hardware acceptance.",
+            "model_management_training": "Changes simulator model selection and fallback fetch conditions, not weights or RL training code. Pin local models and compare actuator/scene contracts before adoption.",
+            "actions_and_sound": "Changes the simulator walking network; no button mapping, skill/audio asset or physical gait validation change."
+          },
+          "this_review": "Read three changed-file patches, pinned source and existing RL scene/registry/body-server source; no simulator, test, training, downloaded software or model executed."
         }
       ],
       "previous_stable_releases": [
@@ -5987,9 +6061,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-01T09:09:02.372170+00:00",
+  "checked_at_utc": "2026-11-02T02:03:07.205885+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-01T04:15:03.680970+00:00",
+    "previous_substantive_review_utc": "2026-11-01T09:09:02.372170+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
@@ -5997,31 +6071,23 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "previous_tracked_prs_merged": false,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
+    "new_pull_requests": {
       "pollen-robotics/microduck": [
-        477
+        513
       ]
     },
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "new_review_concerns": [
-      {
-        "repository": "pollen-robotics/microduck",
-        "number": 477,
-        "comment_id": 4434936078,
-        "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
-        "kind": "NFC consumer of expanded paired-device status"
-      }
-    ],
+    "new_review_concerns": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
-    "model_metadata_changed": null,
+    "model_metadata_changed": false,
     "supplementary_model_metadata_check": {
-      "checked_at_utc": "2026-11-01T09:05:38.934653+00:00",
-      "status": "same previously notified HTTP429; stopped after first limited source; last-known metadata preserved, not reverified unchanged",
+      "checked_at_utc": "2026-11-02T01:58:51.665787+00:00",
+      "status": "healthy; all four stored model metadata records unchanged; previous HTTP429 no longer blocks this check",
       "new_failure": false
     },
     "local_migration_record_changed": false,
@@ -6030,7 +6096,7 @@
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Read new PR477 review comment and fixed producer/NFC/HID source, plus committed local785 source. All default heads/stable18.3 assets/development tag SHAs/PR merge states/blog remain unchanged. Local0182 retains gamepad classification; no integration, tests, environment repair or webpage/device access. Existing HF429 is not a new alert."
+    "notes": "New community PR513 only changes duck-sim launcher and documentation; unmerged, no daemon/API/weight change. Read fixed6eb patch and RLbae source, and local785 old simulator script. Author macOS smoke results are not our Linux/ARM/HD1910 validation. Default heads, formal18.3 assets, development SHAs, tracked PR merge states, model metadata and official blog unchanged; PR477 review unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
