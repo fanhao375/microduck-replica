@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-02",
+  "recorded_on": "2026-11-03",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -5117,7 +5117,7 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-09-12T04:32:50Z",
-          "updated_at": "2026-11-02T14:18:49Z",
+          "updated_at": "2026-11-02T15:54:04Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/271",
           "head_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
           "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
@@ -5214,6 +5214,12 @@
               "created_at_utc": "2026-11-02T14:13:26Z",
               "updated_at_utc": "2026-11-02T14:13:26Z",
               "author": "pierre-rouanet"
+            },
+            {
+              "url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6581614872",
+              "created_at_utc": "2026-11-02T15:54:04Z",
+              "updated_at_utc": "2026-11-02T15:54:04Z",
+              "author": "pierre-rouanet"
             }
           ],
           "replica_integration": {
@@ -5245,7 +5251,7 @@
             ],
             "scope": "Only previously archived main997 simulation merge history; all eight reviewed SDK/package/workflow sources retain exact Git blob hashes. Not another SDK behavior change or test run."
           },
-          "author_hardware_validation_status": "Maintainer said at2026-11-02T14:13:26Z that robot testing is planned; no new result recorded in this check.",
+          "author_hardware_validation_status": "External maintainer report on a robot running0.18.2 through real rendezvous; exact SDK/firmware commits and media ICE path unstated. Not replica/HD1910 acceptance.",
           "source_reviewed_at_utc": "2026-11-02T14:22:25.205206+00:00",
           "comparison_to_recorded_main": {
             "main_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
@@ -5253,6 +5259,77 @@
             "ahead_by": 12,
             "behind_by": 0,
             "files": 33
+          },
+          "hardware_report_history": [
+            {
+              "recorded_status": "Maintainer said at2026-11-02T14:13:26Z that robot testing is planned; no new result recorded in this check.",
+              "source_url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6579324173",
+              "reported_at_utc": "2026-11-02T14:13:26Z"
+            }
+          ],
+          "latest_maintainer_test_and_review": {
+            "checked_at_utc": "2026-11-02T16:17:48.629826+00:00",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/271#issuecomment-6581614872",
+            "comment_id": 6581614872,
+            "comment_created_at_utc": "2026-11-02T15:54:04Z",
+            "comment_updated_at_utc": "2026-11-02T15:54:04Z",
+            "author": "pierre-rouanet",
+            "observed_pr_head_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
+            "source_changed": false,
+            "external_test_report": {
+              "daemon_version_reported": "0.18.2",
+              "host": "laptop, OS not specified in test statement",
+              "control_transport": "real rendezvous",
+              "reported_results": [
+                "unit tests pass, count and exact source not stated",
+                "python -m microduck.wire finds robot and gets answers",
+                "state via watch and head command work",
+                "steady walking twist after intent stream starts; no repeated deadman in that observation",
+                "Ctrl-C stops robot",
+                "Duck(video=True) shows live camera"
+              ],
+              "sdk_commit_used": null,
+              "firmware_commit_used": null,
+              "media_ICE_path": "not reported; real rendezvous control/signalling does not establish TURN/media relay acceptance",
+              "replica_robot_test": false,
+              "HD_1910_acceptance": false,
+              "verified_by_tracker": false
+            },
+            "reported_control_findings": [
+              "A connected pad keeps writing its twist, including centred-stick zeros, so script move can be overwritten in the shared last-writer slot.",
+              "When the pad disappears the reported robot sits; enable(True) does not unseat it, sit_toggle does. A proposed stand helper should first check sitting state."
+            ],
+            "requested_followups": {
+              "publication": "Publish SDK with daemon-v* stable tags and stamp workspace Cargo.toml version during build instead of maintaining SDK-only version/tag line.",
+              "stand": "A stand() helper conditional on robot.policies.sitting, or explanatory README, suggested but not implemented.",
+              "gaze": "Keep robot idle as default; SDK held gaze by resending robot.head accepted as a later separate PR.",
+              "frames": "Distinguish no picture ever received from a video stream that stopped.",
+              "macOS": "README note for av/opencv-python duplicate bundled FFmpeg class warnings.",
+              "wire_module": "RuntimeWarning due to package pre-import of wire needs attention."
+            },
+            "actual_current_source": {
+              "package_version": "0.1.0",
+              "publish_tag": "sdk-v*",
+              "daemon_tag_publication_implemented": false,
+              "stand_helper_present": false,
+              "enable": "One robot.enable RPC",
+              "look": "One robot.look RPC; only example currently resends look",
+              "new_runtime_or_idle_switch": false
+            },
+            "fixed_sources": {
+              "package": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/pyproject.toml",
+              "publication_workflow": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/.github/workflows/sdk-pypi.yml",
+              "client_helpers": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/microduck/client.py",
+              "held_look_example": "https://github.com/pollen-robotics/microduck/blob/5c4360acec8b92d92fe9ed8be51f8963c7b3876b/sdk/examples/find_it.py"
+            },
+            "priority": "high before control adoption: pad/script ownership, explicit posture, stop and gaze timing; publication coupling remains a proposal",
+            "impact": {
+              "HD_1910_actions": "Controller ownership and sit/stand boundaries need independent fixed-source and hardware verification; no new motor/register/gain implementation.",
+              "camera_ToF": "External live-camera report adds evidence for that unit only; exact path/latency and replica camera/ToF remain unverified. frame failure wording and gaze hold still pending.",
+              "model_management_training_sound": "No new policy weights, training, model selection or audio asset changes; host VLM still optional example."
+            },
+            "tracker_tests_executed": false,
+            "tracker_robot_connected": false
           }
         }
       ],
@@ -6535,9 +6612,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-02T14:22:25.205206+00:00",
+  "checked_at_utc": "2026-11-02T16:17:48.629826+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-02T13:13:25.775161+00:00",
+    "previous_substantive_review_utc": "2026-11-02T14:22:25.205206+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
@@ -6546,9 +6623,6 @@
     "stable_asset_count": 8,
     "previous_tracked_prs_merged": false,
     "new_pull_requests": {},
-    "newly_indexed_existing_prs": [
-      271
-    ],
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
         271
@@ -6557,7 +6631,15 @@
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "new_review_concerns": [],
+    "new_review_concerns": [
+      {
+        "repository": "pollen-robotics/microduck",
+        "number": 271,
+        "comment_id": 6581614872,
+        "head_sha": "75748cc23dea863df2930c653a39d42bea4156a2",
+        "kind": "External hardware report and pending versioning/ownership/posture/gaze followups"
+      }
+    ],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
@@ -6568,7 +6650,15 @@
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Newly indexed existing unmerged SDK271 at75748 after merge of recordedmain997; actual SDK revision5c436 is4-commit29-file rename/CI/publisher/example revision over observed5586418, full PR33files. Actual importmicroduck and package0.1.0 source; no sdk-v GitHub ref found, workflow is not publication. Gaze hold only in example; SDK look still one RPC. Native/ToF transport unchanged. No tests/installation/model/device/webpage operation; official heads/releases/dev tags/model metadata/blog and committed local validation unchanged. Eight reviewed SDK blobs identical across5c436 and75748; maintainer robot test remains planned."
+    "non_substantive_comment_updates": [
+      {
+        "repository": "pollen-robotics/microduck_rl",
+        "number": 77,
+        "comment_id": 6580850208,
+        "reason": "Intent to investigate Windows11 only; source unchanged and no new compatibility result."
+      }
+    ],
+    "notes": "SDK271 source remains757 with reviewed SDK blobs from5c. New external real-robot0.18.2 report is not replica validation and has no exact test SDK/firmware SHA or media candidate path. Daemon-tag/workspace-version SDK publication, stand helper and held-gaze are followup proposals; current package0.1.0/sdk-v workflow unchanged. All official source/release/dev refs/models/blog and local verification checkpoints unchanged; tracker executed no tests/models or robot/webpage actions."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
