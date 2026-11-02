@@ -7,9 +7,9 @@
     "pollen-robotics/microduck": {
       "default_branch": "main",
       "head": {
-        "sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "committed_at": "2026-10-30T14:58:39Z",
-        "subject": "Merge pull request #502 from pollen-robotics/telemetry"
+        "sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+        "committed_at": "2026-11-02T11:36:59Z",
+        "subject": "Merge pull request #513 from first-it-consulting/duck-sim-walks"
       },
       "latest_stable_release": {
         "tag_name": "daemon-v0.18.3",
@@ -1156,28 +1156,40 @@
         {
           "tag": "daemon-dev-codex/gamepad-connection",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-codex/gamepad-connection",
-          "published_at": "2026-10-31T21:54:56Z",
-          "version": "daemon 0.17.9-dev.1534.789ec47 (codex/gamepad-connection)",
-          "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
+          "published_at": "2026-11-02T11:57:22Z",
+          "version": "daemon 0.18.3-dev.1539.d6f77af (codex/gamepad-connection)",
+          "head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
           "prerelease": true,
           "related_pull_request": 477,
-          "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46.",
+          "change": "Merge currentmain and assign additive pad status/connect contract48; d6f filters listed devices to bonded recognized gamepads or bonded exact-HID inputs, excluding a connected non-pad phone from nfcd gate.",
           "priority": "review_candidate_only_not_stable",
-          "replica_integration": "not_integrated; doc-only review, no downloaded binaries/tests/installation",
-          "previous_head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+          "replica_integration": "not integrated at native785; no tests/binary installation by tracker",
+          "previous_head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
           "head_history": [
             "f169c3dc1fa042229461f7f3691245cfcdf48d19",
             "61f4ad5882243c1bcb34500a59974308684ada28",
             "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
-            "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1"
+            "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+            "789ec47e00d743f0909ba5e71e09b9731f38cac2"
           ],
-          "development_api_version": 46,
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1...789ec47e00d743f0909ba5e71e09b9731f38cac2",
+          "development_api_version": 48,
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/789ec47e00d743f0909ba5e71e09b9731f38cac2...d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
           "comparison_to_recorded_main": {
-            "status": "diverged",
-            "ahead_by": 8,
-            "behind_by": 50
-          }
+            "ahead_by": 10,
+            "behind_by": 0
+          },
+          "source_history": [
+            {
+              "tag": "daemon-dev-codex/gamepad-connection",
+              "published_at": "2026-10-31T21:54:56Z",
+              "version": "daemon 0.17.9-dev.1534.789ec47 (codex/gamepad-connection)",
+              "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
+              "development_api_version": 46,
+              "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46."
+            }
+          ],
+          "source_version": "0.18.3",
+          "scope_note": "Still unmerged Bluetooth status/targeted reconnect proposal, rebased by merge onto currentmain; source0.18.3/API48. Main OS46 and telemetry47 are inherited history, not new PR477 features."
         },
         {
           "tag": "daemon-dev-codex/robot-diagnostics-design",
@@ -1199,11 +1211,11 @@
         {
           "tag": "daemon-dev-main",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
-          "published_at": "2026-10-30T15:03:05Z",
-          "head_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "published_at": "2026-11-02T11:42:15Z",
+          "head_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
           "prerelease": true,
-          "scope_note": "Same fixed source as stable0.18.2/API46; source parity does not certify identical packaging or replica integration.",
-          "previous_head_sha": "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
+          "scope_note": "Main-only simulator/xtask changes ahead of formal0.18.3; source0.18.3/API47, developer-signed build only.",
+          "previous_head_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
           "head_history": [
             "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
             "2091d42286fa29a1e24ea4f072191a4836fd1a6e",
@@ -1211,9 +1223,10 @@
             "6cdfdaad21bed25e01b450c0dd4e0aee0ae19fde",
             "52a8e2377aa2ef1ce9d6ae3fdc062d1cc3ab7b36",
             "a360b3843bb49fd48a635b39eabcb835d9fffecb",
-            "7d866d0f864c9b6f19ec6b7762ec2341520db3cc"
+            "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
+            "b2b0d213a402caeac492dd662ea891faa17f67c0"
           ],
-          "version": "daemon 0.18.3-dev.1529.b2b0d21 (main)",
+          "version": "daemon 0.18.3-dev.1537.997808c (main)",
           "history": [
             {
               "tag": "daemon-dev-main",
@@ -1472,15 +1485,25 @@
                 "dev_sha": "4fc912ff57d96ecffdb83adff4dff925a50b842f",
                 "note": "dev-main publication14:14UTC predates telemetry merge14:58UTC; do not label it0.18.3/API47."
               }
+            },
+            {
+              "tag": "daemon-dev-main",
+              "published_at": "2026-10-30T15:03:05Z",
+              "version": "daemon 0.18.3-dev.1529.b2b0d21 (main)",
+              "head_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+              "change": "Sameb2b0d213source asformal0.18.3 includingPR502telemetryandPR505SSHcache; noadditionalfeaturechange.",
+              "scope_note": "Same fixed source as stable0.18.2/API46; source parity does not certify identical packaging or replica integration."
             }
           ],
           "api_version": 47,
-          "change": "Sameb2b0d213source asformal0.18.3 includingPR502telemetryandPR505SSHcache; noadditionalfeaturechange.",
+          "change": "Merge PR513: existing velstand/backlash/drive changes plus xtask slot-default regression; temporary AGENTS addition reverted. No action_scale=1.0, new daemon/API or weights.",
           "comparison_to_recorded_main": {
-            "main_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-            "dev_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-            "note": "Exactsourceidentitywithcurrentmainandstable0.18.3; publicationnameis0.18.3-dev.1529,b2b,API47."
-          }
+            "ahead_by": 0,
+            "behind_by": 0
+          },
+          "development_api_version": 47,
+          "source_version": "0.18.3",
+          "replica_integration": "not integrated; documentation review only"
         },
         {
           "tag": "daemon-dev-ground-grasp-x",
@@ -2015,6 +2038,30 @@
           "model_metadata_changed": false,
           "priority": "medium_prototype_reference; high_contract_and_motion_safety_review_before_adoption",
           "replica_integration": "not_integrated; not same API47 as official0.18.3telemetry or local0182extensions; no binary/model download/install or hardware test"
+        },
+        {
+          "tag": "daemon-dev-pad-pairing-cleanup",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-pad-pairing-cleanup",
+          "published_at": "2026-11-02T11:51:10Z",
+          "version": "daemon 0.18.3-dev.1538.b69b5ff (pad-pairing-cleanup)",
+          "head_sha": "b69b5ff040fa5fe59b23bd13f144e4e4320c2af2",
+          "prerelease": true,
+          "source_version": "0.18.3",
+          "development_api_version": 47,
+          "change": "Standalone2-file configd cleanup on currentmain: StartDiscovery retries only NotReady within5s, hung call bounded too; both bond timeout paths request CancelPairing bounded2s. No association deletion or claimed radio recovery.",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...b69b5ff040fa5fe59b23bd13f144e4e4320c2af2",
+          "comparison_to_recorded_main": {
+            "ahead_by": 1,
+            "behind_by": 0
+          },
+          "changed_files": [
+            "configd/src/bluez.rs",
+            "configd/src/pad.rs"
+          ],
+          "new_discovery_test_definitions": 2,
+          "scope_note": "Not full PR477: no targeted pad.connect/enriched status/HID list contract48 and no detected-Zero3 hardware guard. robotctl legacy workaround still depends on marker only. Main OS/telemetry47 inherited.",
+          "priority": "review narrowly before any adoption; keep pairing timeout cleanup separate from hardware workaround and richer status contract",
+          "replica_integration": "not integrated; no tracker source tests, installation or robot operation"
         }
       ],
       "pending_pull_requests": [
@@ -2371,11 +2418,11 @@
           "number": 500,
           "url": "https://github.com/pollen-robotics/microduck/pull/500",
           "title": "duck-sim: name the shipped gait, not the legacy pair, so the duck walks",
-          "state": "open",
+          "state": "closed",
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-29T22:41:14Z",
-          "updated_at": "2026-10-29T22:41:14Z",
+          "updated_at": "2026-11-02T11:38:53Z",
           "head_sha": "34fceb53f5caa980b78840162a5c5afa38888704",
           "base_sha": "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
           "review": {
@@ -2410,7 +2457,25 @@
             "file_count": 1,
             "api_version": 46,
             "replica_integration": "not_integrated; no runtime/model/image/hardware or online-page change by tracker"
-          }
+          },
+          "state_history": [
+            {
+              "state": "open",
+              "merged_at": null,
+              "updated_at": "2026-10-29T22:41:14Z",
+              "head_sha": "34fceb53f5caa980b78840162a5c5afa38888704"
+            }
+          ],
+          "closed_at": "2026-11-02T11:37:38Z",
+          "closure_review": {
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "reason": "Superseded by513; action_scale=1.0 was not taken, robotd default retained.",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/500#issuecomment-6576171516",
+            "comment_created_at_utc": "2026-11-02T11:37:37Z",
+            "comment_updated_at_utc": "2026-11-02T11:38:53Z",
+            "closed_without_merge": true
+          },
+          "replica_integration": "not integrated by tracker; closure is not adoption of every proposed feature"
         },
         {
           "number": 495,
@@ -3292,20 +3357,20 @@
         },
         {
           "number": 477,
-          "title": "Improve gamepad connection status and add targeted reconnect",
+          "title": "Improve gamepad status, reconnect and pairing timeout cleanup",
           "state": "open",
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-27T13:25:40Z",
-          "updated_at": "2026-11-01T09:40:23Z",
+          "updated_at": "2026-11-02T11:56:33Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/477",
-          "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
-          "base_sha": "5def2f3e66501f0f365d4fb1183020b8ee875443",
+          "head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+          "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
           "base_branch": "main",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/5def2f3e66501f0f365d4fb1183020b8ee875443...bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
           "replica_integration": "not_integrated; non-draft open PR is not merged or stable; no tracker code/model/image/device update",
           "this_review": "Read-only currentbase fixed diff and relevant incremental changes; no downloaded implementation or tests executed.",
-          "scope_note": "Standalone Bluetooth status/exactMAC reconnect only, API46 with currentmain; diagnostics/session notes/temporary CI removed. Home is normal reconnect; connect does not guarantee remote wake, and HID match does not prove padd opened the input.",
+          "scope_note": "Still unmerged Bluetooth status/targeted reconnect proposal, rebased by merge onto currentmain; source0.18.3/API48. Main OS46 and telemetry47 are inherited history, not new PR477 features.",
           "changed_file_count": 16,
           "priority": "higher_gamepad_contract_review; matching_daemons_and_service_state; no_native_diagnostic_register_mapping_in_this_Bluetooth_only_scope",
           "comparison_with_PR474": "PR474 automatic classic re-page/background sweep remains separate pending work; PR477 provides exact targeted manual reconnect/status, not that background loop.",
@@ -3317,7 +3382,7 @@
             "latest_standalone_deployed_during_review": false,
             "verified_by_tracker": false
           },
-          "previous_head_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+          "previous_head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
           "previous_bluetooth_only_validation": {
             "workspace_tests_passed_excluding_nfcd_macos": 1744,
             "nfc_library_tests_passed": 22,
@@ -3343,10 +3408,10 @@
             }
           ],
           "latest_increment": {
-            "from_sha": "61f4ad5882243c1bcb34500a59974308684ada28",
-            "to_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
-            "file": ".github/workflows/ci.yml",
-            "change": "Run CI for direct pushes on codex/gamepad-connection as well as main. No additional gamepad/motor runtime behavior in this increment."
+            "from_sha": "3485be7ba1414a5afbae8fcaa40463b94b854f36",
+            "to_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+            "file": "configd/src/bluez.rs",
+            "change": "Restrict status list to bonded gamepad heuristics or positive exact-HID evidence; add phone/input listing regression definition. Previous merge adopted main and assigned API48."
           },
           "revision_history": [
             {
@@ -3362,13 +3427,22 @@
                 "positive_explicit_reconnect_from_disconnected_available_controller_tested": false,
                 "verified_by_tracker": false
               }
+            },
+            {
+              "head_sha": "789ec47e00d743f0909ba5e71e09b9731f38cac2",
+              "base_sha": "5def2f3e66501f0f365d4fb1183020b8ee875443",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/5def2f3e66501f0f365d4fb1183020b8ee875443...bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+              "development_api_version": 46,
+              "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46.",
+              "updated_at": "2026-11-01T09:40:23Z",
+              "scope_note": "Standalone Bluetooth status/exactMAC reconnect only, API46 with currentmain; diagnostics/session notes/temporary CI removed. Home is normal reconnect; connect does not guarantee remote wake, and HID match does not prove padd opened the input."
             }
           ],
-          "development_api_version": 46,
+          "development_api_version": 48,
           "latest_body_review": {
-            "checked_at_utc": "2026-10-28T14:33:35.344006+00:00",
-            "source_head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
-            "change": "Description clarifies targetedRust1.94.1components/independentreview already recorded; no new source or robotdeployment, positiveexplicitreconnect stillunverified.",
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "source_head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+            "change": "Current description still mentions API46; read sourceCargo0.18.3 and API48 instead. Old physical1533/489 and789 guard reports remain historical, not new d6 hardware acceptance.",
             "counts_as_new_implementation_or_hardware_acceptance": false
           },
           "previous_priority_text": "high_contract_review_before_any_adoption; requiresHD1910_native_register_mapping and combined daemon release evaluation",
@@ -3457,16 +3531,27 @@
               "previous_priority_text": "high_contract_review_before_any_adoption; requiresHD1910_native_register_mapping and combined daemon release evaluation"
             }
           ],
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1...789ec47e00d743f0909ba5e71e09b9731f38cac2",
-          "change": "Pair startup retries only BlueZ NotReady for at most5s; expired bonding explicitly requests CancelPairing bounded2s. Legacy radio-reset workaround now requires both marker and device-tree-detected Zero3, ignoring editable board.version. Still unmerged standalone0.17.9/API46.",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/789ec47e00d743f0909ba5e71e09b9731f38cac2...d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+          "change": "Merge currentmain and assign additive pad status/connect contract48; d6f filters listed devices to bonded recognized gamepads or bonded exact-HID inputs, excluding a connected non-pad phone from nfcd gate.",
           "incremental_review": {
-            "commits": 3,
-            "files": 4,
-            "new_test_functions": 3,
-            "source_tests_run_by_tracker": false,
-            "author_reported": "configd66 tests at489637c; robotctl234pass/5ignored and aarch64clippy at hardware-guard followup. Author beta still ran1533; marker removal was manual, new guard not yet installed; fresh Sync test pending.",
-            "local_0182_adoption": "not_integrated_at785254e; staticBlueZ lacks new helpers, robotctl marker check has no hardware conjunct",
-            "priority": "high_boundary_review_for_Radxa_pairing; no release/device readiness claim"
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "new_direct_fix_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+            "main_merge_sha": "3485be7ba1414a5afbae8fcaa40463b94b854f36",
+            "against_current_main": {
+              "ahead_by": 10,
+              "behind_by": 0,
+              "files": 16
+            },
+            "older789_to_current": {
+              "ahead_by": 57,
+              "note": "Mostly already archived main history; not57 new hand-controller features."
+            },
+            "list_rule": "paired && (is_gamepad() || hid_recognized == Some(true))",
+            "known_gamepad_false_or_unknown_HID": "still listed by heuristic; HID does not prove padd opened input",
+            "unnamed_explicit_address_pad": "listed only with Some(true) HID; false/unknown excluded",
+            "new_filter_test_definition": "status_lists_pads_and_input_devices_but_not_a_connected_phone",
+            "tests_executed_by_tracker": false,
+            "physical_confirmation": "not established for new source"
           },
           "latest_consumer_review": {
             "checked_at_utc": "2026-11-01T09:09:02.372170+00:00",
@@ -3475,7 +3560,7 @@
             "review_comment_url": "https://github.com/pollen-robotics/microduck/pull/477#discussion_r4434936078",
             "review_created_at_utc": "2026-11-01T09:40:23Z",
             "review_updated_at_utc": "2026-11-01T09:42:35Z",
-            "state": "unresolved_review_concern; no source/tag/state change; not a formal release or hardware acceptance",
+            "state": "Source remedy added at d6f in unmerged PR477; no tracker tests or hardware acceptance",
             "finding": "Static contract mismatch: PadStatus lists every paired device on the selected adapter; nfcd passes status.pads through and exits on any connected entry before chirp/pair/greet. A bonded connected non-HID phone can therefore suppress an NFC pad tag attempt under these conditions.",
             "fixed_sources": {
               "producer": "https://github.com/pollen-robotics/microduck/blob/789ec47e00d743f0909ba5e71e09b9731f38cac2/configd/src/bluez.rs#L936-L944",
@@ -3507,8 +3592,69 @@
               "actions_and_sound": "NFC path may return before chirp, pairing and greet; no action mapping, motion or audio asset change."
             },
             "tests_executed_by_tracker": false,
-            "runtime_changed_by_tracker": false
-          }
+            "runtime_changed_by_tracker": false,
+            "previous_state": "unresolved_review_concern; no source/tag/state change; not a formal release or hardware acceptance",
+            "resolution": {
+              "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+              "source_head_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/blob/d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594/configd/src/bluez.rs",
+              "change": "Restore gamepad classification while retaining exact-HID fallback for devices paired by address. Known gamepad false/None HID still lists; non-pad phone false/None does not.",
+              "consumer_gate_changed": false,
+              "tests_executed_by_tracker": false,
+              "local_replica_adopted": false
+            }
+          },
+          "previous_development_api_version": 46,
+          "previous_title": "Improve gamepad connection status and add targeted reconnect",
+          "source_version": "0.18.3",
+          "description_version_note": "PR body still says API46; checked Cargo/proto source is0.18.3/API48 and governs this record.",
+          "latest_revision_review": {
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "new_direct_fix_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+            "main_merge_sha": "3485be7ba1414a5afbae8fcaa40463b94b854f36",
+            "against_current_main": {
+              "ahead_by": 10,
+              "behind_by": 0,
+              "files": 16
+            },
+            "older789_to_current": {
+              "ahead_by": 57,
+              "note": "Mostly already archived main history; not57 new hand-controller features."
+            },
+            "list_rule": "paired && (is_gamepad() || hid_recognized == Some(true))",
+            "known_gamepad_false_or_unknown_HID": "still listed by heuristic; HID does not prove padd opened input",
+            "unnamed_explicit_address_pad": "listed only with Some(true) HID; false/unknown excluded",
+            "new_filter_test_definition": "status_lists_pads_and_input_devices_but_not_a_connected_phone",
+            "tests_executed_by_tracker": false,
+            "physical_confirmation": "not established for new source"
+          },
+          "increment_history": [
+            {
+              "from_sha": "61f4ad5882243c1bcb34500a59974308684ada28",
+              "to_sha": "f72c19bf7e58cf0d16e00591728b39f887d4c8e0",
+              "file": ".github/workflows/ci.yml",
+              "change": "Run CI for direct pushes on codex/gamepad-connection as well as main. No additional gamepad/motor runtime behavior in this increment."
+            }
+          ],
+          "incremental_review_history": [
+            {
+              "commits": 3,
+              "files": 4,
+              "new_test_functions": 3,
+              "source_tests_run_by_tracker": false,
+              "author_reported": "configd66 tests at489637c; robotctl234pass/5ignored and aarch64clippy at hardware-guard followup. Author beta still ran1533; marker removal was manual, new guard not yet installed; fresh Sync test pending.",
+              "local_0182_adoption": "not_integrated_at785254e; staticBlueZ lacks new helpers, robotctl marker check has no hardware conjunct",
+              "priority": "high_boundary_review_for_Radxa_pairing; no release/device readiness claim"
+            }
+          ],
+          "body_review_history": [
+            {
+              "checked_at_utc": "2026-10-28T14:33:35.344006+00:00",
+              "source_head_sha": "bcd2f70d3ad56a213bbaff88b433ac1bf1c012b1",
+              "change": "Description clarifies targetedRust1.94.1components/independentreview already recorded; no new source or robotdeployment, positiveexplicitreconnect stillunverified.",
+              "counts_as_new_implementation_or_hardware_acceptance": false
+            }
+          ]
         },
         {
           "number": 476,
@@ -4132,11 +4278,29 @@
           "number": 450,
           "url": "https://github.com/pollen-robotics/microduck/pull/450",
           "title": "duck-sim walks on velstand, as a robot does",
-          "state": "open",
+          "state": "closed",
           "merged_at": null,
-          "updated_at": "2026-10-25T06:21:04Z",
+          "updated_at": "2026-11-02T11:37:35Z",
           "head_sha": "7fd745a4dd21ff7c40519dc732847ca8a1a5994f",
-          "draft": false
+          "draft": false,
+          "state_history": [
+            {
+              "state": "open",
+              "merged_at": null,
+              "updated_at": "2026-10-25T06:21:04Z",
+              "head_sha": "7fd745a4dd21ff7c40519dc732847ca8a1a5994f"
+            }
+          ],
+          "closed_at": "2026-11-02T11:37:35Z",
+          "closure_review": {
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "reason": "Superseded by513; its xtask regression was transferred as a separate authored commit.",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/450#issuecomment-6576170520",
+            "comment_created_at_utc": "2026-11-02T11:37:34Z",
+            "comment_updated_at_utc": "2026-11-02T11:37:34Z",
+            "closed_without_merge": true
+          },
+          "replica_integration": "not integrated by tracker; closure is not adoption of every proposed feature"
         },
         {
           "number": 447,
@@ -4745,25 +4909,25 @@
         {
           "number": 513,
           "title": "duck-sim: the twin walks — velstand, on the robot with backlash",
-          "state": "open",
+          "state": "closed",
           "draft": false,
-          "merged_at": null,
+          "merged_at": "2026-11-02T11:37:00Z",
           "created_at": "2026-11-01T15:18:35Z",
-          "updated_at": "2026-11-01T15:18:35Z",
+          "updated_at": "2026-11-02T11:37:00Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/513",
-          "head_sha": "6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+          "head_sha": "f3ccf7ca3a099938e0f0df155967511f12e63c85",
           "base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
           "base_branch": "main",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...f3ccf7ca3a099938e0f0df155967511f12e63c85",
           "author": "first-it-consulting",
-          "classification": "community unmerged simulator proposal; not a daemon release or robot acceptance",
+          "classification": "Merged upstream main; not in formal0.18.3 stable tag or local replica",
           "changed_file_count": 3,
           "changed_files": [
-            "AGENTS.md",
             "docs/design/simulation.md",
-            "scripts/duck-sim"
+            "scripts/duck-sim",
+            "xtask/src/main.rs"
           ],
-          "commit_count": 2,
+          "commit_count": 4,
           "change": "duck-sim defaults to backlash scene and velstand walk with stand=none; checks velstand.onnx when selecting a policy directory; drive reports simulator trunk displacement and accumulated quaternion yaw, with a low-displacement warning.",
           "model_selection": "A local policies/ folder wins only if velstand.onnx exists. Otherwise use state/policies/current and try seed-policies.sh if missing; existing custom alpha-only folders are not selected. File existence is not a policy contract or HD1910 compatibility check.",
           "runtime_or_api_implementation_changed": false,
@@ -4775,7 +4939,9 @@
             "drive_measurement": "https://github.com/pollen-robotics/microduck/blob/6eb8525135abbd7cd9cdc2b468c74ef967e51793/scripts/duck-sim#L739-L768",
             "training_registry": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/tasks/__init__.py#L239-L263",
             "scene_model": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/robot/microduck/scene_backlash.xml#L1-L28",
-            "body_server_control": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/sim/body_server.py#L359-L388"
+            "body_server_control": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/src/mjlab_microduck/sim/body_server.py#L359-L388",
+            "merged_slot_regression": "https://github.com/pollen-robotics/microduck/blob/997808c1d71056d31bd6f05fc5fde848c849d2bc/xtask/src/main.rs",
+            "merged_launcher": "https://github.com/pollen-robotics/microduck/blob/997808c1d71056d31bd6f05fc5fde848c849d2bc/scripts/duck-sim"
           },
           "source_review_limits": [
             "math.dist of start/end XY is net displacement, not signed forward progress or accumulated path length.",
@@ -4799,7 +4965,7 @@
           },
           "priority": "medium simulator reference; high priority for model/actuator/measurement boundaries before future Linux simulation acceptance",
           "replica_integration": {
-            "status": "not integrated at fixed native checkpoint",
+            "status": "not integrated at fixed native785; previous source-only comparison remains applicable",
             "runtime_source_sha": "785254e8105d42e8bab2085bdfe04d15635c0f7a",
             "script": "scripts/duck-sim",
             "scene_default": "empty override, simulator default",
@@ -4814,7 +4980,89 @@
             "model_management_training": "Changes simulator model selection and fallback fetch conditions, not weights or RL training code. Pin local models and compare actuator/scene contracts before adoption.",
             "actions_and_sound": "Changes the simulator walking network; no button mapping, skill/audio asset or physical gait validation change."
           },
-          "this_review": "Read three changed-file patches, pinned source and existing RL scene/registry/body-server source; no simulator, test, training, downloaded software or model executed."
+          "this_review": "Read final merge diff and added xtask definition; launcher raw bytes match previously reviewed6eb. No new simulator/Linux/ARM/robot acceptance run.",
+          "revision_history": [
+            {
+              "head_sha": "6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+              "state": "open",
+              "draft": false,
+              "merged_at": null,
+              "updated_at": "2026-11-01T15:18:35Z",
+              "changed_files": [
+                "AGENTS.md",
+                "docs/design/simulation.md",
+                "scripts/duck-sim"
+              ],
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+              "classification": "community unmerged simulator proposal; not a daemon release or robot acceptance",
+              "this_review": "Read three changed-file patches, pinned source and existing RL scene/registry/body-server source; no simulator, test, training, downloaded software or model executed."
+            }
+          ],
+          "closed_at": "2026-11-02T11:37:00Z",
+          "previous_head_sha": "6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+          "merge_commit_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+          "maintainer_followup": {
+            "from_sha": "6eb8525135abbd7cd9cdc2b468c74ef967e51793",
+            "to_sha": "f3ccf7ca3a099938e0f0df155967511f12e63c85",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eb8525135abbd7cd9cdc2b468c74ef967e51793...f3ccf7ca3a099938e0f0df155967511f12e63c85",
+            "changes": [
+              "Revert preliminary AGENTS.md addition.",
+              "Take duck_sim_names_robotds_walk_defaults from PR450 into xtask; compare every generated slot against resolved robotd Walk defaults, with explicit none for unloaded slots."
+            ],
+            "action_scale_1_0_adopted": false,
+            "drive_default_m_s": 0.15,
+            "test_definition_executed_by_tracker": false
+          }
+        },
+        {
+          "number": 331,
+          "title": "duck-sim: a default that walks, keyboard teleop, and a race to run",
+          "created_at": "2026-09-27T13:36:39Z",
+          "url": "https://github.com/pollen-robotics/microduck/pull/331",
+          "head_sha": "67b8b949cc0af28888f02c20e5b6519d9ee55957",
+          "base_sha": "a9ec4b2079ef8ee7904014089c885bb07d57d63c",
+          "base_branch": "main",
+          "classification": "Existing closed proposal newly indexed with simulation consolidation, not a newly created PR",
+          "changed_file_count": 3,
+          "state": "closed",
+          "draft": false,
+          "merged_at": null,
+          "closed_at": "2026-11-02T11:37:46Z",
+          "updated_at": "2026-11-02T11:37:46Z",
+          "closure_review": {
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "reason": "Velocity workaround superseded by513. keys, require_body and duck-race were not reviewed/adopted; separate PRs requested.",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/331#issuecomment-6576173813",
+            "comment_created_at_utc": "2026-11-02T11:37:45Z",
+            "comment_updated_at_utc": "2026-11-02T11:37:45Z",
+            "closed_without_merge": true
+          },
+          "replica_integration": "not integrated by tracker; closure is not adoption of every proposed feature"
+        },
+        {
+          "number": 390,
+          "title": "duck-sim: default drive to 0.30 m/s",
+          "created_at": "2026-10-11T19:42:38Z",
+          "url": "https://github.com/pollen-robotics/microduck/pull/390",
+          "head_sha": "36ee8f0b0091e48f5ab849cfb152749c4a4a9caa",
+          "base_sha": "dec725c67ffbbdde7f1de30f8c936b1bf9c1d70e",
+          "base_branch": "main",
+          "classification": "Existing closed proposal newly indexed with simulation consolidation, not a newly created PR",
+          "changed_file_count": 2,
+          "state": "closed",
+          "draft": false,
+          "merged_at": null,
+          "closed_at": "2026-11-02T11:37:41Z",
+          "updated_at": "2026-11-02T11:37:41Z",
+          "closure_review": {
+            "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
+            "reason": "Velocity workaround superseded by513; default remains0.15m/s, not0.30m/s.",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/390#issuecomment-6576172287",
+            "comment_created_at_utc": "2026-11-02T11:37:40Z",
+            "comment_updated_at_utc": "2026-11-02T11:37:40Z",
+            "closed_without_merge": true
+          },
+          "replica_integration": "not integrated by tracker; closure is not adoption of every proposed feature"
         }
       ],
       "previous_stable_releases": [
@@ -5055,14 +5303,18 @@
       },
       "main_since_latest_stable": {
         "from_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "to_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/commit/b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "commit_count": 0,
-        "file_count": 0,
-        "merged_pull_requests": [],
+        "to_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...997808c1d71056d31bd6f05fc5fde848c849d2bc",
+        "commit_count": 5,
+        "file_count": 3,
+        "merged_pull_requests": [
+          513
+        ],
         "main_api_version": 47,
-        "release_status": "Recordedmain equalsformal0.18.3.8assetmetadata+2JSONmanifestsreviewed; nofurthermain-onlysourcechange.",
-        "replica_integration": "not_integrated; localisolated18.2hasownAPI47contract"
+        "version_family": "0.18.3",
+        "release_status": "Main is ahead of formal0.18.3 by5 commits/3 final files; only daemon-dev-main1537 published for this source. Stable tag/assets unchanged.",
+        "replica_integration": "not integrated; fixed local0182/ownAPI47 still has old simulator script; no test rerun",
+        "scope_note": "Merge PR513: existing velstand/backlash/drive changes plus xtask slot-default regression; temporary AGENTS addition reverted. No action_scale=1.0, new daemon/API or weights."
       },
       "retired_development_releases": [
         {
@@ -5251,9 +5503,9 @@
         }
       ],
       "previous_head": {
-        "sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
-        "committed_at": "2026-10-30T08:40:03Z",
-        "subject": "Merge pull request #474 from is-qian/pr/configd-auto-reconnect"
+        "sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+        "committed_at": "2026-10-30T14:58:39Z",
+        "subject": "Merge pull request #502 from pollen-robotics/telemetry"
       },
       "tracked_model_metadata": [
         {
@@ -5318,6 +5570,11 @@
           "sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
           "committed_at": "2026-10-30T08:40:03Z",
           "subject": "Merge pull request #474 from is-qian/pr/configd-auto-reconnect"
+        },
+        {
+          "sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "committed_at": "2026-10-30T14:58:39Z",
+          "subject": "Merge pull request #502 from pollen-robotics/telemetry"
         }
       ],
       "main_since_latest_stable_history": [
@@ -5406,23 +5663,33 @@
           "version_family": "0.18.3 release preparation",
           "release_status": "daemon-v0.18.3 git tag exists at b2b0d213; no release-by-tag found at this check; latest published stable remains0.18.2.",
           "replica_integration": "not_integrated; isolated local0.18.2/API47 has another extension contract and no telemetry.* implementation"
+        },
+        {
+          "from_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "to_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/commit/b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "commit_count": 0,
+          "file_count": 0,
+          "merged_pull_requests": [],
+          "main_api_version": 47,
+          "release_status": "Recordedmain equalsformal0.18.3.8assetmetadata+2JSONmanifestsreviewed; nofurthermain-onlysourcechange.",
+          "replica_integration": "not_integrated; localisolated18.2hasownAPI47contract"
         }
       ],
       "latest_main_change": {
-        "from_sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
-        "to_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/e1b49bf20c5efcbe187553e7b2210ec3df2cd788...b2b0d213a402caeac492dd662ea891faa17f67c0",
-        "commit_count": 10,
-        "file_count": 17,
+        "from_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+        "to_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/b2b0d213a402caeac492dd662ea891faa17f67c0...997808c1d71056d31bd6f05fc5fde848c849d2bc",
+        "commit_count": 5,
+        "file_count": 3,
         "merged_pull_requests": [
-          505,
-          502
+          513
         ],
         "main_api_version": 47,
-        "version_family": "formal0.18.3/API47",
-        "release_status": "Main increment now formally published as0.18.3; zeroGitHubassetsobservedatcheck.",
-        "replica_integration": "not_integrated; isolated local0.18.2/API47 has another extension contract and no telemetry.* implementation",
-        "scope_note": "Merged duckctl address cache and default-on usage telemetry; stable0.18.2 source unaffected. No camera/ToF/HD1910/model-training/action/sound implementation change."
+        "version_family": "0.18.3",
+        "release_status": "Main is ahead of formal0.18.3 by5 commits/3 final files; only daemon-dev-main1537 published for this source. Stable tag/assets unchanged.",
+        "replica_integration": "not integrated; fixed local0182/ownAPI47 still has old simulator script; no test rerun",
+        "scope_note": "Merge PR513: existing velstand/backlash/drive changes plus xtask slot-default regression; temporary AGENTS addition reverted. No action_scale=1.0, new daemon/API or weights."
       },
       "release_preparation": {
         "version": "0.18.3",
@@ -5478,6 +5745,22 @@
           "scope_note": "PR474 classic post-bond link retries, trusted bonded pad reconnect sweep and12-to120s global backoff plus0.18.2 version preparation. Four pairing feature files exactly match previously reviewed14e revision; external API remains46.",
           "replica_integration": "not_integrated; local0.17.9 checkpoint and published replica image/online services unchanged",
           "community_layer_reader_observation": "No params reader change: stable params blob remains6e5daa4; previous static base-only community reader mismatch persists, not runtime reproduced."
+        },
+        {
+          "from_sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
+          "to_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/compare/e1b49bf20c5efcbe187553e7b2210ec3df2cd788...b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "commit_count": 10,
+          "file_count": 17,
+          "merged_pull_requests": [
+            505,
+            502
+          ],
+          "main_api_version": 47,
+          "version_family": "formal0.18.3/API47",
+          "release_status": "Main increment now formally published as0.18.3; zeroGitHubassetsobservedatcheck.",
+          "replica_integration": "not_integrated; isolated local0.18.2/API47 has another extension contract and no telemetry.* implementation",
+          "scope_note": "Merged duckctl address cache and default-on usage telemetry; stable0.18.2 source unaffected. No camera/ToF/HD1910/model-training/action/sound implementation change."
         }
       ],
       "latest_stable_change": {
@@ -6061,42 +6344,80 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-02T02:03:07.205885+00:00",
+  "checked_at_utc": "2026-11-02T12:19:20.042616+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-01T09:09:02.372170+00:00",
-    "default_branch_changes": false,
+    "previous_substantive_review_utc": "2026-11-02T02:03:07.205885+00:00",
+    "default_branch_changes": true,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
     "stable_release_actual_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
     "stable_assets_changed": false,
     "stable_asset_count": 8,
-    "previous_tracked_prs_merged": false,
-    "new_pull_requests": {
+    "previous_tracked_prs_merged": true,
+    "merged_pull_requests": {
       "pollen-robotics/microduck": [
         513
       ]
     },
-    "updated_pull_requests": {},
-    "new_development_releases": [],
-    "moved_development_tags": [],
+    "closed_without_merge": {
+      "pollen-robotics/microduck": [
+        450,
+        500,
+        331,
+        390
+      ]
+    },
+    "new_pull_requests": {},
+    "newly_indexed_existing_closed_prs": [
+      331,
+      390
+    ],
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        477,
+        513,
+        450,
+        500
+      ]
+    },
+    "new_development_releases": [
+      "daemon-dev-pad-pairing-cleanup"
+    ],
+    "moved_development_tags": [
+      "daemon-dev-main",
+      "daemon-dev-codex/gamepad-connection"
+    ],
     "retired_development_tags": [],
     "new_review_concerns": [],
+    "source_remedies_for_recorded_concerns": [
+      {
+        "pr": 477,
+        "source_sha": "d6f77afaa11ea5eb6e88004bbc7fcd0bd211d594",
+        "kind": "NFC consumer no longer receives arbitrary bonded phone in pad status",
+        "status": "unmerged source remedy only"
+      }
+    ],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_on": "2026-10-23",
     "model_metadata_changed": false,
-    "supplementary_model_metadata_check": {
-      "checked_at_utc": "2026-11-02T01:58:51.665787+00:00",
-      "status": "healthy; all four stored model metadata records unchanged; previous HTTP429 no longer blocks this check",
-      "new_failure": false
-    },
     "local_migration_record_changed": false,
     "local_public_software_release_recorded": false,
     "runtime_code_changed_by_heartbeat": false,
     "models_replaced": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "New community PR513 only changes duck-sim launcher and documentation; unmerged, no daemon/API/weight change. Read fixed6eb patch and RLbae source, and local785 old simulator script. Author macOS smoke results are not our Linux/ARM/HD1910 validation. Default heads, formal18.3 assets, development SHAs, tracked PR merge states, model metadata and official blog unchanged; PR477 review unchanged."
+    "non_substantive_prs": [
+      {
+        "number": 514,
+        "reason": "closed unmerged empty diff; identical tree to previous stablemain"
+      },
+      {
+        "number": 515,
+        "reason": "closed unmerged empty diff; identical tree to previous stablemain"
+      }
+    ],
+    "notes": "Merged513 main997 is unreleased simulator/xtask change, not a new formal release. PR477 source is0.18.3/API48 and repairs phone/NFC listing concern, still unmerged; separate cleanup devb69 staysAPI47 and lacks hardware guard/full status contract. Related simulation PR closures do not adopt action_scale1.0,0.30m/s defaults or keyboard/race extras. Stable assets, other default heads, model metadata, blog and committed local software checkpoints unchanged; no tracker tests or runtime/webpage/device changes."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
