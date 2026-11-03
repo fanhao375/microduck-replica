@@ -1006,27 +1006,24 @@
         {
           "tag": "daemon-dev-stress-test",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-stress-test",
-          "published_at": "2026-10-29T16:07:41Z",
-          "version": "daemon 0.18.0-dev.1516.0c3e9c6 (stress-test)",
-          "head_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+          "published_at": "2026-11-03T06:18:33Z",
+          "version": "daemon 0.18.3-dev.1543.0c14a11 (stress-test)",
+          "head_sha": "0c14a1145bb376b57ec2b3d27184bf363f8ffcc8",
           "prerelease": true,
           "replica_integration": "not_integrated; no downloaded code/package execution or robot operation",
-          "change": "Imports known official main through0.18.0, then logs per-joint mean/peak current at each published state tick, total simultaneous-current peak, preserves old CSV headers, and adds current charts/report table. No new stress-run measurements or gait/model/control improvement.",
-          "version_family": "0.18.0-development; diverged from stable0.18.1",
-          "priority": "deferred_controlled_bench_reference_only",
+          "change": "Main-sync development rebuild only:24commits/35files bring23already archived main commits plus merge. Ten stress/logger/plotter-owned Git blobs unchanged; no new stress algorithm, current measurements or validation.",
+          "version_family": "0.18.3-development; current main imported but stress remains independent prototype",
+          "priority": "deferred controlled-bench reference; review inherited telemetry/configuration contracts before adoption, not a release-image upgrade recommendation",
           "comparison_to_recorded_main": {
-            "from_sha": "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
-            "to_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
-            "status": "diverged",
-            "ahead_by": 17,
-            "behind_by": 3,
-            "merge_base_sha": "a360b3843bb49fd48a635b39eabcb835d9fffecb",
+            "from_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+            "to_sha": "0c14a1145bb376b57ec2b3d27184bf363f8ffcc8",
+            "ahead_by": 18,
+            "behind_by": 0,
             "file_count": 13,
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7d866d0f864c9b6f19ec6b7762ec2341520db3cc...0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
-            "scope_note": "Contains0.18.0main, misses3commits for0.18.1; stress remains independent development."
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...0c14a1145bb376b57ec2b3d27184bf363f8ffcc8"
           },
           "bounds": "Six provokedfalls/lap,7sgetup+2sreset+7s, then giveuprelax/logging; odometrysquare/forwardToF approximate; noToF continues.",
-          "verification": "Read fixed3file feature patch including2 Rust tests; no source/test/stress/plot execution, report generation or hardware sampling.",
+          "verification": "Read fixed main-import diff and current version/protocol/telemetry/script sources;10owned feature blobs identical. No downloaded source/test/plot/stress execution, hardware operation or new sampling.",
           "history": [
             {
               "tag": "daemon-dev-stress-test",
@@ -1106,23 +1103,88 @@
                 "evidence_limit": "Post-processes recorded events; no independent physical validation or new measured endurance result in this increment."
               },
               "superseded_at_check_utc": "2026-10-29T17:00:11.141450+00:00"
+            },
+            {
+              "tag": "daemon-dev-stress-test",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-stress-test",
+              "published_at": "2026-10-29T16:07:41Z",
+              "version": "daemon 0.18.0-dev.1516.0c3e9c6 (stress-test)",
+              "head_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+              "prerelease": true,
+              "replica_integration": "not_integrated; no downloaded code/package execution or robot operation",
+              "change": "Imports known official main through0.18.0, then logs per-joint mean/peak current at each published state tick, total simultaneous-current peak, preserves old CSV headers, and adds current charts/report table. No new stress-run measurements or gait/model/control improvement.",
+              "version_family": "0.18.0-development; diverged from stable0.18.1",
+              "priority": "deferred_controlled_bench_reference_only",
+              "comparison_to_recorded_main": {
+                "from_sha": "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
+                "to_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+                "status": "diverged",
+                "ahead_by": 17,
+                "behind_by": 3,
+                "merge_base_sha": "a360b3843bb49fd48a635b39eabcb835d9fffecb",
+                "file_count": 13,
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7d866d0f864c9b6f19ec6b7762ec2341520db3cc...0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+                "scope_note": "Contains0.18.0main, misses3commits for0.18.1; stress remains independent development."
+              },
+              "bounds": "Six provokedfalls/lap,7sgetup+2sreset+7s, then giveuprelax/logging; odometrysquare/forwardToF approximate; noToF continues.",
+              "verification": "Read fixed3file feature patch including2 Rust tests; no source/test/stress/plot execution, report generation or hardware sampling.",
+              "previous_head_sha": "8668d77396218d8009ef8596a6c68edc52145c81",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/8668d77396218d8009ef8596a6c68edc52145c81...0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+              "latest_increment": {
+                "from_sha": "8668d77396218d8009ef8596a6c68edc52145c81",
+                "to_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+                "commit_count": 48,
+                "file_count": 56,
+                "scope_note": "48commits56files includes46known-main commits and a merge; the actual new current-logging commit changes3files.",
+                "feature_commit": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+                "feature_file_count": 3,
+                "files": [
+                  "docs/robot/cheatsheet.md",
+                  "robotctl/src/runlog.rs",
+                  "scripts/endurance-plot.py"
+                ],
+                "new_model_or_audio_bytes": false
+              },
+              "offline_report": {
+                "file": "report.pdf",
+                "contents": [
+                  "headline counts",
+                  "provoked fall outcomes by lap",
+                  "first-try/reset get-up times",
+                  "per-lap table",
+                  "vector timeline",
+                  "incident log",
+                  "per-joint current mean and peak chart/table"
+                ],
+                "implementation": "matplotlib PdfPages; timeline redrawn as vector rather than embedded low-resolution PNG",
+                "evidence_limit": "Post-processes recorded events; no independent physical validation or new measured endurance result in this increment."
+              },
+              "current_logging": {
+                "joint_count": 15,
+                "joint_fields": [
+                  "<joint>_current_ma",
+                  "<joint>_current_peak_ma"
+                ],
+                "total_peak_field": "motor_current_peak_ma",
+                "subscription": "RobotSubscribe hz=None, every published control tick rather than20Hz; no new current sensor.",
+                "aggregation": "Absolute current per joint, per-sample frame mean and observed peak; total peak is maximum simultaneous sum, not sum of joint peaks.",
+                "csv_resume": "Existing header remains authoritative; new fields absent from old header are dropped on append.",
+                "report": "currents.png, PDF current chart page and summary.md per-joint mean/peak/time/activity table.",
+                "limitations": "Observed state-stream samples are not continuous electrical peak capture. Verify HD1910 current units, joint order and missing values; no physical current/thermal/endurance validation."
+              },
+              "superseded_at_check_utc": "2026-11-03T06:57:17.222380+00:00"
             }
           ],
-          "previous_head_sha": "8668d77396218d8009ef8596a6c68edc52145c81",
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/8668d77396218d8009ef8596a6c68edc52145c81...0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+          "previous_head_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/0c3e9c66a50144d92e02c9a330d226fad0bd90c6...0c14a1145bb376b57ec2b3d27184bf363f8ffcc8",
           "latest_increment": {
-            "from_sha": "8668d77396218d8009ef8596a6c68edc52145c81",
-            "to_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
-            "commit_count": 48,
-            "file_count": 56,
-            "scope_note": "48commits56files includes46known-main commits and a merge; the actual new current-logging commit changes3files.",
-            "feature_commit": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
-            "feature_file_count": 3,
-            "files": [
-              "docs/robot/cheatsheet.md",
-              "robotctl/src/runlog.rs",
-              "scripts/endurance-plot.py"
-            ],
+            "from_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+            "to_sha": "0c14a1145bb376b57ec2b3d27184bf363f8ffcc8",
+            "commit_count": 24,
+            "file_count": 35,
+            "inherited_main_commits": 23,
+            "merge_only_commits": 1,
+            "stress_feature_blobs_changed": false,
             "new_model_or_audio_bytes": false
           },
           "offline_report": {
@@ -1151,6 +1213,27 @@
             "csv_resume": "Existing header remains authoritative; new fields absent from old header are dropped on append.",
             "report": "currents.png, PDF current chart page and summary.md per-joint mean/peak/time/activity table.",
             "limitations": "Observed state-stream samples are not continuous electrical peak capture. Verify HD1910 current units, joint order and missing values; no physical current/thermal/endurance validation."
+          },
+          "source_version": "0.18.3",
+          "development_api_version": 47,
+          "inherited_main_contract": {
+            "workspace_version": "0.18.3",
+            "official_api_version": 47,
+            "telemetry": "PostHog usage collection on by default on device unless configured off; existing official opt-out retained",
+            "simulator": "scripts/duck-sim explicitly sets MICRODUCK_TELEMETRY=0 for updaterd; inherits velstand/backlash and displacement-report changes already archived under main997",
+            "other_imported_changes": "Previously recorded0.18.1boot check,0.18.2classic pad reconnection and0.18.3SSHcache; not new stress features",
+            "local_api_equivalence": false
+          },
+          "fixed_sources": {
+            "workspace": "https://github.com/pollen-robotics/microduck/blob/0c14a1145bb376b57ec2b3d27184bf363f8ffcc8/Cargo.toml",
+            "protocol": "https://github.com/pollen-robotics/microduck/blob/0c14a1145bb376b57ec2b3d27184bf363f8ffcc8/duck-ipc-proto/src/lib.rs",
+            "telemetry": "https://github.com/pollen-robotics/microduck/blob/0c14a1145bb376b57ec2b3d27184bf363f8ffcc8/updater/src/telemetry.rs",
+            "simulator": "https://github.com/pollen-robotics/microduck/blob/0c14a1145bb376b57ec2b3d27184bf363f8ffcc8/scripts/duck-sim"
+          },
+          "impact": {
+            "HD1910": "No new servo implementation/current conversion; existing absolute-current samples and joint order still require physical calibration. Deliberate fall/get-up prototype only for future controlled bench review.",
+            "camera_ToF": "No new sensing/transport in stress-owned code; existing forward ToF guard is approximate and missing depth can continue as before.",
+            "models_training_actions_sound": "No new weights, training, gait, fall/get-up sequence or sound assets in this main-sync increment; local candidate not updated."
           }
         },
         {
@@ -2221,9 +2304,9 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-30T12:43:31Z",
-          "updated_at": "2026-10-30T16:44:38Z",
-          "head_sha": "f28005581936cb794aaea089708474f8ca24dfab",
-          "base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+          "updated_at": "2026-11-03T05:55:02Z",
+          "head_sha": "20d48383999712401485c7923aaa36ac2ea14141",
+          "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
           "review": {
             "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4fc912ff57d96ecffdb83adff4dff925a50b842f...2b379204fa7dfcbc566db8fd4057eb1d0c9d8392",
             "commit_count": 6,
@@ -2264,6 +2347,18 @@
               "plotter_and_tests_changed": false,
               "substantive_feature_change": false,
               "merged": false
+            },
+            "latest_main_sync": {
+              "checked_at_utc": "2026-11-03T06:57:17.222380+00:00",
+              "previous_head_sha": "f28005581936cb794aaea089708474f8ca24dfab",
+              "head_sha": "20d48383999712401485c7923aaa36ac2ea14141",
+              "previous_base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+              "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/f28005581936cb794aaea089708474f8ca24dfab...20d48383999712401485c7923aaa36ac2ea14141",
+              "commits": 6,
+              "files": 3,
+              "change": "Already archived main513 simulation history plus merge only; exact plotter/test Git blobs unchanged. Not a new analytics fix or rerun of historical37Windows tests.",
+              "substantive_feature_change": false
             }
           },
           "review_history": [
@@ -2300,9 +2395,22 @@
               "base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
               "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/2b379204fa7dfcbc566db8fd4057eb1d0c9d8392...f28005581936cb794aaea089708474f8ca24dfab",
               "change": "Main import only: 9 commits/15 files bring already archived telemetry and0.18.3 release changes; endurance plotter/test files unchanged. Still open; no new runtime or offline analytics behavior."
+            },
+            {
+              "checked_at_utc": "2026-11-03T06:57:17.222380+00:00",
+              "previous_head_sha": "f28005581936cb794aaea089708474f8ca24dfab",
+              "head_sha": "20d48383999712401485c7923aaa36ac2ea14141",
+              "previous_base_sha": "b2b0d213a402caeac492dd662ea891faa17f67c0",
+              "base_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/f28005581936cb794aaea089708474f8ca24dfab...20d48383999712401485c7923aaa36ac2ea14141",
+              "commits": 6,
+              "files": 3,
+              "change": "Already archived main513 simulation history plus merge only; exact plotter/test Git blobs unchanged. Not a new analytics fix or rerun of historical37Windows tests.",
+              "substantive_feature_change": false
             }
           ],
-          "merge_commit_sha": "6a3a18f9fdc2278e2c2121103c0dbd486727f4d0"
+          "merge_commit_sha": "e271fd0ea2becf52730a6dfddf4827376511f22e",
+          "merge_commit_sha_role": "GitHub test merge while PR remains open; not an upstream merge event"
         },
         {
           "number": 502,
@@ -6816,9 +6924,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T02:59:27.511044+00:00",
+  "checked_at_utc": "2026-11-03T06:57:17.222380+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-02T16:17:48.629826+00:00",
+    "previous_substantive_review_utc": "2026-11-03T02:59:27.511044+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.3",
@@ -6829,17 +6937,17 @@
     "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        271
-      ],
-      "pollen-robotics/microduck_rl": [
-        86
+        504
       ]
     },
-    "new_development_releases": [
-      "daemon-dev-nfc-pairing-tag",
-      "daemon-dev-ep5-footsteps-side"
+    "new_development_releases": [],
+    "moved_development_tags": [
+      {
+        "tag": "daemon-dev-stress-test",
+        "from_sha": "0c3e9c66a50144d92e02c9a330d226fad0bd90c6",
+        "to_sha": "0c14a1145bb376b57ec2b3d27184bf363f8ffcc8"
+      }
     ],
-    "moved_development_tags": [],
     "retired_development_tags": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
@@ -6847,12 +6955,10 @@
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
     "runtime_code_changed_by_heartbeat": false,
-    "models_replaced": false,
+    "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "tests_executed_by_tracker": false,
-    "notes": "SDK271 four-commit source followup implements prior publication/stand/video/diagnostic requests but remains unmerged; historical external robot report not reassigned to new source. Jump86 strengthens backlash tests only, smoke/export statements external and unpinned. Two separate moving dev tags: NFC generic token0.18.3/API47; sideways/target-grasp ep5 old0.18.0/API47, neither ownAPI47 nor padAPI48. Main/stable/models/blog and local checkpoints unchanged.",
-    "local_public_software_release_recorded": false
+    "notes": "Stress dev tag now0.18.3/API47 after known main merge, with inherited default-on device telemetry and simulator opt-out; owned stress sources unchanged, no new stress run or hardware evidence. PR504 only imports known main simulation changes; unchanged plotter/test blobs. Stable/main/models/blog and local software/image/validation records unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
