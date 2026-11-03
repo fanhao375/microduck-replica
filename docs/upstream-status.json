@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-03",
+  "recorded_on": "2026-11-04",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -3075,35 +3075,161 @@
         {
           "tag": "daemon-dev-nfc-pairing-tag",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-pairing-tag",
-          "published_at": "2026-11-02T16:29:48Z",
-          "version": "daemon 0.18.3-dev.1540.5d6066b (nfc-pairing-tag)",
-          "head_sha": "5d6066b297fda58af6189788202033a666b373b0",
+          "published_at": "2026-11-03T14:34:47Z",
+          "version": "daemon 0.18.3-dev.1556.7ae5735 (nfc-pairing-tag)",
+          "head_sha": "7ae573569522af9558cc04109ab2edd619592a55",
           "prerelease": true,
           "source_version": "0.18.3",
           "development_api_version": 47,
           "classification": "Moving development release, not formal release or replica integration",
           "changed_files": [
-            "CONTRIBUTING.md",
+            "configd/src/bluez.rs",
             "docs/robot/pair-a-gamepad.md",
-            "nfc/Cargo.toml",
-            "nfc/examples/st25r100_read.rs",
+            "nfc/examples/st25r100_v.rs",
+            "nfc/src/lib.rs",
             "nfc/src/main.rs",
             "nfc/src/ndef.rs",
-            "nfc/src/pairing.rs",
-            "nfc/systemd/nfcd.service"
+            "nfc/src/spi.rs",
+            "nfc/src/st25r100.rs",
+            "nfc/src/vtag.rs"
           ],
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...5d6066b297fda58af6189788202033a666b373b0",
-          "increment_commits": 1,
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/5d6066b297fda58af6189788202033a666b373b0...7ae573569522af9558cc04109ab2edd619592a55",
+          "increment_commits": 3,
           "replica_integration": "not integrated; local checkpoints and existing validation unchanged; no tracker tests/install or robot operations",
           "comparison_to_recorded_main": {
-            "head_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
-            "ahead_by": 1,
-            "behind_by": 0
+            "head_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+            "to_sha": "7ae573569522af9558cc04109ab2edd619592a55",
+            "ahead_by": 4,
+            "behind_by": 6,
+            "file_count": 14,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...7ae573569522af9558cc04109ab2edd619592a55",
+            "scope": "Still source0.18.3/API47 based on old main997; misses6current-main commits, including517/518/519. Not formal0.18.4 or PR477padAPI48."
           },
-          "change": "Generic NFC pairing token replaces MAC-address extraction. Text/URI record must equal microduck_gamepad_pairing after trim, case sensitive. Old MAC-only cards no longer initiate pairing.",
-          "pairing_contract": "nfcd sends default PadPairParams (no MAC); configd discovers candidate; existing connected-pad gate, one attempt per touch, chirp/greet sequence retained. No pad.connect/status48 or pairing-cleanup changes inherited.",
-          "priority": "medium feature reference; high tag-format/reader/pad-selection compatibility review before adoption",
-          "impact": "No HD1910 register, camera/ToF, policy model or training change. Existing chirp then greet only; actual NFC reader and pairing hardware remain unverified."
+          "change": "Moving NFC prototype imports existing PR475Type5 approach plus revised protocol restore/read bounds, and prefers radio-classified unbonded pads over name-only candidates. Generic pairing token retained. No default-main/stable/API or replica runtime/image update.",
+          "pairing_contract": "Text/URI value must equal microduck_gamepad_pairing after trim, case sensitive; MAC-only cards still do not pair. nfcd sends address-free PadPairParams, preserves connected-pad gate/one-touch handling and chirp/greet. Automatic multi-candidate selection now prefers Classified over name-only after unbonded filtering/unit-octet folding; same-strength ambiguity remains. No PR477pad.connect/status48 or pairing-cleanup import.",
+          "priority": "Conditional medium NFC feature reference when ST25R100 hardware is selected; lower for current non-NFC workflow. Review reader/tag formatting, protocol round-trip and mixed-strength pad selection before adoption.",
+          "impact": {
+            "HD1910": "No Feetech servo registers/gains/current/actuator change. Reader RF/protocol and Bluetooth selection need own board/device tests before inclusion.",
+            "camera_ToF": "No camera or ToF code/path change. NFC tag types do not add sensing features.",
+            "model_management_training": "No model manager/training/weights changes; tracked model revisions unchanged.",
+            "actions_sound": "Existing chirp then greet requests and connected-pad gate retained, no new sound asset/action mapping or audible/device acceptance. Multi-pad selection semantics changed even though card stays generic."
+          },
+          "history": [
+            {
+              "tag": "daemon-dev-nfc-pairing-tag",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-pairing-tag",
+              "published_at": "2026-11-02T16:29:48Z",
+              "version": "daemon 0.18.3-dev.1540.5d6066b (nfc-pairing-tag)",
+              "head_sha": "5d6066b297fda58af6189788202033a666b373b0",
+              "prerelease": true,
+              "source_version": "0.18.3",
+              "development_api_version": 47,
+              "classification": "Moving development release, not formal release or replica integration",
+              "changed_files": [
+                "CONTRIBUTING.md",
+                "docs/robot/pair-a-gamepad.md",
+                "nfc/Cargo.toml",
+                "nfc/examples/st25r100_read.rs",
+                "nfc/src/main.rs",
+                "nfc/src/ndef.rs",
+                "nfc/src/pairing.rs",
+                "nfc/systemd/nfcd.service"
+              ],
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/997808c1d71056d31bd6f05fc5fde848c849d2bc...5d6066b297fda58af6189788202033a666b373b0",
+              "increment_commits": 1,
+              "replica_integration": "not integrated; local checkpoints and existing validation unchanged; no tracker tests/install or robot operations",
+              "comparison_to_recorded_main": {
+                "head_sha": "997808c1d71056d31bd6f05fc5fde848c849d2bc",
+                "ahead_by": 1,
+                "behind_by": 0
+              },
+              "change": "Generic NFC pairing token replaces MAC-address extraction. Text/URI record must equal microduck_gamepad_pairing after trim, case sensitive. Old MAC-only cards no longer initiate pairing.",
+              "pairing_contract": "nfcd sends default PadPairParams (no MAC); configd discovers candidate; existing connected-pad gate, one attempt per touch, chirp/greet sequence retained. No pad.connect/status48 or pairing-cleanup changes inherited.",
+              "priority": "medium feature reference; high tag-format/reader/pad-selection compatibility review before adoption",
+              "impact": "No HD1910 register, camera/ToF, policy model or training change. Existing chirp then greet only; actual NFC reader and pairing hardware remain unverified.",
+              "superseded_at_check_utc": "2026-11-03T15:06:51.938324+00:00"
+            }
+          ],
+          "previous_head_sha": "5d6066b297fda58af6189788202033a666b373b0",
+          "latest_increment": {
+            "from_sha": "5d6066b297fda58af6189788202033a666b373b0",
+            "to_sha": "7ae573569522af9558cc04109ab2edd619592a55",
+            "status": "ahead",
+            "commit_count": 3,
+            "file_count": 9,
+            "commits": [
+              {
+                "sha": "da71bd23d26eb6dce83a28788573d32b46d4a65d",
+                "subject": "configd: a classified pad wins over a name-only match in pairing mode",
+                "committed_at": "2026-11-02T17:06:57Z"
+              },
+              {
+                "sha": "bfbc53923c4dedfd67bd62b59a3f895f292bff7d",
+                "subject": "nfc: read NFC Type 5 (ISO 15693) tags too",
+                "committed_at": "2026-11-03T14:05:13Z"
+              },
+              {
+                "sha": "7ae573569522af9558cc04109ab2edd619592a55",
+                "subject": "nfc: Type 5 leaves ISO 14443A as it was, and reads within the tag",
+                "committed_at": "2026-11-03T14:09:13Z"
+              }
+            ],
+            "files": [
+              "configd/src/bluez.rs",
+              "docs/robot/pair-a-gamepad.md",
+              "nfc/examples/st25r100_v.rs",
+              "nfc/src/lib.rs",
+              "nfc/src/main.rs",
+              "nfc/src/ndef.rs",
+              "nfc/src/spi.rs",
+              "nfc/src/st25r100.rs",
+              "nfc/src/vtag.rs"
+            ],
+            "new_model_or_audio_bytes": false,
+            "new_test_definitions_read_only": 14
+          },
+          "candidate_selection": {
+            "source_commit": "da71bd23d26eb6dce83a28788573d32b46d4a65d",
+            "change": "When several candidates remain, prefer unbonded, fold same-unit faces, then keep radio-classified candidates if any; icon/class/appearance evidence outranks name-only. One survivor selected; two same-strength unbonded survivors remain ambiguous. If no unbonded candidates remain, existing deterministic lowest-MAC bonded selection stays.",
+            "tradeoff": "A genuine second name-only pad may be discarded in favor of a classified pad instead of refusal. Heuristic preference, not proof they are two faces of one physical device. Address-explicit pairing path not changed.",
+            "motivation": "Author describes Pro Controller clone LE/classic faces with differing unit octets; upstream observation, not own hardware reproduction."
+          },
+          "type5_reader": {
+            "supported_path": "ST25R100 over SPI only; serial CLRC663/USB branch remains Type2/ISO14443A.",
+            "polling": "On each of two antennas ask A then V, first detected tag wins. V inventory is single-slot and assumes one tag; not general multi-tag discovery. Switch toV then reset RF field before inventory; next A restores A settings.",
+            "protocol_registers": "begin retains prior A setup and snapshots7registers; V alone applies AM regulator/12percent modulation/receiver settings; A restores snapshot and AM bit. Register-file test definitions are static only, not RF regression acceptance.",
+            "flags": "Final source names0x04Inventory and0x20one-slot in inventory mode, so inventory request0x26;0x06is16-slot. Replaces old bring-up explanation, not an ST-specific extra flag.",
+            "read_bounds": "Read addressed blocks by UID. CC MLEN bounds memory, capped at32blocks;4byte CC for nonzero MLEN,8byte CC for zero MLEN and RFU bytes4-5clear, legacy MLEN0/nonclear TLV keeps4byte fallback. Not an unlimited large-memory/extended-address reader.",
+            "tlv_handling": "If first TLV sizes NDEF, read its needed bytes; otherwise read declared/capped area so leading Lock Control TLV can be skipped by shared parser. No CC returns blank; NDEF needing bytes beyond bounded end reports error instead of intentional truncation.",
+            "ndef_format": "Type2 NTAG or SPI Type5 ST25TV/ICODE needs readable NDEF with existing exact pairing token; format/phone/reader suitability still device-specific.",
+            "timing_trace": "Default5Hz retained; source comments estimate empty beta poll~110ms and recommend<=5Hz, not measured own timing. SPI tracing uses RUST_LOG=nfc::spi=trace and logs only first12TX/RX bytes, not full capture. Bench example added but not executed."
+          },
+          "type5_review_provenance": {
+            "existing_PR": 475,
+            "PR_state": "open",
+            "PR_head_sha": "c1b5d419cfef26595188ecac593e0e17176b203e",
+            "review_id": 5709961230,
+            "review_submitted_at": "2026-10-30T08:44:58Z",
+            "review_source": "https://github.com/pollen-robotics/microduck/pull/475#pullrequestreview-5709961230",
+            "reviewer_hardware_validation": false,
+            "import_commit": "bfbc53923c4dedfd67bd62b59a3f895f292bff7d",
+            "followup_commit": "7ae573569522af9558cc04109ab2edd619592a55",
+            "scope": "Development tag incorporates approach and follow-up to old read-only review; does not merge/update/approve PR475. Prior reported28tests and beta Type2/5 pairing are historical submitter evidence, not final7ae or replica acceptance."
+          },
+          "verification": "Read all9incremental patches and12canonical final sources with Git blob hashes, including14new fake/register/parser/classification test definitions. Reviewed old PR475read-only review separately. No source/example/tests/install execution, phone/tag writing, SPI/USB/RF/BlueZ/robot connection or new physical measurements.",
+          "fixed_sources": {
+            "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/Cargo.toml",
+            "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/duck-ipc-proto/src/lib.rs",
+            "configd/src/bluez.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/configd/src/bluez.rs",
+            "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/main.rs",
+            "nfc/src/st25r100.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/st25r100.rs",
+            "nfc/src/vtag.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/vtag.rs",
+            "nfc/src/ndef.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/ndef.rs",
+            "nfc/src/pairing.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/pairing.rs",
+            "nfc/src/spi.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/src/spi.rs",
+            "nfc/examples/st25r100_v.rs": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/nfc/examples/st25r100_v.rs",
+            "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/7ae573569522af9558cc04109ab2edd619592a55/docs/robot/pair-a-gamepad.md"
+          }
         },
         {
           "tag": "daemon-dev-ep5-footsteps-side",
@@ -8422,9 +8548,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T14:09:21.649290+00:00",
+  "checked_at_utc": "2026-11-03T15:06:51.938324+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T12:06:36.243170+00:00",
+    "previous_substantive_review_utc": "2026-11-03T14:09:21.649290+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
@@ -8432,14 +8558,16 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {
-      "pollen-robotics/microduck_rl": [
-        77
-      ]
-    },
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
     "new_development_releases": [],
-    "moved_development_tags": [],
+    "moved_development_tags": [
+      {
+        "tag": "daemon-dev-nfc-pairing-tag",
+        "from_sha": "5d6066b297fda58af6189788202033a666b373b0",
+        "to_sha": "7ae573569522af9558cc04109ab2edd619592a55"
+      }
+    ],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -8447,7 +8575,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Open RL77rebased4existing PR commits onto5known develop commits then adds4-file Win32 cu128/profile hook. Current PR5commits26files;18reviewed blobs including VLA core/inference/plan/all6testfiles identical to old0ed. VLA48+384->14/schema3 is retrospective contract review, not new feature or rerun. Fixed official257/own d870loaders remain61D1/1or3/3, incompatible. All other heads/releases/devtags/PRs/models/blog/local production/test/image records unchanged."
+    "notes": "NFC1556actual7ae,source0.18.3/API47:3commits9files adds radio-classified-over-name candidate preference, imports existing475Type5 approach and review follow-up protocol restore/CC bounds. SPI ST25R100 only; serial Type2 unchanged, generic token/audio retained.14new test definitions read only; old reviewer/submitter hardware claims not own/final7aevalidation. All mainheads/formal8assets/otherdevtags/PRs/models/blog/local production/test/image records unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
