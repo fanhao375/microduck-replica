@@ -9,6 +9,8 @@ nmcli 都在 self.run_cmd 里；时间从 tick(now) 传进来，测试可以完�
 - 例外：一个 WiFi 都没存过（新卡第一次开机），没有可等的，断网那一拍就开热点（10-21 新卡上热点约 2 分钟才出来）。
   查已保存的 WiFi 时 nmcli 出错，当成不知道，照旧等 45 秒。
 - NetworkManager 报「正在连」时最多等 120 秒；超时后按「没连上」再等 45 秒。
+- 反复连接 / 断开的旧网络共享连续离线窗口，累计 123 秒仍未连上就触发回退判定。
+  网卡枚举、nmcli 调用和热点实际启动仍可能另外耗时，不是开机后广播可见的硬期限。
 - 热点连续 5 分钟没有客户端才去试已保存的 WiFi；从最后一个客户端离开时算。
 - 开热点失败、关热点失败或尝试 WiFi 失败后，60 秒再试。
 - Studio 正在连 WiFi 的窗口文件必须未到 until，且 mtime 在 180 秒内；期间不插手。
@@ -41,6 +43,7 @@ FIRSTBOOT = "/usr/local/sbin/microduck-firstboot"
 TICK_S = 3.0
 NONE_NEED_S = 45.0
 CONNECTING_MAX_S = 120.0
+OFFLINE_MAX_S = CONNECTING_MAX_S + TICK_S
 HOTSPOT_IDLE_S = 300.0
 RETRY_S = 60.0
 STUDIO_CONNECTING_FRESH_S = 180.0
@@ -209,6 +212,7 @@ class Netcheck:
         self.prev_effective = "none"
         self.none_accum = 0.0
         self.connecting_since = None
+        self.offline_since = None
         self.hotspot_retry_at = 0.0
         self.force_hotspot_until = 0.0
         self.wifi_try_at = 0.0
@@ -415,24 +419,42 @@ class Netcheck:
     def _ensure_hotspot_connection(self):
         if any(name == HOTSPOT_NAME for name, _kind in self._connection_rows()):
             return True
-        self.log("NetworkManager 里没有 %s 连接，先运行 microduck-firstboot --hotspot-only 重建" %
-                 HOTSPOT_NAME)
-        result = self._run([FIRSTBOOT, "--hotspot-only"], 30)
+        if not self.keyfile.is_file():
+            self.log("NetworkManager 里没有 %s 连接，配置文件也不存在，先运行 microduck-firstboot --hotspot-only 重建" %
+                     HOTSPOT_NAME)
+            result = self._run([FIRSTBOOT, "--hotspot-only"], 30)
+            if result.returncode != 0:
+                self.log("重建热点连接失败（退出 %s）：%s" %
+                         (result.returncode, one_line(result.stderr or result.stdout)))
+                return False
+        # keyfile may exist while NetworkManager has not loaded it. Preserve the
+        # owner's SSID/password instead of regenerating and overwriting it.
+        result = self._nmcli(["connection", "load", str(self.keyfile)], 10)
         if result.returncode != 0:
-            self.log("重建热点连接失败（退出 %s）：%s" %
+            self.log("加载热点连接失败（退出 %s）：%s" %
                      (result.returncode, one_line(result.stderr or result.stdout)))
+            return False
+        if not any(name == HOTSPOT_NAME for name, _kind in self._connection_rows()):
+            self.log("加载热点后仍未读回 %s，暂不激活" % HOTSPOT_NAME)
             return False
         return True
 
     def open_hotspot(self, now):
         self.scan_wifi(now)
         self._safe_write_state(now)
-        self._ensure_hotspot_connection()
+        if not self._ensure_hotspot_connection():
+            self.hotspot_retry_at = float(now) + RETRY_S
+            return False
         result = self._nmcli(["connection", "up", HOTSPOT_NAME], 30)
         if result.returncode != 0:
             detail = one_line(result.stdout or result.stderr)
             self.log("开热点失败：nmcli connection up %s 退出 %s：%s；%d 秒后重试" %
                      (HOTSPOT_NAME, result.returncode, detail, int(RETRY_S)))
+            self.hotspot_retry_at = float(now) + RETRY_S
+            return False
+        if self.read_raw_mode() != "hotspot":
+            self.log("热点激活命令已返回，但 wlan0 尚未确认连接到 %s；%d 秒后重试" %
+                     (HOTSPOT_NAME, int(RETRY_S)))
             self.hotspot_retry_at = float(now) + RETRY_S
             return False
         self.hotspot_retry_at = 0.0
@@ -571,6 +593,8 @@ class Netcheck:
                          (ssid or "未写", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(until))))
                 self._studio_logged_until = until
             self.none_accum = 0.0
+            self.connecting_since = None
+            self.offline_since = None
             self.prev_effective = "studio"
             self._safe_write_state(now)
             self.last_tick = now
@@ -584,6 +608,8 @@ class Netcheck:
         if raw == "unavailable" and self.mode == "hotspot":
             # nmcli 暂时读不到网卡时不要把正在用的热点关掉；等它恢复再继续。
             self.none_accum = 0.0
+            self.connecting_since = None
+            self.offline_since = None
             self.prev_effective = "hotspot"
             self._safe_write_state(now)
             self.last_tick = now
@@ -592,6 +618,12 @@ class Netcheck:
         if (raw in ("none", "connecting") and now < self.force_hotspot_until
                 and self.mode == "hotspot"):
             raw = "hotspot"
+
+        if raw in ("none", "connecting"):
+            if self.offline_since is None:
+                self.offline_since = now
+        else:
+            self.offline_since = None
 
         hung_connecting = False
         effective = raw
@@ -622,6 +654,14 @@ class Netcheck:
             pass
         else:
             self.none_accum = 0.0
+
+        # NetworkManager can repeatedly retry an unreachable saved SSID. Each
+        # attempt is shorter than CONNECTING_MAX_S and disconnected intervals
+        # need not accumulate 45 seconds. Bound the whole offline episode.
+        if (effective in ("none", "connecting") and self.offline_since is not None
+                and now - self.offline_since >= OFFLINE_MAX_S):
+            effective = "none"
+            self.none_accum = max(self.none_accum, NONE_NEED_S)
 
         public_mode = "none" if effective in ("connecting", "unavailable") else effective
         self._enter_mode(public_mode, now)

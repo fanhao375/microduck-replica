@@ -62,13 +62,27 @@ class FakeNmcli:
         self.iw_rc = 0
         self.firstboot_rc = 0
         self.conn_rc = 0
+        self.hotspot_keyfile = None
+        self.load_rc = 0
+        self.load_registers = True
+        self.up_sets_hotspot = True
 
     def __call__(self, args, timeout=None):
         args = list(args)
         self.calls.append((args, timeout))
         if args[:1] and args[0].endswith("microduck-firstboot"):
+            if self.firstboot_rc == 0 and self.hotspot_keyfile is not None:
+                self.hotspot_keyfile.write_text("[wifi]\nssid=Microduck-c51b\n[wifi-security]\npsk=microduck\n", encoding="utf-8")
             return NC.Result(self.firstboot_rc, "",
                              "" if self.firstboot_rc == 0 else "firstboot failed\n")
+        if args[:3] == ["nmcli", "connection", "load"]:
+            if self.load_rc:
+                return NC.Result(self.load_rc, "", "profile load failed\n")
+            if not Path(args[3]).is_file():
+                return NC.Result(10, "", "profile file missing\n")
+            if self.load_registers and not any(name == NC.HOTSPOT_NAME for name, _ in self.connections):
+                self.connections.append((NC.HOTSPOT_NAME, "802-11-wireless"))
+            return NC.Result(0, "profile loaded\n", "")
         if args[:1] == ["nmcli"] and "device" in args and "show" in args:
             if self.device_rc:
                 return NC.Result(self.device_rc, "", "device show failed\n")
@@ -98,7 +112,10 @@ class FakeNmcli:
             return NC.Result(0, out, "")
         if args[:1] == ["nmcli"] and "connection" in args and "up" in args:
             if self.up_rc == 0:
-                self.device = ("hotspot", "Microduck-Hotspot")
+                if not any(name == NC.HOTSPOT_NAME for name, _ in self.connections):
+                    return NC.Result(10, "", "unknown connection\n")
+                if self.up_sets_hotspot:
+                    self.device = ("hotspot", "Microduck-Hotspot")
                 return NC.Result(0, self.up_stdout, self.up_stderr)
             return NC.Result(self.up_rc, self.up_stdout, self.up_stderr)
         if args[:1] == ["nmcli"] and "connection" in args and "down" in args:
@@ -132,6 +149,7 @@ class NetcheckTests(unittest.TestCase):
         root = make_root(tmp.name)
         if fake is None:
             fake = FakeNmcli()
+        fake.hotspot_keyfile = root / "etc/NetworkManager/system-connections/Microduck-Hotspot.nmconnection"
         log = io.StringIO()
         nc = NC.Netcheck(root=root, run_cmd=fake, now=lambda: now, log_stream=log)
         return root, fake, nc, log
@@ -442,6 +460,7 @@ class NetcheckTests(unittest.TestCase):
     def test_missing_hotspot_connection_calls_firstboot_before_up(self):
         root, fake, nc, log = self.make()
         fake.connections = [("Home", "802-11-wireless")]
+        fake.hotspot_keyfile.unlink()
         nc.tick(0)
         nc.tick(45)
         calls = [call[0] for call in fake.calls]
@@ -452,6 +471,122 @@ class NetcheckTests(unittest.TestCase):
         self.assertLess(firstboot, up)
         self.assertIn("--hotspot-only", calls[firstboot])
         self.assertIn("--hotspot-only", log.getvalue())
+
+    def test_unreachable_saved_wifi_retries_cannot_postpone_hotspot_forever(self):
+        root, fake, nc, log = self.make()
+        for t in range(0, 124, 3):
+            fake.device = ("none", "") if t % 30 == 0 else ("connecting", "Home")
+            nc.tick(t)
+        self.assertEqual(len(fake.calls_of("connection", "up")), 1)
+        self.assertEqual(nc.mode, "hotspot")
+
+    def test_successful_wifi_connection_resets_the_offline_window(self):
+        root, fake, nc, log = self.make()
+        fake.device = ("connecting", "Home")
+        nc.tick(0)
+        nc.tick(60)
+        fake.device = ("wifi", "Home")
+        nc.tick(90)
+        for t in range(120, 242, 3):
+            fake.device = ("none", "") if t % 30 == 0 else ("connecting", "Home")
+            nc.tick(t)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        fake.device = ("connecting", "Home")
+        nc.tick(243)
+        self.assertEqual(nc.mode, "hotspot")
+
+    def test_web_connection_window_resets_previous_connecting_timeout(self):
+        root, fake, nc, log = self.make()
+        fake.device = ("connecting", "Home")
+        nc.tick(0)
+        path = root / "run/microduck/studio-connecting.json"
+        path.write_text(json.dumps({"until": 160, "ssid": "NewHome"}), encoding="utf-8")
+        os.utime(path, (70, 70))
+        nc.tick(70)
+        nc.tick(159)
+        nc.tick(160)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        nc.tick(279)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        nc.tick(283)
+        self.assertEqual(nc.mode, "hotspot")
+
+    def test_disk_profile_is_loaded_without_overwriting_custom_hotspot_password(self):
+        root, fake, nc, log = self.make()
+        fake.connections = [("Home", "802-11-wireless")]
+        original = "[wifi]\nssid=Microduck-c51b\n[wifi-security]\npsk=owner-chosen-pass\n"
+        fake.hotspot_keyfile.write_text(original, encoding="utf-8")
+        nc.tick(0)
+        nc.tick(45)
+        self.assertEqual(nc.mode, "hotspot")
+        self.assertEqual(fake.hotspot_keyfile.read_text(encoding="utf-8"), original)
+        self.assertFalse(any(args[0].endswith("microduck-firstboot") for args, _ in fake.calls))
+        calls = [args for args, _ in fake.calls]
+        load = next(i for i, args in enumerate(calls) if args[:3] == ["nmcli", "connection", "load"])
+        up = next(i for i, args in enumerate(calls) if args[:3] == ["nmcli", "connection", "up"])
+        self.assertLess(load, up)
+
+    def test_failed_hotspot_regeneration_does_not_attempt_activation(self):
+        root, fake, nc, log = self.make()
+        fake.connections = [("Home", "802-11-wireless")]
+        fake.hotspot_keyfile.unlink()
+        fake.firstboot_rc = 1
+        nc.tick(0)
+        nc.tick(45)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        self.assertEqual(nc.mode, "none")
+        calls = len(fake.calls)
+        nc.tick(48)
+        self.assertFalse(any(args[0].endswith("microduck-firstboot") for args, _ in fake.calls[calls:]))
+
+    def test_failed_hotspot_load_keeps_credentials_and_obeys_retry_backoff(self):
+        root, fake, nc, log = self.make()
+        fake.connections = [("Home", "802-11-wireless")]
+        original = fake.hotspot_keyfile.read_bytes()
+        fake.load_rc = 1
+        nc.tick(0)
+        nc.tick(45)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        self.assertEqual(len(fake.calls_of("connection", "load")), 1)
+        self.assertEqual(fake.hotspot_keyfile.read_bytes(), original)
+        nc.tick(104)
+        self.assertEqual(len(fake.calls_of("connection", "load")), 1)
+        fake.load_rc = 0
+        nc.tick(105)
+        self.assertEqual(nc.mode, "hotspot")
+
+    def test_load_success_without_registered_hotspot_is_not_reported_ready(self):
+        root, fake, nc, log = self.make()
+        fake.connections = [("Home", "802-11-wireless")]
+        fake.load_registers = False
+        nc.tick(0)
+        nc.tick(45)
+        self.assertEqual(fake.calls_of("connection", "up"), [])
+        self.assertEqual(nc.mode, "none")
+
+    def test_activation_exit_zero_requires_hotspot_state_readback(self):
+        root, fake, nc, log = self.make()
+        fake.up_sets_hotspot = False
+        nc.tick(0)
+        nc.tick(45)
+        self.assertEqual(nc.mode, "none")
+        state = json.loads((root / "run/microduck/net.json").read_text(encoding="utf-8"))
+        self.assertEqual(state["mode"], "none")
+        nc.tick(104)
+        self.assertEqual(len(fake.calls_of("connection", "up")), 1)
+
+    def test_unavailable_hotspot_discards_previous_connecting_timeout(self):
+        root, fake, nc, log = self.make()
+        for t in range(0, 124, 3):
+            fake.device = ("none", "") if t % 30 == 0 else ("connecting", "Home")
+            nc.tick(t)
+        self.assertEqual(nc.mode, "hotspot")
+        fake.device = ("unavailable", "")
+        nc.tick(126)
+        fake.device = ("connecting", "Home")
+        nc.tick(300)
+        self.assertEqual(len(fake.calls_of("connection", "up")), 1,
+                         "A recovered adapter must receive a new connection window")
 
 
 class HelperTests(unittest.TestCase):
