@@ -1010,24 +1010,24 @@
         {
           "tag": "daemon-dev-stress-test",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-stress-test",
-          "published_at": "2026-11-03T09:03:27Z",
-          "version": "daemon 0.18.3-dev.1551.25f3a59 (stress-test)",
-          "head_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+          "published_at": "2026-11-03T09:36:26Z",
+          "version": "daemon 0.18.4-dev.1553.5c0d1fb (stress-test)",
+          "head_sha": "5c0d1fb04181c722b3734168b51d911d1232702e",
           "prerelease": true,
           "replica_integration": "not_integrated; no downloaded code/package execution or robot operation",
-          "change": "One commit/3files adds calls for help after gave_up: two existing chirps then about1.2s wheee hold, wait call_every(default15s) and repeat. No new audio asset/daemon API or recovery motion.",
-          "version_family": "0.18.3-development/API48 robot.trip; diverges from main47 and PR477pad48",
+          "change": "Stress default trip changes250to500ms and reads [stress] trip_ms/trip_legs per fall, optional CLI overrides. Main517/518 imported; no519editor-row import. No new weights/audio assets or hardware acceptance.",
+          "version_family": "0.18.4-development/robot.trip API48, not formal0.18.4/API47",
           "priority": "deferred controlled bench experiment; high motion, boot-trigger, API identity and stop/ownership validation before any HD1910 adoption",
           "comparison_to_recorded_main": {
             "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
-            "to_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
-            "ahead_by": 21,
-            "behind_by": 6,
+            "to_sha": "5c0d1fb04181c722b3734168b51d911d1232702e",
+            "ahead_by": 23,
+            "behind_by": 2,
             "file_count": 32,
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...25f3a591cff1d3475ca661ab2ba469fc143a96e7"
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...5c0d1fb04181c722b3734168b51d911d1232702e"
           },
-          "bounds": "Default six provoked falls per lap via250ms both-leg target hold; ms1..1000; optional legacy0.5s cut. Existing7sgetup/2sreset/7s retry and give-up remain; no hardware safety acceptance.",
-          "verification": "Read three-file increment and current driver/RPC retry path; no test, source import, audio/stress run, installation or robot connection. No new automated test definitions in this increment.",
+          "bounds": "Six provoked falls per lap; default500ms both-leg hold, dynamically read per fall unless CLI pinned; RPC1..1000ms unchanged. Optional cut0.5s and existing get-up/reset/give-up bounds retained.",
+          "verification": "Read seven-file feature commit and final merged config/driver/version/protocol source, including two new test definitions; no tests, config editing, stress/audio commands, install or robot connection.",
           "history": [
             {
               "tag": "daemon-dev-stress-test",
@@ -1377,15 +1377,144 @@
                 "contract_collision": "PR477 also says API48 for pad connection/status; incompatible additions, not interchangeable; own0182API47 neither"
               },
               "superseded_at_check_utc": "2026-11-03T09:15:23.901847+00:00"
+            },
+            {
+              "tag": "daemon-dev-stress-test",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-stress-test",
+              "published_at": "2026-11-03T09:03:27Z",
+              "version": "daemon 0.18.3-dev.1551.25f3a59 (stress-test)",
+              "head_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+              "prerelease": true,
+              "replica_integration": "not_integrated; no downloaded code/package execution or robot operation",
+              "change": "One commit/3files adds calls for help after gave_up: two existing chirps then about1.2s wheee hold, wait call_every(default15s) and repeat. No new audio asset/daemon API or recovery motion.",
+              "version_family": "0.18.3-development/API48 robot.trip; diverges from main47 and PR477pad48",
+              "priority": "deferred controlled bench experiment; high motion, boot-trigger, API identity and stop/ownership validation before any HD1910 adoption",
+              "comparison_to_recorded_main": {
+                "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+                "to_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+                "ahead_by": 21,
+                "behind_by": 6,
+                "file_count": 32,
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...25f3a591cff1d3475ca661ab2ba469fc143a96e7"
+              },
+              "bounds": "Default six provoked falls per lap via250ms both-leg target hold; ms1..1000; optional legacy0.5s cut. Existing7sgetup/2sreset/7s retry and give-up remain; no hardware safety acceptance.",
+              "verification": "Read three-file increment and current driver/RPC retry path; no test, source import, audio/stress run, installation or robot connection. No new automated test definitions in this increment.",
+              "previous_head_sha": "a2e53304da55f4b9a2b13b7e08498903162fb7b1",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/a2e53304da55f4b9a2b13b7e08498903162fb7b1...25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+              "latest_increment": {
+                "from_sha": "a2e53304da55f4b9a2b13b7e08498903162fb7b1",
+                "to_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+                "commit_count": 1,
+                "file_count": 3,
+                "new_model_or_audio_bytes": false
+              },
+              "offline_report": {
+                "file": "report.pdf",
+                "contents": [
+                  "headline counts",
+                  "provoked fall outcomes by lap",
+                  "first-try/reset get-up times",
+                  "per-lap table",
+                  "vector timeline",
+                  "incident log",
+                  "per-joint current mean and peak chart/table"
+                ],
+                "implementation": "matplotlib PdfPages; timeline redrawn as vector rather than embedded low-resolution PNG",
+                "evidence_limit": "Post-processes recorded events; no independent physical validation or new measured endurance result in this increment."
+              },
+              "current_logging": {
+                "joint_count": 15,
+                "joint_fields": [
+                  "<joint>_current_ma",
+                  "<joint>_current_peak_ma"
+                ],
+                "total_peak_field": "motor_current_peak_ma",
+                "subscription": "RobotSubscribe hz=None, every published control tick rather than20Hz; no new current sensor.",
+                "aggregation": "Absolute current per joint, per-sample frame mean and observed peak; total peak is maximum simultaneous sum, not sum of joint peaks.",
+                "csv_resume": "Existing header remains authoritative; new fields absent from old header are dropped on append.",
+                "report": "currents.png, PDF current chart page and summary.md per-joint mean/peak/time/activity table.",
+                "limitations": "Observed state-stream samples are not continuous electrical peak capture. Verify HD1910 current units, joint order and missing values; no physical current/thermal/endurance validation."
+              },
+              "source_version": "0.18.3",
+              "development_api_version": 48,
+              "inherited_main_contract": {
+                "workspace_version": "0.18.3",
+                "telemetry": "PostHog usage collection on by default on device unless configured off; existing official opt-out retained",
+                "simulator": "scripts/duck-sim explicitly sets MICRODUCK_TELEMETRY=0 for updaterd; inherits velstand/backlash and displacement-report changes already archived under main997",
+                "other_imported_changes": "Previously recorded0.18.1boot check,0.18.2classic pad reconnection and0.18.3SSHcache; not new stress features",
+                "local_api_equivalence": false,
+                "base_main_api_version": 47,
+                "scope": "Inherited main997 telemetry47, not newly merged main517 dev-key marker; stress source now adds different trip48."
+              },
+              "fixed_sources": {
+                "protocol": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/duck-ipc-proto/src/lib.rs",
+                "driver": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotctl/src/stress/mod.rs",
+                "control": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotd/src/main.rs",
+                "boot_service": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotctl/systemd/robotctl-stress-boot.service",
+                "boot_timer": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotctl/systemd/robotctl-stress-boot.timer",
+                "defaults": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotd-params/src/lib.rs",
+                "help_driver": "https://github.com/pollen-robotics/microduck/blob/25f3a591cff1d3475ca661ab2ba469fc143a96e7/robotctl/src/stress/mod.rs"
+              },
+              "impact": {
+                "HD1910_actions": "New intentional target hold/fall experiment requires joint-name/order/gain/current/limp and landing verification on own hardware; no new Feetech driver or safe-stumble acceptance.",
+                "camera_ToF": "No new camera/depth sensing or transport; existing approximate guard and missing-ToF fallback remain.",
+                "model_management_training_sound": "No new models, training, movement sequence or sound assets. Existing chirp/wheee requests now repeat after give-up, altering acoustic/load conditions; actual volume/beak behavior and battery effect not verified."
+              },
+              "on_boot": {
+                "default": false,
+                "config": "stress.on_boot",
+                "timer_seconds_after_boot": 30,
+                "robotd_socket_wait_seconds": 120,
+                "oneshot_install_section": false,
+                "configuration_change": "NextBoot, no immediate start/stop/restart",
+                "bad_config": "does not start; existing run left alone",
+                "packaging": "timer+oneshot included in release/dev/local package paths; installer enables timer without starting; static regression definition, not actual systemd timing acceptance"
+              },
+              "robot_trip": {
+                "api_version": 48,
+                "ms_default": 250,
+                "ms_min": 1,
+                "ms_max": 1000,
+                "legs_default": "both",
+                "legs_values": [
+                  "both",
+                  "left",
+                  "right"
+                ],
+                "effect": "Hold previous target positions for selected left_/right_ leg joints; policy still steps and head/mouth remain on policy targets",
+                "request_gate": "enabled policy; reply means queued only. Loop applies only while driving in Walk mode with controller neither busy nor sitting, otherwise logs drop.",
+                "release": "timeout or !driving clears hold",
+                "runtime_default_fall": "trip; --fall cut retains historical method",
+                "report": "logs limp transitions during get-up and summarizes limp counts",
+                "lap_version": "stress-v1 unchanged; compare meta.args.fall/trip_ms/trip_legs plus fixed source, not lap string alone",
+                "contract_collision": "PR477 also says API48 for pad connection/status; incompatible additions, not interchangeable; own0182API47 neither"
+              },
+              "call_for_help": {
+                "trigger": "Only Halt::HandsOff(GAVE_UP), after existing get-up failure path requests relax; battery hands_off stays silent",
+                "sounds": "two existing chirp calls with0.4s waits then wheee hold renewed every0.1s for about1.2s and explicit release",
+                "call_every_default_seconds": 15.0,
+                "zero_or_negative": "wait for stop signal silently",
+                "cadence": "Sound sequence then wait15s, not a strict15s start-to-start period; RPC and reconnection add latency",
+                "transport": "Existing conn/call path retries disconnected robotd every5s; chirp accepted result is not checked, so delivery/audibility is not established",
+                "measurement": "Adds audio work to gave_up tail; compare meta.args.call_every/events/source when studying battery/current data",
+                "new_audio_files": false,
+                "tracker_audio_or_hardware_acceptance": false
+              },
+              "superseded_at_check_utc": "2026-11-03T10:01:58.989538+00:00"
             }
           ],
-          "previous_head_sha": "a2e53304da55f4b9a2b13b7e08498903162fb7b1",
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/a2e53304da55f4b9a2b13b7e08498903162fb7b1...25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+          "previous_head_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/25f3a591cff1d3475ca661ab2ba469fc143a96e7...5c0d1fb04181c722b3734168b51d911d1232702e",
           "latest_increment": {
-            "from_sha": "a2e53304da55f4b9a2b13b7e08498903162fb7b1",
-            "to_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
-            "commit_count": 1,
-            "file_count": 3,
+            "from_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+            "to_sha": "5c0d1fb04181c722b3734168b51d911d1232702e",
+            "commit_count": 6,
+            "file_count": 28,
+            "known_main_commits": 4,
+            "new_feature_commits": 1,
+            "merge_commits": 1,
+            "feature_commit": "7228ae5568f2d3626366c121d69758bd7d1f1648",
+            "feature_file_count": 7,
             "new_model_or_audio_bytes": false
           },
           "offline_report": {
@@ -1415,16 +1544,17 @@
             "report": "currents.png, PDF current chart page and summary.md per-joint mean/peak/time/activity table.",
             "limitations": "Observed state-stream samples are not continuous electrical peak capture. Verify HD1910 current units, joint order and missing values; no physical current/thermal/endurance validation."
           },
-          "source_version": "0.18.3",
+          "source_version": "0.18.4",
           "development_api_version": 48,
           "inherited_main_contract": {
-            "workspace_version": "0.18.3",
+            "workspace_version": "0.18.4",
             "telemetry": "PostHog usage collection on by default on device unless configured off; existing official opt-out retained",
             "simulator": "scripts/duck-sim explicitly sets MICRODUCK_TELEMETRY=0 for updaterd; inherits velstand/backlash and displacement-report changes already archived under main997",
             "other_imported_changes": "Previously recorded0.18.1boot check,0.18.2classic pad reconnection and0.18.3SSHcache; not new stress features",
             "local_api_equivalence": false,
             "base_main_api_version": 47,
-            "scope": "Inherited main997 telemetry47, not newly merged main517 dev-key marker; stress source now adds different trip48."
+            "scope": "Now inherits main517dev-key marker/builtin key and518version bump; misses519editor row. Trip API48 remains separate from formal47/pad48.",
+            "base_main_sha": "2573246f44cb5dab426714a1b45ae34746d7f1a2"
           },
           "fixed_sources": {
             "protocol": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/duck-ipc-proto/src/lib.rs",
@@ -1433,12 +1563,15 @@
             "boot_service": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotctl/systemd/robotctl-stress-boot.service",
             "boot_timer": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotctl/systemd/robotctl-stress-boot.timer",
             "defaults": "https://github.com/pollen-robotics/microduck/blob/a2e53304da55f4b9a2b13b7e08498903162fb7b1/robotd-params/src/lib.rs",
-            "help_driver": "https://github.com/pollen-robotics/microduck/blob/25f3a591cff1d3475ca661ab2ba469fc143a96e7/robotctl/src/stress/mod.rs"
+            "help_driver": "https://github.com/pollen-robotics/microduck/blob/25f3a591cff1d3475ca661ab2ba469fc143a96e7/robotctl/src/stress/mod.rs",
+            "trip_driver": "https://github.com/pollen-robotics/microduck/blob/5c0d1fb04181c722b3734168b51d911d1232702e/robotctl/src/stress/mod.rs",
+            "trip_defaults": "https://github.com/pollen-robotics/microduck/blob/5c0d1fb04181c722b3734168b51d911d1232702e/robotd-params/src/lib.rs",
+            "trip_apply_plan": "https://github.com/pollen-robotics/microduck/blob/5c0d1fb04181c722b3734168b51d911d1232702e/robotctl/src/configure.rs"
           },
           "impact": {
-            "HD1910_actions": "New intentional target hold/fall experiment requires joint-name/order/gain/current/limp and landing verification on own hardware; no new Feetech driver or safe-stumble acceptance.",
+            "HD1910_actions": "Default target hold doubles250to500ms; full-config load errors can select built-in500/both while run continues. Own joint/gain/fall/limp/current/landing and stop validation required before controlled bench use; no new motor adaptation.",
             "camera_ToF": "No new camera/depth sensing or transport; existing approximate guard and missing-ToF fallback remain.",
-            "model_management_training_sound": "No new models, training, movement sequence or sound assets. Existing chirp/wheee requests now repeat after give-up, altering acoustic/load conditions; actual volume/beak behavior and battery effect not verified."
+            "model_management_training_sound": "No new weights/training or audio assets. Existing give-up call behavior unchanged; variable trip config alters experimental conditions and needs resolved event/source provenance."
           },
           "on_boot": {
             "default": false,
@@ -1452,7 +1585,7 @@
           },
           "robot_trip": {
             "api_version": 48,
-            "ms_default": 250,
+            "ms_default": 500,
             "ms_min": 1,
             "ms_max": 1000,
             "legs_default": "both",
@@ -1467,7 +1600,8 @@
             "runtime_default_fall": "trip; --fall cut retains historical method",
             "report": "logs limp transitions during get-up and summarizes limp counts",
             "lap_version": "stress-v1 unchanged; compare meta.args.fall/trip_ms/trip_legs plus fixed source, not lap string alone",
-            "contract_collision": "PR477 also says API48 for pad connection/status; incompatible additions, not interchangeable; own0182API47 neither"
+            "contract_collision": "PR477 also says API48 for pad connection/status; incompatible additions, not interchangeable; own0182API47 neither",
+            "default_scope": "Stress configuration default; robot.trip RPC still requires explicit ms"
           },
           "call_for_help": {
             "trigger": "Only Halt::HandsOff(GAVE_UP), after existing get-up failure path requests relax; battery hands_off stays silent",
@@ -1479,6 +1613,26 @@
             "measurement": "Adds audio work to gave_up tail; compare meta.args.call_every/events/source when studying battery/current data",
             "new_audio_files": false,
             "tracker_audio_or_hardware_acceptance": false
+          },
+          "trip_configuration": {
+            "keys": [
+              "stress.trip_ms",
+              "stress.trip_legs"
+            ],
+            "defaults": {
+              "trip_ms": 500,
+              "trip_legs": "both",
+              "on_boot": false
+            },
+            "config_path": "--config, defaults to robotd_params::DEFAULT_PATH; boot forwards its config to background run",
+            "read_policy": "Params::load(config,false) before every trip fall; applies at next fall, not fixed1s polling or daemon restart",
+            "overrides": "Optional CLI trip_ms/trip_legs independently win for one run; editor settings apply only to unpinned fields",
+            "file_validation": "Full Params validation requires trip_ms1..=1000, legs typed both/left/right",
+            "load_failure": "config_unreadable event then fresh built-in500/both, not last known values and not stop; CLI overrides still apply",
+            "CLI_validation": "Optional u32 ms has no added matching clap range bound; daemon1..1000 gate remains final refusal",
+            "measurement": "meta.args may leave trip fields null when using config; fall_triggered event records resolved ms/legs, needed to reconstruct live tuning with fixed source/lap stress-v1",
+            "author_default_rationale": "Source comment says250was often recovered and500falls; no fixed device/test source evidence, not replica verification",
+            "test_source": "One config apply-plan definition and one parameter bounds/default definition added; tracker did not run them"
           }
         },
         {
@@ -7593,33 +7747,24 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T09:15:23.901847+00:00",
+  "checked_at_utc": "2026-11-03T10:01:58.989538+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T08:11:13.463593+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-03T09:15:23.901847+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
     "stable_release_actual_sha": "2573246f44cb5dab426714a1b45ae34746d7f1a2",
     "stable_assets_changed": false,
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        519
-      ]
-    },
-    "newly_observed_merged_pull_requests": [
-      519
-    ],
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
     "new_development_releases": [],
     "moved_development_tags": [
       {
-        "tag": "daemon-dev-main",
-        "to_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384"
-      },
-      {
         "tag": "daemon-dev-stress-test",
-        "to_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7"
+        "from_sha": "25f3a591cff1d3475ca661ab2ba469fc143a96e7",
+        "to_sha": "5c0d1fb04181c722b3734168b51d911d1232702e"
       }
     ],
     "official_blog_new_articles": false,
@@ -7629,7 +7774,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Main519adds developer marker editor row, not effective-policy display or atomic multi-file commit; formal0.18.4tag/assets/manifests unchanged. Stress1551adds existing chirp/wheee call after give-up, default15s wait after sequence, no new audio bytes/API; need distinct energy/acoustic measurement context. Local candidate, published15software/image and all other monitored sources unchanged."
+    "notes": "Stress1553actual5c:4known main commits+1new7-file trip-config commit+merge. Source now0.18.4but trip48 still differs from formal47/pad48; defaults500/both, reread/full-config failure fallback and optional independent CLI overrides reviewed. No new physical falls or own validation; formal assets, all defaultheads/PRs/models/blog/local release records unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
