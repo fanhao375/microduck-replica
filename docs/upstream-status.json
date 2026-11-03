@@ -8049,9 +8049,241 @@
           "title": "feat: Windows 10 support  ",
           "state": "open",
           "merged_at": null,
-          "updated_at": "2026-10-20T09:27:15Z",
-          "head_sha": "0ed85a56da1dd22f992059aefc2020a786505767",
-          "draft": false
+          "updated_at": "2026-11-03T13:34:20Z",
+          "head_sha": "e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+          "draft": false,
+          "history": [
+            {
+              "number": 77,
+              "url": "https://github.com/pollen-robotics/microduck_rl/pull/77",
+              "title": "feat: Windows 10 support  ",
+              "state": "open",
+              "merged_at": null,
+              "updated_at": "2026-10-20T09:27:15Z",
+              "head_sha": "0ed85a56da1dd22f992059aefc2020a786505767",
+              "draft": false,
+              "superseded_at_check_utc": "2026-11-03T14:09:21.649290+00:00"
+            }
+          ],
+          "base_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "previous_head_sha": "0ed85a56da1dd22f992059aefc2020a786505767",
+          "replica_integration": "not_integrated; read-only source/committed-runtime review, no dependencies/models downloaded or source executed",
+          "change": "Rebases4existing Windows/VLA commits atop already-recorded develop, then adds1new4-file Windows cu128/profile-cache commit. Current PR5commits26files remains open.18reviewed blobs, including VLA core/inference/plan and all6test files, match old0ed exactly; language-policy contract is retrospective review, not new today.",
+          "comparison_to_recorded_develop": {
+            "from_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+            "to_sha": "e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+            "status": "ahead",
+            "ahead_by": 5,
+            "behind_by": 0,
+            "commit_count": 5,
+            "file_count": 26,
+            "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/bae39f5900b318f7e87fc485c30a31213cfa14eb...e8f8c29bf56eec8b2f3998d2468c87324f100ee1"
+          },
+          "comparison_to_previous_head": {
+            "from_sha": "0ed85a56da1dd22f992059aefc2020a786505767",
+            "to_sha": "e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+            "status": "diverged",
+            "ahead_by": 10,
+            "behind_by": 4,
+            "file_count": 34,
+            "merge_base_sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+            "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/0ed85a56da1dd22f992059aefc2020a786505767...e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+            "scope_note": "Rewritten/diverged history10incoming/4old-only,34files:5known develop commits,4replayed PR commits and1new Windows commit. Direct old/new blob comparison finds18of26current-PR paths identical; VLA core was already present at0ed."
+          },
+          "current_commits": [
+            {
+              "sha": "d3c18f18c52bff6e4767957e6b56deb1724e1726",
+              "subject": "feat: Windows 10 support",
+              "authored_at": "2026-10-16T06:36:15Z",
+              "committed_at": "2026-11-03T13:33:22Z"
+            },
+            {
+              "sha": "9d2f1af828debacb51a2952dec2246e5df3788d9",
+              "subject": "docs: notebook.md local visualization quick-reference",
+              "authored_at": "2026-10-16T06:36:15Z",
+              "committed_at": "2026-11-03T13:33:22Z"
+            },
+            {
+              "sha": "aca06b1805986d1ce8a3f5b09f51c5b976ea2de0",
+              "subject": "添加group-pick和kick-ball的训练步骤",
+              "authored_at": "2026-10-16T08:45:36Z",
+              "committed_at": "2026-11-03T13:33:22Z"
+            },
+            {
+              "sha": "3c440f059a59ea9ae5320ff1c1193fff78d0f709",
+              "subject": "feat: free-sentence (VLA) language-conditioned velocity policy",
+              "authored_at": "2026-10-20T09:09:00Z",
+              "committed_at": "2026-11-03T13:33:34Z"
+            },
+            {
+              "sha": "e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+              "subject": "feat: Windows 11 support (Blackwell cu128 + profile cache redirect)",
+              "authored_at": "2026-11-03T13:23:29Z",
+              "committed_at": "2026-11-03T13:33:34Z"
+            }
+          ],
+          "windows_training": {
+            "torch": "pyproject routes every win32 resolution to explicit cu128 index; lock records torch2.9.1+cu128. No GPU-family selection. Linux aarch64 cu129 and other-platform source rules retained.",
+            "author_hardware_context": "Final commit targets Blackwell sm120/RTX50 and cites driver>=570, local591.84; source assertions, not inspected replica machine/Windows/GPU acceptance. Older PR body still says cu126; fixed final source is cu128.",
+            "pre_volta": "At task import, probe CUDA device0 capability; major<7 mutates all registered MicroDuck train/play configs to sparse Jacobian/CG, regardless of OS. Not proof of compatible PyTorch wheels or physical servo behavior.",
+            "terminal_tests_docs": "Existing msvcrt arrows, UTF8/launcher tests, pre-Volta workaround and notebook ground-pick/kick-ball instructions retained from old PR; corresponding test/infer/notebook blobs unchanged. No new trained assets or own Windows/GPU validation.",
+            "profile_cache_script": "Opt-in script writes site-packages/sitecustomize.py to redirect MPLCONFIGDIR/WARP_CACHE_PATH/TEMP/TMP into project .cache when existing variable is not writable. Recreating venv removes it. Non-venv only warns and still writes; existing target is overwritten without backup, --remove deletes target. Not a read-only probe, not executed by tracker."
+          },
+          "language_policy": {
+            "task": "Mjlab-VLA-Flat-MicroDuck",
+            "scope": "Text-conditioned velocity/head/body policy, no camera/image input, ASR, TTS, autonomous visual task planning or demonstrated free-language generalization.",
+            "instruction_table": {
+              "intent_count": 12,
+              "paraphrase_count": 125,
+              "languages": [
+                "zh",
+                "en"
+              ],
+              "sampling": "uniform intent then uniform paraphrase;4..8s resampling",
+              "grounding": "One13D numeric command [twist3,head4,body6] drives rewards and privileged critic; actor sees text, not numeric command."
+            },
+            "actor": "48D proprio normalized alone, raw frozen384D sentence embedding appended; symmetry loss disabled. No mouth action added; official output remains14.",
+            "encoder": {
+              "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+              "embedding_dim": 384,
+              "max_length": 64,
+              "normalize": true,
+              "training": "frozen HF encoder/table lookup; optional sentence-transformers extra. Hash backend64D is deterministic test plumbing, not semantic robot model.",
+              "revision_pinned": false,
+              "artifacts_downloaded_by_tracker": false
+            },
+            "policy_contract": {
+              "inputs": {
+                "obs": [
+                  1,
+                  48
+                ],
+                "text_emb": [
+                  1,
+                  384
+                ]
+              },
+              "output": {
+                "actions": [
+                  1,
+                  14
+                ]
+              },
+              "model_api": 1,
+              "manifest_schema": 3,
+              "command_encoding": "text",
+              "paired_files": [
+                "policy.onnx",
+                "encoder.onnx"
+              ]
+            },
+            "encoder_contract": {
+              "inputs": [
+                "input_ids",
+                "attention_mask"
+              ],
+              "input_type": "int64 [1,sequence]",
+              "output": "float32 text_emb[1,384]",
+              "export": "mean pool then L2 normalization, opset18, fixed batch1/dynamic sequence. Pre-export wrapper compares one sentence to SentenceTransformer when available; separate reported ONNX results are not tracker verification."
+            },
+            "publishing": "VLA requires encoder ONNX, checks input names/width pairing, records encoder SHA256 and ships pair. model string may default to truthy unknown; no required HF revision/tokenizer version/artifact/max-length binding. Same384D alone does not establish semantic equivalence.",
+            "simulation": "infer_policy detects two-input session, omits numeric command from actor obs; --text/--text-file/N update cached embedding only on changed text. ONNX encoder still needs tokenizer by model id; this is MuJoCo rehearsal, not native daemon support.",
+            "static_limits": [
+              "Some package/docstrings retain61D wording; executable config/export/tests use48D actor obs.",
+              "Cached-embedding fast path returns array without setting InstructionPool._embeddings; constructor then calls pool.sample, which rejects unembedded pool. Existing fake-env config tests use hash encode path. Static control-flow finding only; no execution/reproduction.",
+              "HF SentenceTransformer/AutoModel/AutoTokenizer loads omit revision; publisher can label encoder model unknown. Training/deployment tokenizer/model provenance remains incomplete."
+            ]
+          },
+          "runtime_compatibility": {
+            "official_stable_sha": "2573246f44cb5dab426714a1b45ae34746d7f1a2",
+            "official_source": "https://github.com/pollen-robotics/microduck/blob/2573246f44cb5dab426714a1b45ae34746d7f1a2/duck-control/src/policy.rs",
+            "own_runtime_production_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+            "own_runtime_paths": [
+              "duck-control/src/policy.rs",
+              "duck-control/src/obs.rs"
+            ],
+            "static_contract": "Both fixed runtimes require61D obs; policy loader accepts1input/1output feed-forward or3input/3output LSTM, not2input/1output with48D obs. Model API1/daemon API numbers do not make schema3 loadable.",
+            "tested_by_tracker": false,
+            "loadable_in_current_release_or_candidate": false
+          },
+          "external_validation_claims": {
+            "source_commit": "0ed85a56da1dd22f992059aefc2020a786505767",
+            "source": "https://github.com/pollen-robotics/microduck_rl/commit/0ed85a56da1dd22f992059aefc2020a786505767",
+            "claims": "Commit says87VLA/publish tests +3infer tests,64env/5iteration smoke run sw5sq8bm,48+384->14 ONNX and encoder agreement. Plan document labels validation2026-10-20 and states long training/native runtime unfinished.",
+            "limit": "Historical author report at original0ed/replayed3c, not final e8 Windows/cu128 rerun evidence, trained-policy quality, ARM latency, released model bundle, HD1910 device validation or replica tests.",
+            "replayed_commit": "3c440f059a59ea9ae5320ff1c1193fff78d0f709"
+          },
+          "priority": "Medium-priority isolated training/reproducibility research; first resolve native schema/two-input gate, encoder/tokenizer provenance/cache path and HD1910 actuator assumptions. Keep out of existing15series image and18.2delivery scope.",
+          "impact": {
+            "HD1910": "Manifest still targets14action XL330/50Hz; no Feetech actuator/current/gain adaptation or physical movement acceptance. Language grounding does not make XL330-trained motion safe for own hardware.",
+            "camera_ToF": "No visual input, camera stream or ToF processing change. VLA label here does not add vision.",
+            "models_training": "Retrospectively reviewed existing optional encoder/table/curriculum/normalization and paired-artifact contract;18reviewed blobs match old0ed. New Windows wheel/cache changes do not deliver new weights; tracked model revisions unchanged.",
+            "actions_sound": "Text can condition simulated velocity/head/body goals; no new microphone ASR/TTS/audio assets, no proof of unrestricted-language understanding or robot skill quality."
+          },
+          "verification": "Archived26canonical PR files plus4old fixed files with Git blob hashes; compared all26against old Git tree,18identical. Reviewed changed Windows commit4patches and existing VLA/config/encoder/model/export/publish/inference logic/test definitions, plus5fixed official/own runtime source blobs. No dependency installation, model/checkpoint download, training/export/publish/import/test execution, cache-script execution, robot/page access or environment repair.",
+          "fixed_sources": {
+            "pyproject.toml": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/pyproject.toml",
+            "uv.lock": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/uv.lock",
+            "scripts/fix_windows_profile_writes.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/scripts/fix_windows_profile_writes.py",
+            "scripts/infer_policy.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/scripts/infer_policy.py",
+            "src/mjlab_microduck/tasks/__init__.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/tasks/__init__.py",
+            "src/mjlab_microduck/tasks/microduck_vla_env_cfg.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/tasks/microduck_vla_env_cfg.py",
+            "src/mjlab_microduck/tasks/mdp.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/tasks/mdp.py",
+            "src/mjlab_microduck/vla/instructions.json": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/vla/instructions.json",
+            "src/mjlab_microduck/vla/instructions.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/vla/instructions.py",
+            "src/mjlab_microduck/vla/model.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/vla/model.py",
+            "src/mjlab_microduck/vla/text_encoder.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/vla/text_encoder.py",
+            "src/mjlab_microduck/vla/export_encoder.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/vla/export_encoder.py",
+            "src/mjlab_microduck/publish/manifest.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/publish/manifest.py",
+            "src/mjlab_microduck/publish/cli.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/publish/cli.py",
+            "src/mjlab_microduck/export.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/src/mjlab_microduck/export.py",
+            "docs/vla-plan.md": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/docs/vla-plan.md",
+            "tests/test_vla_cfg.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/tests/test_vla_cfg.py",
+            "tests/test_vla_model.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/tests/test_vla_model.py",
+            "tests/test_vla_text_encoder.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/tests/test_vla_text_encoder.py",
+            "tests/test_publish_manifest.py": "https://github.com/pollen-robotics/microduck_rl/blob/e8f8c29bf56eec8b2f3998d2468c87324f100ee1/tests/test_publish_manifest.py"
+          },
+          "latest_new_commit": {
+            "sha": "e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+            "subject": "feat: Windows 11 support (Blackwell cu128 + profile cache redirect)",
+            "file_count": 4,
+            "files": [
+              ".gitignore",
+              "pyproject.toml",
+              "scripts/fix_windows_profile_writes.py",
+              "uv.lock"
+            ],
+            "fixed_source": "https://github.com/pollen-robotics/microduck_rl/commit/e8f8c29bf56eec8b2f3998d2468c87324f100ee1",
+            "new_test_definitions": false,
+            "scope": "cu126->cu128 Windows index/lock, profile sitecustomize installer, .env/.cache ignores; no new VLA core, model weights or test rerun evidence."
+          },
+          "retrospective_vla_review": {
+            "already_present_at_old_head": "0ed85a56da1dd22f992059aefc2020a786505767",
+            "original_vla_commit": "0ed85a56da1dd22f992059aefc2020a786505767",
+            "replayed_vla_commit": "3c440f059a59ea9ae5320ff1c1193fff78d0f709",
+            "unchanged_reviewed_file_count": 18,
+            "unchanged_paths": [
+              "docs/vla-plan.md",
+              "notebook.md",
+              "scripts/export_encoder.py",
+              "scripts/infer_policy.py",
+              "src/mjlab_microduck/tasks/mdp.py",
+              "src/mjlab_microduck/tasks/microduck_vla_env_cfg.py",
+              "src/mjlab_microduck/vla/__init__.py",
+              "src/mjlab_microduck/vla/export_encoder.py",
+              "src/mjlab_microduck/vla/instructions.json",
+              "src/mjlab_microduck/vla/instructions.py",
+              "src/mjlab_microduck/vla/model.py",
+              "src/mjlab_microduck/vla/text_encoder.py",
+              "tests/test_aarch64_cuda_torch.py",
+              "tests/test_hf_jobs_flag.py",
+              "tests/test_publish_manifest.py",
+              "tests/test_vla_cfg.py",
+              "tests/test_vla_model.py",
+              "tests/test_vla_text_encoder.py"
+            ],
+            "scope": "Newly documented here, not a new2026-11-03language feature. Publisher/export differences outside unchanged VLA pieces are already-recorded training-bundle/provenance imports from develop."
+          }
         },
         {
           "number": 71,
@@ -8190,9 +8422,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T12:06:36.243170+00:00",
+  "checked_at_utc": "2026-11-03T14:09:21.649290+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T11:11:29.604659+00:00",
+    "previous_substantive_review_utc": "2026-11-03T12:06:36.243170+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
@@ -8200,16 +8432,14 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {},
+    "updated_pull_requests": {
+      "pollen-robotics/microduck_rl": [
+        77
+      ]
+    },
     "previous_tracked_prs_merged": false,
     "new_development_releases": [],
-    "moved_development_tags": [
-      {
-        "tag": "daemon-dev-stress-test",
-        "from_sha": "7d195ab31bf727016d2a90eca538955c5fdf2afd",
-        "to_sha": "854adb810d9d9fa2188ebace6d28543d888235a6"
-      }
-    ],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -8217,7 +8447,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Stress1555actual854:2commits4files revert map/fall-room/skip/boxed_in and add body/head look-back. Wall30cm/home_moved retained. Author small-pen failure report is not own reproduction; missing-depth/pose, target/accepted and nominal timeout limits reviewed. One new Rust test definition read only;5other canonical blobs unchanged. Formal8assets, all defaultheads/PRs/models/blog/local production/test/release records unchanged."
+    "notes": "Open RL77rebased4existing PR commits onto5known develop commits then adds4-file Win32 cu128/profile hook. Current PR5commits26files;18reviewed blobs including VLA core/inference/plan/all6testfiles identical to old0ed. VLA48+384->14/schema3 is retrospective contract review, not new feature or rerun. Fixed official257/own d870loaders remain61D1/1or3/3, incompatible. All other heads/releases/devtags/PRs/models/blog/local production/test/image records unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
