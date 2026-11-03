@@ -3278,6 +3278,123 @@
           "scope_note": "Old0.18.0/API47 episode5 prototype diverges from telemetry/API47 main; inherits personal Select/power behavior. No new ONNX weight in five-file increment or change to four watched model metadata baselines.",
           "priority": "low prototype adoption priority; high joint/observation/head-slot/model/BAM/landing/control ownership checks before any HD1910 use",
           "impact": "Motion and target-conditioned grasp contract only. No new camera/ToF detection, target estimation, training weights or audio files; existing emotion/phase/beak/sound experiments inherited."
+        },
+        {
+          "tag": "daemon-dev-stress-test-v2",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-stress-test-v2",
+          "published_at": "2026-11-03T15:55:00Z",
+          "version": "daemon 0.18.4-dev.1557.6193e4e (stress-test-v2)",
+          "head_sha": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+          "prerelease": true,
+          "source_version": "0.18.4",
+          "development_api_version": 50,
+          "classification": "New moving stress/map-service prototype; not formal0.18.4/API47 or original stress/tripAPI48.",
+          "replica_integration": "not integrated; no tracker tests/build/install, mapping import, robot/page/service operations",
+          "change": "Separate stress-test-v2 merges maploc-v2 history, then adds frozen-map room guards, relocalization/fallback, map.mode and map import. Original stress-test854 unchanged.",
+          "comparison_to_recorded_main": {
+            "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+            "to_sha": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+            "ahead_by": 53,
+            "behind_by": 2,
+            "file_count": 70,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+            "scope": "Diverged; still misses2main519commits. Not53new features or formal release."
+          },
+          "comparison_to_existing_stress": {
+            "from_tag": "daemon-dev-stress-test",
+            "from_sha": "854adb810d9d9fa2188ebace6d28543d888235a6",
+            "to_sha": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+            "status": "ahead",
+            "commit_count": 25,
+            "file_count": 56,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/854adb810d9d9fa2188ebace6d28543d888235a6...6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+            "inherited_mapping_history_commits": 23,
+            "branch_merge": "d5577c4c7fb80ef7e9971079e3a2127946675395",
+            "mapping_parent": "7e0be18d13e5f220647d2ae5d8d39fb50e721dc5",
+            "actual_feature_commit": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce",
+            "actual_feature_file_count": 16,
+            "scope": "23mapping-history commits +1merge +1new16-file feature; not25newly validated features."
+          },
+          "mapping_service": {
+            "daemon": "mapd",
+            "algorithm": "maploc",
+            "default_enabled": false,
+            "path": "/var/lib/mapd/map.json",
+            "autosave_s": 60,
+            "state_hz_default": 25,
+            "state_hz_clamp": [
+              5,
+              50
+            ],
+            "tof_latency_ms_default": 60.0,
+            "mechanism": "Stop-based ToF keyframes, odometry matching/fusion and saved map; mapd sends no head/motion intents.",
+            "disabled": "Answers unavailable status without worker/feed subscriptions. Default off pending on-board state parsing/CPU measurements.",
+            "deployment": "Packaging templates gain mapd binary/unit/user/routing; no own ARM bundle/image build or install inferred.",
+            "transport": "map.status/stream/grid/wipe via mediad/WebRTC; BLE rejects map.*; map.mode refused over WebRTC/BLE, used locally."
+          },
+          "freeze_contract": {
+            "default_stress_request": "Before every lap unless --no-map or --map-learns, request localize_only=true and log result, then fetch room grid.",
+            "mapper": "Freeze main-island map, discard pre-existing unplaced islands; match without adding main-map nodes or optimizing. Lost islands temporary; wider gates for3believed stops after relocalization.",
+            "empty_or_failed": "Empty map keeps learning; RPC/refusal logs and allows run/map growth. --map-learns skips freeze request, not a forced unfreeze.",
+            "lifetime": "Global, nonpersistent, no lease: mapd restart maps again until next lap request.",
+            "release": "Normal park/hands-off exit requests mapping only if last map_frozen==true; does not restore prior external mode or guarantee release on crash/RPC failure."
+          },
+          "room_guard": {
+            "grid_res_m": 0.05,
+            "heading_candidates": 24,
+            "heading_step_degrees": 15,
+            "lookahead_m": 0.05,
+            "wall_default_m": 0.3,
+            "home_radius_m": 0.5,
+            "geometry": "Non-dot grid cells blocked; cell-centre distance transform. Home once per run from maximum-clearance ridge mean; grid once per lap. Prefer full-walk heading/minimum turn or homeward; otherwise longest free run/map_short.",
+            "live": "Map-blocked or map-pose loss mid-walk stands for remainder of step. On-spot turns have no map guard; mapped walk does not also apply live head-ToF guard.",
+            "pose": "Feed age<=1s;60odom samples, nearest timestamp within60ms for extrapolation, else stamped pose. No physical error bound.",
+            "margin_limit": "Threshold=min(wall,current clearance), not absolute30cm. Zero-clearance start gives zero threshold; wall/unknown/outside boundary behavior requires verification. Frozen grid does not establish detection of newly moved obstacles."
+          },
+          "relocalization": {
+            "nominal_seconds": 15,
+            "per_stop_seconds": 3,
+            "sequence": "If lost before mapped walk, stand/quarter-turn until pose found. Turns/RPC/getup can extend deadline. Fall or sit/stand transition breaks map chain.",
+            "fallback": "No map/service or still lost runs that walk on old odometry square/forward ToF/look_back; --no-map selects old guards. Missing ToF can still continue. Six scheduled trip/cut slots are not measured fall counts."
+          },
+          "map_load": {
+            "scope": "Local root operation: basic JSON/version/keyframe shape check, clear last_pose boot hint, stop mapd, retain old map beside it, write owned/permissioned temporary map and replace, then attempt start.",
+            "limits": "Not read-only copy or full format/calibration acceptance. No automatic old-map restoration after intermediate failure; disabled map stays disabled. Tracker did not execute it."
+          },
+          "inherited_stress": "Trip500ms/both/config fallback, default-off boot entry, help sounds and offline concatenation inherited; extra map stops/turns/mode change experimental workload.",
+          "validation_evidence": {
+            "latest_commit": "Explicitly not yet run on robot and maploc_truth regression gate not run.",
+            "author_simulation": "Reported33cm->8cm lap-error improvement with widened post-relocalization window; not HD1910 physical accuracy or tracker result.",
+            "new_feature_test_definitions_read": 15,
+            "test_scope": "10room,2map-file shape,3frozen-map sim definitions; existing server test extended. No execution.",
+            "blog_limit": "Earlier8x8mapping demonstration is different historical evidence, not final6193validation."
+          },
+          "priority": "Medium for isolated ToF mapping/stress research; low for current0182delivery/image. Before adoption verify API50consumers/package, ToF/HD1910odometry calibration and CPU, map lifecycle/failure/boundaries and actual stop/clearance.",
+          "impact": {
+            "HD1910_actions": "No servo/register/gain/current adaptation. Map-dependent turns/stands change workload; no calibrated body/foot/landing clearance, on-spot turns unguarded.",
+            "camera_ToF": "New ToF+odometry mapping/localization prototype; no RGB camera transport/calibration change or physical obstacle-avoidance acceptance.",
+            "models_training": "No policy weights/model-manager/training change. Environment map JSON has separate source/calibration/state provenance.",
+            "sound": "Help/chirp/wheee/audio assets unchanged; timing/current comparison conditions change."
+          },
+          "verification": "Archived56canonical final files with Git blob hashes; reviewed critical16-file feature, mapd defaults/service/boundary and room/mode/localization/import/fallback/test sources. No downloaded code/tests/replay/gate/map/stress execution, build/install/robot/page operation.",
+          "fixed_sources": {
+            "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/Cargo.toml",
+            "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/duck-ipc-proto/src/lib.rs",
+            "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/robotd-params/src/lib.rs",
+            "mapd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mapd/src/main.rs",
+            "mapd/src/server.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mapd/src/server.rs",
+            "mapd/src/worker.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mapd/src/worker.rs",
+            "mapd/systemd/mapd.service": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mapd/systemd/mapd.service",
+            "maploc/src/mapper.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/maploc/src/mapper.rs",
+            "maploc/tests/sim.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/maploc/tests/sim.rs",
+            "robotctl/src/stress/mod.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/robotctl/src/stress/mod.rs",
+            "robotctl/src/stress/room.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/robotctl/src/stress/room.rs",
+            "robotctl/src/map.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/robotctl/src/map.rs",
+            "docs/design/mapping-design.md": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/docs/design/mapping-design.md",
+            "docs/superpowers/specs/2026-10-27-stress-test-design.md": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/docs/superpowers/specs/2026-10-27-stress-test-design.md",
+            "mediad/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mediad/src/route.rs",
+            "btd/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/btd/src/route.rs"
+          }
         }
       ],
       "pending_pull_requests": [
@@ -8548,9 +8665,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T15:06:51.938324+00:00",
+  "checked_at_utc": "2026-11-03T16:06:21.123723+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T14:09:21.649290+00:00",
+    "previous_substantive_review_utc": "2026-11-03T15:06:51.938324+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
@@ -8560,14 +8677,13 @@
     "new_pull_requests": {},
     "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [],
-    "moved_development_tags": [
+    "new_development_releases": [
       {
-        "tag": "daemon-dev-nfc-pairing-tag",
-        "from_sha": "5d6066b297fda58af6189788202033a666b373b0",
-        "to_sha": "7ae573569522af9558cc04109ab2edd619592a55"
+        "tag": "daemon-dev-stress-test-v2",
+        "head_sha": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce"
       }
     ],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -8575,7 +8691,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "NFC1556actual7ae,source0.18.3/API47:3commits9files adds radio-classified-over-name candidate preference, imports existing475Type5 approach and review follow-up protocol restore/CC bounds. SPI ST25R100 only; serial Type2 unchanged, generic token/audio retained.14new test definitions read only; old reviewer/submitter hardware claims not own/final7aevalidation. All mainheads/formal8assets/otherdevtags/PRs/models/blog/local production/test/image records unchanged."
+    "notes": "Separate stress-test-v2dev1557actual6193/source0.18.4/API50:23mapping-history commits+merge+16-file feature. mapd defaultoff; freeze failure/pre-walk lost permits old guards, mid-walk loss stands. Global mode/import/boundary limits; author no robot/latest truth gate. Originalstress854 and all defaultheads/formal8assets/otherdevtags/PRs/models/blog/local records unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
