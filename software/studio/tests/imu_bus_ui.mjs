@@ -265,6 +265,35 @@ try {
   await wait(`document.querySelector('#main-imu').textContent==='ft6'`, 'Main prior daemon control identity');
   await js(`mainListener({...controlState,imu:{...controlState.imu,context_current:false,generation:100.1}})`);
   await wait(`document.querySelector('#main-imu').textContent==='unknown'`, 'Main new hello clears same-phase prior daemon identity');
+  // The actual reported entry is motion/HOME with torque already enabled.
+  // It must expose collection in place, without sending redo-start or relax.
+  await js(`window.calls=[];window.replies=[];
+    props.st={mode:'motion',posture:'holding',gravity:[0,0,-1],joints_age_ms:5,imu:{status:'ok'},hold:null};
+    props.imu={source:'bus',mode:'motion',mount:{quat:[1,0,0,0],verified:true},
+      imu_bus:{protocol:'feetech',board:'imu_to_dxl',identity:[1,1,0,68,77]},
+      coarse_sampling:{available:true,reason:null,needs_unload:true},
+      redo:{can_start:false,reason:'先扶稳并卸力，等主程序确认全部失能'}};
+    props.live=true;draw()`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&!b.disabled)`, 'motion HOME installation entry enabled');
+  await js(`clickText('重新标定方向')`);
+  await pause(750);
+  await js(`clickText('保持 HOME，确认采集安装方向？')`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&!b.disabled)`, 'motion HOME can collect still');
+  assert.equal(await js(`calls.length`),0, 'opening collection never changes mode or torque');
+  await js(`clickText('采静止（3 秒）')`);
+  await wait(`calls.length===1`, 'motion HOME still request');
+  assert.deepEqual(await js(`calls[0]`),{name:'imu.op',args:{op:'coarse-capture',phase:'still',seconds:3}});
+  await js(`replies.shift()({ok:true,data:{n:30,samples:[{step:'still',g:[0,0,-1]}]}})`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='采前倾（3 秒）'&&!b.disabled)`, 'motion HOME forward follows still');
+  await js(`clickText('采前倾（3 秒）')`);
+  await wait(`calls.length===2`, 'motion HOME forward request');
+  await js(`replies.shift()({ok:true,data:{n:30,samples:[{step:'fwd',g:[.34,0,-.94]}]}})`);
+  await wait(`calls.length===3`, 'motion HOME solve request');
+  await js(`replies.shift()({ok:true,data:{ok:true,mount:[1,0,0,0],confirm:[],notes:[]}})`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&b.disabled)`, 'motion HOME final write requires unload');
+  await js(`props.imu={...props.imu,coarse_sampling:{...props.imu.coarse_sampling,needs_unload:false}};draw()`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'motion HOME unload preserves solved candidate');
+  assert.equal(await js(`calls.some(c=>c.args.op==='redo-start'||c.name==='relax'||c.args.op==='verify')`),false);
   // A persisted redo session may hold HOME for sampling, but must unload before
   // final verification/cancellation. Unloading must keep the solved samples.
   await js(`window.calls=[];window.replies=[];window.confirm=()=>true;

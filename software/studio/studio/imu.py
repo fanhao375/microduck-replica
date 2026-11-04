@@ -155,6 +155,9 @@ class ImuBackend:
         self._seen_context = None
         self._context_generation = 0
         self._redo_busy = False
+        self._capture_basis = None
+        self._result_basis = None
+        self._verify_lock = asyncio.Lock()
         self.job = None              # 粗校采数 / 交给主程序验证的进度
         self.detected = None         # 最近一次识别芯片的结果（这一步还没有）
         self.last_result = None      # 最近一次 solve 的结果：写入只认这一份
@@ -175,6 +178,9 @@ class ImuBackend:
         source, mount = mount_of(bus, calib)
         redo = self._redo_view(bus, source)
         context = calibration_context(bus, source, redo)
+        if self._result_basis is not None and self._result_basis != self._sampling_basis(bus):
+            self.last_result = None
+            self._result_basis = None
         if self._seen_context is not None and context != self._seen_context:
             self._context_generation += 1
             self.last_result = None
@@ -201,7 +207,54 @@ class ImuBackend:
             "hold": bus.get("hold") if isinstance(bus.get("hold"), dict) else None,
             "detected": self.detected, "stand_calib_at": self._stand_calib_at(), "job": self.job,
             "redo": redo,
+            "coarse_sampling": self._motion_sampling(bus, source, redo),
         }
+
+    def _sampling_basis(self, bus):
+        source, mount = mount_of(bus, fresh_calib(self.rd))
+        quat = (mount or {}).get("quat")
+        return (calibration_context(bus, source, {}), tuple(quat) if isinstance(quat, list) else None,
+                getattr(getattr(self.rd, "hello", None), "at", None))
+
+    def _motion_sampling(self, bus, source, redo):
+        """Read-only collection in motion HOME; no mode/torque command here."""
+        _, mount = mount_of(bus, fresh_calib(self.rd))
+        try:
+            self._normalized_quat((mount or {}).get("quat"))
+            known_mount = True
+        except Refused:
+            known_mount = False
+        available = bus.get("mode") == "motion" and source in ("bus", "lsm6dsv16x", "bno08x") and known_mount and not redo.get("active")
+        native = bus.get("native") if isinstance(bus.get("native"), dict) else {}
+        hd = native.get("hd1910") if isinstance(native.get("hd1910"), dict) else {}
+        off = (native.get("torque_state_confirmed") is False and native.get("torque_enabled") is False
+               and hd.get("restore_pending") is False and hd.get("temporary_gains_applied") is False)
+        guard = bus.get("home_start_guard") or {}
+        error = guard.get("max_joint_error_deg") if isinstance(guard, dict) else None
+        held = (native.get("torque_state_confirmed") is True and native.get("torque_enabled") is True
+                and bus.get("homed") is True and isinstance(error, (int, float)) and not isinstance(error, bool)
+                and math.isfinite(error) and 0 <= error <= 5)
+        age = native.get("imu_age_ms")
+        reason = None
+        if not available:
+            reason = "当前不能在 HOME 原地采安装方向：先读取安装方向或进入初次标定模式"
+        elif self._redo_busy:
+            reason = "标定模式正在切换，等当前操作完成"
+        elif bus_profile_error(bus, fresh_calib(self.rd), source):
+            reason = bus_profile_error(bus, fresh_calib(self.rd), source)
+        elif (bus.get("phase") != "control" or bus.get("policy_enabled") is not False
+              or bus.get("policy_motion_enabled") is True or bus.get("home_recovery")
+              or bus.get("torque_off_pending") or bus.get("power_pending") or bus.get("motion")):
+            reason = "先停下模型并保持 HOME：正在起身或策略接管时不能采数"
+        elif not (held or off):
+            reason = "先等 HOME 站稳（关节误差 ≤5°），或确认全部卸力"
+        elif (native.get("imu_ready") is not True or not isinstance(age, (int, float))
+              or isinstance(age, bool) or not math.isfinite(age) or not 0 <= age <= 250
+              or bus.get("all_joints_fresh") is not True or bus.get("fresh_sample") is not True):
+            reason = "IMU 或关节读数不新鲜：等实时数据恢复再采数"
+        elif helper.flag_present():
+            reason = "舵机页占着总线：先交还主程序"
+        return {"available": available, "reason": reason, "needs_unload": not off}
 
     def _redo_view(self, bus, source):
         redo = helper.imu_redo_state(root=self.root)
@@ -262,6 +315,11 @@ class ImuBackend:
             self.last_result = None
             raise Refused(error)
         redo = helper.imu_redo_state(root=self.root)
+        if bus.get("mode") == "motion":
+            sampling = self._motion_sampling(bus, source, redo)
+            if sampling["reason"]:
+                raise Refused(sampling["reason"])
+            return redo
         native = bus.get("native") if isinstance(bus.get("native"), dict) else {}
         hold = bus.get("hold") if isinstance(bus.get("hold"), dict) else {}
         transitioning = (bus.get("torque_off_pending") not in (None, False)
@@ -399,13 +457,14 @@ class ImuBackend:
             raise Refused("采数时间要在 0.5–8 秒之间")
         out, t0, last_tilt = [], time.monotonic(), None
         capture_context = None
+        last_state_key = None
         capture_generation = self._context_generation
         label = {"still": "摆正，别动", "fwd": "往前低头", "back": "往后仰"}[phase]
         self.job = {"kind": "coarse", "title": "粗校采数", "msg": f"{label}：{float(seconds):g} 秒",
                     "target_deg": 20 if phase == "fwd" else 0, "hold": 0.0}
         while time.monotonic() - t0 < float(seconds):
             bus = await self._bus_once()
-            if bus.get("mode") != "commissioning":
+            if bus.get("mode") not in ("commissioning", "motion"):
                 self.job = {"kind": "coarse", "title": "粗校采数", "failed": True,
                             "msg": "主程序已经不在标定模式了"}
                 if bus.get("mode") == "motion":
@@ -415,12 +474,30 @@ class ImuBackend:
             source, _ = mount_of(bus, fresh_calib(self.rd))
             redo = helper.imu_redo_state(root=self.root)
             context = calibration_context(bus, source, redo)
+            motion = bus.get("mode") == "motion"
+            if motion:
+                basis = self._sampling_basis(bus)
+                if phase == "still" and capture_context is None:
+                    self._capture_basis = basis
+                if self._capture_basis != basis:
+                    raise Refused("采数期间安装方向或主程序连接已改变：重新采静止")
             if (self._context_generation != capture_generation
                     or (capture_context is not None and context != capture_context)):
                 self.last_result = None
                 raise Refused("粗校采数期间 IMU 来源 / 总线板卡 / 模式 / 会话改变：重新采数")
             capture_context = context
             g, imu = self._sample_g(bus)
+            if motion:
+                sample = getattr(self.rd, "state", None)
+                age = sample.age() if sample is not None else None
+                state = sample.value if sample is not None and isinstance(sample.value, dict) else {}
+                key = state.get("t_ns")
+                gravity = (state.get("safety") or {}).get("gravity")
+                fresh = (age is not None and age <= .5 and isinstance(key, int) and not isinstance(key, bool)
+                         and (last_state_key is None or key > last_state_key))
+                g, imu = self._sample_g({"last_sample": {"imu": {"valid": fresh, "gravity": gravity}}})
+                if g is not None:
+                    last_state_key = key
             if g is not None:
                 out.append({"step": phase, "t": time.monotonic() - t0, "g": g})
                 tilt = imu.get("tilt_deg")
@@ -506,6 +583,8 @@ class ImuBackend:
 
     async def _verify(self, args, by=None):
         bus = await self._bus_once()
+        if bus.get("mode") == "motion":
+            return await self._verify_from_home(bus, args, by)
         if bus.get("mode") != "commissioning":
             raise Refused("主程序已经在运动模式：站起来以后用站着校准")
         redo = self._coarse_guard(bus)
@@ -574,6 +653,60 @@ class ImuBackend:
                       ctx={"by": by, "source": self.view().get("source"), "mount": mount})
         return {"ok": True, "note": "主程序验证通过，安装方向已经写进标定文件", "reply": r, "calibration": status}
 
+    async def _verify_from_home(self, bus, args, by):
+        """Handoff the collected candidate only after the user manually unloads."""
+        self._coarse_guard(bus)
+        self.view()
+        mount = args.get("mount_wxyz") or args.get("mount")
+        last = self.last_result
+        if (args.get("confirmed") is not True or not isinstance(last, dict) or not last.get("ok")
+                or last.get("mode") != "coarse" or last.get("mount") != mount):
+            raise Refused("这份方向不是刚刚粗校算出来的：重新采数并确认后再验证")
+        if self._result_basis != self._sampling_basis(bus):
+            self.last_result = None
+            raise Refused("实时读回的 IMU 来源、板卡、原方向或连接已改变：重新采静止和前倾")
+        source, old_mount = mount_of(bus, fresh_calib(self.rd))
+        if self._motion_sampling(bus, source, {})["needs_unload"]:
+            raise Refused("静止和前倾可以保持 HOME 采集；验证写入前先扶稳并卸力，已采结果会保留")
+        if not helper.available():
+            raise Refused("验证写入需要新版 root 小助手和 sudoers")
+        transport = calibration_context(bus, source, {})[1]
+        basis = self._sampling_basis(bus)
+        self._redo_busy = True
+        self.job = {"kind": "coarse", "title": "进入安装方向验证", "msg": "已采结果保留；备份原方向并切换验证模式"}
+        try:
+            ok, result, detail = await asyncio.to_thread(helper.imu_recalibrate, by or "Studio", "enter", confirmed=True)
+            if not ok:
+                raise Refused(helper.friendly(result, detail, "imu-recalibrate"))
+            deadline = time.monotonic() + 8
+            while hasattr(self.rd, "present") and self.rd.present is not True:
+                if time.monotonic() >= deadline:
+                    raise Refused("验证模式已进入，等待网页重新连上主程序后再继续")
+                await asyncio.sleep(.1)
+            current = await self._bus_once()
+            status = await self._rpc_once("robot.busCommand", {"action": "calibration-status"}, 5.0, "核对验证前原方向")
+            now_source, now_mount = mount_of(current, status)
+            if (current.get("mode") != "commissioning" or now_source != source or now_mount != old_mount
+                    or calibration_context(current, source, {})[1] != transport):
+                self.last_result = None
+                raise Refused("切换验证模式后 IMU 来源、板卡或原方向不一致：停止写入，重新采数")
+            self.rd.bus.set(current)
+            self.rd.calib.set(status)
+            self._result_basis = None
+            self.view()  # expected mode/session transition invalidates the old cached context
+            self.last_result = last
+        except BaseException as err:
+            self.job = {"kind": "coarse", "title": "安装方向验证未开始", "failed": True, "msg": str(err)}
+            # The existing persistent transaction owns recovery if entering succeeded.
+            if helper.imu_redo_state(root=self.root).get("active"):
+                self.last_result = None
+            elif self._sampling_basis(self.rd.bus.value) != basis:
+                self.last_result = None
+            raise
+        finally:
+            self._redo_busy = False
+        return await self._verify(args, by)
+
     @staticmethod
     def _normalized_quat(quat):
         if (not isinstance(quat, list) or len(quat) != 4
@@ -617,6 +750,11 @@ class ImuBackend:
 
     async def handle(self, args, by=None):
         op = args.get("op")
+        if self._verify_lock.locked():
+            raise Refused("安装方向正在验证：等当前操作结束，紧急时仍可卸力")
+        if (op in ("coarse-capture", "solve", "verify", "redo-start", "profile-select")
+                and self.job and not self.job.get("done") and not self.job.get("failed")):
+            raise Refused("上一项采集或标定操作还没结束：等它完成再继续")
         if op in ("redo-start", "redo-cancel", "profile-select"):
             return await self._redo_op(args, by)
         if op == "solve":
@@ -628,8 +766,6 @@ class ImuBackend:
             mode = args.get("mode", "full")
             if mode not in ("full", "coarse"):
                 raise Refused(f"不认识的校准方式：{mode}")
-            if mode == "coarse" and self.view().get("mode") == "motion":
-                raise Refused("主程序已经在运动模式：站起来以后用站着校准")
             # 旧方向只认主程序那份（不收页面传的），页面传来的 rules / home_gravity 也不透传（审查 A3）
             view = self.view()
             if view.get("profile_error"):
@@ -639,17 +775,26 @@ class ImuBackend:
             redo = helper.imu_redo_state(root=self.root)
             if redo.get("active") and mode != "coarse":
                 raise Refused("重做初次 IMU 校准期间用静止 / 前倾粗校，可卸力托住或站姿使能后等站稳")
+            solve_basis = None
             if mode == "coarse":
-                self._coarse_guard(await self._bus_once())
+                bus = await self._bus_once()
+                self._coarse_guard(bus)
+                if bus.get("mode") == "motion":
+                    solve_basis = self._sampling_basis(bus)
+                    if self._capture_basis != solve_basis:
+                        self.last_result = None
+                        raise Refused("已采数据的安装方向或主程序连接已改变：重新采静止和前倾")
             old = (view["mount"] or {}).get("quat")
             old_verified = bool((view["mount"] or {}).get("verified"))
             res = await asyncio.to_thread(lambda: imu_calib.solve(
                 samples, frame="body", old_mount=old, mode=mode, old_verified=old_verified))
             self.view()
-            if self._seen_context != context or self._context_generation != generation:
+            if (self._seen_context != context or self._context_generation != generation
+                    or solve_basis is not None and self._sampling_basis(self.rd.bus.value) != solve_basis):
                 self.last_result = None
                 raise Refused("采数后 IMU 来源 / 总线板卡 / 模式 / 会话已改变：重新采数再算")
             self.last_result = res
+            self._result_basis = solve_basis
             detail = json.dumps({k: res.get(k) for k in ("mount", "quality", "confirm", "parts", "redo") if k in res},
                                 ensure_ascii=False)[:1500]
             if res.get("ok"):
@@ -680,7 +825,8 @@ class ImuBackend:
                             "msg": str(err) or "采数已中止：重新采数或取消重做"}
                 raise
         if op == "verify":
-            return await self._verify(args, by)
+            async with self._verify_lock:
+                return await self._verify(args, by)
         if op in ("save", "coarse", "detect", "set_chip"):
             if op == "save":
                 raise Refused("新的 IMU 方向已经记下了：去「上手清单」第 3 步点「写进主程序」")

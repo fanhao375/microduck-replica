@@ -411,7 +411,7 @@ class ImuBackendTest(unittest.TestCase):
         self.assertIn("超时没看到往前低头", msg)
         self.assertIn("Nothing saved", msg)
 
-    def test_motion_mode_refuses_coarse(self):
+    def test_motion_mode_without_confirmed_home_refuses_coarse(self):
         b = self.backend(bus=commissioning_bus(mode="motion"), calib=factory_calib())
         for args in ({"op": "solve", "mode": "coarse", "samples": [{"step": "still", "g": [0, 0, -1]}]},
                      {"op": "coarse-capture", "phase": "still", "seconds": 0.5},
@@ -419,7 +419,7 @@ class ImuBackendTest(unittest.TestCase):
             with self.subTest(op=args["op"]):
                 with self.assertRaises(Refused) as cm:
                     asyncio.run(b.handle(args, "测试"))
-                self.assertIn("主程序已经在运动模式", str(cm.exception))
+                self.assertIn("HOME", str(cm.exception))
 
     def test_verify_readback_failure_or_mismatch_is_not_success(self):
         for corrupt in ("unreachable", "wrong-source", "wrong-quat", "unverified", "not-normalized", "contradictory-top"):
