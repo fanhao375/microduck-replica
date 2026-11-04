@@ -3395,6 +3395,262 @@
             "mediad/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/mediad/src/route.rs",
             "btd/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce/btd/src/route.rs"
           }
+        },
+        {
+          "tag": "daemon-dev-robotd-runtime-missing-servos-degraded",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-robotd-runtime-missing-servos-degraded",
+          "published_at": "2026-11-04T10:35:32Z",
+          "version": "daemon 0.18.4-dev.1559.909478c (robotd-runtime-missing-servos-degraded)",
+          "head_sha": "909478c8bbfeee09a289ce0b9d4157ac38bf687f",
+          "prerelease": true,
+          "source_version": "0.18.4",
+          "development_api_version": 48,
+          "classification": "new separate moving development tag; not default main or formal release",
+          "change": "Separate development build for pending PR525; runtime missing-device census and degraded update-health classification.",
+          "review": {
+            "change": "Once failed bus reads reach max_consecutive_errors, run RobotIo::census before publishing the count, and every five seconds during the run. One successful read clears the census and consecutive error count.",
+            "backend": "DynamixelIo pings 15 expected servos and IMU ID200. RobotIo defaults to Ok(None); FakeIo can supply test answers. No Feetech implementation is present in this upstream patch.",
+            "verdict": "A census naming missing servos, or a silent IMU when all servos answered, yields healthy=false/degraded=true and startup-style names. All devices answering, None, or census error clears missing information and leaves the consecutive-read failure unhealthy. Earlier forced-unhealthy/policy errors can outrank this branch.",
+            "not_a_recovery": "Health classification is for update diagnostics, not safe-to-move approval. No new motor repair, replacement adoption, torque-off/parking or reconnect workflow is added.",
+            "timing": "Synchronous census runs in the control-loop thread; source estimates about half a second for silent servos. Before the first census returns the threshold count is not yet published, and health also checks stale ticks below the bus branch; the PR does not establish that a health sampler can never observe a transient stall. Control/deadman delay, snapshot timing and hardware classification need isolated verification.",
+            "wire": "Source0.18.4/API48 extends semantics of existing BusHealth::missing and ImuHealth::missing fields, without new field shapes. It is a separate contract from other gamepad/trip API48 branches and local0.18.2/API47.",
+            "tests_read": [
+              "servos_unplugged_on_a_running_loop_are_degraded_not_unhealthy",
+              "servo_power_lost_on_a_running_loop_is_degraded",
+              "an_imu_board_unplugged_on_a_running_loop_is_degraded",
+              "a_running_loop_names_the_servo_that_went_quiet"
+            ],
+            "author_verification_claim": "Author reports robotd/duck-control/robotctl tests and no new clippy warnings on macOS with nfc excluded; Linux CI is described as full gate, and no board trial yet. Not project validation.",
+            "tracker_tests_executed": false
+          },
+          "fixed_sources": {
+            "health": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L964",
+            "census": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L1500",
+            "loop": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L2538",
+            "bus": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-control/src/bus.rs#L247",
+            "default_backend": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-control/src/io.rs#L215",
+            "api": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-ipc-proto/src/lib.rs#L503"
+          },
+          "priority": "medium-high diagnostic reference; Feetech backend/timing acceptance required before adoption",
+          "replica_integration": "Not integrated, installed, built or tested by this monitor.",
+          "impact": "Potentially relevant to HD-1910 missing-device diagnostics and update decisions; does not adapt its bus protocol, gains or current conversion. No camera, ToF, policy weight, model-management, training or sound change; no image/robot acceptance.",
+          "asset_inventory": [
+            {
+              "name": "0.18.4-dev.1559.909478c.manifest.json",
+              "size": 386,
+              "digest": "sha256:0396a731f5f1ef9efa1cea95dd6c77f7c8ef9f581f9c31ea845211c3a32e8e00"
+            },
+            {
+              "name": "0.18.4-dev.1559.909478c.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:fb7094a57efd417223d2882d337c2b8c57749888a99edb255568fe3c3523bd1b"
+            },
+            {
+              "name": "daemon-0.18.4-dev.1559.909478c.tar.zst",
+              "size": 15026437,
+              "digest": "sha256:c50c11009952ee53653e35d29bce9fe384ffd07ae84efb14f951c7bd83613ae6"
+            },
+            {
+              "name": "daemon-0.18.4-dev.1559.909478c.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:435f53503f4aa73439b713d3faed27eb42773c8ce8359ac086f7ed4fdbee7a21"
+            },
+            {
+              "name": "duckctl-0.18.4-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674152,
+              "digest": "sha256:3988fdd39dadc3864da4d02785547d4e5b110d86e87d5caedb7de11fdf0bf74a"
+            },
+            {
+              "name": "duckctl-0.18.4-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594136,
+              "digest": "sha256:3321b5b087fcf684060620f16e1884686de6a38b1b438f51930f1288f2e7bf66"
+            },
+            {
+              "name": "duckctl-0.18.4-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809521,
+              "digest": "sha256:eab4d395bb25e83d82e92d73b28d7d014f284127635a1c18e3eb3948fdd3dd7e"
+            },
+            {
+              "name": "duckctl-0.18.4-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035603,
+              "digest": "sha256:6d2e732ca8d3ebe404262d81b6fd75aea721af70d5905db9888f8a75192b0b8a"
+            },
+            {
+              "name": "duckctl-0.18.4-py3-none-win_amd64.whl",
+              "size": 1512495,
+              "digest": "sha256:d673011568ba950200ff64a7b4ce2fe3d431615a8af1397113b452d916bb6efa"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:fee32d94bf6c752f03c6ac0f520fbb02dbd31606fe1ff7675076d4e5b6e71642"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:7ae9df19356b40076a57e7c0b3029a2c53ffe538bc1409b279e61a9aa0898171"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505310,
+              "digest": "sha256:897c0378b43cdd5bc546a7961f603002172a34882404fe4697556623b4b1f999"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601591,
+              "digest": "sha256:054437811b36df795c7280cfd8762b5ae8e6c38197461d6bb30116f76c66e3ad"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384008,
+              "digest": "sha256:66c291d0e1f83a0b8e25734ea47a35d7aab2103a073af64a12958f4e723699b2"
+            },
+            {
+              "name": "manifest.json",
+              "size": 612,
+              "digest": "sha256:d0b6d7d8dad9409bc3750cb782732a4623ea5657a19e5d23a16b3a24efcb9656"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:fe1b9bef3232694b811e4d7d1cb4f6e28f41fed18eb90a37243d05b5d1fa30e6"
+            }
+          ],
+          "pull_request": 525,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...909478c8bbfeee09a289ce0b9d4157ac38bf687f",
+          "changed_file_count": 8,
+          "commit_count": 1
+        },
+        {
+          "tag": "daemon-dev-nfc-mode-tags",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-mode-tags",
+          "published_at": "2026-11-04T10:28:41Z",
+          "version": "daemon 0.18.3-dev.1558.42afb9d (nfc-mode-tags)",
+          "head_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+          "prerelease": true,
+          "source_version": "0.18.3",
+          "development_api_version": 47,
+          "classification": "new separate moving development tag; not default main or formal release",
+          "change": "Separate mode-tag prototype on pairing7ae; walk/roller requests plus three recognized no-op tags.",
+          "review": {
+            "mode_records": "Text or URI value, trimmed, exact case-sensitive match. walk_mode -> walk; roller_skating_mode -> roller. soccer_mode, laser_mode and autonomous_mode only chirp/log NotYet and make no mode request.",
+            "routing": "Pairing record takes precedence if also present; otherwise first recognized mode record wins. Existing per-touch UID suppression is retained. Mode path does not use the connected-pad guard from pairing::on_touch.",
+            "sound_and_result": "Reuses chirp before request; sound transport error is logged but does not stop the mode request. Switched means IntentResult.accepted, not a subsequent state or loaded-policy verification; refusal/transport failure is logged. No new sound asset.",
+            "inheritance": "One commit/four files on existing pairing7ae, retaining its generic pairing token, classified-pad preference and SPI-only Type5 implementation. Does not update or replace daemon-dev-nfc-pairing-tag. New branch diverges from main by ahead5/behind6; it still misses later main517/518/519 changes.",
+            "tests_read": [
+              "each_tag_text_names_its_mode_and_nothing_else_does",
+              "walk_and_roller_skating_switch_the_robot",
+              "soccer_laser_and_autonomous_quack_and_ask_nothing",
+              "a_refusal_says_why"
+            ],
+            "tracker_tests_executed": false,
+            "acceptance": "Four fake-driver definitions read only; no reader/card, mode-transition, policy-load or device test performed. Soccer/laser/autonomous functionality is not implemented."
+          },
+          "fixed_sources": {
+            "mode_contract": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L58",
+            "mode_request": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L97",
+            "routing": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/main.rs#L246",
+            "documentation": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/docs/robot/pair-a-gamepad.md#L76",
+            "source_version": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/Cargo.toml",
+            "api": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/duck-ipc-proto/src/lib.rs"
+          },
+          "priority": "conditional medium with NFC reader; low for current non-NFC delivery",
+          "replica_integration": "Not integrated, installed, built or tested by this monitor.",
+          "impact": "Existing NFC reader can request walk/roller modes and reuse chirp; no new physical skills, models/weights/training, HD-1910 driver, RGB/ToF stream or sound asset.",
+          "asset_inventory": [
+            {
+              "name": "0.18.3-dev.1558.42afb9d.manifest.json",
+              "size": 386,
+              "digest": "sha256:cb585f6d86095a20c04627cd8a9d95f888909d49b3dc0e23c9e6fed7d5446f6a"
+            },
+            {
+              "name": "0.18.3-dev.1558.42afb9d.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:3c35cc1bda68eccd557fdc7a4a34e9970356d3c435786e6639cc7721d779120c"
+            },
+            {
+              "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst",
+              "size": 15057536,
+              "digest": "sha256:2142c25c8828e4a38aa8282c53689cbcb64c1aa5d08d7c41ddbb3dd688b3c31b"
+            },
+            {
+              "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:25722fb7139f1551a9c9ae97cfe6b40d11b90fabd50687bab89f4c56355dd5c1"
+            },
+            {
+              "name": "duckctl-0.18.3-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674180,
+              "digest": "sha256:ae72aa5463e8fbcad9d98bb4ee8fc2270c29ca08470d3f907321a5186f2d95bb"
+            },
+            {
+              "name": "duckctl-0.18.3-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594062,
+              "digest": "sha256:73b407c202de1d94ede496ae5f62442ddcab86a80a9e3acc14f97a74e8a330f1"
+            },
+            {
+              "name": "duckctl-0.18.3-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035214,
+              "digest": "sha256:291f23f240f1b0033bce101d342d5e836bc1395ff0758942c5ae98012605358e"
+            },
+            {
+              "name": "duckctl-0.18.3-py3-none-win_amd64.whl",
+              "size": 1512567,
+              "digest": "sha256:323d6d80d1cda6cd71b7126f7abb26652e5cb9e54ee5e63e88f10aed3b0d775f"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:581dac79e6632d6a885e37a7b02fec69b570b82df98d7c7050e5de9f0393a1ec"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:c53a1b936a51cb0f0cbbf43eedaf8af22528f51690ae0d84239f5921b05321f6"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505221,
+              "digest": "sha256:8eb857b317f4a2b8f496677ba98b306e274a960e168d787b6f7d761437bb6b24"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601653,
+              "digest": "sha256:a5ca7b9193c57b4ec2ae5d1691b92b1b3104006a36cd9694542ccce790cdf580"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384008,
+              "digest": "sha256:83b492cb565fdc3e9a77a589bc7a824ec9341facefb86a7d02544683a6fd0eaf"
+            },
+            {
+              "name": "manifest.json",
+              "size": 562,
+              "digest": "sha256:08d489edc678c6576fa30ba806cef16fef19e410a5161a35ef2859cf4a2653ac"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:3aa7ef0368aec7a84c3081481644e40195b574fb2db02d54a8c0c3e5a402757d"
+            }
+          ],
+          "comparison_to_existing_pairing": {
+            "from_sha": "7ae573569522af9558cc04109ab2edd619592a55",
+            "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+            "status": "ahead",
+            "commit_count": 1,
+            "file_count": 4,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7ae573569522af9558cc04109ab2edd619592a55...42afb9dbac17bd9a0422711c7f00407f8373d99f"
+          },
+          "comparison_to_recorded_main": {
+            "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+            "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+            "status": "diverged",
+            "ahead_by": 5,
+            "behind_by": 6,
+            "file_count": 15,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...42afb9dbac17bd9a0422711c7f00407f8373d99f"
+          }
         }
       ],
       "pending_pull_requests": [
@@ -7080,6 +7336,52 @@
             "tests": "https://github.com/pollen-robotics/microduck/blob/fce32d114d4747f1bc469cc67cf3b1c975592623/xtask/tests/publish_scripts.rs#L1"
           },
           "replica_integration": "Not adopted or executed by this monitor; no website/Space access or publication."
+        },
+        {
+          "number": 525,
+          "title": "robotd: a servo unplugged mid-run is degraded, as at boot",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T10:31:55Z",
+          "updated_at": "2026-11-04T10:31:55Z",
+          "merged_at": null,
+          "merge_commit_sha": null,
+          "url": "https://github.com/pollen-robotics/microduck/pull/525",
+          "head_sha": "909478c8bbfeee09a289ce0b9d4157ac38bf687f",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 8,
+          "commit_count": 1,
+          "classification": "pending PR with separate development build; not main or stable",
+          "development_api_version": 48,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...909478c8bbfeee09a289ce0b9d4157ac38bf687f",
+          "priority": "medium-high diagnostic and updater-verdict review for HD-1910; hardware backend and timing adaptation required",
+          "review": {
+            "change": "Once failed bus reads reach max_consecutive_errors, run RobotIo::census before publishing the count, and every five seconds during the run. One successful read clears the census and consecutive error count.",
+            "backend": "DynamixelIo pings 15 expected servos and IMU ID200. RobotIo defaults to Ok(None); FakeIo can supply test answers. No Feetech implementation is present in this upstream patch.",
+            "verdict": "A census naming missing servos, or a silent IMU when all servos answered, yields healthy=false/degraded=true and startup-style names. All devices answering, None, or census error clears missing information and leaves the consecutive-read failure unhealthy. Earlier forced-unhealthy/policy errors can outrank this branch.",
+            "not_a_recovery": "Health classification is for update diagnostics, not safe-to-move approval. No new motor repair, replacement adoption, torque-off/parking or reconnect workflow is added.",
+            "timing": "Synchronous census runs in the control-loop thread; source estimates about half a second for silent servos. Before the first census returns the threshold count is not yet published, and health also checks stale ticks below the bus branch; the PR does not establish that a health sampler can never observe a transient stall. Control/deadman delay, snapshot timing and hardware classification need isolated verification.",
+            "wire": "Source0.18.4/API48 extends semantics of existing BusHealth::missing and ImuHealth::missing fields, without new field shapes. It is a separate contract from other gamepad/trip API48 branches and local0.18.2/API47.",
+            "tests_read": [
+              "servos_unplugged_on_a_running_loop_are_degraded_not_unhealthy",
+              "servo_power_lost_on_a_running_loop_is_degraded",
+              "an_imu_board_unplugged_on_a_running_loop_is_degraded",
+              "a_running_loop_names_the_servo_that_went_quiet"
+            ],
+            "author_verification_claim": "Author reports robotd/duck-control/robotctl tests and no new clippy warnings on macOS with nfc excluded; Linux CI is described as full gate, and no board trial yet. Not project validation.",
+            "tracker_tests_executed": false
+          },
+          "fixed_sources": {
+            "health": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L964",
+            "census": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L1500",
+            "loop": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/robotd/src/main.rs#L2538",
+            "bus": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-control/src/bus.rs#L247",
+            "default_backend": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-control/src/io.rs#L215",
+            "api": "https://github.com/pollen-robotics/microduck/blob/909478c8bbfeee09a289ce0b9d4157ac38bf687f/duck-ipc-proto/src/lib.rs#L503"
+          },
+          "replica_integration": "Not integrated. Read-only fixed production d870 RobotIo/HardwareIo/FeetechIo sources have no census; porting only the default None would not implement Feetech diagnosis.",
+          "impact": "Potentially relevant to HD-1910 missing-device diagnostics and update decisions; does not adapt its bus protocol, gains or current conversion. No camera, ToF, policy weight, model-management, training or sound change; no image/robot acceptance."
         }
       ],
       "previous_stable_releases": [
@@ -8844,9 +9146,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-04T05:23:00.268484+00:00",
+  "checked_at_utc": "2026-11-04T10:36:08.940488+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T16:06:21.123723+00:00",
+    "previous_substantive_review_utc": "2026-11-04T05:23:00.268484+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
@@ -8855,25 +9157,44 @@
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        520,
-        521,
-        522,
-        523,
-        524
+        525
       ]
     },
     "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [],
+    "new_development_releases": [
+      {
+        "tag": "daemon-dev-robotd-runtime-missing-servos-degraded",
+        "head_sha": "909478c8bbfeee09a289ce0b9d4157ac38bf687f"
+      },
+      {
+        "tag": "daemon-dev-nfc-mode-tags",
+        "head_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f"
+      }
+    ],
     "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
+    "project_release_drafts_observed": [
+      {
+        "tag": "microduck-replica-image-20261104",
+        "draft": true,
+        "prerelease": true,
+        "published_at": null
+      },
+      {
+        "tag": "microduck-software-v2026.11.4",
+        "draft": true,
+        "prerelease": true,
+        "published_at": null
+      }
+    ],
     "runtime_code_changed_by_heartbeat": false,
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Five one-commit pending PRs on unchanged d13:520 Duration-representable endurance spans,521 zero archive config budgets,522 finite detection scores,523 defensive512-byte BLE chunk cap,524 publisher usage errors. Seven new test definitions read only; author checks are external. Four analogous local d870 conditions unchanged. All default heads, formal0.18.4/8assets, dev tags, existing PR states, models, blog and fixed project records unchanged; RL77 acknowledgment nonmaterial."
+    "notes": "Pending525/dev1559 actual909478 source0.18.4/API48 adds runtime Dynamixel census and degraded health naming; no Feetech implementation, synchronous timing/gate sampling needs review, four definitions read only. Separate nfc-mode-tags dev1558actual42afb9 source0.18.3/API47 adds walk/roller requests; soccer/laser/autonomous no-op, four fake definitions read only. Existing pairing tag/main/formal8assets/other PRs/models/blog/fixed0182 records unchanged. Retained remote master commits; own Nov4 image/software releases remain drafts, not replacements for published27image/31-r1software."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
