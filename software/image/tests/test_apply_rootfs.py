@@ -402,6 +402,13 @@ class test_symlink_escape(ApplyTestBase):
 
 
 class test_residual_scan(ApplyTestBase):
+    def test_source_provenance_in_payload_manifest_is_retained(self):
+        repository = "https://github.com/fanhao375/Microduck-" + THIRD_PARTY_NAME
+        payload = self.fx.make_payload(manifest_extra={"robotd_source": {"repository": repository}})
+        root = self.fx.make_rootfs()
+        self.run_ok(root, payload, self.fx.make_studio(), self.fx.make_overlay())
+        self.assertIn(repository, (root / "usr/share/doc/microduck/payload.json").read_text(encoding="utf-8"))
+
     def test_third_party_name_leak_fails(self):
         payload = self.fx.make_payload()
         root = self.fx.make_rootfs()

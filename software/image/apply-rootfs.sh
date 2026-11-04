@@ -1494,8 +1494,10 @@ SCAN_START=$(date +%s)
 find "$ROOT" -type f -exec grep -ailE "$NAME_SCAN" {} + >> "$WORK/name-leak.txt" 2>/dev/null || true
 LC_ALL=C sort -u "$WORK/name-leak.txt" -o "$WORK/name-leak.txt"
 if [ -s "$WORK/name-leak.txt" ]; then
-    EXCEPT=$ROOT/usr/share/doc/microduck/模型说明.txt
-    grep -v -x -F "$EXCEPT" "$WORK/name-leak.txt" > "$WORK/name-leak-left.txt" || true
+    # 来源清单和模型署名必须保留；只排除这两个固定文件，其他路径继续检查。
+    printf '%s\n' "$ROOT/usr/share/doc/microduck/模型说明.txt" \
+        "$ROOT/usr/share/doc/microduck/payload.json" > "$WORK/name-scan-attribution.txt"
+    grep -v -x -F -f "$WORK/name-scan-attribution.txt" "$WORK/name-leak.txt" > "$WORK/name-leak-left.txt" || true
     if [ -s "$WORK/name-leak-left.txt" ]; then
         echo "    仍然含第三方作者名的文件："
         sed 's/^/      - /' "$WORK/name-leak-left.txt"

@@ -159,7 +159,7 @@ class FakeProject:
         return files
 
     def make_payload(self, bad_hash=False, extra_file=None, extra_symlink=False, chmod777=False,
-                     robotd_dropin=None, payload_extra=None):
+                     robotd_dropin=None, payload_extra=None, manifest_extra=None):
         root = self.tmp / "payload-root"
         if root.exists():
             rmtree_force(root)
@@ -177,6 +177,8 @@ class FakeProject:
             "robotd_sha256": sha(self.robotd),
             "files": entries,
         }
+        if manifest_extra:
+            manifest.update(manifest_extra)
         put(root, "payload.json", json.dumps(manifest, ensure_ascii=False, indent=2))
         if extra_file:
             put(root, extra_file, b"not in manifest\n")
