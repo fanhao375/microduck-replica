@@ -6901,6 +6901,185 @@
             "editor": "https://github.com/pollen-robotics/microduck/blob/d13be2c1a2f4b1e0b0e499b08b92f870518b1384/robotctl/src/configure.rs",
             "switch": "https://github.com/pollen-robotics/microduck/blob/d13be2c1a2f4b1e0b0e499b08b92f870518b1384/robotctl/src/dev_daemon.rs"
           }
+        },
+        {
+          "number": 520,
+          "title": "robotctl endurance: an infinite span parses, then panics in the background unit",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T04:48:31Z",
+          "updated_at": "2026-11-04T04:48:31Z",
+          "merged_at": null,
+          "merge_commit_sha": "25eeb508bc85a67c5f9c07ee74d42e6523117d05",
+          "url": "https://github.com/pollen-robotics/microduck/pull/520",
+          "head_sha": "a38a49e52a6f2501effd93b65948dd4c467efc8f",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...a38a49e52a6f2501effd93b65948dd4c467efc8f",
+          "classification": "pending PR, endurance argument validation only",
+          "priority": "medium before using endurance CLI; low for current image publication",
+          "review": {
+            "change": "span requires Duration::try_from_secs_f64(hi) success in addition to 0 < lo <= hi; rejects infinite and finite oversized activity bounds before the transient unit starts.",
+            "scope": "walk_s, stand_s and sit_s share span. NaN was already refused by the ordering check; its new cases preserve rejection, not a newly fixed NaN parsing path. This is a Duration representation check, not validation of every floating CLI option or every Instant deadline.",
+            "tests_read": [
+              "spans_refuse_seconds_a_duration_cannot_hold"
+            ],
+            "test_cases": "1:inf, inf, inf:inf, NaN:5, 1:NaN, 1:2e19 refused; 20:60 retained",
+            "author_verification_claim": "PR body reports target-crate cargo test, cargo fmt and cargo clippy; external claim, not project validation.",
+            "tracker_tests_executed": false
+          },
+          "impact": "Prevents invalid endurance scheduling; no changed drive policy, HD-1910 tuning/current sampling, camera streaming, ToF guard, model, training or audio.",
+          "fixed_sources": {
+            "span_and_test": "https://github.com/pollen-robotics/microduck/blob/a38a49e52a6f2501effd93b65948dd4c467efc8f/robotctl/src/endurance.rs#L118"
+          },
+          "replica_integration": "Not adopted by this monitor. Fixed local production d870 retains the previous span/config/decode/chunks conditions for PR520-523; no runtime edit, test, build or delivery claim."
+        },
+        {
+          "number": 521,
+          "title": "updater: a zero archive budget is refused at load time, not during an update",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T04:49:24Z",
+          "updated_at": "2026-11-04T04:49:24Z",
+          "merged_at": null,
+          "merge_commit_sha": "3169c3986edfdbffdffba4252bba2bae533a7f96",
+          "url": "https://github.com/pollen-robotics/microduck/pull/521",
+          "head_sha": "26083c5e45ec31c609cbb260d53b9d084c586823",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...26083c5e45ec31c609cbb260d53b9d084c586823",
+          "classification": "pending PR, updater configuration validation only",
+          "priority": "medium configuration preflight reference before adopting native updater",
+          "review": {
+            "change": "Config::validate rejects Some(0) for max_uncompressed_bytes and max_archive_entries, reached through from_toml/load. Previously Some(0) reached archive_limits and caused extraction to fail during an update.",
+            "scope": "Omitted bounds still use ArchiveLimits defaults. Zero is not unlimited. Default limits, package formats, signatures, installation and rollback behavior are unchanged.",
+            "tests_read": [
+              "zero_archive_budgets_are_rejected_at_load_time"
+            ],
+            "test_cases": "Both zero fields loaded through from_toml return configuration errors containing must be positive.",
+            "author_verification_claim": "PR body reports target-crate cargo test, cargo fmt and cargo clippy; external claim, not project validation.",
+            "tracker_tests_executed": false
+          },
+          "impact": "Earlier diagnosis of invalid archive budgets; not evidence of ARM catalogue delivery, 15-to-18 online migration, a released image or device acceptance. No sensor/model/training/action/audio changes.",
+          "fixed_sources": {
+            "validation_and_test": "https://github.com/pollen-robotics/microduck/blob/26083c5e45ec31c609cbb260d53b9d084c586823/updater/src/config.rs#L440"
+          },
+          "replica_integration": "Not adopted by this monitor. Fixed local production d870 retains the previous span/config/decode/chunks conditions for PR520-523; no runtime edit, test, build or delivery claim."
+        },
+        {
+          "number": 522,
+          "title": "duck-detect: a non-finite score is not a detection",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T04:49:44Z",
+          "updated_at": "2026-11-04T04:49:44Z",
+          "merged_at": null,
+          "merge_commit_sha": "a32f2a4b99f9d14174eab0e0636bb54255354b3c",
+          "url": "https://github.com/pollen-robotics/microduck/pull/522",
+          "head_sha": "a9f2e94edc96ced47f84eab1f4fa031275476437",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...a9f2e94edc96ced47f84eab1f4fa031275476437",
+          "classification": "pending PR, detection score numerical guard only",
+          "priority": "medium when enabling RGB detector consumers; independent of current camera transport",
+          "review": {
+            "change": "decode skips !score.is_finite() before thresholding/sorting/NMS, so a corrupt score cannot replace a finite detection over the same box.",
+            "scope": "Guard also rejects negative infinity; new test exercises NaN and positive infinity. Box coordinates, threshold and iou_limit validation are unchanged, so this is not complete tensor validation or a new detector/model.",
+            "tests_read": [
+              "a_non_finite_score_is_not_a_detection"
+            ],
+            "test_cases": "Bad and valid 0.9 scores on the same box retain the valid candidate; a lone bad candidate yields no detections.",
+            "author_verification_claim": "PR body reports target-crate cargo test, cargo fmt and cargo clippy; external claim, not project validation.",
+            "tracker_tests_executed": false
+          },
+          "impact": "RGB inference result robustness only; no change to camera capture/transport/calibration, ToF, HD-1910 driver, weights, model management, training, motion policies or sounds.",
+          "fixed_sources": {
+            "decode_and_test": "https://github.com/pollen-robotics/microduck/blob/a9f2e94edc96ced47f84eab1f4fa031275476437/duck-detect/src/lib.rs#L105"
+          },
+          "replica_integration": "Not adopted by this monitor. Fixed local production d870 retains the previous span/config/decode/chunks conditions for PR520-523; no runtime edit, test, build or delivery claim."
+        },
+        {
+          "number": 523,
+          "title": "duck-ble: the function that cuts bytes obeys the 512-octet cap too",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T04:50:03Z",
+          "updated_at": "2026-11-04T04:50:03Z",
+          "merged_at": null,
+          "merge_commit_sha": "ca84f38ff611eb1ee40da24457bf06474ae75dd0",
+          "url": "https://github.com/pollen-robotics/microduck/pull/523",
+          "head_sha": "88779b1114c1b9e3e9a7ed22de8b1563e072ac07",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...88779b1114c1b9e3e9a7ed22de8b1563e072ac07",
+          "classification": "pending PR, defensive BLE chunk upper bound",
+          "priority": "low preventive transport hardening; medium only for a new caller bypassing notification_payload",
+          "review": {
+            "change": "chunks replaces mtu.max(FLOOR_MTU) with mtu.clamp(FLOOR_MTU, MAX_ATTRIBUTE_VALUE), giving 20..512-byte chunks with newline preserved.",
+            "existing_live_path": "Main d13 btd bluez computes notification_payload(req.mtu), stores it on Link, and session passes link.mtu() to chunks; the normal radio path already caps payloads. This adds protection at the slicing function rather than demonstrating a currently broken session.",
+            "scope": "chunks does not subtract the ATT header; callers still need the link payload bound for a small negotiated MTU. No BLE method/API change, camera throughput improvement or fresh phone/device test.",
+            "tests_read": [
+              "chunks_never_exceed_the_characteristic_value_limit"
+            ],
+            "test_cases": "512, 517, 1000, 4096 and usize::MAX chunk sizes capped at 512; 4096-byte line reassembles.",
+            "author_verification_claim": "PR body reports target-crate cargo test, cargo fmt and cargo clippy; external claim, not project validation.",
+            "tracker_tests_executed": false
+          },
+          "impact": "Defensive BLE reply framing only; no HD-1910/sensor/model/training/action/audio contract changes.",
+          "fixed_sources": {
+            "chunks_and_test": "https://github.com/pollen-robotics/microduck/blob/88779b1114c1b9e3e9a7ed22de8b1563e072ac07/duck-ble/src/framing.rs#L181",
+            "existing_bluez_payload": "https://github.com/pollen-robotics/microduck/blob/d13be2c1a2f4b1e0b0e499b08b92f870518b1384/btd/src/bluez.rs#L440",
+            "existing_link": "https://github.com/pollen-robotics/microduck/blob/d13be2c1a2f4b1e0b0e499b08b92f870518b1384/btd/src/link.rs#L90",
+            "existing_session": "https://github.com/pollen-robotics/microduck/blob/d13be2c1a2f4b1e0b0e499b08b92f870518b1384/btd/src/session.rs#L308"
+          },
+          "replica_integration": "Not adopted by this monitor. Fixed local production d870 retains the previous span/config/decode/chunks conditions for PR520-523; no runtime edit, test, build or delivery claim."
+        },
+        {
+          "number": 524,
+          "title": "scripts: a --space without a value is a usage error in both publishers",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-04T04:50:23Z",
+          "updated_at": "2026-11-04T04:50:23Z",
+          "merged_at": null,
+          "merge_commit_sha": "68a04da5e7c4bd0f0550d806246e285dbfaf725b",
+          "url": "https://github.com/pollen-robotics/microduck/pull/524",
+          "head_sha": "fce32d114d4747f1bc469cc67cf3b1c975592623",
+          "base_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+          "base_branch": "main",
+          "changed_file_count": 3,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...fce32d114d4747f1bc469cc67cf3b1c975592623",
+          "classification": "pending PR, publisher argument validation only",
+          "priority": "low unless manually publishing official Hugging Face Spaces",
+          "review": {
+            "change": "Both publishers reject absent, empty or hyphen-leading --space values with exit 2; publish-space also treats an empty or flag-shaped NAME as usage error. --space --dry-run no longer consumes the dry-run option as the destination.",
+            "scope": "Checks happen before staging/cloning/pushing. The error says org/name but does not validate the full identifier format. Valid-input staging and publishing implementation is unchanged.",
+            "tests_read": [
+              "a_space_flag_without_a_value_is_a_usage_error",
+              "a_space_flag_does_not_take_the_next_flag_as_its_value",
+              "publishing_without_a_name_is_a_usage_error"
+            ],
+            "test_cases": "Missing values and next-option values in both scripts, plus NAME-position --space; empty-value rejection is present in code, not separately exercised by these three definitions.",
+            "author_manual_claim": "PR author reports console and vision-demo dry-run checks; tracker did not execute either script or access/change a live Space.",
+            "author_verification_claim": "PR body reports target-crate cargo test, cargo fmt and cargo clippy; external claim, not project validation.",
+            "tracker_tests_executed": false
+          },
+          "impact": "Publisher CLI ergonomics; no runtime, image, camera, ToF, servo, model, training, action or sound changes.",
+          "fixed_sources": {
+            "console": "https://github.com/pollen-robotics/microduck/blob/fce32d114d4747f1bc469cc67cf3b1c975592623/scripts/publish-console.sh#L32",
+            "space": "https://github.com/pollen-robotics/microduck/blob/fce32d114d4747f1bc469cc67cf3b1c975592623/scripts/publish-space.sh#L19",
+            "tests": "https://github.com/pollen-robotics/microduck/blob/fce32d114d4747f1bc469cc67cf3b1c975592623/xtask/tests/publish_scripts.rs#L1"
+          },
+          "replica_integration": "Not adopted or executed by this monitor; no website/Space access or publication."
         }
       ],
       "previous_stable_releases": [
@@ -8665,24 +8844,27 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-03T16:06:21.123723+00:00",
+  "checked_at_utc": "2026-11-04T05:23:00.268484+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-03T15:06:51.938324+00:00",
+    "previous_substantive_review_utc": "2026-11-03T16:06:21.123723+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.4",
     "stable_release_actual_sha": "2573246f44cb5dab426714a1b45ae34746d7f1a2",
     "stable_assets_changed": false,
     "stable_asset_count": 8,
-    "new_pull_requests": {},
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        520,
+        521,
+        522,
+        523,
+        524
+      ]
+    },
     "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      {
-        "tag": "daemon-dev-stress-test-v2",
-        "head_sha": "6193e4eaf5a5090f7cb22a8e6d4b810080ff49ce"
-      }
-    ],
+    "new_development_releases": [],
     "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
@@ -8691,7 +8873,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Separate stress-test-v2dev1557actual6193/source0.18.4/API50:23mapping-history commits+merge+16-file feature. mapd defaultoff; freeze failure/pre-walk lost permits old guards, mid-walk loss stands. Global mode/import/boundary limits; author no robot/latest truth gate. Originalstress854 and all defaultheads/formal8assets/otherdevtags/PRs/models/blog/local records unchanged."
+    "notes": "Five one-commit pending PRs on unchanged d13:520 Duration-representable endurance spans,521 zero archive config budgets,522 finite detection scores,523 defensive512-byte BLE chunk cap,524 publisher usage errors. Seven new test definitions read only; author checks are external. Four analogous local d870 conditions unchanged. All default heads, formal0.18.4/8assets, dev tags, existing PR states, models, blog and fixed project records unchanged; RL77 acknowledgment nonmaterial."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
