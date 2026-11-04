@@ -3,10 +3,12 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1] / 'software_components.py'
+sys.path.insert(0,str(SOURCE.parent))
 
 
 class SoftwareComponents(unittest.TestCase):
@@ -41,6 +43,13 @@ class SoftwareComponents(unittest.TestCase):
     def install(self, runner=None):
         def record(command, **kwargs):
             self.calls.append(command)
+            release = self.root/'opt/microduck/software/releases/2026.10.27'
+            release.mkdir(parents=True)
+            (release/'suite-version.json').write_text(json.dumps({'version':'2026.10.27','files':{}}))
+            try:
+                (release.parent.parent/'current').symlink_to('releases/2026.10.27',target_is_directory=True)
+            except OSError:
+                self.skipTest('installed suite requires directory symlinks')
             return None
         return self.module().install(self.root,self.package,self.key,self.engine,self.resources,
             bootstrap_script=self.bootstrap,engine_command=['qemu-aarch64','-L','/test-libs'],

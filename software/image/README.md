@@ -121,6 +121,8 @@ export SOFTWARE_UPDATE_ENGINE_COMMAND_JSON='["qemu-aarch64","-L","/path/to/arm64
 
 以下命令在root构建shell执行时保留上述环境；通过sudo调用时需显式传入这些固定输入，避免sudo清理环境后退回旧版构建。未设置整套组件输入只保留旧镜像构建行为，不包含新的升级/语音套件。最终镜像检查`/usr/share/doc/microduck/software-components.json`、语音资源说明与实际版本文件。
 
+签名软件包含有控制器伴随包时，共享安装器完成后，`controller_factory.py` 从已验证版本树读取并核对冻结的主程序、padd、两份原生清单与语音依赖。镜像 payload 中的两个二进制必须逐字节一致，才会安装声明的四个服务 drop-in、root 所有的语音兼容门及兼容标记，文件均为 0644；清单缺件、哈希不符或目标符号链接均拒绝。支持文件来源和哈希记在 `software-components.json` 的 `controller_bundle` 中。旧软件包没有伴随包时沿用原构建行为。此步骤仅操作离线 ROOT，不启动服务、不复制个人状态，不更改模型、标定或 legacy 协议默认值，也不刷 MCU。
+
 ```sh
 sudo STUDIO_VERSION=<Studio 的提交号> IMAGE_VERSION=<本目录的提交号> \
     sh build-image.sh /path/to/microduck-zero3w-0.15.1-R1-V112.img \

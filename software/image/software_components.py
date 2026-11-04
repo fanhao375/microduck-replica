@@ -8,6 +8,8 @@ import subprocess
 import sys
 import tempfile
 
+from controller_factory import install as install_controller_factory
+
 
 def digest(path):
     with Path(path).open('rb') as source:
@@ -99,9 +101,12 @@ def install(root, package, public_key, engine, resources, *, bootstrap_script=No
     if engine_command:
         command += ['--engine-command-json',json.dumps(engine_command)]
     runner(command,check=True,capture_output=True,text=True,timeout=240)
+    controller = install_controller_factory(root)
     record = {'schema':1,'package_sha256':digest(package),'engine_sha256':digest(engine),
               'public_key_sha256':digest(public_key),'resources_manifest_sha256':digest(resources/'resources-manifest.json'),
               'resource_files':len(manifest['files']),'voice':'local-sit-stand-actions-toggle-duck'}
+    if controller is not None:
+        record['controller_bundle'] = controller
     target = safe_target(root,'usr/share/doc/microduck/software-components.json')
     target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
