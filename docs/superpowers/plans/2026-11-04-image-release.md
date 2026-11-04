@@ -8,14 +8,14 @@
 
 **Tech Stack:** Rust1.99、Python3.12/3.13、WSL Ubuntu22.04、QEMU ARM64、minisign、ext4镜像工具、GitHub CLI。
 
-- [ ] 核对今日源码/实机/实验件清单和旧公开功能保留范围，记录 artifacts/image-release-20261104/change-inventory.txt。
-- [ ] 原生独立工作树 `.worktrees/native-image-release-20261104`：公开27d7921上集成82aec98、3f0dc0a、cdebd43、0d0e3e0、7036345；解决冲突时保留既有秦墨和独立状态逻辑，使用API43及control.48构建标识。先跑公开基线，再跑合并后的相同测试；构建ARM64并记录精确源码和哈希。
-- [ ] Studio发布工作树 `.worktrees/image-release-20261104`：加入2fa4ec9，更新 `software/studio/deploy/native_update.py` 和 `controller_bundle.py` 的原生来源/API/哈希/大小，保留已发布padd映射。增加并运行配套声明一致、旧版.47可升级及错误载荷拒绝回归。
-- [ ] 运行Studio、配网、镜像、语音和升级器相关套件，按失败名称与旧公开基线区分，不把遗留失败写作通过。
-- [ ] 从冻结Git导出LF源码，使用现有发行私钥签名2026.11.4软件包。私钥不复制到源码、镜像或附件。验证旧27引擎安装/回退及新原生配套元数据。
-- [ ] 以 `/root/microduck-build-20261027/inputs/` 的已核验底图/payload/updaterd/resources构建 `/root/microduck-build-20261104/`。payload中更新robotd及已核验padd，默认legacy协议输出，不默认启用实验full_q4_v1。出厂标定仍未标定、默认标定模式，移除Wi-Fi、维护者SSH钥匙、个人API Key/音乐/动作/日志。
-- [ ] 对最终镜像做文件哈希、分区/ext4、启动服务、首次启动清理、默认配置和依赖核验；校验压缩文件和发行附件，不把离线检查称为烧卡实测。
-- [ ] 独立复核后推送精确源码并创建配套GitHub发布，上传镜像/签名软件/校验和/更新清单/许可与来源记录；以测试版注明新镜像烧卡验收和运动效果仍待现场验证。
-- [ ] 回读GitHub公开附件大小/hash和可访问下载链接，交付中文更新摘要、下载地址及旧卡升级方法。
+- [x] 核对今日源码/实机/实验件清单和旧公开功能保留范围，记录 artifacts/image-release-20261104/change-inventory.txt。
+- [x] 原生独立工作树 `.worktrees/native-image-release-20261104`：公开27d7921上集成82aec98、3f0dc0a、cdebd43、0d0e3e0、7036345；解决冲突时保留既有秦墨和独立状态逻辑，使用API43及control.48构建标识。先跑公开基线，再跑合并后的相同测试；构建ARM64并记录精确源码和哈希。
+- [x] Studio发布工作树 `.worktrees/image-release-20261104`：加入2fa4ec9，更新 `software/studio/deploy/native_update.py` 和 `controller_bundle.py` 的原生来源/API/哈希/大小，保留已发布padd映射。增加并运行配套声明一致、旧版.47可升级及错误载荷拒绝回归。
+- [x] 运行Studio、配网、镜像、语音和升级器相关套件，按失败名称与旧公开基线区分，不把遗留失败写作通过。
+- [x] 从冻结Git导出LF源码，使用现有发行私钥签名2026.11.4软件包。私钥不复制到源码、镜像或附件。验证旧27引擎安装/回退及新原生配套元数据。
+- [x] 以 `/root/microduck-build-20261027/inputs/` 的已核验底图/payload/updaterd/resources构建 `/root/microduck-build-20261104/`。payload中更新robotd及已核验padd，默认legacy协议输出，不默认启用实验full_q4_v1。出厂标定仍未标定、默认标定模式，移除Wi-Fi、维护者SSH钥匙、个人API Key/音乐/动作/日志。
+- [x] 对最终镜像做文件哈希、分区/ext4、启动服务、首次启动清理、默认配置和依赖核验；校验压缩文件和发行附件，不把离线检查称为烧卡实测。
+- [x] 独立复核后推送精确源码并创建配套GitHub发布，上传镜像/签名软件/校验和/更新清单/许可与来源记录；以测试版注明新镜像烧卡验收和运动效果仍待现场验证。
+- [x] 回读GitHub公开附件大小/hash和可访问下载链接，交付中文更新摘要、下载地址及旧卡升级方法。
 
 范围边界：不改变用户现机模型、零位、已保存IMU方向、动作参数；固定安装方向预设仍留待后续。实验MCU1.1完整四元数和1.2补偿不得默认刷入镜像或宣称已经解决走路/起身；新镜像不预装维护者个人标定和联网资料。
