@@ -265,9 +265,46 @@ try {
   await wait(`document.querySelector('#main-imu').textContent==='ft6'`, 'Main prior daemon control identity');
   await js(`mainListener({...controlState,imu:{...controlState.imu,context_current:false,generation:100.1}})`);
   await wait(`document.querySelector('#main-imu').textContent==='unknown'`, 'Main new hello clears same-phase prior daemon identity');
+  // A persisted redo session may hold HOME for sampling, but must unload before
+  // final verification/cancellation. Unloading must keep the solved samples.
+  await js(`window.calls=[];window.replies=[];window.confirm=()=>true;
+    props.st={mode:'commissioning',posture:'commissioning',gravity:[0,0,-1],joints_age_ms:5,imu:{status:'ok'},hold:null};
+    props.imu={source:'bus',mode:'commissioning',mount:{quat:[1,0,0,0],verified:true},hold:null,
+      imu_bus:{protocol:'feetech',board:'imu_to_dxl',identity:[1,1,0,68,77]},
+      redo:{active:true,phase:'commissioning',session_id:'redo-held',source:'bus'}};
+    props.live=true;draw()`);
+  await wait(`document.querySelector('.imu-stand')&&!document.querySelector('.imu-stand').disabled`, 'redo stance enable available');
+  await js(`clickText('站姿使能')`);
+  await wait(`calls.some(c=>c.args.op==='hold')`, 'redo uses commissioning hold');
+  assert.deepEqual(await js(`calls.find(c=>c.args.op==='hold')`), {name:'imu.op',args:{op:'hold'}});
+  await js(`replies.shift()({ok:true,data:{accepted:true}});
+    props.st={...props.st,hold:{stage:'ramping',max_error_deg:8}};props.imu={...props.imu,hold:props.st.hold};draw()`);
+  await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&b.disabled)`, 'ramping cannot collect');
+  await js(`props.st={...props.st,hold:{stage:'holding',max_error_deg:0.4}};props.imu={...props.imu,hold:props.st.hold};draw()`);
+  await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&!b.disabled)`, 'settled redo hold can collect');
+  assert.match(await js(`document.querySelector('.imu-coarse').innerText`), /站姿使能/);
+  await js(`clickText('采静止（3 秒）')`);
+  await wait(`calls.some(c=>c.args.op==='coarse-capture'&&c.args.phase==='still')`, 'held still capture');
+  await js(`replies.shift()({ok:true,data:{n:30,samples:[{step:'still',g:[0,0,-1]}]}})`);
+  await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='采前倾（3 秒）'&&!b.disabled)`, 'held forward capture offered');
+  await js(`clickText('采前倾（3 秒）')`);
+  await wait(`calls.some(c=>c.args.op==='coarse-capture'&&c.args.phase==='fwd')`, 'held forward capture');
+  await js(`replies.shift()({ok:true,data:{n:30,samples:[{step:'fwd',g:[0.34,0,-0.94]}]}})`);
+  await wait(`calls.some(c=>c.args.op==='solve')`, 'held samples solved');
+  await js(`replies.shift()({ok:true,data:{ok:true,mount:[1,0,0,0],confirm:[],notes:[],quality:{grade:'coarse'}}})`);
+  await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='交给主程序验证'&&b.disabled)`, 'redo verification requires unloading');
+  assert.match(await js(`document.querySelector('.imu-coarse').innerText`), /卸力/);
+  await js(`props.st={...props.st,hold:null};props.imu={...props.imu,hold:null};draw()`);
+  await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'unloading preserves the solved candidate');
+  assert.equal(await js(`calls.filter(c=>c.args.op==='coarse-capture').length`),2);
+  assert.equal(await js(`calls.some(c=>c.args.op==='verify')`),false, 'UI never auto-verifies or auto-relaxes');
   assert.deepEqual(errors, []);
   process.stdout.write('IMU bus browser assertions passed\n');
 } finally {
-  await send('Page.close').catch(() => {});
+  // Windows Edge's launcher may exit before its actual browser child, so the
+  // Python parent PID alone cannot reliably release this test's profile files.
+  // Close the browser while the target WebSocket is still connected.
+  await send('Browser.close').catch(() => {});
   ws.close();
+  await pause(500);
 }

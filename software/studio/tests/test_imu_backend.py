@@ -10,6 +10,7 @@ import math
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 from pathlib import Path
 
@@ -449,7 +450,7 @@ class ImuBackendTest(unittest.TestCase):
                 asyncio.run(b.handle({"op": "verify", "confirmed": True, "mount_wxyz": q}))
             self.assertFalse((b.job or {}).get("done"))
 
-    def test_redo_view_resumes_persistent_session_and_blocks_hold(self):
+    def test_redo_view_resumes_persistent_session_and_allows_hold(self):
         from studio import helper
         root = Path(self.tmp.name) / "duck"
         directory = root / "var/lib/microduck-helper/imu-recalibrate"
@@ -463,8 +464,12 @@ class ImuBackendTest(unittest.TestCase):
         self.assertTrue(redo["active"])
         self.assertEqual(redo["session_id"], "a"*32)
         self.assertEqual(redo["phase"], "commissioning")
-        with self.assertRaisesRegex(Refused, "重做"):
-            asyncio.run(b.handle({"op": "hold"}))
+        b.commit = SimpleNamespace(hold_directions=lambda: [-1] * 15)
+        b._rpc_once = mock.AsyncMock(return_value={"accepted": True})
+        self.assertTrue(asyncio.run(b.handle({"op": "hold"}))["accepted"])
+        b._rpc_once.assert_awaited_once_with("robot.busCommand",
+            {"action": "hold-home", "directions": [-1] * 15, "duration_ms": 3000}, 20.0, "站姿使能")
+        self.assertFalse(b._redo_busy)
 
     def test_factory_coarse_refuses_enabled_hold_and_pending_torque(self):
         for key, value in (("torque_state", "all_enabled"), ("torque_state", None),
@@ -518,15 +523,115 @@ class ImuBackendTest(unittest.TestCase):
             with self.subTest(index=index), self.assertRaises(Refused):
                 asyncio.run(backend.handle({"op": "coarse-capture", "phase": "still", "seconds": 0.5}))
 
-    def test_redo_coarse_still_requires_unloaded_torque(self):
+    def test_redo_coarse_capture_and_solve_while_holding_home(self):
         from studio import helper
         bus = commissioning_bus()
         bus.update(phase="holding", torque_state="all_enabled",
                    hold={"stage": "holding", "max_error_deg": 0.6})
         backend = self.backend(bus=bus, calib=factory_calib())
         session = {"active": True, "phase": "commissioning", "source": "bus", "session_id": "c" * 32}
+        original_joints = copy.deepcopy(backend.rd.calib.value["calibration"]["joints"])
+        with mock.patch.object(helper, "imu_redo_state", return_value=session):
+            still = asyncio.run(backend.handle({"op": "coarse-capture", "phase": "still", "seconds": 3}))
+            a = math.radians(20)
+            bus["last_sample"]["imu"]["gravity"] = [math.sin(a), 0, -math.cos(a)]
+            fwd = asyncio.run(backend.handle({"op": "coarse-capture", "phase": "fwd", "seconds": 3}))
+            solved = asyncio.run(backend.handle({"op": "solve", "mode": "coarse",
+                                                "samples": still["samples"] + fwd["samples"]}))
+        self.assertTrue(solved["ok"], solved)
+        self.assertEqual(bus["torque_state"], "all_enabled")
+        self.assertEqual(backend.rd.calib.value["calibration"]["joints"], original_joints)
+
+    def test_redo_held_capture_keeps_motion_and_session_guards(self):
+        from studio import helper
+        for change, session_change in (
+            (lambda b: b["hold"].update(stage="ramping"), {}),
+            (lambda b: b["hold"].update(max_error_deg=5.1), {}),
+            (lambda b: b.update(policy_enabled=True), {}),
+            (lambda b: b.update(power_pending=True), {}),
+            (lambda b: b.update(mode="motion"), {}),
+            (lambda b: None, {"phase": "cancelling"}),
+            (lambda b: None, {"source": "bno08x"}),
+        ):
+            bus = commissioning_bus()
+            bus.update(phase="holding", torque_state="all_enabled",
+                       hold={"stage": "holding", "max_error_deg": 0.6})
+            change(bus)
+            backend = self.backend(bus=bus, calib=factory_calib())
+            session = {"active": True, "phase": "commissioning", "source": "bus",
+                       "session_id": "c" * 32, **session_change}
+            with self.subTest(session=session_change), mock.patch.object(helper, "imu_redo_state", return_value=session), self.assertRaises(Refused):
+                backend._coarse_guard(bus)
+
+    def test_redo_verify_while_holding_requires_unload_before_rpc(self):
+        from studio import helper
+        bus = commissioning_bus()
+        bus.update(phase="holding", torque_state="all_enabled", hold={"stage": "holding", "max_error_deg": 0.6})
+        backend = self.backend(bus=bus, calib=factory_calib())
+        backend.last_result = {"ok": True, "mode": "coarse", "mount": [1., 0., 0., 0.]}
+        backend._rpc_once = mock.AsyncMock(return_value={"accepted": True})
+        session = {"active": True, "phase": "commissioning", "source": "bus", "session_id": "c" * 32}
+        with mock.patch.object(helper, "imu_redo_state", return_value=session), self.assertRaisesRegex(Refused, "卸力"):
+            asyncio.run(backend.handle({"op": "verify", "confirmed": True, "mount_wxyz": [1., 0., 0., 0.]}))
+        backend._rpc_once.assert_not_awaited()
+        self.assertIsNotNone(backend.last_result)
+
+    def test_hold_blocks_collection_and_mode_switch_until_completion(self):
+        from studio import helper
+        backend = self.backend(bus=commissioning_bus(), calib=factory_calib())
+        backend.commit = SimpleNamespace(hold_directions=lambda: [-1] * 15)
+        session = {"active": True, "phase": "commissioning", "source": "bus", "session_id": "c" * 32}
+        async def hold_rpc(*args):
+            self.assertTrue(backend._redo_busy)
+            with self.assertRaises(Refused):
+                backend._coarse_guard(backend.rd.bus.value)
+            with self.assertRaises(Refused):
+                await backend.handle({"op": "redo-cancel", "confirmed": True})
+            return {"accepted": True}
+        backend._rpc_once = hold_rpc
+        with mock.patch.object(helper, "imu_redo_state", return_value=session), mock.patch.object(helper, "imu_recalibrate") as switch:
+            self.assertTrue(asyncio.run(backend.handle({"op": "hold"}))["accepted"])
+            switch.assert_not_called()
+        self.assertFalse(backend._redo_busy)
+
+    def test_hold_rejects_wrong_session_and_releases_busy_on_rpc_error(self):
+        from studio import helper
+        backend = self.backend(bus=commissioning_bus(), calib=factory_calib())
+        backend.commit = SimpleNamespace(hold_directions=lambda: [-1] * 15)
+        backend._rpc_once = mock.AsyncMock(side_effect=RpcError("robot.busCommand", -32603, "relax cancelled"))
+        session = {"active": True, "phase": "commissioning", "source": "bus", "session_id": "c" * 32}
+        for key, value in (("phase", "finishing"), ("source", "bno08x")):
+            with mock.patch.object(helper, "imu_redo_state", return_value={**session, key: value}), self.assertRaises(Refused):
+                asyncio.run(backend.handle({"op": "hold"}))
+        backend._rpc_once.assert_not_awaited()
         with mock.patch.object(helper, "imu_redo_state", return_value=session), self.assertRaises(Refused):
-            asyncio.run(backend.handle({"op": "coarse-capture", "phase": "still", "seconds": 0.5}))
+            asyncio.run(backend.handle({"op": "hold"}))
+        backend._rpc_once.assert_awaited_once()
+        self.assertFalse(backend._redo_busy)
+
+    def test_redo_mode_switch_rechecks_busy_after_async_preflight(self):
+        from studio import helper
+        bus = commissioning_bus(mode="motion")
+        backend = self.backend(bus=bus, calib=factory_calib())
+        async def concurrent_hold_started():
+            backend._redo_busy = True
+            return bus
+        backend._bus_once = concurrent_hold_started
+        with mock.patch.object(helper, "imu_redo_state", return_value={"active": False}), \
+             mock.patch.object(helper, "available", return_value=True), \
+             mock.patch.object(helper, "imu_recalibrate", return_value=(True, "imu_entered", {})) as switch, self.assertRaises(Refused):
+            asyncio.run(backend.handle({"op": "redo-start", "confirmed": True}))
+        switch.assert_not_called()
+
+    def test_hold_refuses_active_capture_or_verification_job(self):
+        for title in ("粗校采数", "交给主程序验证"):
+            backend = self.backend(bus=commissioning_bus(), calib=factory_calib())
+            backend.commit = SimpleNamespace(hold_directions=lambda: [-1] * 15)
+            backend._rpc_once = mock.AsyncMock()
+            backend.job = {"kind": "coarse", "title": title}
+            with self.subTest(title=title), self.assertRaises(Refused):
+                asyncio.run(backend.handle({"op": "hold"}))
+            backend._rpc_once.assert_not_awaited()
 
     def test_coarse_capture_rejects_source_change_mid_collection(self):
         b = self.backend(bus=commissioning_bus(), calib=factory_calib())

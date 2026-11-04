@@ -662,7 +662,8 @@ function StanceCard({ st, imu, pd, link, live }) {
     : commissioning && hold ? HOLD_CN[hold.stage] || '标定模式（站着）' : (POSE_CN[st.posture] || '读不出');
   const sb = pd?.motion?.buttons?.stand;              // 遥控卡「站起来」的判断（后端推的手柄快照，1 Hz 也够用）
   const standWhy = !st || live === false ? '连不上鸭子：等它回来'
-    : imu?.redo?.active ? '重新标定方向期间保持卸力：双手托住，完成或取消后再站起来'
+    : imu?.redo?.active && (!commissioning || !['commissioning', 'finish_failed'].includes(imu.redo.phase))
+      ? '重新标定模式正在切换或恢复：等当前操作结束再站姿使能'
     : st.posture === 'servo_session' ? '舵机页还占着总线：点顶上的「交还主程序」'
       : st.posture === 'starting' ? '主程序还在启动：等它起来'
         : commissioning ? (hold ? (hold.stage === 'holding' ? '已经站着了' : '正在站起来') : null)
@@ -840,6 +841,11 @@ function CoarseCard({ st, imu, link, live }) {
   const commissioning = mode === 'commissioning';
   const verified = imu?.mount?.verified === true;
   const working = !!(imu?.job && !imu.job.done && !imu.job.failed);
+  const hold = st?.hold || imu?.hold || null;
+  const needsUnload = !!redo.active && !!hold;
+  const captureWhy = hold && (hold.stage !== 'holding' || !Number.isFinite(hold.max_error_deg)
+    || hold.max_error_deg < 0 || hold.max_error_deg > 5)
+    ? '站姿使能还未站稳：等 HOME 误差不超过 5°，再采静止或前倾' : null;
   const canCollect = commissioning && !imu?.profile_error && (!redo.active || ['commissioning', 'finish_failed'].includes(redo.phase));
   const showSteps = canCollect && (!verified || opened || redo.active);
   const startWhy = !open ? '连不上鸭子：等它回来' : imu?.profile_error ? imu.profile_error : working ? '上一项操作还没结束'
@@ -849,7 +855,7 @@ function CoarseCard({ st, imu, link, live }) {
     const r = await link.cmd('imu.op', { op, confirmed: true }, 90000);
     setBusy(false);
     setMsg({ ok: r.ok, text: r.ok ? r.data?.note || (op === 'redo-start'
-      ? '已回到标定模式，保持卸力，双手托住鸭子开始采集。' : '已取消，原来的安装方向和模式已恢复。')
+      ? '已回到标定模式。可先点「站姿使能」，等站稳后扶住采集；也可卸力托住采集。' : '已取消，原来的安装方向和模式已恢复。')
       : r.reason || r.error || '操作没完成：查看当前状态后重试' });
   };
   const start = async () => {
@@ -862,10 +868,10 @@ function CoarseCard({ st, imu, link, live }) {
     <p class="sv-small">先采静止和前倾，计算安装方向（四元数），再由主程序验证。装法改了或上次没调对，都可以重新做。</p>
     ${imu?.mount_protocol_mismatch ? html`<p class="sv-warn">总线协议与已存安装方向不匹配：需要重新标定；主程序验证通过后才确认这份方向。</p>` : null}
     ${redo.active ? html`<p class="sv-warn">${canCollect
-      ? '本次重标定还没完成：双手托住鸭子，保持卸力。验证通过后会恢复原模式；也可以取消并恢复原参数。'
+      ? '本次重标定可先站姿使能、站稳后扶住采集，也可卸力托住采集。验证通过后恢复原模式；验证或取消前先失能（卸力）。'
       : '正在切换或恢复标定会话，请等当前操作结束；如未能恢复，可以取消并恢复原参数。'}</p>
       <div class="imu-actions"><${TwoStep} label="取消并恢复原参数" ask="扶好鸭子，确认恢复原方向和模式？"
-        disabled=${!open || busy || working}
+        disabled=${!open || busy || working || needsUnload}
         onConfirm=${() => run('redo-cancel')} busyLabel="正在恢复…" /></div>` : null}
     ${!showSteps && !redo.active ? html`<div class="imu-actions"><${TwoStep}
       label="重新标定方向" ask=${commissioning ? '扶好鸭子，确认重新采集？' : '扶好并已卸力，确认重启并进入标定模式？'}
@@ -874,13 +880,15 @@ function CoarseCard({ st, imu, link, live }) {
         ? '双手扶稳，可卸力托住，也可站姿使能后等站稳，再重新采集。'
         : '重新标定前先点「失能（卸力）」并扶住鸭子。进入和完成时会重启主程序，并备份原 IMU 方向。'}保留舵机零位、方向和限位；验证通过才采用新方向。</p>
       ${startWhy ? html`<p class="sv-warn">${startWhy}</p>` : null}` : null}
-    ${showSteps ? html`<${CoarseSteps} key=${context} link=${link} disabled=${!open || busy || working} unloadedOnly=${!!redo.active}
+    ${captureWhy ? html`<p class="sv-warn">${captureWhy}</p>` : null}
+    ${showSteps ? html`<${CoarseSteps} key=${context} link=${link} disabled=${!open || busy || working || !!captureWhy}
+      redoSession=${!!redo.active} needsUnload=${needsUnload}
       onBegin=${() => setOpened(true)} onDone=${(text) => setMsg({ ok: true, text })} />` : null}
     ${msg ? html`<div class=${'banner ' + (msg.ok ? 'warn' : 'bad')} role="status"><span>${msg.text}</span></div>` : null}
   </section>`;
 }
 
-function CoarseSteps({ link, disabled, unloadedOnly, onBegin, onDone }) {
+function CoarseSteps({ link, disabled, redoSession, needsUnload, onBegin, onDone }) {
   const [step, setStep] = useState('idle');       // idle / still / fwd / confirm / verifying / done / failed
   const [still, setStill] = useState(null);
   const [res, setRes] = useState(null);
@@ -923,7 +931,7 @@ function CoarseSteps({ link, disabled, unloadedOnly, onBegin, onDone }) {
   };
   const reset = () => { setStep('idle'); setStill(null); setRes(null); setChecks({}); setOut(null); };
   const verify = async () => {
-    if (disabled || busy || !res?.mount) return;
+    if (disabled || busy || needsUnload || !res?.mount) return;
     setBusy(true); setStep('verifying'); setOut(null);
     const r = await link.cmd('imu.op', { op: 'verify', confirmed: true, mount_wxyz: res.mount }, 90000);
     if (!alive.current) return;
@@ -936,8 +944,8 @@ function CoarseSteps({ link, disabled, unloadedOnly, onBegin, onDone }) {
   const allChecked = confirms.every((_, i) => checks[i]);
   const nowStep = step === 'idle' ? 'still' : step;
   return html`<div class="imu-coarse-steps">
-    <p class="sv-small">${unloadedOnly
-      ? '本次重标定会话要恢复原来的运行模式：保持失能（卸力），双手托住鸭子。'
+    <p class="sv-small">${redoSession
+      ? '本次重标定可先点「站姿使能」，等站稳后扶住采集；也可失能（卸力）后托住采集。交给主程序验证或取消前，再先失能（卸力）。'
       : '粗校在标定模式做：可先点「站姿使能」，等站稳后双手扶住；也可失能（卸力）后双手托住。站姿使能只锁住关节，需要一直扶稳。'}
       先把整个鸭子摆正、别动，采 3 秒；再让整个躯干前倾 15–30° 停住，采 3 秒；电脑算出方向，再交给主程序自己验一遍。</p>
     ${nowStep === 'still' ? html`<div class="imu-coarse-step">
@@ -960,9 +968,10 @@ function CoarseSteps({ link, disabled, unloadedOnly, onBegin, onDone }) {
       ${confirms.map((c, i) => html`<label class="imu-confirm"><input type="checkbox" checked=${!!checks[i]}
         onChange=${(e) => setChecks({ ...checks, [i]: e.target.checked })} /> ${c}</label>`)}
       <div class="imu-actions">
-        <button class="btn-dark" disabled=${busy || disabled || !res.mount || !allChecked} onClick=${verify}>交给主程序验证</button>
+        <button class="btn-dark" disabled=${busy || disabled || needsUnload || !res.mount || !allChecked} onClick=${verify}>交给主程序验证</button>
         <button class="btn-light" disabled=${busy} onClick=${reset}>重做</button>
       </div>
+      ${redoSession ? html`<p class=${needsUnload ? 'sv-warn' : 'sv-small'}>本次重标验证会恢复原运行模式；先扶稳并点「失能（卸力）」，已采集和求解的结果会保留。</p>` : null}
       <p class="sv-small"><b>点击验证前，先把实物回正并停住。</b>点了以后，再按提示在 20 秒内往前倾 15–30° 并停住。</p>
     </div>` : null}
     ${nowStep === 'verifying' ? html`<div class="imu-coarse-step">

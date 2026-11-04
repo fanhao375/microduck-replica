@@ -254,6 +254,8 @@ class ImuBackend:
         return self._redo_busy or helper.imu_redo_state(root=self.root).get("active", False)
 
     def _coarse_guard(self, bus):
+        if self._redo_busy:
+            raise Refused("站姿使能或标定模式切换尚未结束：等站稳后再采数")
         calib = fresh_calib(self.rd)
         source, _ = mount_of(bus, calib)
         if error := bus_profile_error(bus, calib, source):
@@ -266,7 +268,7 @@ class ImuBackend:
                          or bus.get("power_pending") or bus.get("motion") or bus.get("home_recovery")
                          or bus.get("policy_enabled") is True or bus.get("policy_motion_enabled") is True)
         error = hold.get("max_error_deg")
-        settled_hold = (not redo.get("active") and bus.get("mode") == "commissioning"
+        settled_hold = (bus.get("mode") == "commissioning"
                         and bus.get("phase") == "holding" and bus.get("torque_state") == "all_enabled"
                         and hold.get("stage") == "holding" and native.get("torque_state_confirmed") is not False
                         and isinstance(error, (int, float)) and not isinstance(error, bool)
@@ -314,6 +316,10 @@ class ImuBackend:
                 raise Refused("重做初次 IMU 校准要安装新版 root 小助手和 sudoers（deploy/install.sh）")
         elif not redo.get("active") or not redo.get("session_id"):
             raise Refused("没有可取消的初次 IMU 校准重做会话")
+        # _bus_once above yields: a hold request may have acquired the operation
+        # slot while this mode switch was still doing its preflight.
+        if self._redo_busy:
+            raise Refused("站姿使能或标定模式切换尚未结束：等当前操作完成")
         self._redo_busy = True
         self.last_result = None
         self.job = {"kind": "coarse", "title": "切换初次 IMU 校准", "msg": "保持扶稳和失能，等待主程序切换"}
@@ -458,11 +464,13 @@ class ImuBackend:
         """标定模式「站姿使能」（用户 10-21：「咱标定也能站姿不就好了吗？非要切到运动模式」）。
         fork 标定模式的 hold-home：15 颗一起 3 秒转到 HOME、锁住，IMU 照常读，站着校准就在标定模式里做。
         方向跟第 3 步「写进主程序」同一套，零位用主程序文件里的（出厂 2048）。失能 = 顶上的「卸力」（robot.relax）。"""
-        if helper.imu_redo_state(root=self.root).get("active"):
-            raise Refused("重做初次 IMU 校准期间保持失能，不做站姿使能")
         bus = await self._bus_once()
+        if self._redo_busy or (self.job and not self.job.get("done") and not self.job.get("failed")):
+            raise Refused("正在采数、验证或切换站姿：等当前操作完成再使能")
         if bus.get("mode") != "commissioning":
             raise Refused("主程序不在标定模式：运动模式下用遥控卡的「站起来」")
+        if helper.imu_redo_state(root=self.root).get("active"):
+            self._coarse_guard(bus)  # validates the redo phase and source before enabling torque
         if self.commit is None:
             raise Refused("这只鸭子没开「写进主程序」的后端，算不出 15 颗的方向")
         from .commit import Refused as CommitRefused
@@ -470,33 +478,39 @@ class ImuBackend:
             dirs = self.commit.hold_directions()
         except CommitRefused as e:
             raise Refused(str(e)) from e
+        self._redo_busy = True
         try:
-            # fork 的 command_timeout：3 秒爬升 + 2 秒稳住 + 10 秒；再加余量
-            r = await self._rpc_once("robot.busCommand",
-                                     {"action": "hold-home", "directions": dirs, "duration_ms": 3000},
-                                     20.0, "站姿使能")
-        except (RpcError, Timeout, Unreachable) as e:
-            text = getattr(e, "message", None) or str(e)
-            low = text.lower()
-            if "unknown variant" in low or "hold-home" in low and "unknown" in low:
-                msg = "主程序版本太旧，标定模式还不会站：要更新主程序"
-            elif "still" in low and "from home" in low:
-                msg = f"有关节转不到站姿（{text}）：多半是方向反了或者被卡住，已经卸力。去舵机页核对方向"
-            elif "relax" in low:
-                msg = "站起来的途中被卸力打断了"
-            else:
-                msg = f"没站起来：{text}"
-            self.log.warn(f"标定模式站姿使能没成：{msg}", cat="IMU", raw=text, ctx={"by": by, "directions": dirs})
-            raise Refused(msg) from e
-        self.log.info("标定模式站姿使能：站住了", cat="IMU", raw=json.dumps(r, ensure_ascii=False)[:400],
-                      ctx={"by": by, "directions": dirs})
-        return r
+            try:
+                # fork 的 command_timeout：3 秒爬升 + 2 秒稳住 + 10 秒；再加余量
+                r = await self._rpc_once("robot.busCommand",
+                                         {"action": "hold-home", "directions": dirs, "duration_ms": 3000},
+                                         20.0, "站姿使能")
+            except (RpcError, Timeout, Unreachable) as e:
+                text = getattr(e, "message", None) or str(e)
+                low = text.lower()
+                if "unknown variant" in low or "hold-home" in low and "unknown" in low:
+                    msg = "主程序版本太旧，标定模式还不会站：要更新主程序"
+                elif "still" in low and "from home" in low:
+                    msg = f"有关节转不到站姿（{text}）：多半是方向反了或者被卡住，已经卸力。去舵机页核对方向"
+                elif "relax" in low:
+                    msg = "站起来的途中被卸力打断了"
+                else:
+                    msg = f"没站起来：{text}"
+                self.log.warn(f"标定模式站姿使能没成：{msg}", cat="IMU", raw=text, ctx={"by": by, "directions": dirs})
+                raise Refused(msg) from e
+            self.log.info("标定模式站姿使能：站住了", cat="IMU", raw=json.dumps(r, ensure_ascii=False)[:400],
+                          ctx={"by": by, "directions": dirs})
+            return r
+        finally:
+            self._redo_busy = False
 
     async def _verify(self, args, by=None):
         bus = await self._bus_once()
         if bus.get("mode") != "commissioning":
             raise Refused("主程序已经在运动模式：站起来以后用站着校准")
         redo = self._coarse_guard(bus)
+        if redo.get("active") and (bus.get("torque_state") != "off" or bus.get("hold")):
+            raise Refused("重标采数可以保持站姿；交给主程序验证前，请扶稳并先点「失能（卸力）」。已采集结果会保留")
         self.view()  # invalidate a result from a different mode/source/session before consuming it
         source, _ = mount_of(bus, fresh_calib(self.rd))
         context = calibration_context(bus, source, redo)
@@ -624,7 +638,7 @@ class ImuBackend:
             generation = self._context_generation
             redo = helper.imu_redo_state(root=self.root)
             if redo.get("active") and mode != "coarse":
-                raise Refused("重做初次 IMU 校准期间用静止 / 前倾粗校，保持失能")
+                raise Refused("重做初次 IMU 校准期间用静止 / 前倾粗校，可卸力托住或站姿使能后等站稳")
             if mode == "coarse":
                 self._coarse_guard(await self._bus_once())
             old = (view["mount"] or {}).get("quat")
