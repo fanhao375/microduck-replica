@@ -31,4 +31,6 @@
 - [x] 验证写入前要求手动卸力，等待主程序重连，保留候选并复用原 verify / finish 事务。
 - [x] 168 项相关测试通过，含带 present / hello / calib_valid_after 的延迟重连测试；独立复核发现的问题均修正。
 - [ ] 更新实机网页并核对服务、文件及受保护数据。
-- [ ] 推送到 GitHub 主分支。
+- [x] 推送到 GitHub 主分支（3725b46）。
+
+只读实机数据核对：duck-658d 当前为 motion/HOME、策略关闭，HOME 关节误差约 3.71°。将此真实回读交给候选后端，得到 `coarse_sampling.available=true`、`reason=null`，符合直接采静止的门槛。候选文件已上传，当前仍保持站姿；等待用户手动卸力后只更新 Studio 服务，不自动发动作。
