@@ -1,0 +1,394 @@
+/* Microduck 手机中控（m.html）的样式。
+   跟桌面版 styles.css 是两套：这里不加载桌面样式，避免 .stage/.shell 之类的规则互相打架，
+   只把同一套设计变量抄过来，保证颜色、字体、圆角跟 Studio 一致。
+   断点只有一条思路：底栏 + 单列。宽过 560 时内容居中，两边留白。 */
+
+:root {
+  --page: #F2F2F7;
+  --board: #FFFFFF;
+  --board-edge: rgba(0, 0, 0, 0.08);
+  --line: #EFEFF2;
+  --text: #1D1D1F;
+  --text-2: #6E6E73;
+  --text-3: #A1A1A6;
+  --link: #0066CC;
+  --blue: #0071E3;
+  --warn: #B25000;
+  --danger: #D70015;
+  --danger-bg: #E8112D;
+  --ok: #1E7E34;
+  --brand: #F5B400;
+  --brand-hi: #FFC81E;
+  --brand-lo: #E0A000;
+  --radius-board: 16px;
+  --font: "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", -apple-system, sans-serif;
+  --tabbar-h: 58px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body.m-body {
+  background: var(--page); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.5;
+  overscroll-behavior-y: contain;                 /* 长按说话时别触发下拉刷新 */
+  -webkit-text-size-adjust: 100%;
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { cursor: default; opacity: .55; }
+a { color: var(--link); text-decoration: none; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------------- 外壳 ---------------- */
+
+/* 整页是一列：顶栏 / 可滚动内容 / 底栏。内容自己在 .m-main 里滚，底栏就不再 position:fixed。
+   iOS Safari 上「fixed 底栏 + backdrop-filter」有两类老毛病：滚动/回弹之后点击判定区跟视觉位置错位，
+   以及毛玻璃层把触摸事件吞掉。底栏改成普通 flex 子项、内容内部滚动，这两类问题都不会出现。 */
+.m-app { height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+.m-main {
+  flex: 1; min-height: 0; width: 100%; max-width: 560px; margin: 0 auto;
+  padding: 4px 16px 16px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;                /* 长按说话时别触发下拉刷新 */
+}
+
+.m-head {
+  position: relative; z-index: 20; flex: none;
+  padding: calc(8px + var(--safe-t)) 16px 8px;
+  background: rgba(242, 242, 247, .94);
+  width: 100%;
+}
+.m-head-in { max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 8px; }
+.m-duck { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.m-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--text-3); flex: none; }
+.m-dot.on { background: #16A34A; box-shadow: 0 0 0 3px rgba(22, 163, 74, .16); }
+.m-dot.warn { background: var(--brand); box-shadow: 0 0 0 3px rgba(245, 180, 0, .18); }
+.m-dot.bad { background: var(--danger); box-shadow: 0 0 0 3px rgba(215, 0, 21, .16); }
+.m-duck-name { font-size: 17px; font-weight: 600; letter-spacing: .2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m-head-gap { flex: 1; }
+
+/* 卸力：跟桌面同一个命令（relax），单点就发，不弹二次确认——急停多一次点击就是少一条命 */
+.m-estop {
+  height: 38px; padding: 0 18px; border-radius: 19px; background: var(--danger-bg); color: #fff;
+  font-size: 16px; font-weight: 600; letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(232, 17, 45, .28);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.m-estop:active { transform: scale(.95); box-shadow: 0 2px 6px rgba(232, 17, 45, .3); }
+
+/* ---------------- 底栏 ---------------- */
+
+.m-tabs {
+  position: relative; flex: none; z-index: 30;
+  width: 100%; height: calc(var(--tabbar-h) + var(--safe-b)); padding-bottom: var(--safe-b);
+  display: flex; background: var(--board);
+  box-shadow: 0 -1px 0 var(--board-edge);
+}
+.m-tabs-in { flex: 1; max-width: 560px; margin: 0 auto; display: flex; }
+.m-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 11px; color: var(--text-2); position: relative;
+}
+.m-tab svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.m-tab[aria-current="page"] { color: var(--text); font-weight: 600; }
+.m-tab[aria-current="page"]::after {
+  content: ""; position: absolute; top: 5px; width: 20px; height: 3px; border-radius: 2px; background: var(--brand);
+}
+
+/* ---------------- 通用卡片 ---------------- */
+
+.m-card { background: var(--board); border-radius: var(--radius-board); box-shadow: 0 0 0 1px var(--board-edge); }
+.m-card + .m-card { margin-top: 12px; }
+.m-pad { padding: 16px; }
+.m-h2 { font-size: 15px; font-weight: 600; margin: 20px 2px 10px; }
+.m-h2:first-child { margin-top: 4px; }
+.m-sub { font-size: 13px; color: var(--text-2); }
+.m-tip { font-size: 13px; color: var(--text-2); margin: 10px 2px; line-height: 1.6; }
+.m-tip b { color: var(--text); }
+.m-tip.bad { color: var(--danger); }
+.m-empty { padding: 28px 16px; text-align: center; color: var(--text-2); font-size: 14px; }
+
+.m-btn {
+  height: 46px; padding: 0 16px; border-radius: 12px; background: var(--board);
+  box-shadow: 0 0 0 1px var(--board-edge); font-size: 15px; font-weight: 500;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  transition: transform .1s ease, background .1s ease;
+}
+.m-btn:active { transform: scale(.97); background: #F5F5F7; }
+.m-btn.primary { background: var(--text); color: #fff; box-shadow: none; }
+.m-btn.brand { background: var(--brand); color: #1D1D1F; box-shadow: none; font-weight: 600; }
+.m-btn.danger { background: #FDECEE; color: var(--danger); box-shadow: none; }
+.m-btn[aria-pressed="true"] { background: var(--text); color: #fff; box-shadow: none; }
+.m-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.m-btns.three { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ---------------- 总览 ---------------- */
+
+.m-stage { position: relative; height: 42vh; min-height: 240px; max-height: 360px; border-radius: var(--radius-board); overflow: hidden;
+  background: radial-gradient(circle farthest-corner at 50% 42%, #FFFFFF 0%, #EDEDF1 52%, #DCDCE2 100%);
+  box-shadow: 0 0 0 1px var(--board-edge); margin-top: 4px; }
+.m-stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+.m-stage.stale canvas { filter: grayscale(1) opacity(.55); }
+.m-stage-badge {
+  position: absolute; left: 12px; bottom: 12px; display: flex; align-items: baseline; gap: 6px;
+  padding: 7px 12px; border-radius: 999px; background: rgba(255, 255, 255, .82); backdrop-filter: blur(8px);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .08); font-size: 13px; color: var(--text-2); max-width: calc(100% - 24px);
+}
+.m-stage-badge b { color: var(--text); font-size: 15px; font-weight: 600; }
+.m-stage-load { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text-2); }
+
+.m-caption { text-align: center; margin: 14px 0 4px; }
+.m-caption h1 { font-size: 25px; line-height: 1.25; font-weight: 600; margin: 0 0 6px; letter-spacing: -.3px; }
+.m-caption p { margin: 0; font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+.m-caption .deal { font-size: 14px; color: var(--danger); margin-top: 6px; }
+
+.m-cells { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.m-cell { padding: 13px 14px; }
+.m-cell .label { font-size: 12.5px; color: var(--text-2); display: block; }
+.m-cell .big { font-size: 23px; font-weight: 600; letter-spacing: -.5px; margin-top: 2px; display: inline-block; }
+.m-cell .unit { font-size: 13px; color: var(--text-2); margin-left: 3px; }
+.m-cell .small { font-size: 12px; color: var(--text-2); margin-top: 3px; display: block; }
+.m-cell.stale .big, .m-cell.stale .small { color: var(--text-3); }
+.m-cell.bad .big { color: var(--danger); }
+.m-cell.warn .big { color: var(--warn); }
+
+.m-bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 8px; }
+.m-bar > i { display: block; height: 100%; border-radius: 3px; background: var(--ok); transition: width .3s ease; }
+.m-bar > i.warn { background: var(--brand); }
+.m-bar > i.bad { background: var(--danger); }
+
+/* ---------------- 语音 ---------------- */
+
+.m-voice-hero { text-align: center; padding: 10px 0 0; }
+.m-voice-title { font-size: 27px; font-weight: 700; letter-spacing: -.4px; margin: 8px 0 8px; }
+.m-voice-title .comma { color: var(--text); }
+.m-voice-lede { font-size: 13.5px; color: var(--text-2); margin: 0 auto 6px; max-width: 300px; line-height: 1.6; }
+
+.m-mic-wrap { position: relative; display: flex; align-items: center; justify-content: center; margin: 10px 0 2px; }
+.m-halo { position: absolute; width: 204px; height: 204px; border-radius: 50%; pointer-events: none; }
+.m-halo::before, .m-halo::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid rgba(245, 180, 0, .22);
+  animation: m-breathe 3.4s ease-in-out infinite;
+}
+.m-halo::after { inset: -18px; border-color: rgba(245, 180, 0, .12); animation-delay: .9s; }
+.m-mic-wrap.live .m-halo::before, .m-mic-wrap.live .m-halo::after { border-color: rgba(245, 180, 0, .5); animation-duration: 1.5s; }
+@keyframes m-breathe { 0%, 100% { transform: scale(.97); opacity: .9; } 50% { transform: scale(1.04); opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .m-halo::before, .m-halo::after { animation: none; } }
+
+.m-mic {
+  position: relative; width: 152px; height: 152px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 34%, var(--brand-hi) 0%, var(--brand) 58%, var(--brand-lo) 100%);
+  color: #1D1D1F; box-shadow: 0 10px 26px rgba(224, 160, 0, .32), inset 0 -5px 14px rgba(0, 0, 0, .06);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  transition: transform .14s ease, box-shadow .14s ease;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.m-mic.live { transform: scale(.965); box-shadow: 0 8px 22px rgba(224, 160, 0, .42), inset 0 0 0 3px rgba(255, 255, 255, .5); }
+.m-mic:disabled { filter: grayscale(.75) opacity(.7); box-shadow: none; }
+.m-mic svg { width: 34px; height: 34px; stroke: #1D1D1F; fill: none; stroke-width: 2.1; stroke-linecap: round; }
+.m-mic .t1 { font-size: 16.5px; font-weight: 700; letter-spacing: .4px; }
+.m-mic .t2 { font-size: 11px; color: rgba(29, 29, 31, .62); letter-spacing: .8px; }
+/* 「手机说话」的圆按钮：只在最上面留一行小字，其余文字不显示。
+   板载麦克风沿用上面的居中大按钮，不受这条影响。 */
+.m-mic-talk .t1 {
+  position: absolute; top: 20px; left: 0; right: 0;
+  text-align: center; font-size: 12px; font-weight: 600; letter-spacing: .4px;
+}
+
+/* 语音页：策略开关（开始走 / 停止策略）。跟手柄页那个黄色主按钮是同一套 op，只是小一号、
+   两列并排；「停止策略」= robot.stop + enable off，停下并关掉走路策略（再推摇杆就不动了）。 */
+.m-policy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.m-policy-row .m-key { height: 50px; border-radius: 13px; font-size: 15px; }
+.m-key.pol-start {
+  background: linear-gradient(180deg, var(--brand-hi), var(--brand)); color: #1D1D1F;
+  font-weight: 600; box-shadow: 0 1px 2px rgba(160, 110, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.m-key.pol-start:active { background: var(--brand-lo); }
+.m-key.pol-start small { color: rgba(29, 29, 31, .6); }
+.m-key.pol-stop { background: var(--board); color: var(--text); font-weight: 600; box-shadow: 0 0 0 1px var(--board-edge); }
+.m-key.pol-stop:active { background: #F2F2F7; }
+.m-key.pol-stop small { color: var(--text-3); }
+.m-key.pol-start small, .m-key.pol-stop small { font-size: 10.5px; font-weight: 500; letter-spacing: .3px; }
+
+.m-sent { margin: 20px 0 2px; font-size: 14.5px; color: var(--text-2); min-height: 22px; }
+.m-sent b { color: var(--text); font-weight: 600; }
+.m-heard { font-size: 12.5px; color: var(--text-3); margin-top: 16px; }
+.m-heard-text { font-size: 20px; font-weight: 600; color: var(--text); margin-top: 4px; min-height: 28px; letter-spacing: .5px; }
+.m-heard-text.interim { color: var(--text-2); font-weight: 500; }
+
+.m-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 18px 0 0; }
+.m-chip {
+  height: 34px; padding: 0 14px; border-radius: 17px; border: 1px solid rgba(0, 0, 0, .1);
+  font-size: 13.5px; color: var(--text); background: rgba(255, 255, 255, .7);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.m-chip:active { background: #fff; }
+.m-chip[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
+
+.m-asr-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 12.5px; color: var(--text-2); justify-content: center; }
+
+.m-type { display: flex; gap: 8px; margin-top: 14px; }
+.m-type input {
+  flex: 1; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, .1);
+  background: #fff; font: inherit; font-size: 16px; color: var(--text); min-width: 0;
+}
+.m-type input::placeholder { color: var(--text-3); }
+
+.m-log { list-style: none; margin: 8px 0 0; padding: 0; }
+.m-log li { display: flex; align-items: baseline; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.m-log li:first-child { border-top: 0; }
+.m-log .who { font-weight: 600; flex: none; }
+.m-log .what { color: var(--text-2); }
+.m-log .when { margin-left: auto; font-size: 12px; color: var(--text-3); flex: none; }
+.m-log .bad .who { color: var(--danger); }
+
+/* ---------------- 手柄 ---------------- */
+
+.m-sticks { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+.m-stick-box { text-align: center; }
+.m-stick-box .cap { font-size: 12.5px; color: var(--text-2); margin-top: 8px; }
+.m-stick {
+  position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #FFFFFF 0%, #F0F0F4 70%, #E4E4EA 100%);
+  box-shadow: inset 0 0 0 1px var(--board-edge), 0 2px 8px rgba(0, 0, 0, .04);
+  touch-action: none; user-select: none; -webkit-user-select: none; overflow: hidden;
+}
+.m-stick::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 1px; height: 70%; transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, .06);
+}
+.m-stick::after {
+  content: ""; position: absolute; left: 50%; top: 50%; height: 1px; width: 70%; transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, .06);
+}
+.m-knob {
+  position: absolute; left: 50%; top: 50%; width: 42%; aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 50% 32%, #FFFFFF 0%, #F5F5F7 60%, #E8E8EE 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .14), inset 0 0 0 1px rgba(0, 0, 0, .05);
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow .12s ease;
+}
+.m-stick.active .m-knob { box-shadow: 0 4px 14px rgba(245, 180, 0, .5), inset 0 0 0 2px var(--brand); }
+.m-knob i { width: 26%; height: 26%; border-radius: 50%; background: var(--brand); opacity: .85; }
+
+.m-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-key {
+  height: 52px; border-radius: 14px; background: var(--board); box-shadow: 0 0 0 1px var(--board-edge);
+  font-size: 15px; font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.m-key small { font-size: 10.5px; color: var(--text-3); font-weight: 400; }
+.m-key:active { background: #F2F2F7; }
+.m-key.on { background: var(--text); color: #fff; box-shadow: none; }
+.m-key.on small { color: rgba(255, 255, 255, .6); }
+/* 手柄页：按当前站姿推荐的那一个键（比如站着但策略没跑 → 「开始走」），描一圈绿边 */
+.m-key.hot { background: #E9F6ED; color: var(--ok); font-weight: 600; box-shadow: 0 0 0 2px var(--ok); }
+
+/* 手柄页：把「开始走（start 策略）」从动作格里拎出来，单独整行放在摇杆下面，贴品牌黄底。
+   它是「推摇杆没反应」的唯一解法，普通白底按钮太容易和别的键混过去。 */
+.m-start-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.m-key.start {
+  height: 58px; border-radius: 15px; font-size: 17px; font-weight: 600; letter-spacing: .2px;
+  background: linear-gradient(180deg, var(--brand-hi), var(--brand)); color: #1D1D1F;
+  box-shadow: 0 1px 2px rgba(160, 110, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.m-key.start small { font-size: 11.5px; color: rgba(29, 29, 31, .62); font-weight: 500; letter-spacing: .4px; }
+.m-key.start:active { background: var(--brand-lo); }
+/* 轮到这个键时仍给绿描边（上面 .hot 的浅绿底会盖掉黄底，所以这里单独写） */
+.m-key.start.hot { background: linear-gradient(180deg, var(--brand-hi), var(--brand)); color: #1D1D1F;
+  box-shadow: 0 0 0 2.5px var(--ok), 0 1px 2px rgba(160, 110, 0, .28); }
+.m-key.start.on { background: var(--text); color: #fff; box-shadow: none; }
+.m-key.start.on small { color: rgba(255, 255, 255, .6); }
+/* 「停止策略」跟「开始走」并排，用白底描边跟黄底那个区分开（和语音页的 pol-stop 一个风格） */
+.m-key.start.stop { background: var(--board); color: var(--text);
+  box-shadow: 0 0 0 1px var(--board-edge), inset 0 1px 0 rgba(255, 255, 255, .6); }
+.m-key.start.stop small { color: var(--text-3); }
+.m-key.start.stop:active { background: #F2F2F7; }
+.m-key.start.stop.on { background: var(--text); color: #fff; box-shadow: none; }
+.m-key.start.stop.on small { color: rgba(255, 255, 255, .6); }
+
+.m-seg { display: flex; padding: 3px; border-radius: 11px; background: #E9E9EE; gap: 3px; }
+.m-seg button { flex: 1; height: 34px; border-radius: 9px; font-size: 13.5px; color: var(--text-2); }
+.m-seg button[aria-pressed="true"] { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+
+/* ---------------- 摄像头 ---------------- */
+
+.m-video-wrap { position: relative; border-radius: var(--radius-board); overflow: hidden; background: #0B0B0C; aspect-ratio: 4 / 3; margin-top: 4px; }
+.m-video-wrap video { display: block; width: 100%; height: 100%; object-fit: contain; background: #0B0B0C; }
+.m-video-over { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: rgba(255, 255, 255, .82); font-size: 13.5px; text-align: center; padding: 24px; }
+.m-video-over .spin { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .25); border-top-color: #fff; animation: m-spin 1s linear infinite; }
+@keyframes m-spin { to { transform: rotate(360deg); } }
+.m-video-tag { position: absolute; left: 12px; top: 12px; padding: 5px 10px; border-radius: 999px; background: rgba(0, 0, 0, .45); color: #fff; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.m-video-tag i { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; }
+.m-video-tag.bad i { background: #F87171; }
+
+/* ---------------- 更多 ---------------- */
+
+.m-list { list-style: none; margin: 0; padding: 0; }
+.m-list li { border-top: 1px solid var(--line); }
+.m-list li:first-child { border-top: 0; }
+.m-list a, .m-list .row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: var(--text); font-size: 15.5px; }
+.m-list a:active { background: #F5F5F7; }
+.m-list .chev { margin-left: auto; color: var(--text-3); font-size: 17px; line-height: 1; }
+.m-list .desc { font-size: 12px; color: var(--text-3); margin-left: auto; }
+.m-kv { display: flex; justify-content: space-between; padding: 11px 16px; font-size: 14px; border-top: 1px solid var(--line); }
+.m-kv:first-child { border-top: 0; }
+.m-kv .k { color: var(--text-2); }
+.m-kv .v { color: var(--text); font-variant-numeric: tabular-nums; max-width: 60%; text-align: right; word-break: break-all; }
+
+/* ---------------- 顶部横幅 / 吐司 ---------------- */
+
+.m-banner {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px;
+  background: #FFF6E0; color: #8A5A00; font-size: 13.5px; margin: 8px 0 0; line-height: 1.5;
+}
+.m-banner.bad { background: #FDECEE; color: var(--danger); }
+/* 手柄页顶上的站姿提示：ok = 能走、warn = 差一步、bad = 动不了 */
+.m-banner.ok { background: #E9F6ED; color: var(--ok); }
+.m-banner + .m-banner { margin-top: 8px; }
+.m-banner .act { margin-left: auto; color: inherit; text-decoration: underline; flex: none; font-size: 13px; }
+
+.m-toast {
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 22px + var(--safe-b));
+  transform: translateX(-50%); z-index: 60; max-width: min(88vw, 420px);
+  padding: 11px 16px; border-radius: 12px; background: rgba(29, 29, 31, .92); color: #fff;
+  font-size: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, .22); text-align: center;
+  animation: m-toast-in .18s ease;
+}
+.m-toast.bad { background: rgba(180, 12, 28, .95); }
+@keyframes m-toast-in { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* 登录（设了密码才会有） */
+.m-login { max-width: 380px; margin: 12vh auto 0; padding: 0 24px; }
+.m-login h1 { font-size: 24px; margin: 0 0 6px; }
+.m-login p { color: var(--text-2); font-size: 14px; margin: 0 0 22px; }
+.m-login input { width: 100%; height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, .12); font: inherit; font-size: 16px; background: #fff; }
+.m-login .m-btn { width: 100%; margin-top: 12px; height: 48px; }
+
+/* ---------------- 内嵌的桌面页（模型） ---------------- */
+
+/* 模型页直接复用桌面版的 ModelsPage，排版由它自己的 models.css 负责。
+   手机壳这里只补两件事：把它的面板接成跟 .m-card 一样的白底卡片（桌面版靠 .board），
+   以及给两段式确认框补上手机字号——这两条样式桌面版在 styles.css 里，m.html 没加载。 */
+.m-main .models-page { margin-top: 4px; }
+.m-main .models-page > .board {
+  background: var(--board); border-radius: var(--radius-board);
+  box-shadow: 0 0 0 1px var(--board-edge); margin: 0;
+}
+.m-main .models-page .models-notice,
+.m-main .models-page .models-capture { border-radius: 12px; }
+.m-main .models-page .models-heading h1 { font-size: 22px; }
+.m-main .confirm-box {
+  background: var(--board); border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--board-edge); padding: 14px; margin: 4px 0 0;
+}
+.m-main .confirm-box .confirm-lines p { margin: 0 0 8px; font-size: 14px; line-height: 1.55; color: var(--text); }
+.m-main .confirm-box .confirm-lines p:last-child { margin-bottom: 0; }
+.m-main .confirm-box .confirm-acts { display: flex; gap: 10px; margin-top: 12px; }
+.m-main .confirm-box .confirm-acts button {
+  flex: 1; height: 42px; border-radius: 10px; border: 0; font: inherit; font-size: 14px;
+}
+.m-main .confirm-box .confirm-acts .btn-light { background: #EFEFF4; color: var(--text); }
+.m-main .confirm-box .confirm-acts .btn-danger { background: var(--danger-bg); color: #fff; }
