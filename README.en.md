@@ -4,6 +4,8 @@
 
 A third-party full-robot replica project based on [Pollen Robotics' Microduck](https://pollen-robotics.com/microduck/), with resources for sourcing parts, printing, assembly, calibration, control, and training.
 
+**20261104 test release:** [image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [matching software](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.4) · [change list (Chinese)](docs/更新说明-20261104.md). It combines HOME IMU recalibration, independent ID 200 orientation checks, hotspot recovery, and previously released features such as gamepad mapping. Fresh-card boot and motion still require hardware acceptance; fixed mounting presets remain future work.
+
 **The Feetech HD-1910 build has passed real hardware validation: standing, walking, a forward roll and standing back up.** Our main build uses **15 Feetech HD-1910 servos**. We provide a **ready-to-flash system image** and the **Microduck Studio web console** for Wi-Fi setup, calibration, and remote control from a phone or computer browser.
 
 **The first-use workflow has also been completed on real hardware:** flash the image → hotspot and Wi-Fi setup → servo and IMU calibration → gamepad pairing and e-stop test → stand and walk. [Real hardware validation records](docs/update-history.en.md#latest)

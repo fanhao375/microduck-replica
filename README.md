@@ -4,6 +4,8 @@
 
 基于 [Pollen Robotics Microduck](https://pollen-robotics.com/microduck/) 的第三方整机复刻项目，提供从采购、打印、装配到标定、控制和训练的资料。
 
+**20261104 测试版：**[新镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [配套软件](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.4) · [完整更新清单](docs/更新说明-20261104.md)。整合站姿 IMU 重标、ID 200 独立方向核验、热点恢复，以及手柄映射等此前软件功能。新镜像烧卡和运动效果待现场验收；固定安装方向预设仍留待后续。
+
 **飞特 HD-1910 版本已完成整机实机验证：站立、行走、前滚翻后起身均已跑通。** 主线使用 **15 颗飞特 HD-1910 舵机**，提供可烧录的**复刻镜像**和 **Microduck Studio 网页中控**，通过手机或电脑浏览器完成配网、标定和遥控。
 
 **首次上手流程已在实机跑通：** 烧录镜像 → 热点配网 → 舵机与 IMU 标定 → 配手柄、测试急停 → 站立行走。[查看实机验证记录](docs/历史更新.md#最近更新)
