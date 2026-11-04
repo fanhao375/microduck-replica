@@ -52,9 +52,9 @@ class NativePackage(unittest.TestCase):
         self.assertNotIn('studio/deploy/native/manifest.json',files)
 
     def test_reviewed_actual_arm64_pie_is_injected_with_hash_bound_manifest(self):
-        artifact=Path('F:/chengshenzhilu/Robot/Microduck/artifacts/imu-independent-20261030/robotd-independent-imu-arm64')
+        artifact=Path('F:/chengshenzhilu/Robot/Microduck/artifacts/image-release-20261104/robotd-control48-aarch64')
         if not artifact.exists():
-            artifact=Path('/mnt/f/chengshenzhilu/Robot/Microduck/artifacts/imu-independent-20261030/robotd-independent-imu-arm64')
+            artifact=Path('/mnt/f/chengshenzhilu/Robot/Microduck/artifacts/image-release-20261104/robotd-control48-aarch64')
         if not artifact.exists(): self.skipTest('reviewed local release input not present')
         try:
             files=self.build(artifact.read_bytes())
@@ -63,40 +63,76 @@ class NativePackage(unittest.TestCase):
         suite=json.loads(files['suite-version.json']);manifest=json.loads(files['studio/deploy/native/manifest.json'])
         for name in ('studio/deploy/native/robotd','studio/deploy/native/manifest.json'):
             self.assertEqual(suite['files'][name],hashlib.sha256(files[name]).hexdigest())
-        self.assertEqual(manifest['sha256'],'725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00')
-        self.assertEqual(manifest['source_revision'],'931ce978f2efb27c157b7a583ee402793131a0d2')
+        self.assertEqual(manifest['sha256'],'e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0')
+        self.assertEqual(manifest['source_revision'],'eecac1878136d3188370a5f6460b7d0521cf845d')
         self.assertEqual(manifest['schema'],'microduck-native-payload/1')
-        self.assertEqual(manifest['build'],'0791fcd-feetech-qinmo-control.47')
+        self.assertEqual(manifest['build'],'replica-imu-verify-control.48')
         self.assertEqual(manifest['official_version'],'0.15.1')
         self.assertEqual(manifest['architecture'],'aarch64')
         self.assertEqual(manifest['software_version'],'2026.10.30')
-        self.assertEqual(manifest['size'],5606976)
+        self.assertEqual(manifest['size'],7275792)
         self.assertEqual(manifest['model_api'],2)
-        self.assertEqual(manifest['ipc_api'],42)
+        self.assertEqual(manifest['ipc_api'],43)
         self.assertEqual(manifest['supported_installed_sha256'],[
             'edf182edb7bf11aeeeedfdab98170ab2ec48a9ec18417f9b68c744b0a60c6d16',
             'febf44e2e5d4e573f4513f25a1ae6480b976c3988dd3d5e7cdfcf84d2a2d5063',
-            '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422'])
+            '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422',
+            '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'])
 
     def test_unreviewed_bytes_are_refused(self):
         with self.assertRaises(ValueError): self.build(b'foreign binary')
 
+    def test_published47_is_a_predecessor_and_cannot_be_new_payload(self):
+        for root in (Path('F:/chengshenzhilu/Robot/Microduck'),Path('/mnt/f/chengshenzhilu/Robot/Microduck')):
+            artifact=root/'artifacts/imu-independent-20261030/robotd-independent-imu-arm64'
+            if artifact.is_file():break
+        else:self.skipTest('published predecessor release input not present')
+        self.assertEqual(hashlib.sha256(artifact.read_bytes()).hexdigest(),
+            '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00')
+        with self.assertRaises(ValueError):self.build(artifact.read_bytes())
+
+    def published_padd(self):
+        relative='artifacts/native-release-prep-20261030/padd-arm64-a'
+        for root in (Path('F:/chengshenzhilu/Robot/Microduck'),Path('/mnt/f/chengshenzhilu/Robot/Microduck')):
+            if (root/relative).is_file():return (root/relative).read_bytes()
+        self.skipTest('published padd release input not present')
+
+    def test_real_frozen_pair_is_injected_with_consistent_api43_and_unchanged_padd(self):
+        bundle_source=(Path(__file__).resolve().parents[2]/'studio/deploy/controller_bundle.py').read_bytes()
+        files=self.build(self.reviewed_binary(),padd=self.published_padd(),bundle_source=bundle_source)
+        native=json.loads(files['studio/deploy/native/manifest.json'])
+        bundle=json.loads(files['studio/deploy/native/controller-manifest.json'])
+        for field in ('sha256','size','source_revision','build','ipc_api'):
+            self.assertEqual(bundle['components']['robotd'][field],native[field])
+        self.assertEqual(native['ipc_api'],43)
+        self.assertEqual(bundle['components']['padd']['sha256'],
+            'dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec')
+        self.assertEqual(files['studio/deploy/native/padd'],self.published_padd())
+
+    def test_real_frozen_pair_rejects_tampered_robotd_or_padd_bytes(self):
+        bundle_source=(Path(__file__).resolve().parents[2]/'studio/deploy/controller_bundle.py').read_bytes()
+        robot,pad=self.reviewed_binary(),self.published_padd()
+        for robot_bytes,pad_bytes in ((robot[:-1]+bytes([robot[-1]^1]),pad),
+                                      (robot,pad[:-1]+bytes([pad[-1]^1]))):
+            with self.subTest(component='robotd' if robot_bytes!=robot else 'padd'),self.assertRaises(ValueError):
+                self.build(robot_bytes,padd=pad_bytes,bundle_source=bundle_source)
+
     def reviewed_binary(self):
-        relative='artifacts/imu-independent-20261030/robotd-independent-imu-arm64'
+        relative='artifacts/image-release-20261104/robotd-control48-aarch64'
         for root in (Path('F:/chengshenzhilu/Robot/Microduck'),Path('/mnt/f/chengshenzhilu/Robot/Microduck')):
             if (root/relative).is_file():return (root/relative).read_bytes()
         self.skipTest('reviewed local release input not present')
 
     def test_native_manifest_comes_from_frozen_revision_not_builder_worktree(self):
         source=(Path(__file__).resolve().parents[2]/'studio/deploy/native_update.py').read_bytes()
-        altered=source.replace(b"SOURCE = '931ce978f2efb27c157b7a583ee402793131a0d2'",b"SOURCE = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'")
+        altered=source.replace(b"SOURCE = 'eecac1878136d3188370a5f6460b7d0521cf845d'",b"SOURCE = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'")
         self.assertNotEqual(source,altered)
         files=self.build(self.reviewed_binary(),native_source=altered)
         self.assertEqual(json.loads(files['studio/deploy/native/manifest.json'])['source_revision'],'b'*40)
 
     def test_frozen_validator_cannot_be_bypassed_by_valid_builder_worktree(self):
         source=(Path(__file__).resolve().parents[2]/'studio/deploy/native_update.py').read_bytes()
-        altered=source.replace(b"REVIEWED_SHA256 = '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'",b"REVIEWED_SHA256 = '1111111111111111111111111111111111111111111111111111111111111111'")
+        altered=source.replace(b"REVIEWED_SHA256 = 'e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'",b"REVIEWED_SHA256 = '1111111111111111111111111111111111111111111111111111111111111111'")
         self.assertNotEqual(source,altered)
         with self.assertRaises(ValueError):self.build(self.reviewed_binary(),native_source=altered)
 
@@ -109,7 +145,7 @@ def bundle_manifest(version,robotd,padd):
              'padd_sha256':hashlib.sha256(padd).hexdigest(),
              'robotd_sha256':hashlib.sha256(robotd).hexdigest(),'frozen_marker':'fixture-only'}}
 def validate_bundle(robotd,padd,manifest,version):
-    if padd!={padd!r} or hashlib.sha256(robotd).hexdigest()!='725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00' or manifest!=bundle_manifest(version,robotd,padd):
+    if padd!={padd!r} or hashlib.sha256(robotd).hexdigest()!='e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0' or manifest!=bundle_manifest(version,robotd,padd):
         raise ValueError('not the reviewed fixture inputs')
 '''.encode()
         return padd,source

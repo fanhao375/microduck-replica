@@ -16,10 +16,12 @@ import uuid
 
 PAYLOAD_SCHEMA='microduck-controller-payload/1'
 SCHEMA='microduck-controller-update/1'
-ROBOTD_SHA256='725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'
-ROBOTD_SIZE=5606976
-ROBOTD_SOURCE='931ce978f2efb27c157b7a583ee402793131a0d2'
-ROBOTD_BUILD='0791fcd-feetech-qinmo-control.47'
+ROBOTD_SHA256='e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'
+ROBOTD_SIZE=7275792
+ROBOTD_SOURCE='eecac1878136d3188370a5f6460b7d0521cf845d'
+ROBOTD_BUILD='replica-imu-verify-control.48'
+LEGACY_ROBOTD_SHA256='725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'
+PREDECESSOR_PROCEDURE='已完成的 .47 配套驱动请先明确确认“恢复旧配套驱动”，再安装本版；操作说明：docs/native-update-20261104.md'
 # Frozen from two independent, byte-identical builds and actual QEMU status.
 PADD_SHA256='dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec'
 PADD_SIZE=3522648
@@ -46,6 +48,9 @@ UNITS={
 }
 VOICE_FILES=('duck-echo/pad_mapping.py','duck-echo/duck_echo.py')
 PHASES=frozenset(('prepared','guarding','replacing','verifying','restoring','completed','restored','recovery_required'))
+RESTORE_IMMUTABLE=('schema','bundle_schema','transaction_id','mode','target_robotd','target_padd',
+    'old_sha256','target_sha256','records','files','service_files','targets','services','controllers',
+    'original_services','original_process','padd_args','profile_sha256','protected')
 
 
 def sha(data):return hashlib.sha256(data).hexdigest()
@@ -56,7 +61,7 @@ def bundle_manifest(version,robotd_bytes,padd_bytes):
         raise ValueError('invalid software version')
     return {'schema':PAYLOAD_SCHEMA,'architecture':'aarch64','software_version':version,
         'components':{
-            'robotd':{'sha256':sha(robotd_bytes),'size':len(robotd_bytes),'source_revision':ROBOTD_SOURCE,'build':ROBOTD_BUILD,'ipc_api':42},
+            'robotd':{'sha256':sha(robotd_bytes),'size':len(robotd_bytes),'source_revision':ROBOTD_SOURCE,'build':ROBOTD_BUILD,'ipc_api':43},
             'padd':{'sha256':sha(padd_bytes),'size':len(padd_bytes),'source_revision':PADD_SOURCE,'mapping_api':1,
                     'supported_installed_sha256':list(SUPPORTED_PADD_SHA256)}},
         'units':{path:{'sha256':sha(body),'mode':0o644} for path,body in UNITS.items()},
@@ -203,8 +208,8 @@ class BundleTransaction:
 
     def paths(self):return (ROBOTD,PADD,*UNITS,VOICE_GUARD,COMPAT)
 
-    def targets(self):
-        return {ROBOTD:{'sha256':ROBOTD_SHA256,'mode':0o755},PADD:{'sha256':PADD_SHA256,'mode':0o755},
+    def targets(self,robotd=None):
+        return {ROBOTD:{'sha256':ROBOTD_SHA256 if robotd is None else robotd,'mode':0o755},PADD:{'sha256':PADD_SHA256,'mode':0o755},
                 **{p:{'sha256':sha(b),'mode':0o644} for p,b in {**UNITS,VOICE_GUARD:VOICE_GUARD_PROGRAM,COMPAT:COMPAT_BYTES}.items()}}
 
     def snapshot(self,path):
@@ -233,7 +238,7 @@ class BundleTransaction:
         if self.present(PREPARED):
             prepared=self.load_record(PREPARED)
             if not self.present(JOURNAL):return prepared
-            committed=self.load_record(JOURNAL)
+            committed=self.load_record(JOURNAL,prepared)
             if committed['transaction_id']==prepared['transaction_id']:
                 immutable=('schema','bundle_schema','mode','target_robotd','target_padd','old_sha256','target_sha256',
                     'records','files','service_files','targets','services','controllers','original_services','original_process',
@@ -245,7 +250,7 @@ class BundleTransaction:
             return prepared
         return self.load_record(JOURNAL)
 
-    def load_record(self,path):
+    def load_record(self,path,prepared=None):
         if not self.present(path):return None
         try:
             m=json.loads(self.read(path,65536))
@@ -257,12 +262,12 @@ class BundleTransaction:
                     or type(m.get('active')) is not bool or not re.fullmatch('[0-9a-f]{32}',m.get('transaction_id',''))
                     or m.get('mode')!='motion' or [r['path'] for r in m['records']]!=list(self.paths())
                     or set(m['services'])!=set(SERVICES) or any(s not in ('active','inactive','failed','absent') for s in m['services'].values())
-                    or m.get('target_robotd')!=ROBOTD_SHA256 or m.get('target_padd')!=PADD_SHA256
+                    or m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256) or m.get('target_padd')!=PADD_SHA256
                     or type(m.get('restore_pending')) is not bool or type(m.get('cleanup_pending')) is not bool
                     or type(m.get('running_verified')) is not bool or m.get('bundle_schema')!=PAYLOAD_SCHEMA
-                    or m.get('targets')!=self.targets()
+                    or m.get('targets')!=self.targets(m.get('target_robotd'))
                     or (m.get('profile_sha256') is not None and not re.fullmatch('[0-9a-f]{64}',m['profile_sha256']))
-                    or m.get('old_sha256')!=m['records'][0]['sha256'] or m.get('target_sha256')!=ROBOTD_SHA256
+                    or m.get('old_sha256')!=m['records'][0]['sha256'] or m.get('target_sha256')!=m.get('target_robotd')
                     or m.get('controllers')!={u:m['services'][u]=='active' for u in self.legacy.CONTROLLERS}
                     or set(m.get('original_services',{}))!={u for u,s in m['services'].items() if s=='active'}
                     or any(m['services'][u]!='active' for u in ('padd','microduck-studio','duck-echo'))
@@ -294,9 +299,72 @@ class BundleTransaction:
             if m['records'][0]['sha256'] not in (*self.legacy.SUPPORTED_SHA256,ROBOTD_SHA256):raise ValueError('unknown old robotd')
             if m['records'][1]['sha256'] not in SUPPORTED_PADD_SHA256:raise ValueError('unknown old padd')
             if any(row['existed'] for row in m['records'][2:]):raise ValueError('owned path preimage was not empty')
+            if m['target_robotd']!=ROBOTD_SHA256:self.legacy_terminal(m,prepared)
+            elif 'restore_origin_sha256' in m or 'restore_updater_sha256' in m:self.owned_restore_origin(m)
             return m
         except (OSError,ValueError,TypeError,KeyError,AttributeError):
             self.refuse('伴随升级记录或备份无效，保留保护并恢复','controller_tampered')
+
+    def legacy_terminal(self,m,prepared=None):
+        # Only the published .47 vector shares these exact service/voice bytes.
+        # Unmarked unfinished recovery remains with the original signed updater.
+        if m['old_sha256'] not in self.legacy.SUPPORTED_SHA256:raise ValueError('unknown predecessor preimage')
+        if 'restore_origin_sha256' in m or 'restore_updater_sha256' in m:
+            self.owned_restore_origin(m)
+            if m['phase']!='restored' or m['active'] or m['restore_pending'] or m['cleanup_pending']:return
+            if self.base.has_exclusion() and not self.present(PREPARED):
+                expected=[(self.legacy.ACTIVE,m['transaction_id'].encode()),
+                    (self.legacy.RESTORE_PERMIT,m['transaction_id'].encode()),(self.legacy.GUARD,self.base.guard(m)),
+                    *((path,self.base.controller_guard(m)) for path in self.base.controller_guard_paths())]
+                if any(self.present(path) and self.read(path,65536)!=body for path,body in expected):
+                    raise ValueError('predecessor restore cleanup ownership changed')
+                return
+        historical=bool(prepared and prepared['transaction_id']!=m['transaction_id'] and m['phase']=='restored'
+            and self.read(STATE+'/'+m['transaction_id']+'/journal.json',65536)==self.read(JOURNAL,65536))
+        if (m['active'] or m['restore_pending'] or m['cleanup_pending']
+                or m['phase'] not in ('completed','restored') or not m['running_verified']
+                or (not historical and (self.base.has_exclusion() or self.present(PREPARED)))):
+            self.refuse('上一版 .47 配套驱动尚未完成：请使用该版已签名软件包的更新器恢复后再更新',
+                        'controller_recovery_required')
+        if m['phase']=='completed':
+            if not self.vector_current(m):raise ValueError('predecessor completed vector changed')
+        elif any(self.snapshot(row['path'])!=row for row in m['records']):
+            raise ValueError('predecessor restored vector changed')
+
+    def owned_restore_origin(self,m):
+        raw=self.read(STATE+'/'+m['transaction_id']+'/restore-origin.json',65536)
+        origin=json.loads(raw)
+        if (m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256)
+                or m.get('restore_updater_sha256')!=ROBOTD_SHA256 or m.get('restore_origin_sha256')!=sha(raw)
+                or m['phase'] not in ('restoring','recovery_required','restored')
+                or (m['phase']!='restored' and not m['active'])
+                or any(origin.get(key)!=m.get(key) for key in RESTORE_IMMUTABLE)
+                or origin.get('phase')!='completed' or origin.get('active') is not False
+                or origin.get('restore_pending') is not False or origin.get('cleanup_pending') is not False
+                or origin.get('running_verified') is not True
+                or 'restore_origin_sha256' in origin or 'restore_updater_sha256' in origin):
+            raise ValueError('untrusted predecessor restore origin')
+        return origin
+
+    def begin_restore(self,m):
+        raw=self.read(JOURNAL,65536)
+        if json.loads(raw)!=m:self.refuse('上一版配套驱动记录已改变','controller_tampered')
+        directory=STATE+'/'+m['transaction_id'];path=directory+'/restore-origin.json'
+        if self.present(path):
+            if self.read(path,65536)!=raw:self.refuse('上一版恢复起点已改变','controller_tampered')
+            self.base.sync_dir(directory)
+        else:self.write(path,raw,0o600)
+        self.save(m,'restoring',active=True,running_verified=False,
+            restore_origin_sha256=sha(raw),restore_updater_sha256=ROBOTD_SHA256)
+
+    def archive_legacy(self,m):
+        raw=self.read(JOURNAL,65536)
+        if json.loads(raw)!=m:self.refuse('上一版配套驱动记录已改变','controller_tampered')
+        directory=STATE+'/'+m['transaction_id'];history=directory+'/journal.json'
+        if self.present(history):
+            if self.read(history,65536)!=raw:self.refuse('上一版配套驱动历史已改变','controller_tampered')
+            self.base.sync_dir(directory)
+        else:self.write(history,raw,0o600)
 
     def state(self,unit):
         value=self.unit(unit)
@@ -521,7 +589,10 @@ class BundleTransaction:
     def protected_unchanged(self,m):
         current=json.loads(self.read(self.legacy.PROTECTED,65536)) if self.present(self.legacy.PROTECTED) else None
         lost=current is None and self.ctx.boot_id()!=m.get('baseline_boot_id',m['original_process']['boot_id'])
-        if current not in (m.get('protected'),m.get('protected_next')) and not lost:
+        allowed=[m.get('protected'),m.get('protected_next')]
+        if m.get('target_robotd') in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256) and m.get('restore_updater_sha256')==ROBOTD_SHA256:
+            allowed.append(self.owned_restore_origin(m).get('protected_next'))
+        if current not in allowed and not lost:
             self.refuse('软件升级器的 native 进程基线被外部改变，保留现场')
 
     def install_bytes(self,path,data,mode,uid=0,gid=0):
@@ -566,6 +637,13 @@ class BundleTransaction:
     def vector_current(self,m):
         return all(self.present(path) and sha(self.read(path))==row['sha256']
                    and (os.name!='posix' or stat.S_IMODE(os.lstat(self.ctx.p(path)).st_mode)==row['mode']) for path,row in m['targets'].items())
+
+    def factory_current(self):
+        if (self.present(JOURNAL) or self.present(PREPARED) or self.base.has_exclusion()
+                or not self.vector_current({'targets':self.targets()})):return False
+        self.base.process(ROBOTD_SHA256,self.base.args())
+        self.target_health({'services':{'mediad':self.state('mediad')},'padd_args':self.pad_arguments()})
+        return True
 
     def target_health(self,m):
         if sha(self.read(MEDIAD))!=MEDIAD_SHA256:self.refuse('媒体磁盘程序已改变')
@@ -678,7 +756,7 @@ class BundleTransaction:
         if any(self.snapshot(row['path'])!=row for row in m['records']):self.refuse('旧组件向量恢复回读不一致')
         self.complete(m,'restored',robot,pad)
 
-    def prepare(self,payload):
+    def prepare(self,payload,previous_bundle=None):
         # Never reinterpret a pending robotd-only transaction as a new bundle.
         previous=self.base.load()
         if previous and (previous['active'] or previous.get('restore_pending') or previous.get('cleanup_pending')):
@@ -717,6 +795,7 @@ class BundleTransaction:
            'services':states,'controllers':{u:states[u]=='active' for u in self.legacy.CONTROLLERS},
            'original_services':{u:self.unit(u) for u,s in states.items() if s=='active'},'original_process':robot,
            'padd_args':pad_args,'profile_sha256':profile,'protected':protected,'running_verified':False}
+        if previous_bundle and previous_bundle['target_robotd']!=ROBOTD_SHA256:self.archive_legacy(previous_bundle)
         self.save(m,'prepared');return m
 
     def status(self):
@@ -725,17 +804,19 @@ class BundleTransaction:
             robot_hash=sha(self.read(ROBOTD));pad_hash=sha(self.read(PADD))
             self.base.process(robot_hash,self.base.args());pad_args=self.pad_arguments();self.process('padd',pad_hash,pad_args)
             supported=robot_hash in (*self.legacy.SUPPORTED_SHA256,ROBOTD_SHA256) and pad_hash in (*SUPPORTED_PADD_SHA256,PADD_SHA256)
-            current=bool(m and m['phase']=='completed' and not active and self.vector_current(m))
-            if current:self.target_health(m)
-        except (self.h.Stop,OSError,ValueError,TypeError):supported=False;current=False;robot_hash=pad_hash=None
+            restorable=bool(m and m['phase']=='completed' and not active and self.vector_current(m))
+            if restorable:self.target_health(m)
+            current=bool(restorable and m['target_robotd']==ROBOTD_SHA256) or (m is None and self.factory_current())
+        except (self.h.Stop,OSError,ValueError,TypeError):supported=False;current=restorable=False;robot_hash=pad_hash=None
         try:self.payload();available=True
         except (self.h.Stop,OSError,ValueError,TypeError):available=False
         detail={key:m.get(key) for key in PUBLIC if m and key in m}
         detail.update(active=active,phase=m['phase'] if m else 'idle',bundle_schema=PAYLOAD_SCHEMA,bundle_current=current,
-            available=available,running_verified=supported,restorable=bool(current),
+            available=available,running_verified=supported,restorable=restorable,
             installed_sha256=robot_hash,target_sha256=ROBOTD_SHA256,
             components={'robotd':{'installed_sha256':robot_hash,'target_sha256':ROBOTD_SHA256},
                         'padd':{'installed_sha256':pad_hash,'target_sha256':PADD_SHA256}})
+        if m and m['target_robotd']!=ROBOTD_SHA256 and m['phase']=='completed':detail['reason']=PREDECESSOR_PROCEDURE
         return self.op.finish(0,'controller_status',detail=detail)
 
     def run(self,action):
@@ -768,6 +849,7 @@ class BundleTransaction:
                     self.unpublished_readiness(m);self.gate()
                 if action=='restore':
                     self.base.readiness();self.gate();self.unchanged(m)
+                    if m['phase']=='completed':self.begin_restore(m)
                 try:self.restore(m)
                 except Exception as error:
                     self.protect(m);self.save(m,'recovery_required',active=True,reason=str(error)[:300]);return self.op.finish(5,'controller_recovery_required',detail={k:m.get(k) for k in PUBLIC if k in m})
@@ -778,8 +860,10 @@ class BundleTransaction:
                     self.owned(m)
                     if not self.vector_current(m):self.refuse('已完成的组件向量已改变，不能当作重复安装成功')
                     self.target_health(m)
+                    if m['target_robotd']!=ROBOTD_SHA256:self.refuse(PREDECESSOR_PROCEDURE,'controller_predecessor_restore_required')
                     return self.status()
-            payload=self.payload();m=self.prepare(payload)
+            if m is None and self.factory_current():return self.status()
+            payload=self.payload();m=self.prepare(payload,m)
             try:
                 self.save(m,'guarding');self.bridge(m);self.stop_services(m);self.gate()
                 identity=self.base.process(m['old_sha256'],self.legacy.ARGS)

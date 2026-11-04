@@ -17,19 +17,23 @@ import uuid
 
 SCHEMA = 'microduck-native-update/1'
 PAYLOAD_SCHEMA = 'microduck-native-payload/1'
-REVIEWED_SHA256 = '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'
-REVIEWED_SIZE = 5606976
+REVIEWED_SHA256 = 'e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'
+REVIEWED_SIZE = 7275792
 LEGACY_OLD_SHA256 = 'edf182edb7bf11aeeeedfdab98170ab2ec48a9ec18417f9b68c744b0a60c6d16'
 LEGACY_TARGET_SHA256 = 'febf44e2e5d4e573f4513f25a1ae6480b976c3988dd3d5e7cdfcf84d2a2d5063'
 LEGACY_STARTUP_SHA256 = '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422'
-SUPPORTED_SHA256 = (LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256)
-PREDECESSOR_IPC_API = {LEGACY_OLD_SHA256: 40, LEGACY_TARGET_SHA256: 40, LEGACY_STARTUP_SHA256: 41}
+LEGACY_PUBLISHED_SHA256 = '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'
+SUPPORTED_SHA256 = (LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256, LEGACY_PUBLISHED_SHA256)
+PREDECESSOR_IPC_API = {LEGACY_OLD_SHA256: 40, LEGACY_TARGET_SHA256: 40, LEGACY_STARTUP_SHA256: 41,
+                       LEGACY_PUBLISHED_SHA256: 42}
 LEGACY_TRANSACTIONS = {(LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256): '.45',
                        (LEGACY_OLD_SHA256, LEGACY_STARTUP_SHA256): '.46',
-                       (LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256): '.46'}
-SOURCE = '931ce978f2efb27c157b7a583ee402793131a0d2'
-BUILD = '0791fcd-feetech-qinmo-control.47'
-IPC_API = 42
+                       (LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256): '.46',
+                       **{(old, LEGACY_PUBLISHED_SHA256): '.47' for old in
+                          (LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256)}}
+SOURCE = 'eecac1878136d3188370a5f6460b7d0521cf845d'
+BUILD = 'replica-imu-verify-control.48'
+IPC_API = 43
 TARGET = '/opt/robot/feetech-ft5-r5/robotd'
 CONFIG = '/etc/robot/feetech-ft5/robotd.toml'
 CALIB = '/etc/robot/feetech-ft5/hd1910-calibration.toml'
@@ -150,7 +154,8 @@ class Transaction:
                     or (os.name=='posix' and m.get('binary_mode') not in (0o755,0o555))
                     or not re.fullmatch('[0-9a-f]{32}', m.get('transaction_id', ''))
                     or m.get('old_sha256') not in (*SUPPORTED_SHA256, REVIEWED_SHA256)
-                    or m.get('target_sha256') not in (REVIEWED_SHA256, LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256)
+                    or m.get('target_sha256') not in (REVIEWED_SHA256, LEGACY_TARGET_SHA256,
+                                                       LEGACY_STARTUP_SHA256, LEGACY_PUBLISHED_SHA256)
                     or m.get('mode') not in ('motion', 'startup', 'commissioning')
                     or set(m.get('controllers', {})) != set(CONTROLLERS)
                     or any(type(v) is not bool for v in m['controllers'].values())

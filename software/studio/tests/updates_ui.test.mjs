@@ -35,4 +35,19 @@ assert.equal(nativeActions({...stage2,native:bundle},false,true).restore,true);
 assert.equal(nativeActions({...stage2,native:bundle},false,false).restore,false);
 assert.equal(nativeActions({...stage2,native:{...bundle,active:true}},false,true).restore,false);
 assert.equal(updateActions({...stage2,can_rollback:true,native:bundle}).rollback,false,'restore matching native before software rollback');
+const factoryCurrent={...bundle,restorable:false};
+assert.match(nativeMessage(factoryCurrent),/没有.*旧配套驱动备份/);
+assert.doesNotMatch(nativeMessage(factoryCurrent),/请先恢复/);
+assert.equal(nativeActions({...stage2,native:factoryCurrent},false,true).restore,false);
+const predecessor={...bundle,current:false,phase:'completed',reason:'已完成的 .47 配套驱动请先恢复旧配套驱动；docs/native-update-20261104.md'};
+assert.equal(nativeMessage(predecessor),predecessor.reason,'show the signed updater restore-first procedure');
+assert.equal(nativeActions({...stage2,native:predecessor},false,true).restore,true,'completed verified predecessor remains explicitly restorable');
+assert.equal(nativeActions({...stage2,native:predecessor},false,true).install,false,'restore the old owned bundle before installing');
+for(const changed of [{supported:false},{active:true},{submitting:true},{restorable:false},{service_available:false},
+  {bundle_schema:'foreign'},{phase:'recovery_required'}]){
+  assert.equal(nativeActions({...stage2,native:{...predecessor,...changed}},false,true).restore,false);
+}
+assert.equal(nativeActions({...stage2,native:predecessor},false,false).restore,false);
+assert.equal(nativeActions({...stage2,native:predecessor},true,true).restore,false);
+assert.equal(nativeActions({...stage2,busy:true,native:predecessor},false,true).restore,false);
 console.log('updates UI state checks passed');

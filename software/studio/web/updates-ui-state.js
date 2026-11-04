@@ -36,6 +36,8 @@ export function nativeMessage(native){
   if(native.active)return (NATIVE_PHASES[native.phase]||'主程序更新保护仍在，请核对或恢复')+(native.reason?`。${native.reason}`:'');
   if(native.submitting)return '正在向独立小助手提交请求；请等待实际运行状态，刷新页面可继续查看。';
   if(!native.service_available)return native.reason||'当前小助手未提供主程序更新服务，请先更新网页 / 语音。';
+  if(native.bundle_schema==='microduck-controller-payload/1'&&native.supported===true&&native.restorable===true&&!native.current&&native.phase==='completed'&&native.reason)return native.reason;
+  if(native.bundle_schema&&native.current&&native.restorable!==true)return '目标配套驱动的实际运行身份、映射接口和服务权限已核验。本机没有可恢复的旧配套驱动备份。';
   if(native.bundle_schema&&native.current)return '目标配套驱动的实际运行身份、映射接口和服务权限已核验。退回旧网页 / 语音前，请先恢复旧配套驱动。';
   if(native.bundle_schema&&native.phase==='restored')return '旧配套驱动与原服务配置已恢复并核验，可以退回旧网页 / 语音。手柄映射配置已保留。';
   if(native.current)return '目标主程序实际运行身份已核验。'+(native.mode==='commissioning'?'请继续 IMU 选择和方向验证。':'秦墨实物仍待验收，使用前完成 IMU 方向验证。');
@@ -48,6 +50,7 @@ export function nativeMessage(native){
 export function nativeActions(data,pending=false,confirmed=false){
   const native=data?.native;
   const idle=!!native?.service_available&&!data?.busy&&!native.submitting&&!pending&&confirmed===true;
-  return {install:idle&&native.available===true&&native.supported===true&&!native.current&&!native.active,
-    recover:idle&&native.active===true,restore:idle&&native.restorable===true&&native.current===true&&!native.active};
+  return {install:idle&&native.available===true&&native.supported===true&&!native.current&&!native.active&&native.restorable!==true,
+    recover:idle&&native.active===true,restore:idle&&native.supported===true&&native.bundle_schema==='microduck-controller-payload/1'
+      &&native.restorable===true&&(native.current===true||native.phase==='completed')&&!native.active};
 }

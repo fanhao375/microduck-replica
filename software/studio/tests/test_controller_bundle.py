@@ -20,6 +20,26 @@ OLD_PAD,NEW_PAD,MEDIA=legacy.elf(b'pad-old'),legacy.elf(b'pad-new'),legacy.elf(b
 SHA=lambda data:hashlib.sha256(data).hexdigest()
 
 
+class PublishedContract(unittest.TestCase):
+    def test_pair_has_one_robotd_identity_and_api43(self):
+        self.assertEqual((C.ROBOTD_SHA256,C.ROBOTD_SIZE,C.ROBOTD_SOURCE,C.ROBOTD_BUILD),
+                         (legacy.N.REVIEWED_SHA256,legacy.N.REVIEWED_SIZE,legacy.N.SOURCE,legacy.N.BUILD))
+        self.assertEqual(legacy.N.IPC_API,43)
+        self.assertEqual(C.bundle_manifest('2026.11.4',b'',b'')['components']['robotd']['ipc_api'],43)
+
+    def test_published_padd_bytes_and_source_remain_exact(self):
+        self.assertEqual((C.PADD_SHA256,C.PADD_SIZE,C.PADD_SOURCE),
+            ('dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec',3522648,
+             '665613ac628fdc9b1b71f324809f0c16ce2795f2'))
+
+    def test_restore_first_reason_points_to_exact_documented_ui_procedure(self):
+        document=Path(__file__).resolve().parents[3]/'docs/native-update-20261104.md'
+        self.assertTrue(document.is_file())
+        self.assertIn('docs/native-update-20261104.md',C.PREDECESSOR_PROCEDURE)
+        self.assertIn('恢复旧配套驱动',C.PREDECESSOR_PROCEDURE)
+        self.assertIn('**恢复旧配套驱动**',document.read_text(encoding='utf-8'))
+
+
 class BundleManifest(unittest.TestCase):
     def setUp(self):
         self.assertIsNotNone(C,'controller companion module must exist')
@@ -33,6 +53,7 @@ class BundleManifest(unittest.TestCase):
         self.assertEqual(manifest['schema'],'microduck-controller-payload/1')
         self.assertEqual(set(manifest['components']),{'robotd','padd'})
         self.assertEqual(manifest['components']['padd']['sha256'],SHA(NEW_PAD))
+        self.assertEqual(manifest['components']['robotd']['ipc_api'],43)
         self.assertEqual(set(manifest['units']),set(C.UNITS))
         C.validate_bundle(legacy.NEW,NEW_PAD,manifest,'2026.10.31')
 
@@ -211,8 +232,11 @@ class BundleTransaction(unittest.TestCase):
         self.assertIsNotNone(C)
         with mock.patch.object(legacy,'NativeWorld',BundleWorld):legacy.NativeTest.setUp(self)
         patch=mock.patch.multiple(C,ROBOTD_SHA256=SHA(legacy.NEW),ROBOTD_SIZE=len(legacy.NEW),
+            ROBOTD_BUILD='replica-imu-verify-control.48',
             PADD_SHA256=SHA(NEW_PAD),PADD_SIZE=len(NEW_PAD),PADD_SOURCE='a'*40,SUPPORTED_PADD_SHA256=(SHA(OLD_PAD),),MEDIAD_SHA256=SHA(MEDIA))
         patch.start();self.addCleanup(patch.stop)
+        predecessor=mock.patch.object(C,'LEGACY_ROBOTD_SHA256',SHA(legacy.PUBLISHED),create=True)
+        predecessor.start();self.addCleanup(predecessor.stop)
         self.w.path(legacy.TARGET).write_bytes(legacy.NEW);self.w.publish_process()
         directory=self.release+'/studio/deploy/native/'
         self.w.path(directory+'padd').write_bytes(NEW_PAD)
@@ -230,6 +254,255 @@ class BundleTransaction(unittest.TestCase):
 
     def journal(self):return json.loads(self.w.path(C.JOURNAL).read_text(encoding='utf-8'))
 
+    def published_terminal(self,phase='completed'):
+        # Produce the old .47 journal using the same unchanged transaction
+        # schema and service bytes; no fabricated backups or safety state.
+        self.w.path(legacy.TARGET).write_bytes(legacy.PUBLISHED);self.w.publish_process()
+        directory=self.release+'/studio/deploy/native/'
+        def payload(robot):
+            self.w.path(directory+'robotd').write_bytes(robot)
+            self.w.path(directory+'manifest.json').write_text(json.dumps(legacy.N.native_manifest('2026.10.28',robot)))
+            self.w.path(directory+'controller-manifest.json').write_text(json.dumps(C.bundle_manifest('2026.10.28',robot,NEW_PAD)))
+        with mock.patch.multiple(legacy.N,REVIEWED_SHA256=SHA(legacy.PUBLISHED),REVIEWED_SIZE=len(legacy.PUBLISHED),
+                BUILD='0791fcd-feetech-qinmo-control.47',IPC_API=42),mock.patch.multiple(C,
+                ROBOTD_SHA256=SHA(legacy.PUBLISHED),ROBOTD_SIZE=len(legacy.PUBLISHED),ROBOTD_BUILD='0791fcd-feetech-qinmo-control.47'):
+            payload(legacy.PUBLISHED)
+            self.assertEqual(self.update(),0)
+            if phase=='restored':
+                # The actual published .47 updater predates restore-origin
+                # publication. Keep its terminal fixture byte schema faithful.
+                with mock.patch.object(C.BundleTransaction,'begin_restore',return_value=None):
+                    self.assertEqual(self.update('restore'),0)
+        payload(legacy.NEW)
+        return self.journal(),self.w.path(C.JOURNAL).read_bytes()
+
+    def test_published47_completed_is_read_only_and_requires_explicit_restore(self):
+        record,raw=self.published_terminal()
+        def lifecycle():return [c for c in self.w.calls if c[:2] in (['systemctl','start'],['systemctl','stop'],['systemctl','daemon-reload'])]
+        calls=lifecycle()
+        self.assertEqual(self.update('status'),0)
+        detail=self.ctx.stdout.lines()[-1]['detail']
+        self.assertFalse(detail['bundle_current']);self.assertTrue(detail['restorable'])
+        self.assertIn('docs/native-update-20261104.md',detail['reason'])
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+        self.assertEqual(lifecycle(),calls)
+        with self.assertRaises(legacy.H.Stop) as error:self.update()
+        self.assertEqual(error.exception.result,'controller_predecessor_restore_required')
+        self.assertIn('.47',str(error.exception))
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+        self.assertEqual(lifecycle(),calls)
+        self.assertEqual(self.update('restore'),0)
+        self.assertEqual(self.w.path(C.ROBOTD).read_bytes(),legacy.PUBLISHED)
+        self.assertEqual(self.w.path(C.PADD).read_bytes(),OLD_PAD)
+        self.assertEqual(self.journal()['phase'],'restored')
+
+    def test_published47_restored_history_is_archived_before_new_bundle_install(self):
+        record,raw=self.published_terminal('restored')
+        self.assertEqual(self.update('status'),0)
+        self.assertFalse(self.ctx.stdout.lines()[-1]['detail']['restorable'])
+        self.assertEqual(self.update(),0)
+        history=C.STATE+'/'+record['transaction_id']+'/journal.json'
+        self.assertEqual(self.w.path(history).read_bytes(),raw)
+        self.assertNotEqual(self.journal()['transaction_id'],record['transaction_id'])
+        self.assertEqual(self.w.path(C.ROBOTD).read_bytes(),legacy.NEW)
+        self.assertEqual(self.update('restore'),0)
+        self.assertEqual(self.w.path(C.ROBOTD).read_bytes(),legacy.PUBLISHED)
+
+    def test_published47_unfinished_record_requires_original_signed_updater(self):
+        record,_=self.published_terminal()
+        for fields in ({'active':True},{'restore_pending':True},{'cleanup_pending':True},{'phase':'recovery_required'}):
+            with self.subTest(fields=fields):
+                raw=json.dumps({**record,**fields}).encode();self.w.path(C.JOURNAL).write_bytes(raw)
+                calls=list(self.w.calls)
+                for action in ('status','install','recover','restore'):
+                    with self.assertRaises(legacy.H.Stop) as error:self.update(action)
+                    self.assertEqual(error.exception.result,'controller_recovery_required')
+                    self.assertIn('.47',str(error.exception))
+                self.assertEqual(self.w.calls,calls);self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+
+    def test_published47_remaining_exclusions_require_original_signed_updater(self):
+        _,raw=self.published_terminal()
+        transaction=legacy.N.Transaction(legacy.H,self.op,self.release)
+        for marker in (legacy.N.ACTIVE,legacy.N.RESTORE_PERMIT,legacy.GUARD,*transaction.controller_guard_paths()):
+            with self.subTest(marker=marker):
+                path=self.w.path(marker);path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'preserve')
+                calls=list(self.w.calls)
+                with self.assertRaises(legacy.H.Stop) as error:self.update('restore')
+                self.assertEqual(error.exception.result,'controller_recovery_required')
+                self.assertEqual(self.w.calls,calls);self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+                self.assertEqual(path.read_bytes(),b'preserve');path.unlink()
+
+    def test_owned_published47_restore_interruption_can_recover_with_new_updater(self):
+        self.published_terminal()
+        original=C.BundleTransaction.write
+        def cut(transaction,path,data,*args,**kwargs):
+            result=original(transaction,path,data,*args,**kwargs)
+            if path==C.JOURNAL and json.loads(data).get('phase')=='recovery_required':raise legacy.PowerCut()
+            return result
+        with mock.patch.object(C.BundleTransaction,'write',cut),self.assertRaises(legacy.PowerCut):self.update('restore')
+        self.assertEqual(self.update('recover'),0)
+        self.assertEqual(self.journal()['phase'],'restored')
+        self.assertEqual(self.w.path(C.ROBOTD).read_bytes(),legacy.PUBLISHED)
+        self.assertEqual(self.w.path(C.PADD).read_bytes(),OLD_PAD)
+        self.assertFalse(self.w.path(legacy.N.ACTIVE).exists())
+
+    def test_current48_restore_cut_before_protected_commit_can_recover(self):
+        self.assertEqual(self.update(),0)
+        original=C.BundleTransaction.write
+        def cut(transaction,path,data,*args,**kwargs):
+            result=original(transaction,path,data,*args,**kwargs)
+            if path==C.JOURNAL:
+                record=json.loads(data)
+                if record.get('phase')=='restored' and record.get('active') is True:raise legacy.PowerCut()
+            return result
+        with mock.patch.object(C.BundleTransaction,'write',cut),self.assertRaises(legacy.PowerCut):self.update('restore')
+        self.assertEqual(self.update('recover'),0)
+        self.assertEqual(self.journal()['phase'],'restored')
+        self.assertFalse(self.journal()['active'])
+        self.assertEqual(self.w.path(C.PADD).read_bytes(),OLD_PAD)
+
+    def test_owned_published47_restore_needs_exact_immutable_terminal_origin(self):
+        record,raw=self.published_terminal()
+        origin=C.STATE+'/'+record['transaction_id']+'/restore-origin.json'
+        self.w.path(origin).write_bytes(raw)
+        marked={**record,'phase':'restoring','active':True,'running_verified':False,
+                'restore_origin_sha256':SHA(raw),'restore_updater_sha256':C.ROBOTD_SHA256}
+        unfinished=json.dumps({**record,'phase':'recovery_required','active':True}).encode()
+        for fields,body in (({'restore_origin_sha256':'a'*64},raw),
+                            ({'restore_updater_sha256':SHA(legacy.PUBLISHED)},raw),
+                            ({'restore_origin_sha256':SHA(unfinished)},unfinished),
+                            ({'profile_sha256':'b'*64},raw)):
+            with self.subTest(fields=fields):
+                self.w.path(origin).write_bytes(body)
+                self.w.path(C.JOURNAL).write_text(json.dumps({**marked,**fields}))
+                calls=list(self.w.calls)
+                with self.assertRaises(legacy.H.Stop):self.update('recover')
+                self.assertEqual(self.w.calls,calls)
+
+    def test_owned_published47_restore_never_overwrites_foreign_protected_baseline(self):
+        self.published_terminal()
+        original=C.BundleTransaction.write
+        def cut(transaction,path,data,*args,**kwargs):
+            result=original(transaction,path,data,*args,**kwargs)
+            if path==C.JOURNAL and json.loads(data).get('phase')=='restoring':raise legacy.PowerCut()
+            return result
+        with mock.patch.object(C.BundleTransaction,'write',cut),self.assertRaises(legacy.PowerCut):self.update('restore')
+        foreign=b'{"robotd":{"MainPID":"999"},"padd":{}}'
+        self.w.path(legacy.N.PROTECTED).write_bytes(foreign)
+        self.assertEqual(self.update('recover'),5)
+        self.assertEqual(self.w.path(legacy.N.PROTECTED).read_bytes(),foreign)
+        self.assertTrue(self.journal()['active'])
+
+    def test_owned_published47_restore_write_and_cleanup_boundaries_recover(self):
+        self.assert_owned_restore_boundaries(published=True)
+
+    def test_current48_restore_write_and_cleanup_boundaries_recover(self):
+        self.assert_owned_restore_boundaries(published=False)
+
+    def assert_owned_restore_boundaries(self,published):
+        guards=legacy.N.Transaction(legacy.H,self.op,self.release).controller_guard_paths()
+        boundaries=[('origin',None),('journal',('restoring',True)),('journal',('recovery_required',True)),
+                    ('journal',('restored',True)),('journal',('restored',False))]
+        boundaries += [('write',path) for path in (legacy.N.ACTIVE,legacy.GUARD,legacy.N.RESTORE_PERMIT,
+                       legacy.N.PROTECTED,C.ROBOTD,C.PADD)]
+        boundaries += [('remove',path) for path in (*C.UNITS,C.VOICE_GUARD,C.COMPAT,C.RUNTIME,
+                       legacy.GUARD,legacy.N.ACTIVE,*guards,legacy.N.RESTORE_PERMIT)]
+        for kind,boundary in boundaries:
+            fixture=BundleTransaction();fixture.setUp()
+            try:
+                with self.subTest(kind=kind,boundary=boundary):
+                    if published:record,_=fixture.published_terminal()
+                    else:
+                        self.assertEqual(fixture.update(),0)
+                        record=fixture.journal()
+                    origin=C.STATE+'/'+record['transaction_id']+'/restore-origin.json'
+                    write=C.BundleTransaction.write;remove=legacy.H.remove
+                    def cut_write(transaction,path,data,*args,**kwargs):
+                        result=write(transaction,path,data,*args,**kwargs)
+                        cut=(kind=='origin' and path==origin) or (kind=='write' and path==boundary)
+                        if kind=='journal' and path==C.JOURNAL:
+                            value=json.loads(data);cut=(value.get('phase'),value.get('active'))==boundary
+                        if cut:raise legacy.PowerCut()
+                        return result
+                    def cut_remove(ctx,path):
+                        existed=os.path.lexists(ctx.p(path));result=remove(ctx,path)
+                        if kind=='remove' and path==boundary and existed:raise legacy.PowerCut()
+                        return result
+                    with mock.patch.object(C.BundleTransaction,'write',cut_write),mock.patch.object(legacy.H,'remove',cut_remove),self.assertRaises(legacy.PowerCut):
+                        fixture.update('restore')
+                    self.assertEqual(fixture.update('restore' if kind=='origin' else 'recover'),0)
+                    self.assertEqual(fixture.journal()['phase'],'restored');self.assertFalse(fixture.journal()['active'])
+                    self.assertEqual(fixture.w.path(C.ROBOTD).read_bytes(),legacy.PUBLISHED if published else legacy.NEW)
+                    self.assertEqual(fixture.w.path(C.PADD).read_bytes(),OLD_PAD)
+                    self.assertFalse(fixture.w.path(legacy.N.ACTIVE).exists())
+                    self.assertFalse(any(fixture.w.path(path).exists() for path in (*C.UNITS,C.VOICE_GUARD,C.COMPAT,*guards)))
+            finally:fixture.doCleanups()
+
+    def test_published47_completed_vector_tamper_never_mutates(self):
+        _,raw=self.published_terminal();self.w.path(C.ROBOTD).write_bytes(legacy.OLD)
+        calls=list(self.w.calls)
+        for action in ('status','install','restore'):
+            with self.assertRaises(legacy.H.Stop):self.update(action)
+        self.assertEqual(self.w.calls,calls);self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+
+    def test_published47_cannot_claim_future_or_arbitrary_original_robotd(self):
+        record,_=self.published_terminal()
+        record['old_sha256']=record['records'][0]['sha256']=SHA(legacy.NEW)
+        self.w.path(C.STATE+'/'+record['transaction_id']+'/component-0').write_bytes(legacy.NEW)
+        raw=json.dumps(record).encode();self.w.path(C.JOURNAL).write_bytes(raw)
+        calls=list(self.w.calls)
+        with self.assertRaises(legacy.H.Stop):self.update('status')
+        self.assertEqual(self.w.calls,calls);self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+
+    def test_published47_archive_power_loss_keeps_old_record_and_retry(self):
+        record,raw=self.published_terminal('restored')
+        history=C.STATE+'/'+record['transaction_id']+'/journal.json'
+        original=C.BundleTransaction.write
+        def cut(transaction,path,*args,**kwargs):
+            result=original(transaction,path,*args,**kwargs)
+            if path==history:raise legacy.PowerCut()
+            return result
+        with mock.patch.object(C.BundleTransaction,'write',cut),self.assertRaises(legacy.PowerCut):self.update()
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+        self.assertEqual(self.w.path(history).read_bytes(),raw)
+        self.assertEqual(self.update(),0)
+
+    def test_published47_foreign_archive_is_never_overwritten(self):
+        record,raw=self.published_terminal('restored')
+        history=C.STATE+'/'+record['transaction_id']+'/journal.json';self.w.path(history).write_bytes(b'foreign')
+        with self.assertRaises(legacy.H.Stop):self.update()
+        self.assertEqual(self.w.path(history).read_bytes(),b'foreign')
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+
+    def test_published47_existing_archive_must_sync_before_new_intent(self):
+        record,raw=self.published_terminal('restored')
+        directory=C.STATE+'/'+record['transaction_id'];self.w.path(directory+'/journal.json').write_bytes(raw)
+        original=legacy.N.Transaction.sync_dir
+        def fail(transaction,path):
+            if path==directory:raise OSError('archive directory sync failure')
+            return original(transaction,path)
+        with mock.patch.object(legacy.N.Transaction,'sync_dir',fail),self.assertRaises(OSError):self.update()
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+        self.assertFalse(self.w.path(C.PREPARED).exists());self.assertFalse(self.w.path(legacy.N.ACTIVE).exists())
+
+    def test_new_prepared_intent_after_archived47_restored_record_can_recover(self):
+        self.assert_archived47_prepared_recovery(C.PREPARED)
+
+    def test_new_active_publication_after_archived47_restored_record_can_recover(self):
+        self.assert_archived47_prepared_recovery(legacy.N.ACTIVE)
+
+    def assert_archived47_prepared_recovery(self,boundary):
+        record,raw=self.published_terminal('restored')
+        original=C.BundleTransaction.write
+        def cut(transaction,path,*args,**kwargs):
+            result=original(transaction,path,*args,**kwargs)
+            if path==boundary:raise legacy.PowerCut()
+            return result
+        with mock.patch.object(C.BundleTransaction,'write',cut),self.assertRaises(legacy.PowerCut):self.update()
+        self.assertEqual(self.w.path(C.JOURNAL).read_bytes(),raw)
+        self.assertEqual(self.update('recover'),0)
+        self.assertEqual(self.w.path(C.ROBOTD).read_bytes(),legacy.PUBLISHED)
+
     def test_robotd_current_still_installs_padd_and_owned_units_then_explicitly_restores(self):
         self.assertEqual(self.update(),0)
         self.assertEqual(self.w.path(C.PADD).read_bytes(),NEW_PAD)
@@ -243,6 +516,36 @@ class BundleTransaction(unittest.TestCase):
         self.assertFalse(self.w.path(C.COMPAT).exists())
         for path in C.UNITS:self.assertFalse(self.w.path(path).exists())
         self.assertEqual(self.journal()['phase'],'restored')
+
+    def factory_vector(self):
+        self.w.path(C.PADD).write_bytes(NEW_PAD)
+        for path,body in {**C.UNITS,C.VOICE_GUARD:C.VOICE_GUARD_PROGRAM,C.COMPAT:C.COMPAT_BYTES}.items():
+            target=self.w.path(path);target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(body);target.chmod(0o644)
+        for unit in self.w.generations:self.w.publish_controller(unit)
+
+    def test_exact_factory_pair_without_journal_is_current_without_restore_claim(self):
+        self.factory_vector()
+        self.assertEqual(self.update('status'),0)
+        detail=self.ctx.stdout.lines()[-1]['detail']
+        self.assertTrue(detail['bundle_current']);self.assertTrue(detail['running_verified'])
+        self.assertFalse(detail['restorable']);self.assertFalse(detail['active'])
+        self.assertFalse(self.w.path(C.JOURNAL).exists())
+        calls=[c for c in self.w.calls if c[:2] in (['systemctl','start'],['systemctl','stop'])]
+        self.assertEqual(self.update(),0)
+        self.assertFalse(self.w.path(C.JOURNAL).exists())
+        self.assertEqual([c for c in self.w.calls if c[:2] in (['systemctl','start'],['systemctl','stop'])],calls)
+        with self.assertRaises(legacy.H.Stop):self.update('restore')
+
+    def test_factory_current_requires_exact_support_vector_and_mapping_health(self):
+        self.factory_vector()
+        path=next(iter(C.UNITS));original=self.w.path(path).read_bytes()
+        self.w.path(path).write_bytes(b'foreign')
+        self.assertEqual(self.update('status'),0)
+        self.assertFalse(self.ctx.stdout.lines()[-1]['detail']['bundle_current'])
+        self.w.path(path).write_bytes(original)
+        with mock.patch.object(C,'mapping_status',return_value={'ok':False}):
+            self.assertEqual(self.update('status'),0)
+            self.assertFalse(self.ctx.stdout.lines()[-1]['detail']['bundle_current'])
 
     def test_partial_bundle_and_unknown_installed_padd_refuse_without_changes(self):
         self.w.path(self.release+'/studio/deploy/native/padd').unlink()
