@@ -30,7 +30,9 @@
 - [x] 绑定采集时的板卡、旧方向与主程序连接代次；求解前后、验证前再次核对。
 - [x] 验证写入前要求手动卸力，等待主程序重连，保留候选并复用原 verify / finish 事务。
 - [x] 168 项相关测试通过，含带 present / hello / calib_valid_after 的延迟重连测试；独立复核发现的问题均修正。
-- [ ] 更新实机网页并核对服务、文件及受保护数据。
+- [x] 更新实机网页并核对服务、文件及受保护数据。
 - [x] 推送到 GitHub 主分支（3725b46）。
 
-只读实机数据核对：duck-658d 当前为 motion/HOME、策略关闭，HOME 关节误差约 3.71°。将此真实回读交给候选后端，得到 `coarse_sampling.available=true`、`reason=null`，符合直接采静止的门槛。候选文件已上传，当前仍保持站姿；等待用户手动卸力后只更新 Studio 服务，不自动发动作。
+只读实机数据核对：安装前 duck-658d 为 motion/HOME、策略关闭，HOME 关节误差约 3.71°。将此真实回读交给候选后端，得到 `coarse_sampling.available=true`、`reason=null`，符合直接采静止的门槛。
+
+用户手动卸力后已完成安装。Studio PID 从 8513 更新为 13613，主控 PID 7510 未变，健康检查 HTTP 200，HTTP 返回的 JavaScript 与测试文件摘要一致。Python 模块摘要同样确认；只读加载已安装模块的 view 也可读回原地采集能力。主控、模型、配置、标定和小助手均保持不变，未自动使能、采数或写标定。备份为 `/var/lib/microduck-imu-q4-bench-20261104/studio-home-entry-before-20261104-143119`。用户刷新页面后可按 HOME 站稳 → 重新标定方向 → 采静止 → 采前倾操作；最终写入前仍需手动卸力。
