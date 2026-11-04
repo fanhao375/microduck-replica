@@ -146,6 +146,33 @@ class HomeCoarseTest(unittest.TestCase):
         self.assertTrue(result['ok'])
         self.assertEqual(actions, ['enter', 'finish'])
 
+    def test_home_old_contract_refuses_before_mode_switch_and_preserves_candidate(self):
+        b = self.home()
+        b.view()
+        q = [0.5]*4
+        candidate = {'ok': True, 'mode': 'coarse', 'mount': q}
+        b.last_result = candidate
+        b._result_basis = b._sampling_basis(b.rd.bus.value)
+        b.rd.bus.value['native'].update(torque_enabled=False, torque_state_confirmed=False)
+        latest = copy.deepcopy(b.rd.calib.value)
+        latest.pop('imu_verification_contract')
+        original = b.rd.cmd.call
+
+        async def old_daemon(method, params, timeout):
+            if (params or {}).get('action') == 'calibration-status':
+                return latest
+            return await original(method, params, timeout)
+
+        b.rd.cmd.call = old_daemon
+        with mock.patch.object(helper, 'available', return_value=True), \
+             mock.patch.object(helper, 'imu_recalibrate', return_value=(False, 'old_daemon', None)) as switch, \
+             mock.patch.object(b.rd, 'verify', wraps=b.rd.verify) as save:
+            with self.assertRaisesRegex(Refused, 'API43'):
+                asyncio.run(b.handle({'op': 'verify', 'confirmed': True, 'mount_wxyz': q}))
+        switch.assert_not_called()
+        save.assert_not_called()
+        self.assertIs(b.last_result, candidate)
+
     def test_verification_waits_for_poll_reconnect_after_enter(self):
         b = self.home()
         b.rd.present = True

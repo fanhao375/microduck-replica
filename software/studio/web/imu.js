@@ -970,6 +970,12 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, needsUnload, onBegi
     ${nowStep === 'confirm' && res ? html`<div class="imu-coarse-step">
       <p class="sv-small">粗校算出来：${res.standard ? `${res.standard.text}${res.standard.off_deg > 0.5 ? `（再偏 ${fmt(res.standard.off_deg)}°）` : ''}` : '方向已算出'}。
         这次只采静止和前倾，左右还没验；之后再做下面的「站着校准」精校一次。</p>
+      <div class="imu-parts num">
+        <div><span>俯仰</span><b>${sgn(res.parts?.pitch_deg)}°</b><small>+ = 静止时读数前倾</small></div>
+        <div><span>横滚</span><b>${sgn(res.parts?.roll_deg)}°</b><small>+ = 左倾</small></div>
+        <div><span>总改变量</span><b>${fmt(res.parts?.total_deg)}°</b><small>相对原安装方向</small></div>
+      </div>
+      <p class="sv-small">静止时躯干姿态的偏差也会折入安装方向；这些修正量同时包含参考姿态偏差和安装偏差，采静止时要以实物摆正为准。</p>
       ${(res.notes || []).map((n) => html`<p class="sv-small">· ${n}</p>`)}
       ${confirms.map((c, i) => html`<label class="imu-confirm"><input type="checkbox" checked=${!!checks[i]}
         onChange=${(e) => setChecks({ ...checks, [i]: e.target.checked })} /> ${c}</label>`)}

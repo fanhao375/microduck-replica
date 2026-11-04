@@ -27,6 +27,7 @@ ON_DUCK = ("总线 ID 200 的 IMU 由主程序启动时自动识别。I²C IMU �
 # 「核对过」的门槛（总览重排审查 O4）：站着完整校一次，算出来的跟主程序现在用的方向差 < 2°、站姿倾斜 ≤ 5°
 # （5° 是 imu_calib RULES 的 stand_confirm_deg：robotd 自己验方向时直立只放 5°）
 CHECK_MAX_DIFF_DEG = 2.0
+IMU_VERIFICATION_CONTRACT = "upright_nose_down_v1"
 
 
 class Refused(Exception):
@@ -581,6 +582,28 @@ class ImuBackend:
         finally:
             self._redo_busy = False
 
+    async def _require_verification_contract(self, source):
+        if source != "bus":
+            return
+        status = await self._rpc_once("robot.busCommand", {"action": "calibration-status"},
+                                      5.0, "核对独立 IMU 核验能力")
+        if not isinstance(status, dict) or status.get("imu_verification_contract") != IMU_VERIFICATION_CONTRACT:
+            raise Refused("当前主程序不支持 ID200 独立直立 / 前倾核验：请安装 API43 配套主程序后重新验证。未发送验证或保存请求")
+
+    @staticmethod
+    def _require_verification_proof(reply, source):
+        proof = reply.get("imu_check") if isinstance(reply, dict) else None
+        upright = proof.get("upright") if isinstance(proof, dict) else None
+        nose_down = proof.get("nose_down") if isinstance(proof, dict) else None
+        residual = proof.get("residual_tilt_deg") if isinstance(proof, dict) else None
+        tilt = nose_down.get("tilt_from_upright_deg") if isinstance(nose_down, dict) else None
+        heading = nose_down.get("lean_heading_deg") if isinstance(nose_down, dict) else None
+        if (not isinstance(upright, dict) or upright.get("imu_source") != source
+                or any(not isinstance(x, (int, float)) or isinstance(x, bool) or not math.isfinite(x)
+                       for x in (residual, tilt, heading))
+                or not 0 <= residual <= 5 or tilt < 12 or abs(heading) > 20):
+            raise Refused("主程序未返回有效的独立直立 / 前倾核验结果：来源须一致、直立残差须在 0–5°、前倾须 ≥12°、朝前误差须 ≤20°。不能确认通过，请检查 API43 配套主程序后重新核验")
+
     async def _verify(self, args, by=None):
         bus = await self._bus_once()
         if bus.get("mode") == "motion":
@@ -604,6 +627,7 @@ class ImuBackend:
         last = self.last_result if isinstance(self.last_result, dict) else {}
         if not last.get("ok") or last.get("mode") != "coarse" or last.get("mount") != mount:
             raise Refused("这份方向不是刚刚粗校算出来的：重新算一次再验证")
+        await self._require_verification_contract(source)
         self.job = {"kind": "coarse", "title": "交给主程序验证",
                     "msg": "摆正，然后 20 秒内往前低头 15–30°", "target_deg": 20}
         try:
@@ -620,6 +644,7 @@ class ImuBackend:
             raise Refused(msg) from e
         # A verifier reply alone is not success: read the exact active source and normalized mount back.
         try:
+            self._require_verification_proof(r, source)
             status = await self._verified_readback(source, mount, transport=context[1], generation=generation)
             current_redo = helper.imu_redo_state(root=self.root)
             if redo.get("active"):
@@ -643,7 +668,7 @@ class ImuBackend:
                     raise Refused("主程序已验证安装方向，但旧站姿校准结果没能清理：重新做站着校准后再写进主程序") from err
         except (RpcError, Timeout, Unreachable, Refused) as err:
             msg = str(err) if isinstance(err, Refused) else f"主程序验证回包后，标定没读回确认：{err}"
-            self.job = {"kind": "coarse", "title": "IMU 标定还没读回确认", "failed": True, "msg": msg}
+            self.job = {"kind": "coarse", "title": "IMU 独立核验或标定读回未确认", "failed": True, "msg": msg}
             self.last_result = None
             raise Refused(msg) from err
         self.last_result = None
@@ -668,6 +693,7 @@ class ImuBackend:
         source, old_mount = mount_of(bus, fresh_calib(self.rd))
         if self._motion_sampling(bus, source, {})["needs_unload"]:
             raise Refused("静止和前倾可以保持 HOME 采集；验证写入前先扶稳并卸力，已采结果会保留")
+        await self._require_verification_contract(source)
         if not helper.available():
             raise Refused("验证写入需要新版 root 小助手和 sudoers")
         transport = calibration_context(bus, source, {})[1]

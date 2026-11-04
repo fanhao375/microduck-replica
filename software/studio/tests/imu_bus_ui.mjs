@@ -289,8 +289,15 @@ try {
   await wait(`calls.length===2`, 'motion HOME forward request');
   await js(`replies.shift()({ok:true,data:{n:30,samples:[{step:'fwd',g:[.34,0,-.94]}]}})`);
   await wait(`calls.length===3`, 'motion HOME solve request');
-  await js(`replies.shift()({ok:true,data:{ok:true,mount:[1,0,0,0],confirm:[],notes:[]}})`);
+  await js(`replies.shift()({ok:true,data:{ok:true,mount:[1,0,0,0],confirm:[],notes:[],
+    parts:{pitch_deg:8.6,roll_deg:-2.4,total_deg:24.8}}})`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&b.disabled)`, 'motion HOME final write requires unload');
+  assert.equal(await js(`!!document.querySelector('.imu-coarse .imu-parts')`), true, 'coarse confirmation shows correction angles');
+  const correction = await js(`document.querySelector('.imu-coarse .imu-parts').innerText`);
+  assert.match(correction, /俯仰[\s\S]*\+8\.6°/);
+  assert.match(correction, /横滚[\s\S]*-2\.4°/);
+  assert.match(correction, /总改变量[\s\S]*24\.8°/);
+  assert.match(await js(`document.querySelector('.imu-coarse').innerText`), /静止时躯干姿态.*折入.*安装方向/);
   await js(`props.imu={...props.imu,coarse_sampling:{...props.imu.coarse_sampling,needs_unload:false}};draw()`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'motion HOME unload preserves solved candidate');
   assert.equal(await js(`calls.some(c=>c.args.op==='redo-start'||c.name==='relax'||c.args.op==='verify')`),false);

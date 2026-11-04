@@ -93,7 +93,10 @@ class FakeRd:
         if isinstance(top, dict):
             top["quat"], top["verified"] = q, True
         self.calib.set(cal)
-        return {"accepted": True, "source": src, "mount_wxyz": q}
+        return {**copy.deepcopy(cal), "imu_check": {
+            "upright": {"imu_source": src},
+            "nose_down": {"tilt_from_upright_deg": 20.0, "lean_heading_deg": 0.0},
+            "residual_tilt_deg": 1.0}}
 
 
 def commissioning_bus(source="bus", gravity=None, mode="commissioning"):
@@ -118,7 +121,8 @@ def factory_calib(source="bus"):
                                              "right_knee", "right_ankle"))]}
     if source != "bus":
         cal["imu_mounts"][source] = {"quat": [0.5, 0.5, 0.5, 0.5], "verified": False}
-    return {"calibration": cal, "imu_source": source}
+    return {"calibration": cal, "imu_source": source,
+            "imu_verification_contract": "upright_nose_down_v1"}
 
 
 def bus_transport(protocol="dxl2", board="sflp_124_12", identity=None):
@@ -380,6 +384,94 @@ class ImuBackendTest(unittest.TestCase):
         self.assertIs(v["mount"]["verified"], True)
         self.assertAlmostEqual(v["mount"]["quat"][0], 0.5)
 
+    def test_bus_verify_requires_latest_explicit_contract_before_saving(self):
+        for contract in (None, "confirm_save_v0", True):
+            with self.subTest(contract=contract):
+                b = self.backend(bus=commissioning_bus(), calib=factory_calib())
+                q = [0.5] * 4
+                b.last_result = {"ok": True, "mode": "coarse", "mount": q}
+                original_calibration = copy.deepcopy(b.rd.calib.value)
+                current = copy.deepcopy(original_calibration)
+                current["imu_verification_contract"] = contract
+                original = b.rd.cmd.call
+
+                async def latest(method, params, timeout):
+                    if (params or {}).get("action") == "calibration-status":
+                        return current
+                    return await original(method, params, timeout)
+
+                b.rd.cmd.call = latest
+                with mock.patch.object(b.rd, "verify", wraps=b.rd.verify) as save:
+                    with self.assertRaisesRegex(Refused, "API43"):
+                        asyncio.run(b.handle({"op": "verify", "confirmed": True, "mount_wxyz": q}))
+                save.assert_not_called()
+                self.assertEqual(b.rd.calib.value, original_calibration)
+                self.assertFalse((b.job or {}).get("done"))
+
+    def test_verify_proof_is_required_for_each_source_before_readback_or_finish(self):
+        from studio import helper
+        for source in ("bus", "lsm6dsv16x", "bno08x"):
+            for corrupt in ("missing", "source", "upright", "nose-down", "residual-low", "residual-high",
+                            "residual-nan", "residual-bool", "tilt-low", "tilt-inf", "tilt-string",
+                            "heading-low", "heading-high", "heading-nan"):
+                with self.subTest(source=source, corrupt=corrupt):
+                    b = self.backend(bus=commissioning_bus(source), calib=factory_calib(source))
+                    q = [0.5] * 4
+                    b.last_result = {"ok": True, "mode": "coarse", "mount": q}
+                    original = b.rd.verify
+
+                    def unproven(params):
+                        result = original(params)
+                        proof = result["imu_check"]
+                        if corrupt == "missing":
+                            result.pop("imu_check")
+                        elif corrupt == "source":
+                            proof["upright"]["imu_source"] = "another-sensor"
+                        elif corrupt == "upright":
+                            proof["upright"] = None
+                        elif corrupt == "nose-down":
+                            proof["nose_down"] = None
+                        elif corrupt.startswith("residual"):
+                            proof["residual_tilt_deg"] = {"residual-low": -0.1, "residual-high": 5.1,
+                                "residual-nan": float("nan"), "residual-bool": True}[corrupt]
+                        elif corrupt.startswith("tilt"):
+                            proof["nose_down"]["tilt_from_upright_deg"] = {
+                                "tilt-low": 11.9, "tilt-inf": float("inf"), "tilt-string": "20"}[corrupt]
+                        else:
+                            proof["nose_down"]["lean_heading_deg"] = {
+                                "heading-low": -20.1, "heading-high": 20.1, "heading-nan": float("nan")}[corrupt]
+                        return result
+
+                    b.rd.verify = unproven
+                    session = {"active": True, "phase": "commissioning", "session_id": "f"*32,
+                               "source": source, "original_mode": "commissioning"}
+                    with mock.patch.object(helper, "imu_redo_state", return_value=session), \
+                         mock.patch.object(helper, "imu_recalibrate", return_value=(True, "imu_finished", {})) as finish, \
+                         mock.patch.object(b, "_verified_readback", wraps=b._verified_readback) as readback:
+                        with self.assertRaisesRegex(Refused, "独立.*核验"):
+                            asyncio.run(b.handle({"op": "verify", "confirmed": True, "mount_wxyz": q}))
+                    readback.assert_not_called()
+                    finish.assert_not_called()
+                    self.assertFalse((b.job or {}).get("done"))
+
+    def test_verify_accepts_inclusive_proof_thresholds(self):
+        for residual, heading in ((0.0, -20.0), (5.0, 20.0)):
+            with self.subTest(residual=residual, heading=heading):
+                b = self.backend(bus=commissioning_bus(), calib=factory_calib())
+                q = [0.5] * 4
+                b.last_result = {"ok": True, "mode": "coarse", "mount": q}
+                original = b.rd.verify
+
+                def boundary(params):
+                    result = original(params)
+                    result["imu_check"]["residual_tilt_deg"] = residual
+                    result["imu_check"]["nose_down"].update(tilt_from_upright_deg=12.0, lean_heading_deg=heading)
+                    return result
+
+                b.rd.verify = boundary
+                result = asyncio.run(b.handle({"op": "verify", "confirmed": True, "mount_wxyz": q}))
+                self.assertTrue(result["ok"])
+
     def _verify_failure(self, plan):
         rd = FakeRd(bus=commissioning_bus("lsm6dsv16x"), calib=factory_calib("lsm6dsv16x"))
         b = ImuBackend(rd, self.log, self.tmp.name)
@@ -428,7 +520,8 @@ class ImuBackendTest(unittest.TestCase):
             b.last_result = {"ok": True, "mode": "coarse", "mount": q}
             original = b.rd.cmd.call
             async def broken(method, params, timeout):
-                if (params or {}).get("action") == "calibration-status":
+                if ((params or {}).get("action") == "calibration-status"
+                        and b.rd.calib.value["calibration"]["imu_mount_verified"]):
                     if corrupt == "unreachable":
                         raise RpcError(method, -1, "readback missing")
                     status = copy.deepcopy(b.rd.calib.value)
@@ -448,6 +541,7 @@ class ImuBackendTest(unittest.TestCase):
             b.rd.cmd.call = broken
             with self.subTest(corrupt=corrupt), self.assertRaises(Refused):
                 asyncio.run(b.handle({"op": "verify", "confirmed": True, "mount_wxyz": q}))
+            self.assertTrue(b.rd.calib.value["calibration"]["imu_mount_verified"])
             self.assertFalse((b.job or {}).get("done"))
 
     def test_redo_view_resumes_persistent_session_and_allows_hold(self):
