@@ -71,6 +71,12 @@ ROBOTD_PROBE_S = 5.0     # 舵机会话期间多久看一眼 robotd 起没起来
 PAD_HEAVY = ("skills", "actions", "combos", "sounds")
 
 
+def overview_diagnostics_active(client, now=None):
+    quiet = (time.monotonic() if now is None else now)-client.get("hb_at", 0.)
+    return (client.get("visible") is True and client.get("diagnostics_visible") is True
+            and client.get("route") in ("/", "/pad") and 0. <= quiet <= HB_QUIET_S)
+
+
 class HostGuard:
     """ASGI 中间件：Host 不认识的请求直接 421（挡 DNS 重绑定）。WebSocket 不认识就关掉。"""
 
@@ -650,8 +656,10 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
     def update_viewers():
         robotd.set_viewers(sum(1 for c in clients.values() if c["visible"]))
         if hasattr(robotd, "set_telemetry_viewers"):
+            now = time.monotonic()
             robotd.set_telemetry_viewers(sum(1 for c in clients.values()
-                if c["visible"] and c.get("route") in ("/servos", "/imu")))
+                if (c["visible"] and c.get("route") in ("/servos", "/imu"))
+                or overview_diagnostics_active(c, now)))
 
     tune_err = {"logged": False}
 
@@ -684,7 +692,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         await ws.accept()
         by = _client_desc(ws)
         pad_conn = pad.new_conn() if pad is not None else None
-        me = {"visible": True, "by": by, "hb_at": time.monotonic(), "route": None, "pad_visible": None}
+        me = {"visible": True, "by": by, "hb_at": time.monotonic(), "route": None,
+              "pad_visible": None, "diagnostics_visible": False}
         clients[ws] = me
         update_viewers()
         log.info(f"页面连上（{by}，现在 {len(clients)} 个）", cat="连接", dedup=False)
@@ -737,13 +746,14 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     else:
                         onb_sent = onb
                     await send(st)
-                    # 舵机表一帧 5.6 KB，只有舵机页用：只在舵机页、或者总线接管着的时候推（总览重排审查 O12）
-                    if servo is not None and (me.get("route") == "/servos" or servo.state in ("open", "opening")):
+                    diagnostics_active = overview_diagnostics_active(me)
+                    if servo is not None and (me.get("route") == "/servos" or diagnostics_active
+                            or (servo.state in ("open", "opening") and me.get("route") not in ("/", "/pad"))):
                         # 接管了总线：推总线上读到的整张表；没接管：用主程序的数据拼一张只读的表
                         await send(servo.snapshot() if servo.state == "open"
                                    else view_from_robotd(robotd, servo.directions, servo.state,
                                                          servo.error, servo.sim))
-                    imu_every = .1 if me.get("route") == "/imu" else .5
+                    imu_every = .1 if me.get("route") == "/imu" or diagnostics_active else .5
                     if imu is not None and time.monotonic() - last_imu >= imu_every:
                         last_imu = time.monotonic()        # Faster projection only; reads the existing owner cache.
                         await send(imu.view())
@@ -1164,6 +1174,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 t = msg.get("t")
                 if t == "hb":
                     me["route"] = msg.get("route")
+                    me["diagnostics_visible"] = msg.get("diagnostics_visible") is True
                     if isinstance(msg.get("pad_visible"), bool):
                         me["pad_visible"] = msg["pad_visible"]
                     vis = bool(msg.get("visible", True))
