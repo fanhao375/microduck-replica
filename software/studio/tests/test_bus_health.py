@@ -1,6 +1,7 @@
 """Communication evidence is counted once, bounded, and independent for every ID."""
 import copy
 import asyncio
+import json
 import sys
 import tempfile
 import unittest
@@ -82,6 +83,112 @@ def native_commissioning_status(cycle=100, sequence=300, source="bus", sample_at
                 "profile": "legacy", "gyro_dps_per_lsb": .061, "identification": "probe", "quaternion": "legacy"},
             "torque_state": "off", "torque_off_pending": None, "power_pending": False,
             "motion": None, "policy_motion_enabled": False, "updated_at_us": updated_at_us}
+
+
+def native_motion_bus_status(board="ft6", read_index=100, sequence=42):
+    """Actual raw_stream wire fixture plus BusImuRawSample for each native board.
+
+    feetech.rs decode/decode_qinmo/decode_dxl2 omit sensor age; accepted
+    read_index is an attempt identifier, never an accepted-sample count.
+    """
+    wire = json.loads((HERE/"fixtures"/"robotd-stopped-wire.json").read_text(encoding="utf-8"))
+    bus = wire["bus"]
+    native = bus["native"]
+    source_sequence = None if board == "sflp_124_12" else sequence
+    bound = 30 if board == "ft6" else None
+    protocol, profile = ("dxl2", "legacy") if board == "sflp_124_12" else ("feetech", "qinmo" if board == "qinmo" else "legacy")
+    native.update(imu_source="bus", imu_ready=True, imu_sequence=source_sequence,
+        sample_age_ms=2, imu_age_ms=None, imu_age_upper_bound_ms=bound,
+        imu_status=0 if source_sequence is not None else None,
+        configured_imu_profile=profile, imu_bus={"protocol": protocol, "board": board,
+            "profile": profile, "identity": [1, 0, 0, 0], "gyro_dps_per_lsb": .061,
+            "identification": "probe", "quaternion": "legacy"},
+        imu_raw={"block": [1, 0, 255, 255, 0, 0, 0, 48, 0, 0, 0, 0],
+            "sequence": source_sequence, "status": 0 if source_sequence is not None else None,
+            "age_ms": None, "age_upper_bound_ms": bound, "host_read_start_us": read_index*20_000,
+            "transaction_us": 4700, "read_index": read_index})
+    return bus, wire["states"][0]
+
+
+class NativeMotionImuContractTest(unittest.TestCase):
+    def backend(self, rd):
+        from studio.imu import ImuBackend
+        return ImuBackend(rd, SimpleNamespace(info=lambda *a, **kw: None, warn=lambda *a, **kw: None))
+
+    def test_ft6_qinmo_and_counterless_dxl2_use_accepted_host_read_age_and_source_basis(self):
+        for board in ("ft6", "qinmo", "sflp_124_12"):
+            with self.subTest(board=board), mock.patch("time.monotonic", return_value=10.) as clock:
+                frame, state = native_motion_bus_status(board)
+                rd = fake_rd(frame)
+                rd.state.set(state)
+                backend = self.backend(rd)
+                first = backend.view()
+                self.assertTrue(first["health"]["fresh"])
+                self.assertEqual(first["health"]["age_ms"], 2.)
+                self.assertEqual(first["health"]["age_basis"], "host_accepted_sample")
+                self.assertEqual(first["gyro"], state["imu"]["gyro"])
+                self.assertEqual(first["health"]["sensor_age_upper_bound_ms"], 32. if board == "ft6" else None)
+                clock.return_value = 11.
+                frame, state = native_motion_bus_status(board, 150, 92)
+                rd.bus.set(frame)
+                rd.state.set(state)
+                second = backend.view()
+                if board == "sflp_124_12":
+                    self.assertEqual(second["health"]["rate_basis"], "accepted_host_read")
+                    self.assertEqual(second["health"]["update_hz"], 1., "attempt-number delta is not accepted data count")
+                else:
+                    self.assertEqual(second["health"]["rate_basis"], "accepted_sensor_counter")
+                    self.assertEqual(second["health"]["update_hz"], 50.)
+                clock.return_value = 12.
+                frame["cycle"] += 50
+                if board != "sflp_124_12":
+                    frame["native"]["imu_sequence"] = 93  # rejected packet advances native tracker only
+                rd.bus.set(copy.deepcopy(frame))
+                stale = backend.view()
+                self.assertGreaterEqual(stale["health"]["age_ms"], 1002.)
+                self.assertFalse(stale["health"]["fresh"])
+                self.assertIsNone(stale["health"]["update_hz"])
+
+    def test_accepted_host_age_is_required_even_when_state_stream_and_raw_counter_are_fresh(self):
+        frame, state = native_motion_bus_status()
+        frame["native"]["sample_age_ms"] = None
+        rd = fake_rd(frame)
+        rd.state.set(state)
+        view = self.backend(rd).view()
+        self.assertIsNone(view["health"]["age_ms"])
+        self.assertFalse(view["health"]["fresh"])
+        self.assertIsNone(view["health"]["update_hz"])
+
+    def test_current_accepted_motion_raw_is_not_invalidated_by_old_startup_diagnostic(self):
+        frame, state = native_motion_bus_status()
+        frame["native"]["imu_observation"] = {"source": "bus", "sensor_ready": False,
+            "sample_valid": False, "sample_fresh": False, "error": "startup still converging"}
+        rd = fake_rd(frame)
+        rd.state.set(state)
+        self.assertTrue(self.backend(rd).view()["health"]["fresh"])
+
+    def test_legacy_report_without_accepted_raw_provenance_keeps_accepted_rate_unavailable(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            frame, state = native_motion_bus_status()
+            frame["native"].pop("imu_raw")
+            rd = fake_rd(frame)
+            rd.state.set(state)
+            backend = self.backend(rd)
+            self.assertTrue(backend.view()["health"]["fresh"])
+            clock.return_value = 11.
+            frame["native"]["imu_sequence"] += 50
+            rd.bus.set(copy.deepcopy(frame))
+            self.assertIsNone(backend.view()["health"]["update_hz"])
+
+    @mock.patch("time.monotonic", return_value=10.)
+    def test_explicit_reported_sensor_age_includes_time_since_native_control_accepted_it(self, _clock):
+        frame, state = native_motion_bus_status()
+        frame["native"].update(imu_age_ms=7, imu_age_upper_bound_ms=9, sample_age_ms=600)
+        rd = fake_rd(frame)
+        rd.state.set(state)
+        view = self.backend(rd).view()
+        self.assertEqual(view["health"]["age_ms"], 607.)
+        self.assertFalse(view["health"]["fresh"])
 
 
 class NativeCommissioningContractTest(unittest.TestCase):
@@ -364,6 +471,38 @@ class ReadOrderTest(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(servo.Refused, "增益"):
             self.session.set_read_order({"mode": "id_ascending"})
 
+    async def test_restored_real_owner_retains_original_gain_baseline_when_current_ram_changed(self):
+        from studio.bus.sim_bus import SimSerial
+        self.assertTrue(self.session.open()[0])
+        metadata = self.session.session_metadata()
+        self.session.close()
+        shared = Path(self.tmp.name)/"servo-read-order.json"
+        shared.write_text('{"mode":"id_last","last_id":13}', encoding="utf-8")
+        metadata.update(sim=False, read_order_configuration_path=str(shared))
+        real_factory = servo.feetech.FeetechBus
+        def changed_bus(port, baud=1_000_000):
+            serial = SimSerial(servo.IDS)
+            serial.servos[13].r[50] = 1
+            return real_factory(None, ser=serial)
+        restored = servo.ServoSession(self.log, sim=False, port="FAKE-PORT", state_dir=self.tmp.name)
+        restored.restore_metadata(metadata)
+        with mock.patch("studio.servo.feetech.FeetechBus", side_effect=changed_bus), \
+                mock.patch("studio.servo.robotd_active", return_value=False):
+            self.assertTrue(restored.open(restored=True)[0])
+        self.addCleanup(restored.close)
+        self.assertEqual(restored._gain_baseline[13], (32, 40, 1000))
+        self.assertFalse(restored.read_order_guard()["allowed"])
+        self.assertIn("增益", restored.read_order_guard()["reason"])
+
+    async def test_restored_real_owner_with_unknown_configuration_does_not_silently_open_default(self):
+        restored = servo.ServoSession(self.log, sim=False, port="FAKE-PORT", state_dir=self.tmp.name)
+        restored.restore_metadata({})
+        with mock.patch("studio.servo.feetech.FeetechBus") as uart:
+            ok, reason = restored.open(restored=True)
+        self.assertFalse(ok)
+        self.assertIn("读取顺序", reason)
+        uart.assert_not_called()
+
     async def test_native_apply_requires_guard_and_exact_readback_and_updates_next_debug_owner(self):
         from studio import servo_read_order
         path = str(Path(self.tmp.name)/"servo-read-order.json")
@@ -511,6 +650,17 @@ class ImuHealthTest(unittest.TestCase):
 
 
 class StatusPollingTest(unittest.TestCase):
+    def test_known_additive_api_versions_do_not_warn_and_unknown_version_still_does(self):
+        log = mock.Mock()
+        rd = Robotd("none", "none", log)
+        self.assertTrue(hasattr(rd, "_check_api"), "known additive native contracts are recognized")
+        for version in (42, 43, 44):
+            rd._check_api(version)
+        log.warn.assert_not_called()
+        rd._check_api(45)
+        log.warn.assert_called_once()
+        self.assertIn("42–44", log.warn.call_args.args[0])
+
     def test_only_status_viewers_request_ten_hz_cached_owner_snapshots(self):
         rd = Robotd("none", "none", SimpleNamespace(info=lambda *a, **kw: None))
         self.assertTrue(hasattr(rd, "set_telemetry_viewers"), "explicit status viewers control cached polling")

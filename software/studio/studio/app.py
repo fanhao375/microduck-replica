@@ -1312,7 +1312,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         if marker is None:
             return True
         data = {"v": 1, "port": servo.port, "sim": bool(servo.sim), "at": time.time(), "by": by,
-                "boot_id": boot_id()}
+                "boot_id": boot_id(), **servo.session_metadata()}
         try:
             marker.parent.mkdir(parents=True, exist_ok=True)
             tmp = marker.with_name(marker.name + ".tmp")
@@ -1473,6 +1473,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         port = "sim" if data.get("sim") is True else (data.get("port") if isinstance(data.get("port"), str) else None)
         async with servo_gate:
             if servo.state == "open":
+                return
+            from .servo import Refused
+            try:
+                servo.restore_metadata(data)
+            except Refused as err:
+                servo.orphan = {"why": str(err), "at": time.monotonic()}
+                log.error("原舵机会话读取顺序不能确认：没有接管", cat="总线", raw=str(err), dedup=False)
                 return
             robotd.set_paused(True, "调舵机（接着上次的会话）")
             # 恢复会话跟网页进舵机页一个样：先 bus_take 立旗（robotd 起不来、管理锁在、确认串口空），再开串口。

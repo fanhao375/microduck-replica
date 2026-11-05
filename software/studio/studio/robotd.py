@@ -23,10 +23,11 @@ from .log import log_cmd
 from .rpc import Conn, RpcError, Timeout, Unreachable, call_once, encode, open_conn, read_message
 from .startup import StartupTrack, startup_loop
 
-API_VERSION = 42                     # duck-ipc-proto；不一致只记日志，不拒绝
+API_VERSION = 42                     # Lowest hello contract; optional capabilities still require owner readback.
+SUPPORTED_API_VERSIONS = frozenset((42, 43, 44))  # Additive observation/verification/read-order contracts.
 KNOWN_BUILDS = ("1fa8438-feetech-ft6-control.43", "4734cbb-feetech-imu-auto-control.44",
                 "0791fcd-feetech-qinmo-control.45", "0791fcd-feetech-qinmo-control.46",
-                "0791fcd-feetech-qinmo-control.47")
+                "0791fcd-feetech-qinmo-control.47", "replica-bus-health-control.49")
 BACKOFF = (0.5, 1.0, 2.0, 5.0)
 STREAM_HZ = 10
 STREAM_LINGER_S = 10.0
@@ -308,9 +309,7 @@ class Robotd:
                     hello_link = self.poll.reconnects
                     self._ask_calib(again=True)
                     v = r.get("api_version") if isinstance(r, dict) else None
-                    if v != API_VERSION:
-                        self.log.warn(f"主程序的接口版本是 {v}，Studio 按 {API_VERSION} 写的", cat="robotd",
-                                      hint="一般能用；哪个功能出错，会在那个功能上报出来")
+                    self._check_api(v)
                     ver = r.get("daemon_version") if isinstance(r, dict) else None
                     self.log.info(f"连上主程序（接口 v{v}，版本 {ver}）", cat="robotd")
                 now = time.monotonic()
@@ -417,6 +416,11 @@ class Robotd:
             self.present, self.absent_since = False, time.monotonic()
             self.log.warn("连不上主程序 robotd", cat="robotd", raw=str(why),
                           hint="鸭子主程序没在跑，或者正在重启（重启约 2 秒）。注意：停掉 robotd 不会卸力，舵机可能还顶着")
+
+    def _check_api(self, version):
+        if version not in SUPPORTED_API_VERSIONS:
+            self.log.warn(f"主程序的接口版本是 {version}，Studio 已核对接口 42–44", cat="robotd",
+                          hint="一般能用；具体功能仍按回读字段和能力确认")
 
     def _check_build(self, bus):
         build = (bus or {}).get("build")

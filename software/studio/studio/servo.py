@@ -206,6 +206,31 @@ class ServoSession:
 
     # ---- 打开 / 关闭 ----
 
+    def session_metadata(self):
+        """Local recovery evidence written by the owner, never supplied by a page."""
+        return {"read_order_configuration_path": self.read_order.get("configuration_path"),
+                "gains_restored_before_takeover": self.gains_restored_before_takeover,
+                "gain_baseline": {str(sid): list(values) for sid, values in self._gain_baseline.items()}}
+
+    def restore_metadata(self, data):
+        path = data.get("read_order_configuration_path") if data.get("sim") is not True else None
+        if path is not None:
+            if (not isinstance(path, str) or not os.path.isabs(path)
+                    or os.path.basename(path) != "servo-read-order.json"):
+                raise Refused("原会话的读取顺序配置位置无效：没有按默认顺序接管")
+            self.read_order_path = path
+        self.gains_restored_before_takeover = data.get("gains_restored_before_takeover") is True
+        self._gain_baseline = {}
+        stored = data.get("gain_baseline")
+        if isinstance(stored, dict):
+            for sid in IDS:
+                values = stored.get(str(sid))
+                if (isinstance(values, list) and len(values) == 3 and all(type(v) is int for v in values)
+                        and all(0 <= v <= 255 for v in values[:2]) and 0 <= values[2] <= 65535):
+                    self._gain_baseline[sid] = tuple(values)
+        if len(self._gain_baseline) != len(IDS):
+            self.gains_restored_before_takeover = False
+
     def open(self, by=None, port=None, restored=False):
         """打开总线（阻塞，调用方放到线程里）。返回 (ok, 原因)。
         port：页面上选的串口（电脑上插 USB 转 TTL 是 COM5 之类，跟 servo-web 一样）；"sim" = 模拟舵机。
@@ -230,6 +255,8 @@ class ServoSession:
         self.state, self.error, self.by = "opening", None, by
         try:
             path = os.path.join(self.state_dir, "servo-read-order-sim.json") if self.sim else self.read_order_path
+            if restored and not self.sim and path is None:
+                raise Refused("原会话的读取顺序配置位置未保存：不能确认原顺序，没有接管")
             mode, last, ids = load_read_order(path)
             self.read_order = {"mode": mode, "last_id": last, "ids": ids, "generation": 0,
                                "session": f"studio-{time.monotonic_ns()}", "configuration_path": path}
@@ -253,8 +280,9 @@ class ServoSession:
             found = [i for i in IDS if self.bus.ping(i) is not None]
             missing = [i for i in IDS if i not in found]
             self._read_static(found)
-            self._gain_baseline = {sid: (s.get("p_run"), s.get("d_run"), s.get("torque_limit"))
-                                   for sid, s in self.static.items() if sid in found}
+            if not restored or self.sim:
+                self._gain_baseline = {sid: (s.get("p_run"), s.get("d_run"), s.get("torque_limit"))
+                                       for sid, s in self.static.items() if sid in found}
             self._record_baseline(found)
             self._read_torque()
             self.restored = bool(restored)

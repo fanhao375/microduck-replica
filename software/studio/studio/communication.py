@@ -192,15 +192,29 @@ class ImuHealth:
             observation = {}
         if sample.get("source") not in (None, source):
             sample = {}
+        raw = native.get("imu_raw", native.get("imu_full_raw")) if source == "bus" else None
+        raw = raw if isinstance(raw, dict) else {}
+        accepted_read_index = raw.get("read_index")
+        if bus.get("mode") == "motion" and (counter(accepted_read_index) or number(native.get("sample_age_ms"))):
+            observation = {}  # Startup diagnostics cannot override a current accepted control sample.
         info = info or (observation.get("info") if source == "bus" else None) or {}
         identity = (source, session, getattr(getattr(rd, "hello", None), "at", None), reader.get("epoch", sample.get("epoch")),
                     (native.get("read_order") or {}).get("generation"),
                     info.get("protocol"), info.get("board"), tuple(info.get("identity") or []))
         sequence = reader.get("samples", native.get("imu_sequence", sample.get("sequence", observation.get("sequence"))))
+        # The freshness tracker's sequence can advance on a rejected packet.
+        # Raw provenance is committed only with the accepted control sample.
+        if source == "bus" and raw:
+            sequence = raw.get("sequence")
         rate_basis = "accepted_sensor_counter" if counter(sequence) else None
+        if source == "bus" and bus.get("mode") == "motion" and not raw and not number(native.get("imu_age_ms")):
+            rate_basis = None  # A legacy freshness-tracker counter can include rejected packets.
         accepted_at_us = last_sample.get("at_us")
         if not counter(sequence) and counter(accepted_at_us) and bus.get("mode") == "commissioning":
             sequence, rate_basis = accepted_at_us, "accepted_snapshot_timestamp"
+        if not counter(sequence) and counter(accepted_read_index):
+            sequence, rate_basis = accepted_read_index, "accepted_host_read"
+        identity += (rate_basis,)
         rollback = counter(sequence) and self.frequency.previous is not None and sequence < self.frequency.previous
         if identity != self.identity or rollback:
             self.identity, self.started = identity, now
@@ -208,18 +222,29 @@ class ImuHealth:
         ready = native.get("imu_ready", sample.get("ready", observation.get("sensor_ready"))) is True
         valid = sample.get("valid", observation.get("sample_valid"))
         age_value = native.get("imu_age_ms", sample.get("age_ms", observation.get("age_ms")))
+        reported_age = age_value if number(age_value) else None
         accepted_age = accepted_snapshot_age_ms(bus)
+        age_basis = "sensor_reported" if number(age_value) else None
         if accepted_age is not None and not number(native.get("imu_age_ms")):
             age_value = accepted_age + (sample["age_ms"] if number(sample.get("age_ms")) else 0.)
-        token = sequence if counter(sequence) else (bus.get("cycle"), tuple(sample.get("quaternion_wxyz") or []), ready, valid)
+            age_basis = "accepted_snapshot"
+        elif bus.get("mode") == "motion" and number(native.get("sample_age_ms")):
+            age_value = native["sample_age_ms"] + (reported_age if reported_age is not None else 0.)
+            age_basis = "sensor_reported_plus_host_age" if reported_age is not None else "host_accepted_sample"
+        token = ("accepted_read", accepted_read_index) if counter(accepted_read_index) else (
+            sequence if counter(sequence) else (tuple(sample.get("quaternion_wxyz") or []), ready, valid))
         age_ms = self.age.observe(token, rd.bus.at, age_value, now)
+        sensor_bound = native.get("imu_age_upper_bound_ms", raw.get("age_upper_bound_ms"))
+        sensor_upper_ms = (round(age_ms+max(0., sensor_bound-(reported_age or 0.)), 1)
+                           if age_ms is not None and number(sensor_bound) else None)
         connected = getattr(rd, "present", True) is not False and not rd.bus.error
         hello_at = getattr(getattr(rd, "hello", None), "at", None)
         connected = connected and (hello_at is None or rd.bus.at is not None and rd.bus.at >= hello_at)
         accepted = ready and valid is not False and observation.get("sample_fresh") is not False
-        if connected and accepted:
+        if connected and accepted and rate_basis is not None:
             self.frequency.update(sequence, rd.bus.at, now, cumulative=rate_basis == "accepted_sensor_counter")
-        fresh = bool(connected and accepted and age_ms is not None and age_ms < 500.)
+        fresh = bool(connected and accepted and age_ms is not None and age_ms < 500.
+                     and (sensor_upper_ms is None or sensor_upper_ms < 500.))
         reason = ("主程序连接已断开" if not connected else
                   "IMU 数据无效" if valid is False else
                   "IMU 尚未就绪" if not ready else
@@ -227,8 +252,8 @@ class ImuHealth:
         counters = {k: reader.get(k) for k in ("samples", "errors", "dropped", "invalid", "stale")}
         health = {"source": source, "session": session, "age_ms": age_ms,
                   "update_hz": self.frequency.view(now, fresh), "observed_s": round(min(WINDOW_S, now-self.started), 3),
-                  "rate_basis": rate_basis, "age_basis": "accepted_snapshot" if accepted_age is not None else
-                    "sensor_reported" if number(age_value) else None,
+                  "rate_basis": rate_basis, "age_basis": age_basis,
+                  "sensor_age_upper_bound_ms": sensor_upper_ms,
                   "ready": bool(connected and ready), "fresh": fresh, "valid": valid,
                   "reason": reason, "last_error": reader.get("last_error", observation.get("error")), "counters": counters}
         metadata = {"chip": info.get("chip", source if source not in (None, "bus") else None),
