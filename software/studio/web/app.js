@@ -882,6 +882,7 @@ function Main({ duck }) {
   const [tune, setTune] = useState(null);
   const [pd, setPd] = useState(null);
   const [stAt, setStAt] = useState(0);
+  const [svAt, setSvAt] = useState(0);
   const [imuAt, setImuAt] = useState(0);
   const imuContext = useRef(null);
   const [status, setStatus] = useState(link.status);
@@ -906,7 +907,7 @@ function Main({ duck }) {
         setSt((prev) => (m.onboarding_same && prev ? { ...m, onboarding: prev.onboarding } : m));
         setStAt(performance.now());
       }
-      else if (m.t === 'servo') setSv(m);
+      else if (m.t === 'servo') { setSv(m); setSvAt(performance.now()); }
       else if (m.t === 'imu') { setImu(m); setImuAt(performance.now()); }
       else if (m.t === 'tune') setTune(m);
       else if (m.t === 'pad') {
@@ -954,12 +955,13 @@ function Main({ duck }) {
   else if (route === '/logs') page = html`<${LogsPage} />`;
   else if (route === '/camera') page = html`<${CameraPage} api=${api} />`;
   else if (route === '/tof') page = html`<${TofPage} api=${api} />`;
-  else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards} />`;
+  else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards}
+    live=${status==='open'} elapsed=${svAt ? now-svAt : Infinity} />`;
   else if (route === '/settings' || route === '/settings/ssh') page = html`<${Settings} st=${st} tune=${tune} />`;
   else if (route === '/models') page = html`<${ModelsPage} api=${api} csrf=${csrf} link=${link} live=${live} />`;
   else if (route === '/imu') page = html`<${ImuPage} st=${st}
     imu=${imu && st?.imu?.diagnostic ? { ...imu, diagnostic: st.imu.diagnostic } : imu}
-    link=${link} live=${live} age=${age} diagnosticElapsed=${now - (st?.imu?.diagnostic ? stAt : imuAt)} pd=${pd} />`;
+    link=${link} live=${live} age=${age} diagnosticElapsed=${now - (st?.imu?.diagnostic ? stAt : imuAt)} healthElapsed=${imuAt ? now-imuAt : Infinity} pd=${pd} />`;
   else page = html`<${Later} what="这一页" />`;
 
   document.title = `${duck?.label || '鸭子'} · Microduck Studio`;

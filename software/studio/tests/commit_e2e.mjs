@@ -388,6 +388,10 @@ if (PHASE === 'imu' || PHASE === 'imu-hold') {
 if (PHASE === 'servo') {
   log('舵机页：一键中位，然后交还主程序');
   await js(`location.hash = '#/servos'`);
+  await waitFor(`!!document.querySelector('.comm-view-tabs')`, '舵机只读状态页', 15000);
+  if (!await clickExact('.comm-view-tabs button', '调舵机 / 标定')) throw new Error('找不到调舵机入口');
+  await waitFor(`!![...document.querySelectorAll('.sv-page button')].find(b=>b.textContent.trim()==='开始调舵机'&&!b.disabled)`, '明确接管入口', 10000);
+  if (!await clickExact('.sv-page button', '开始调舵机')) throw new Error('找不到明确接管按钮');
   await waitFor(`/调舵机中/.test(document.querySelector('.sv-sub')?.innerText || '')`, '舵机页接管（演示舵机）', 20000);
   if (!await clickExact('.sv-page button', '一键校准')) throw new Error('找不到「一键校准」');
   await waitFor(`!!document.querySelector('.sv-modal')`, '中位校准预览', 15000);

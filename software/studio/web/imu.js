@@ -21,6 +21,7 @@ import { html, useState, useEffect, useRef } from './vendor/preact-htm.module.js
 import { Duck3D } from './duck3d.js';
 import { TwoStep } from './confirm.js';
 import { imuDiagnosticCopy } from './startup-status.js';
+import { ImuHealth } from './communication-health.js';
 
 const RULES = {
   // ---- 跟 imu_calib.py RULES 同名同值（改一边就要改另一边，端到端测试会抓） ----
@@ -1020,7 +1021,7 @@ export const _test = { RULES, STEPS, TILTS, feed, freshWizard, startCollect, end
 // ---------------- 页面 ----------------
 
 /** live / age：跟总览同一个判断（app.js 的 Main 里算好传进来）；没传就只看 st.joints_age_ms。 */
-export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd }) {
+export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, healthElapsed = 0, pd }) {
   const W = useRef(freshWizard());
   const [, bump] = useState(0);
   const redraw = () => bump((n) => n + 1);
@@ -1093,6 +1094,7 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
       <${ImuStage} st=${st} stale=${!F.live} corr=${res?.ok ? res.correction : null} parts=${res?.parts}
         collecting=${w.phase === 'collect'} arrow=${arrow} cue=${cue} />
       <div class="imu-side">
+        <${ImuHealth} imu=${imu} live=${live} elapsed=${healthElapsed} />
         <${StatusCard} st=${st} imu=${imu} live=${live} age=${age} diagnosticElapsed=${diagnosticElapsed} />
         <${DiagnosticCard} st=${st} imu=${imu} live=${live} diagnosticElapsed=${diagnosticElapsed} />
         <${CoarseCard} st=${st} imu=${imu} link=${link} live=${live} />
