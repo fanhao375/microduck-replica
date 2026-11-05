@@ -64,6 +64,7 @@ class Robotd:
         self.absent_since = None
         self.estop = EStop()
         self.viewers = 0             # 可见的页面数
+        self.telemetry_viewers = 0   # 舵机/IMU 状态页需要 10 Hz IPC 缓存快照；不增加 UART 读取
         self.force_subscribe = False
         self.background_music = False  # 内部动作消费者；不伪装成可见页面
         self.stream_open = False
@@ -157,6 +158,16 @@ class Robotd:
         if self.viewers and not n:
             self._last_viewer_at = time.monotonic()
         self.viewers = n
+
+    def set_telemetry_viewers(self, n):
+        n = max(0, n)
+        if n and not self.telemetry_viewers:
+            self._due["bus"] = 0.
+            self._wake_poll.set()
+        self.telemetry_viewers = n
+
+    def bus_poll_interval(self):
+        return .1 if self.telemetry_viewers or (self.bus.value or {}).get("mode") == "commissioning" else 1.
 
     def set_background_music(self, on):
         on = bool(on)
@@ -305,7 +316,7 @@ class Robotd:
                 now = time.monotonic()
                 if now >= due["bus"]:
                     # 标定模式 10 Hz：IMU 页的实时读数、站着校准都从 last_sample 拿（标定模式没有 robot.state）
-                    every = 0.1 if (self.bus.value or {}).get("mode") == "commissioning" else 1.0
+                    every = self.bus_poll_interval()
                     bus, asked = await self._ask("bus", "robot.busStatus", every=every)
                     if bus is not None:
                         self.bus.set(bus)

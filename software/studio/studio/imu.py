@@ -20,6 +20,7 @@ from .robotd import fresh_calib
 from .rpc import RpcError, Timeout, Unreachable, call_once
 from .startup_status import imu_context_current, imu_diagnostic
 from .estop import STARTING_PHASES
+from .communication import EvidenceAge, ImuHealth, number
 
 MAX_SAMPLES = 6000          # 一次 solve 最多收这么多读数（5 步 × 每步 ≤ 600 还有富余），防页面发个巨包
 ON_DUCK = ("总线 ID 200 的 IMU 由主程序启动时自动识别。I²C IMU 要在第一次开机前接好；之后才接的，要用 SSH 运行 "
@@ -165,6 +166,8 @@ class ImuBackend:
         # 总览上手清单的「IMU 核对过」记录（审查 O4）：app 接上 Onboarding.note_imu_check。不是写入鸭子：写入照旧要上鸭子再接
         self.on_check = None
         self.commit = None           # 写进主程序的后端（app 接上）：标定模式「站姿使能」要跟它同一套方向
+        self._health = ImuHealth()
+        self._values_age = EvidenceAge()
 
     # ---- 推给页面 ----
 
@@ -193,6 +196,16 @@ class ImuBackend:
         reader = native.get("imu_reader")
         if reader is None and bus.get("mode") == "commissioning":
             reader = {"state": ("streaming" if s_imu.get("ready") else "missing"), "errors": 0}
+        health, metadata = self._health.view(self.rd, source=source, info=bus_imu_of(bus), sample=s_imu)
+        stream = getattr(getattr(self.rd, "state", None), "value", None)
+        stream = stream if isinstance(stream, dict) else {}
+        stream_imu = stream.get("imu") if isinstance(stream.get("imu"), dict) else {}
+        use_stream = bool(stream_imu and bus.get("mode") == "motion")
+        values = stream_imu if use_stream else s_imu
+        values_age = self._values_age.observe((self._health.identity, stream.get("t_ns")),
+            getattr(getattr(self.rd, "state", None), "at", None), 0., time.monotonic()) if use_stream else health["age_ms"]
+        def vector(value, length):
+            return list(value) if isinstance(value, list) and len(value) == length and all(number(x) for x in value) else None
         return {
             "t": "imu", "mode": bus.get("mode"), "source": source, "chip_setting": None, "mount": mount,
             "diagnostic": imu_diagnostic(self.rd),
@@ -202,8 +215,13 @@ class ImuBackend:
             "metadata_error": imu_bus_metadata(bus)[2] if source in (None, "bus") else None,
             "profile_selection": self._profile_view(bus, source, redo),
             "mount_protocol_mismatch": bus_protocol_mismatch(bus, calib, source),
-            "reader": reader, "age_ms": native.get("imu_age_ms", s_imu.get("age_ms")),
-            "ready": native.get("imu_ready", s_imu.get("ready")),
+            "reader": reader, "age_ms": health["age_ms"],
+            "ready": health["ready"], "health": health, "metadata": metadata,
+            "gyro": vector(values.get("gyro"), 3),
+            "quaternion_wxyz": vector(values.get("quaternion_wxyz", values.get("quat")), 4),
+            "accel_m_s2": vector(values.get("accel_m_s2"), 3),
+            "temperature_c": values.get("temperature_c") if number(values.get("temperature_c")) else None,
+            "values_age_ms": values_age,
             "valid": s_imu.get("valid"), "gravity": s_imu.get("gravity"),
             "hold": bus.get("hold") if isinstance(bus.get("hold"), dict) else None,
             "detected": self.detected, "stand_calib_at": self._stand_calib_at(), "job": self.job,
