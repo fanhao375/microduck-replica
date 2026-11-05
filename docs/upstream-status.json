@@ -10404,6 +10404,53 @@
               "review": "Initial route-only proposal; robot.remoteSessionActive still constant false. Superseded within this poll by 830fa5e session census/removal/API50. Earlier author mediad97 report is not relabelled as the revised workspace result."
             }
           ]
+        },
+        {
+          "number": 537,
+          "title": "spaces: preserve control replies across HTTP chunks",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-05T16:17:39Z",
+          "updated_at": "2026-11-05T16:17:39Z",
+          "merged_at": null,
+          "merge_commit_sha": "eddce3e04942dfa1c21bf6228f7a304fee332e6c",
+          "url": "https://github.com/pollen-robotics/microduck/pull/537",
+          "head_sha": "de74b2de6fcd405298a63a96cdcac414177eb3cf",
+          "base_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+          "base_branch": "main",
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "commit_count": 1,
+          "changed_file_count": 3,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/c15c2377d8a80662405bb5e773351c984ad6cffc...de74b2de6fcd405298a63a96cdcac414177eb3cf",
+          "classification": "pending Spaces Python HTTP/SSE control-reply parser and CI regression proposal; not daemon release",
+          "priority": "medium control-reply reliability before port; low current replica-image delivery",
+          "replica_integration": "Not merged, deployed, tested or installed in this project; no existing webpage accessed.",
+          "impact": "Indirect reliability of control RPC replies/actions acknowledgement display only. No WebRTC video, camera calibration, ToF, HD1910 driver, model management, weights, training, motion execution or audio implementation change.",
+          "review": {
+            "change": "WsConsumer._pump keeps codecs.getincrementaldecoder(utf-8)(replace) state across network chunks, appends decoded text to its buffer, then normalizes CRLF. Previously each chunk was decoded/normalized separately, corrupting split characters or hiding/merging complete events.",
+            "actual_consumer": "Legacy class name WsConsumer, but this is rendezvous HTTP POST /send plus GET /events SSE for peer-envelope RPC payloads, with no WebRTC in this lane. Auth/session start/transport and request sending are unchanged; it is not video or continuous teleop.",
+            "remaining_boundary": "Only complete double-newline events are dispatched; unfinished trailing event is left alone. Existing invalid-byte replacement and stream-close RPC abandonment remain; no new reconnection, retransmission or robot execution acknowledgement.",
+            "tests_read": [
+              "test_whole_lf_frame",
+              "test_whole_crlf_frame",
+              "test_crlf_split_across_chunks",
+              "test_utf8_split_across_chunks",
+              "test_all_two_chunk_splits",
+              "test_multiple_frames_with_partial_tail",
+              "test_real_chunked_http_response"
+            ],
+            "test_limits": "Seven unittest methods, including many two-chunk subcases for LF/CRLF. Real handler dispatch reaches a Mock RPC; last case uses a loopback HTTP server and real requests.Response.iter_content with one-byte HTTP chunks. No account, real rendezvous, browser, robot or model verification.",
+            "CI_change": "Check job creates a Python venv, pip installs existing requests dependency without a version pin, and runs unittest discovery for test_wire.py before Rust checks. Added workflow commands are not observed CI-run success.",
+            "author_validation_claim": "Seven methods passed on macOS/Python3.12.15/requests2.34.2; five methods reportedly fail against main. Author also reports exact CI discovery command, YAML/shell syntax and diff check; no local Rust workspace run, Linux/full repository checks left to CI.",
+            "tracker_tests_executed": false,
+            "fixed_sources": {
+              "parser": "https://github.com/pollen-robotics/microduck/blob/de74b2de6fcd405298a63a96cdcac414177eb3cf/spaces/shared/wire.py",
+              "tests": "https://github.com/pollen-robotics/microduck/blob/de74b2de6fcd405298a63a96cdcac414177eb3cf/spaces/shared/test_wire.py",
+              "workflow": "https://github.com/pollen-robotics/microduck/blob/de74b2de6fcd405298a63a96cdcac414177eb3cf/.github/workflows/ci.yml"
+            },
+            "version_boundary": "Only three changed files, no Rust/protocol change; workspace0.18.5/API49 inherited from c15. Not the API50 session-census contract of pending PR535 and not an upgrade to replica0.15.1/API43 or independent0.18.2/API47."
+          }
         }
       ],
       "previous_stable_releases": [
@@ -13568,10 +13615,10 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-05T15:32:49.741119+00:00",
+  "checked_at_utc": "2026-11-05T16:23:34.851498+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-05T13:32:52.064599+00:00",
-    "source_snapshot_utc": "2026-11-05T15:19:01.880004+00:00",
+    "previous_substantive_review_utc": "2026-11-05T15:32:49.741119+00:00",
+    "source_snapshot_utc": "2026-11-05T16:20:11.632609+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.5",
@@ -13580,25 +13627,13 @@
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        535
-      ],
-      "pollen-robotics/microduck_rl": [
-        91
+        537
       ]
     },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        535
-      ]
-    },
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      "daemon-dev-os-update-over-webrtc"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-pad-mapping",
-      "daemon-dev-os-update-over-webrtc"
-    ],
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -13607,9 +13642,9 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "New PR535 evolved during poll from a642 route-only/API49 to 830 peer census/RPC removal/API50. New dev1588/a642 replaced by dev1589/830; both fixed sources retained. Pad dev1586/dd3 changes Select hold timing only over reviewed emotion prototype. New RL91 reward band and explicit limited geometry tests; author training/hardware report remains external. Four default heads, formal185/eight assets, other recorded PRs/devs, HF metadata/blog, public15-series artifacts and independent0182 records unchanged. No runtime, image, service, browser or robot operation.",
-    "final_relevant_sources_checked_at_utc": "2026-11-05T15:32:49.741119+00:00",
-    "canonical_text_sources_verified": 46
+    "notes": "New pending PR537 at de74: one commit/three files, incremental UTF8 decoding and joined-buffer CRLF normalization for Spaces HTTP/SSE replies, seven test methods and Python CI step. External macOS results, not tracker tests or Linux/full CI acceptance. Four default heads, formal185/API49, all existing PR states/dev refs, ten recorded asset inventories, HF metadata/blog, public15-series prerelease assets and independent0182 records unchanged.",
+    "final_relevant_sources_checked_at_utc": "2026-11-05T16:23:34.851498+00:00",
+    "canonical_text_sources_verified": 5
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
