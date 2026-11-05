@@ -1,5 +1,6 @@
 """Real WebSocket routing uses the current owner without implicit takeover."""
 import unittest
+import asyncio
 import json
 from pathlib import Path
 from unittest import mock
@@ -63,6 +64,37 @@ class RestoredReadOrderHttpTest(unittest.IsolatedAsyncioTestCase):
     until = fixture.ServoSessionBatch3Test.until
     client = fixture.ServoSessionBatch3Test.client
     cmd = fixture.ServoSessionBatch3Test.cmd
+
+    async def assert_restore_trust_failure_has_no_service_or_uart_side_effects(self, configuration=None):
+        marker = {"v": 1, "sim": False, "port": "FAKE-PORT", "by": "previousoperator"}
+        if configuration is not None:
+            shared = Path(self.tmp.name)/"servo-read-order.json"
+            shared.write_text(configuration, encoding="utf-8")
+            marker["read_order_configuration_path"] = str(shared)
+        self.marker.write_text(json.dumps(marker), encoding="utf-8")
+        with mock.patch("studio.app._bus_take", return_value=(True, None)) as take, \
+                mock.patch("studio.app._bus_give_back", return_value=(True, None)) as giveback, \
+                mock.patch("studio.servo.feetech.FeetechBus", side_effect=AssertionError("must not open UART")) as uart:
+            session = servo.ServoSession(self.log, sim=False, port="FAKE-PORT", state_dir=str(self.state_dir))
+            await self.start(robotd_up=False, servo=session)
+            self.assertTrue(await self.until(lambda: session.orphan is not None))
+            await asyncio.sleep(.1)  # Include any scheduled rollback helper in the assertion.
+            take.assert_not_called()
+            giveback.assert_not_called()
+            uart.assert_not_called()
+            self.assertTrue(self.marker.exists())
+            self.assertIn("读取顺序", session.orphan["why"])
+            await self.stop()
+
+    async def test_legacy_real_marker_unknown_config_does_not_take_bus_or_restart_robotd(self):
+        await self.assert_restore_trust_failure_has_no_service_or_uart_side_effects()
+
+    async def test_corrupt_referenced_config_does_not_take_bus_or_restart_robotd(self):
+        await self.assert_restore_trust_failure_has_no_service_or_uart_side_effects('{invalid')
+
+    async def test_duplicate_config_fields_do_not_take_bus_or_restart_robotd(self):
+        await self.assert_restore_trust_failure_has_no_service_or_uart_side_effects(
+            '{"mode":"default","mode":"id_last","last_id":13}')
 
     async def test_real_owner_restore_loads_trusted_shared_order_and_gain_baseline_from_marker(self):
         shared = Path(self.tmp.name)/"servo-read-order.json"

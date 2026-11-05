@@ -90,13 +90,22 @@ def validate_read_order(args):
     return mode, last, ids
 
 
-def load_read_order(path):
+def load_read_order(path, *, required=False):
     if path is None:
         return validate_read_order({"mode": "default"})
+    def strict_pairs(items):
+        out = {}
+        for key, value in items:
+            if key in out:
+                raise Refused("读取顺序配置有重复字段")
+            out[key] = value
+        return out
     try:
         with open(path, encoding="utf-8") as stream:
-            value = json.load(stream)
+            value = json.load(stream, object_pairs_hook=strict_pairs)
     except FileNotFoundError:
+        if required:
+            raise
         value = {"mode": "default"}
     return validate_read_order(value)
 
@@ -203,22 +212,41 @@ class ServoSession:
         self._sample_sequence = 0
         self._last_poll_at = None
         self.gains_restored_before_takeover = None
+        self._restore_read_order = None
 
     # ---- 打开 / 关闭 ----
 
     def session_metadata(self):
         """Local recovery evidence written by the owner, never supplied by a page."""
         return {"read_order_configuration_path": self.read_order.get("configuration_path"),
+                "read_order_configuration": {"mode": self.read_order["mode"],
+                    **({"last_id": self.read_order["last_id"]} if self.read_order.get("last_id") is not None else {})},
                 "gains_restored_before_takeover": self.gains_restored_before_takeover,
                 "gain_baseline": {str(sid): list(values) for sid, values in self._gain_baseline.items()}}
 
     def restore_metadata(self, data):
-        path = data.get("read_order_configuration_path") if data.get("sim") is not True else None
-        if path is not None:
+        self._restore_read_order = None
+        simulated = data.get("sim") is True or data.get("sim") is not False and self.sim
+        path = data.get("read_order_configuration_path") if not simulated else None
+        if not simulated:
+            if path is None:
+                raise Refused("原会话的读取顺序配置位置未保存：没有接管，也没有重启主程序")
             if (not isinstance(path, str) or not os.path.isabs(path)
                     or os.path.basename(path) != "servo-read-order.json"):
                 raise Refused("原会话的读取顺序配置位置无效：没有按默认顺序接管")
+            try:
+                try:
+                    restored_order = load_read_order(path, required=True)
+                except FileNotFoundError:
+                    # Native's absent-file default is trusted only when the
+                    # previous owner recorded that exact configuration.
+                    restored_order = validate_read_order(data.get("read_order_configuration"))
+                    if restored_order[0] != "default":
+                        raise Refused("原非默认读取顺序配置文件已丢失")
+            except (OSError, ValueError, Refused) as err:
+                raise Refused(f"原会话的读取顺序配置不能确认：{err}；没有接管，也没有重启主程序") from err
             self.read_order_path = path
+            self._restore_read_order = restored_order
         self.gains_restored_before_takeover = data.get("gains_restored_before_takeover") is True
         self._gain_baseline = {}
         stored = data.get("gain_baseline")
@@ -255,9 +283,13 @@ class ServoSession:
         self.state, self.error, self.by = "opening", None, by
         try:
             path = os.path.join(self.state_dir, "servo-read-order-sim.json") if self.sim else self.read_order_path
-            if restored and not self.sim and path is None:
-                raise Refused("原会话的读取顺序配置位置未保存：不能确认原顺序，没有接管")
-            mode, last, ids = load_read_order(path)
+            if restored and not self.sim:
+                if self._restore_read_order is None:
+                    raise Refused("原会话的读取顺序未在接管前核验：没有打开总线")
+                mode, last, restored_ids = self._restore_read_order
+                ids = list(restored_ids)
+            else:
+                mode, last, ids = load_read_order(path)
             self.read_order = {"mode": mode, "last_id": last, "ids": ids, "generation": 0,
                                "session": f"studio-{time.monotonic_ns()}", "configuration_path": path}
             self._health = ServoHealth()

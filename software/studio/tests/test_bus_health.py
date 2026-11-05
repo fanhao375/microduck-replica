@@ -496,12 +496,21 @@ class ReadOrderTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_restored_real_owner_with_unknown_configuration_does_not_silently_open_default(self):
         restored = servo.ServoSession(self.log, sim=False, port="FAKE-PORT", state_dir=self.tmp.name)
-        restored.restore_metadata({})
         with mock.patch("studio.servo.feetech.FeetechBus") as uart:
-            ok, reason = restored.open(restored=True)
-        self.assertFalse(ok)
-        self.assertIn("读取顺序", reason)
+            with self.assertRaisesRegex(servo.Refused, "读取顺序"):
+                restored.restore_metadata({})
         uart.assert_not_called()
+
+    async def test_absent_native_file_requires_explicit_prior_owner_default_configuration(self):
+        shared = str(Path(self.tmp.name)/"servo-read-order.json")
+        restored = servo.ServoSession(self.log, sim=False, port="FAKE-PORT", state_dir=self.tmp.name)
+        marker = {"sim": False, "read_order_configuration_path": shared,
+                  "read_order_configuration": {"mode": "default"}}
+        restored.restore_metadata(marker)
+        self.assertEqual(restored._restore_read_order, ("default", None, list(servo.IDS)))
+        marker["read_order_configuration"] = {"mode": "id_last", "last_id": 13}
+        with self.assertRaisesRegex(servo.Refused, "读取顺序"):
+            restored.restore_metadata(marker)
 
     async def test_native_apply_requires_guard_and_exact_readback_and_updates_next_debug_owner(self):
         from studio import servo_read_order
