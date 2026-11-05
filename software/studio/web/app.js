@@ -960,7 +960,7 @@ function Main({ duck }) {
   // 浏览器能同时开的 WebGL 上下文也有限）。手柄那一块也在总览里（#/pad 是它的锚点），一直挂着：
   // 「在不在手柄区」看 padActivity，不看挂没挂上（审查 O1）
   const overview = html`<div hidden=${!OVERVIEW(route)}><${Overview} st=${st} live=${live} age=${age} diagnosticElapsed=${now - stAt} duck=${duck} pd=${pd} onSame=${onSame} tune=${tune} sensorsActive=${OVERVIEW(route)}
-    sv=${sv} imu=${imu} connectionLive=${status==='open'} svElapsed=${svAt?now-svAt:Infinity} imuElapsed=${imuAt?now-imuAt:Infinity} /></div>`;
+    sv=${sv} imu=${imu} connectionLive=${status==='open'} svElapsed=${svAt?Math.max(0,now-svAt):Infinity} imuElapsed=${imuAt?Math.max(0,now-imuAt):Infinity} /></div>`;
   let page = null;
   if (OVERVIEW(route)) page = null;
   else if (route === '/logs') page = html`<${LogsPage} />`;

@@ -84,10 +84,15 @@ try {
   await wait(`document.querySelector('.sv-monitor')`, 'readonly monitor');
   await wait(`window.demand===true`, 'visible inline diagnostic demand');
   assert.equal(await js(`document.querySelectorAll('.sv-monitor-row').length`),15);
+  const compact=await js(`(()=>{const cards=[...document.querySelectorAll('.sv-monitor-row')];return {columns:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().left))).size,rows:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().top))).size,height:document.querySelector('.sv-monitor').getBoundingClientRect().height}})()`);
+  assert.equal(compact.columns,5,'wide overview shows five servo cards across');
+  assert.equal(compact.rows,3,'fifteen servos fit in three card rows');
+  await shot('servo-cards-compact');
+  assert.ok(compact.height<850,'default servo diagnostics cannot become a long vertical list: '+JSON.stringify(compact));
   assert.match(await js(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText`), /32.*8\.0.*5\.0%/s);
-  await js(`document.querySelector('.sv-monitor-row[data-id="13"] button').click()`);
+  await js(`document.querySelector('.sv-monitor-row[data-id="13"]').click()`);
   await wait(`document.querySelector('.sv-monitor-detail[data-id="13"]')`, 'detail expanded');
-  assert.ok(await js(`!!document.querySelector('.comm-inspector .sv-monitor-detail[data-id="13"]')`),'desktop details belong in the side panel');
+  assert.ok(await js(`!!document.querySelector('.comm-group .sv-monitor-detail[data-id="13"]')`),'details expand beneath their servo group');
   assert.match(await js(`document.querySelector('.sv-monitor-detail[data-id="13"]').innerText`), /1957/);
   await js(`props.sv={...props.sv,rows:props.sv.rows.map(r=>r.id===13?{...r,temp:38,volt:7.6,comm:{...r.comm,asked:2057,ok:1956,missed:101},health:{...r.health,asked:100,ok:96,missed:4,rate:.04}}:r)};draw()`);
   await wait(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText.includes('38')`, 'live row');
@@ -99,17 +104,19 @@ try {
   await js(`props.sv={...props.sv,rows:props.sv.rows.map(r=>r.id===13?{...r,p_run:null,d_run:null,p:null,d:null,
     speed_raw:42,velocity_rad_s:.12,
     parameters:{source:'robotd_before_arm_cache',age_ms:null,runtime:{pdi:[3,0,0],observed:false},eeprom:{pdi:[32,40,0]},before_arm:{acceleration_raw:12},configured:{kp:5,kd:0,torque_limit:900}}}:r)};draw()`);
-  await js(`document.querySelector('.comm-inspector details.comm-parameters').open=true`);
-  await wait(`document.querySelector('.comm-inspector').innerText.includes('32 / 40 / 0')`, 'parameter cache values');
-  assert.match(await js(`document.querySelector('.comm-inspector').innerText`), /上力前|缓存/);
-  assert.match(await js(`document.querySelector('.comm-inspector').textContent`), /配置限力900/);
-  assert.match(await js(`document.querySelector('.comm-inspector').textContent`), /速度原始值42/);
+  await js(`document.querySelector('.sv-monitor-detail details.comm-parameters').open=true`);
+  await wait(`document.querySelector('.sv-monitor-detail').innerText.includes('32 / 40 / 0')`, 'parameter cache values');
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').innerText`), /上力前|缓存/);
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').textContent`), /配置限力900/);
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').textContent`), /速度原始值42/);
   assert.equal(await js(`document.querySelectorAll('.runtime-diagnostics canvas').length`),0,'reuse the overview 3D instead of duplicating it');
   assert.equal(await js(`document.querySelector('details.comm-advanced').open`),false,'advanced configuration starts folded');
   await shot('servos-desktop');
   await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await pause(100);
   assert.ok(await js(`document.documentElement.scrollWidth<=document.documentElement.clientWidth+2`),'mobile must not overflow');
+  assert.equal(await js(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().left))).size`),2,'phone displays two card columns');
+  assert.ok(await js(`[...document.querySelectorAll('.comm-servo-card')].every(e=>e.scrollWidth<=e.clientWidth+2)`),'card contents must fit on phones');
   await shot('servos-mobile');
   await js(`scrollTo(0,0)`);
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});

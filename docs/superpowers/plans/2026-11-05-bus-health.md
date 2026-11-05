@@ -63,3 +63,9 @@ Files: web/communication-health.js/.css (new), servo.js, imu.js, styles.css/inde
 - [x] 新建 `web/runtime-diagnostics.js` 管理展开/标签、可视区需求及读取顺序回读；在 `web/app.js:Overview` 的 `TuneSection` 前放入该组件，心跳增加严格布尔需求；只读数据和控制权限保持分离。
 - [x] 后台 `app.py` 仅对可见总览的诊断需求启用快照；测试收起、隐藏、离开和多客户端需求，不新增UART读取。后端与前端由不同执行者修改不同文件。
 - [x] 将 `servo.js` 恢复专门校准布局，`imu.js` 保留原标定卡；移动新增健康信息到总览。运行聚焦Python、浏览器与原标零/交还流程，验证完整中控的新位置、手机布局和按需刷新，更新验收记录并提交。
+
+## 紧凑舵机卡片
+
+- [x] 浏览器增加宽屏15颗分3排、总高度受控的检查；详情仍实时刷新，手机不溢出。
+- [x] `communication-health.js/.css` 将每颗改成可点卡片，按左腿/右腿/头颈分组横排；`runtime-diagnostics.js` 去掉常驻详情侧栏，详情在所选组下展开，读取顺序移到下方。
+- [x] 跑现有诊断浏览器回归和完整模拟中控，检查5列桌面与2列手机截图，更新文档和预览并提交。

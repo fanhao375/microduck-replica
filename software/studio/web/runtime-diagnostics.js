@@ -1,6 +1,6 @@
 // Inline overview diagnostics. Visibility requests cached snapshots, never UART ownership.
 import {html, useState, useEffect, useRef} from './vendor/preact-htm.module.js';
-import {ServoMonitor, ServoInspector, ImuHealth, ReadOrderPanel} from './communication-health.js';
+import {ServoMonitor, ImuHealth, ReadOrderPanel} from './communication-health.js';
 
 export function RuntimeDiagnostics({st, sv, imu, link, active = false, live = false,
   summaryLive = live && st?.robotd_ok !== false, svElapsed = 0, imuElapsed = 0}) {
@@ -47,13 +47,12 @@ export function RuntimeDiagnostics({st, sv, imu, link, active = false, live = fa
         <button role="tab" aria-selected=${tab==='servos'} onClick=${()=>setTab('servos')}>舵机诊断</button>
         <button role="tab" aria-selected=${tab==='imu'} onClick=${()=>setTab('imu')}>IMU 诊断</button>
       </div><a href=${tab==='servos'?'#/servos':'#/imu'}>${tab==='servos'?'前往舵机校准':'前往 IMU 标定'} →</a></div>
-      ${tab==='servos' ? html`<div class="comm-monitor-grid">
+      ${tab==='servos' ? html`<div class="runtime-diag-servos">
         <${ServoMonitor} sv=${monitor} selected=${selected} onSelect=${setSelected} live=${live} elapsed=${svElapsed} />
-        <aside class="comm-monitor-aside">
-          <${ServoInspector} sv=${monitor} selected=${selected} live=${live} elapsed=${svElapsed} />
+        <div class="runtime-diag-controls">
           <${ReadOrderPanel} communication=${monitor?.communication} rows=${monitor?.rows} link=${link}
             live=${live && svElapsed<1500} onApplied=${setPendingOrder} />
-        </aside></div>` : html`<${ImuHealth} imu=${imu} live=${live} elapsed=${imuElapsed} />`}
+        </div></div>` : html`<${ImuHealth} imu=${imu} live=${live} elapsed=${imuElapsed} />`}
     </div>`:null}
   </section>`;
 }

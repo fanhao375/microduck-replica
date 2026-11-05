@@ -32,7 +32,7 @@ function ServoDetail({row, status}) {
   const c = row.comm || {}, h = row.health || {}, p = row.parameters || {};
   const pdi = value => Array.isArray(value) && value.length===3 && value.every(number) ? value.join(' / ') : null;
   const source = ({robotd_before_arm_cache:'主程序上力前快照',studio_cached_inspection:'调试会话寄存器回读'})[p.source] || '已提供的回读';
-  return html`<div class="sv-monitor-detail" data-id=${row.id}>
+  return html`<div class="sv-monitor-detail" id=${`servo-detail-${row.id}`} data-id=${row.id}>
     <div class="comm-detail-head"><b>${row.id} · ${row.cn}</b><span>最新反馈 ${ageText(status.age)}</span></div>
     <dl class="comm-values">
       <${Parameter} label="累计请求" value=${number(c.asked)?count(c.asked):null} />
@@ -67,14 +67,6 @@ function ServoDetail({row, status}) {
   </div>`;
 }
 
-export function ServoInspector({sv, selected, live = true, elapsed = 0}) {
-  const row=(sv?.rows || []).find(r=>r.id===selected);
-  return html`<section class="board comm-inspector" aria-label="选中舵机详情">
-    ${row ? html`<${ServoDetail} row=${row} status=${rowStatus(row,live,elapsed)} />`
-      : html`<div class="comm-monitor-head"><div><h2>舵机详情</h2><p>点选列表中的舵机，查看通信统计和参数。</p></div></div>`}
-  </section>`;
-}
-
 export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0}) {
   const c = sv?.communication || {};
   const rows = sv?.rows || [];
@@ -93,21 +85,26 @@ export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0})
     </div>
     ${attention.length ? html`<div class="comm-attention" role="status"><b>${attention.length} 颗需关注</b>
       ${attention.map(x=>html`<button type="button" onClick=${()=>onSelect(x.row.id)}>#${x.row.id} ${x.row.cn} · ${x.status.text}</button>`)}</div>`:null}
-    <div class="comm-table-head"><span>舵机</span><span>角度</span><span>温度</span><span>电压</span><span>近60秒缺回包</span><span>状态</span></div>
-    ${groups.map(([group,label,range]) => html`<div class="comm-group"><h3>${label}<small>${range}</small></h3>
-      ${rows.filter(r=>r.group===group).map(row=>{
+    ${groups.map(([group,label,range]) => {
+      const members=rows.filter(r=>r.group===group), picked=members.find(r=>r.id===selected);
+      return html`<div class="comm-group"><h3>${label}<small>${range}</small></h3>
+      <div class="comm-servo-grid">${members.map(row=>{
         const status=rowStatus(row,live,elapsed);
-        return html`<div class=${'sv-monitor-row '+status.kind+(selected===row.id?' selected':'')} data-id=${row.id}>
-          <button type="button" class="comm-select" aria-expanded=${selected===row.id} onClick=${()=>onSelect(selected===row.id?null:row.id)}>
-            <span class=${'sv-id '+group}>${row.id}</span><span>${row.cn}<small>${selected===row.id?'收起详情':'查看详情'}</small></span></button>
-          <span class="num comm-angle">${fmt(row.deg,1)}°</span>
-          <span class="num comm-temperature"><small>温度</small>${fmt(row.temp)}°C</span>
-          <span class="num comm-voltage"><small>电压</small>${fmt(row.volt,1)} V</span>
-          <${Rate} health=${row.health} />
-          <span class=${'comm-badge '+status.kind}>${status.text}</span>
-          ${selected===row.id ? html`<${ServoDetail} row=${row} status=${status} />`:null}
-        </div>`;
-      })}</div>`)}
+        return html`<button type="button" class=${'sv-monitor-row comm-servo-card '+status.kind+(selected===row.id?' selected':'')} data-id=${row.id}
+          aria-expanded=${selected===row.id} aria-controls=${`servo-detail-${row.id}`} onClick=${()=>onSelect(selected===row.id?null:row.id)}>
+          <span class="comm-card-heading"><span class=${'sv-id '+group}>${row.id}</span><b>${row.cn}</b></span>
+          <span class="comm-card-metrics">
+            <span><small>温度</small><b>${fmt(row.temp)}<em> °C</em></b></span>
+            <span><small>电压</small><b>${fmt(row.volt,1)}<em> V</em></b></span>
+            <span><small>角度</small><b>${fmt(row.deg,1)}<em>°</em></b></span>
+            <span title="近60秒缺回包率"><small>缺回包</small><${Rate} health=${row.health} /></span>
+          </span>
+          <span class="comm-card-tail"><span class=${'comm-badge '+status.kind}>${status.text}</span><span>${selected===row.id?'收起 ▴':'详情 ▾'}</span></span>
+        </button>`;
+      })}</div>
+      ${picked ? html`<${ServoDetail} row=${picked} status=${rowStatus(picked,live,elapsed)} />`:null}
+      </div>`;
+    })}
     ${!rows.length ? html`<p class="comm-empty">等待舵机回读。主程序、调试会话和每颗舵机的状态分别显示。</p>` : null}
     <div class="comm-footer"><span>全总线坏校验 <b>${count(c.counters?.bad_checksum ?? c.counters?.bad_checksums)}</b></span>
       <span>读取失败 <b>${count(c.counters?.failed_reads)}</b></span><span>超时 <b>${count(c.counters?.timeout)}</b></span></div>
