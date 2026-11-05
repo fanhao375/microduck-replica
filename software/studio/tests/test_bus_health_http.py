@@ -53,6 +53,33 @@ class ReadOrderHttpTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(reply["data"]["read_order"]["ids"][-1], 13)
         self.assertEqual(self.servo.holding(), 0)
 
+    async def test_visible_imu_route_receives_ten_hz_views_and_hidden_page_stops_them(self):
+        sequence = 0
+        def fake_view(_backend):
+            nonlocal sequence
+            sequence += 1
+            return {"t": "imu", "fake_sequence": sequence}
+        with mock.patch("studio.imu.ImuBackend.view", fake_view):
+            client = await self.connect()
+            await client.send({"t": "hb", "visible": True, "route": "/"})
+            client.msgs.clear()
+            await client.pump(until=lambda: False, timeout=.85)
+            normal = sum(m.get("t") == "imu" for m in client.msgs)
+            await client.send({"t": "hb", "visible": True, "route": "/imu"})
+            client.msgs.clear()
+            await client.pump(until=lambda: False, timeout=.85)
+            active = sum(m.get("t") == "imu" for m in client.msgs)
+            self.assertGreaterEqual(active, 6)
+            self.assertLessEqual(normal, 3)
+            self.assertGreater(active, normal*2)
+            await client.send({"t": "hb", "visible": False, "route": "/imu"})
+            await client.pump(until=lambda: self.rd.viewers == 0, timeout=.5)
+            client.msgs.clear()
+            before = sequence
+            await client.pump(until=lambda: False, timeout=.6)
+            self.assertFalse(any(m.get("t") == "imu" for m in client.msgs))
+            self.assertEqual(sequence, before)
+
 
 class RestoredReadOrderHttpTest(unittest.IsolatedAsyncioTestCase):
     asyncSetUp = fixture.ServoSessionBatch3Test.asyncSetUp

@@ -743,8 +743,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         await send(servo.snapshot() if servo.state == "open"
                                    else view_from_robotd(robotd, servo.directions, servo.state,
                                                          servo.error, servo.sim))
-                    if imu is not None and time.monotonic() - last_imu >= 0.5:
-                        last_imu = time.monotonic()        # IMU 页要的芯片、安装方向、读数状态：半秒一次够了
+                    imu_every = .1 if me.get("route") == "/imu" else .5
+                    if imu is not None and time.monotonic() - last_imu >= imu_every:
+                        last_imu = time.monotonic()        # Faster projection only; reads the existing owner cache.
                         await send(imu.view())
                     if (tune is not None and time.monotonic() - last_tune >= 1.0
                             and me.get("route") in ("/", "/pad", "/settings")):     # 还没收到心跳（不知道在哪页）先不推
