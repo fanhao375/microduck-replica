@@ -12540,11 +12540,102 @@
           "draft": false,
           "merged_at": null,
           "created_at": "2026-10-25T16:44:11Z",
-          "updated_at": "2026-10-25T18:21:09Z",
-          "head_sha": "930dc02c5154f5e0c6a819f99ab6630ea45ac18b",
-          "scope_note": "Ready for review but not merged; same fixed source SHA. deep-copy shared rough-terrain templates in four factories, restore walking curriculum; changes training distribution/geometry. Submitter CPU/config checks only, no CUDA learning-quality or physical validation. Not integrated into replica.",
-          "priority": "medium_before_rough_training",
-          "previous_draft_state": true
+          "updated_at": "2026-11-05T13:05:40Z",
+          "head_sha": "2f46ee991466d39a473143211027f3af1e6e9ee1",
+          "scope_note": "Five originalterrain/testblob IDs unchanged after knownmain sync. CPU/config and legacy930GPU claims attributed to submitter; no tracker execution/quality comparison/HD1910 acceptance.",
+          "priority": "medium before rough-terrain longtraining",
+          "previous_draft_state": true,
+          "history": [
+            {
+              "number": 82,
+              "url": "https://github.com/pollen-robotics/microduck_rl/pull/82",
+              "title": "Fix shared rough-terrain configs and walking curriculum",
+              "state": "open",
+              "draft": false,
+              "merged_at": null,
+              "created_at": "2026-10-25T16:44:11Z",
+              "updated_at": "2026-10-25T18:21:09Z",
+              "head_sha": "930dc02c5154f5e0c6a819f99ab6630ea45ac18b",
+              "scope_note": "Ready for review but not merged; same fixed source SHA. deep-copy shared rough-terrain templates in four factories, restore walking curriculum; changes training distribution/geometry. Submitter CPU/config checks only, no CUDA learning-quality or physical validation. Not integrated into replica.",
+              "priority": "medium_before_rough_training",
+              "previous_draft_state": true,
+              "superseded_at_utc": "2026-11-05T13:31:00.525665+00:00"
+            }
+          ],
+          "previous_head_sha": "930dc02c5154f5e0c6a819f99ab6630ea45ac18b",
+          "base_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "base_branch": "develop",
+          "changed_file_count": 5,
+          "commit_count": 2,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/bae39f5900b318f7e87fc485c30a31213cfa14eb...2f46ee991466d39a473143211027f3af1e6e9ee1",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/930dc02c5154f5e0c6a819f99ab6630ea45ac18b...2f46ee991466d39a473143211027f3af1e6e9ee1",
+          "classification": "pending rough-terrain patch; known develop sync, no defaultbranch merge",
+          "latest_increment": {
+            "from_sha": "930dc02c5154f5e0c6a819f99ab6630ea45ac18b",
+            "to_sha": "2f46ee991466d39a473143211027f3af1e6e9ee1",
+            "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/930dc02c5154f5e0c6a819f99ab6630ea45ac18b...2f46ee991466d39a473143211027f3af1e6e9ee1",
+            "commit_count": 6,
+            "file_count": 13,
+            "scope": "Five alreadyarchived develop training-bundle/export commits plus one branchmerge, not six new terrain fixes.",
+            "five_feature_blobs_identical_to_previous_sha": true
+          },
+          "feature_review": {
+            "factories": "Deepcopysharedroughgenerator inVelocity,SitStand,StandUp,GroundPick;VelStand inheritsVelocity. Train/play constructionorder no longer mutates sharedtemplate/nestedterrain configs, including registeredBacklash variants.",
+            "curriculum": "Velocity/VelStandtrainingtrue,play5x5random; three nonwalkingfamilies remainrandom10x20; template10x20unchanged. Reportedmjlab1.3.0walkingcurriculum generates10x4terrain-typecolumns, not sourcenum_cols=4.",
+            "cost": "Larger nonwalkinggeometry/memory cost and changedwalkingtrainingdistribution; no learning-quality comparison or physicalvalidation.",
+            "tests_in_original_patch": {
+              "test_function_definitions": 4,
+              "parametrized_cases": 26,
+              "new_in_current_merge": false,
+              "scope": "CPUconfiguration/registration/order/nestedisolation/Backlash, not policytraining"
+            },
+            "fixed_sources": {
+              "velocity": "https://github.com/pollen-robotics/microduck_rl/blob/2f46ee991466d39a473143211027f3af1e6e9ee1/src/mjlab_microduck/tasks/microduck_velocity_env_cfg.py",
+              "ground_pick": "https://github.com/pollen-robotics/microduck_rl/blob/2f46ee991466d39a473143211027f3af1e6e9ee1/src/mjlab_microduck/tasks/microduck_ground_pick_env_cfg.py",
+              "sitstand": "https://github.com/pollen-robotics/microduck_rl/blob/2f46ee991466d39a473143211027f3af1e6e9ee1/src/mjlab_microduck/tasks/microduck_sitstand_env_cfg.py",
+              "standup": "https://github.com/pollen-robotics/microduck_rl/blob/2f46ee991466d39a473143211027f3af1e6e9ee1/src/mjlab_microduck/tasks/microduck_standup_env_cfg.py",
+              "tests": "https://github.com/pollen-robotics/microduck_rl/blob/2f46ee991466d39a473143211027f3af1e6e9ee1/tests/test_rough_terrain_cfg.py"
+            }
+          },
+          "reported_validation": {
+            "classification": "Submitter PR body only, not tracker/project validation",
+            "current_CPU": {
+              "reported_source_sha": "2f46ee991466d39a473143211027f3af1e6e9ee1",
+              "passed": 300,
+              "skipped": 1,
+              "skipped_scope": "linux-aarch64 GPU check",
+              "regression_claim": "Same26casesfailoriginal/passfixed",
+              "terrain_compile_claim": "seed65 10x4patches,existingcontactsoftening,CPUMuJoCo3204geoms/10heightfields",
+              "independently_reproduced": false
+            },
+            "legacy_CUDA": {
+              "reported_source_sha": "930dc02c5154f5e0c6a819f99ab6630ea45ac18b",
+              "current_head_sha": "2f46ee991466d39a473143211027f3af1e6e9ee1",
+              "rerun_after_upstream_merge": false,
+              "platform_reported": "Colab TeslaT4,PyTorch CUDAbuild12.8",
+              "task": "Mjlab-Velocity-Rough-MicroDuck",
+              "environments": 64,
+              "PPO_iterations": 5,
+              "seed": 65,
+              "nan_guard": true,
+              "environment_steps": 7680,
+              "reported_scalar_samples": 260,
+              "reported_scalar_tags": 52,
+              "reported_all_scalars_finite": true,
+              "reported_nan_state_zero_each_iteration": true,
+              "exported_checkpoint_reported": "model_4.pt",
+              "reported_ONNX_shape": "[1,61]->[1,14]",
+              "reported_zero_input_output_finite": true,
+              "covers_other_rough_tasks": false,
+              "learning_quality_or_hardware_acceptance": false,
+              "raw_artifacts_or_ONNX_downloaded_by_tracker": false,
+              "independently_reproduced": false
+            },
+            "tracker_tests_executed": false,
+            "old_results_relabelled_as_current_source_rerun": false
+          },
+          "replica_integration": "Not integrated; no training,checkpointdownload,modelreplacement,export,ORTorhardwarechecks bytracker.",
+          "impact": "Trainingterrain distribution/geometry only; no HD1910servo,camera,ToF,runtimeaction orsoundchanges. Identical61->14shape is not complete consumer/deploymentcompatibility."
         },
         {
           "number": 80,
@@ -12887,6 +12978,43 @@
           ],
           "priority": "low_closed_unmerged_reference; requires separate HD1910power/mass/geometry validation",
           "replica_integration": "not_integrated; no CAD/model download, execution, rewiring or training"
+        },
+        {
+          "number": 90,
+          "url": "https://github.com/pollen-robotics/microduck_rl/pull/90",
+          "title": "docs: add training and simulation troubleshooting",
+          "state": "open",
+          "draft": false,
+          "merged_at": null,
+          "created_at": "2026-11-05T12:33:13Z",
+          "updated_at": "2026-11-05T12:33:13Z",
+          "head_sha": "bdbba59a73b1903471a4078e7ea8bd8c2fa1077f",
+          "base_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "base_branch": "develop",
+          "changed_file_count": 2,
+          "commit_count": 1,
+          "classification": "pending documentation-only troubleshooting guide; no new end-to-end CUDA run",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/bae39f5900b318f7e87fc485c30a31213cfa14eb...bdbba59a73b1903471a4078e7ea8bd8c2fa1077f",
+          "priority": "medium setup/training diagnosis, low currentdelivery",
+          "review": {
+            "change": "229lineguide+READMElink and --new-cmd-obs inreplayexample; CUDA/dependencies/trainentry,Python-listGPUIDs/checkpoints/export/CPUreplay/performance. No runtimeortrainingimplementation change.",
+            "recipe": "FlatVelocity64env5iteration CUDArecipe/7680steps; example not executedresult and not PR82roughrun.",
+            "replay_source_crosscheck": {
+              "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+              "source": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/scripts/infer_policy.py",
+              "change": "Existingnew_cmd_obsflag changescommand3to13,51to61observations for14joints,and headcommand handling; not just dimensiontag."
+            },
+            "ONNX_check_limits": "Single61input/14output and finitezero-input is basicexportcheck, not ordering/normalizer/actionscale/jointmapping/timing/gait or own0182API47contract acceptance.",
+            "author_validation_claim": "NineBashsyntaxblocks,twelve links/anchors,CLIparsewithouttraining/viewers,macOSenvironmentdiagnostic,61->14fixtureaccepted andwrongshape/nonfinitefixturesrejected. No newend-to-endCUDA run onthisbranch.",
+            "tracker_validation": "Readsource/docs only; no install/help/parser/CLI/export/ORT/viewer/test/trainingexecution or reproduce authorchecks.",
+            "fixed_sources": {
+              "guide": "https://github.com/pollen-robotics/microduck_rl/blob/bdbba59a73b1903471a4078e7ea8bd8c2fa1077f/docs/troubleshooting.md",
+              "README": "https://github.com/pollen-robotics/microduck_rl/blob/bdbba59a73b1903471a4078e7ea8bd8c2fa1077f/README.md",
+              "entrypoint": "https://github.com/pollen-robotics/microduck_rl/blob/bae39f5900b318f7e87fc485c30a31213cfa14eb/pyproject.toml"
+            }
+          },
+          "replica_integration": "Documentation reference only; not projectvalidatedprocedure or newweights/images",
+          "impact": "No model-management code,weights,trainingresult,HD1910,camera,ToF,motion orsoundimplementation change."
         }
       ],
       "previous_head": {
@@ -12988,9 +13116,10 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-05T11:38:22.568853+00:00",
+  "checked_at_utc": "2026-11-05T13:32:52.064599+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-05T10:27:32.168620+00:00",
+    "previous_substantive_review_utc": "2026-11-05T11:38:22.568853+00:00",
+    "source_snapshot_utc": "2026-11-05T13:24:38.145968+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.5",
@@ -12998,44 +13127,18 @@
     "stable_assets_changed": false,
     "stable_asset_count": 8,
     "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        533,
-        534
+      "pollen-robotics/microduck_rl": [
+        90
       ]
     },
-    "updated_pull_requests": {},
-    "new_related_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        95
+    "updated_pull_requests": {
+      "pollen-robotics/microduck_rl": [
+        82
       ]
     },
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      {
-        "tag": "daemon-dev-pad-mapping",
-        "head_sha": "30a0e3bb601e46913c42358a056104ee27f36500"
-      },
-      {
-        "tag": "daemon-dev-dev-build-refusal-message",
-        "head_sha": "2e4743b258890d762dc9f055b1d9a96758b951c0"
-      },
-      {
-        "tag": "daemon-dev-board-face-board-v1",
-        "head_sha": "f12becac5aaca58f7ec42cb518c146ee54bd2883"
-      }
-    ],
-    "moved_development_tags": [
-      {
-        "tag": "daemon-dev-main",
-        "from_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
-        "to_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc"
-      },
-      {
-        "tag": "daemon-dev-impact-guard-v3",
-        "from_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
-        "to_sha": "adeb5bceb753026ead1f6d2782209fb20220ee1b"
-      }
-    ],
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -13044,8 +13147,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "Mainc15/formal18554 unchanged; devmain1581 catchesup529. Newpadmapping30a/API49 adds13emotionpairs/player/threebuttondefaults, gate/ownership/soundlimits reviewed, no runtimeexecution. Newface533/f12dev1583 actualbasea64/API49 lacks5maincommits, pairedpendingYocto95 binary-namefallback. Impactadeb/dev1582 rebaseson16c then changescodedefaultstoR, custom50notofficialorHD1910. Newdevrefusal2e/dev1585 signed-withhelddevkey diagnosisstillrefuses. Own15seriesreleases/stable31-r1/27image and independent0182 unchanged. Devrefusal sameSHA2e nowalsoopenPR534, not anotherfeature.",
-    "source_snapshot_utc": "2026-11-05T11:35:12.530064+00:00"
+    "notes": "RL82head2f syncs5knownmaincommits+merge;all5originalfeature/testblobsidentical930. AuthorCPU300/1andterraincompileclaims separatedfromCUDA64env5iter/260samples/exportatold930, explicitlynotrerunaftermerge;notprojectverification. NewRL90docs-onlytroubleshooting/replay61flag,authorfixturesnotnewCUDA. Runtime/mainstable/devtags/own15seriesreleaseassets/independent0182 unchanged. Remote7accommunityGroup15nav preserved byFF; onlytwo trackerfiles edited.",
+    "final_relevant_sources_checked_at_utc": "2026-11-05T13:31:41.124237+00:00"
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
