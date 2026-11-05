@@ -2424,11 +2424,11 @@
         {
           "tag": "daemon-dev-main",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
-          "published_at": "2026-11-05T10:12:02Z",
-          "head_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+          "published_at": "2026-11-05T10:29:00Z",
+          "head_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
           "prerelease": true,
-          "scope_note": "Development tag source individually verified; source equality does not certify own integration.",
-          "previous_head_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+          "scope_note": "Samefixedsourceasmain; not officialstable or ownimageacceptance.",
+          "previous_head_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
           "head_history": [
             "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
             "2091d42286fa29a1e24ea4f072191a4836fd1a6e",
@@ -2441,7 +2441,7 @@
             "2573246f44cb5dab426714a1b45ae34746d7f1a2",
             "d13be2c1a2f4b1e0b0e499b08b92f870518b1384"
           ],
-          "version": "daemon 0.18.5-dev.1580.16c960c (main)",
+          "version": "daemon 0.18.5-dev.1581.c15c237 (main)",
           "history": [
             {
               "tag": "daemon-dev-main",
@@ -3093,6 +3093,132 @@
                 "replica_integration": "not integrated; no NFC hardware acceptance"
               },
               "superseded_at_utc": "2026-11-05T10:26:13.762195+00:00"
+            },
+            {
+              "tag": "daemon-dev-main",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
+              "published_at": "2026-11-05T10:12:02Z",
+              "head_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+              "prerelease": true,
+              "scope_note": "Development tag source individually verified; source equality does not certify own integration.",
+              "previous_head_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+              "version": "daemon 0.18.5-dev.1580.16c960c (main)",
+              "api_version": 49,
+              "change": "Main development build including531;529 only if SHA equalsc15, do not infer source parity from moving label.",
+              "comparison_to_recorded_main": {
+                "head_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+                "dev_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+                "ahead_by": 0,
+                "behind_by": 3
+              },
+              "development_api_version": 49,
+              "source_version": "0.18.5",
+              "replica_integration": "not integrated; no tracker tests/build/install/hardware acceptance",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
+              "latest_increment": {
+                "from_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+                "to_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
+                "commit_count": 2,
+                "file_count": 1
+              },
+              "asset_inventory": [
+                {
+                  "name": "0.18.5-dev.1580.16c960c.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:35790efd87afbc01524d1b5881a17a26f350a345a18f6cc2f3ad450a7e30117e"
+                },
+                {
+                  "name": "0.18.5-dev.1580.16c960c.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:db16ef68bde30a915c3839bba9a5ecb4332393ef0c2f0382b9718fa8f6f79df5"
+                },
+                {
+                  "name": "daemon-0.18.5-dev.1580.16c960c.tar.zst",
+                  "size": 15043442,
+                  "digest": "sha256:c514e0392e4b99aecf75cb8e0b65c74d3e46f00d424a4c5d6dcecccc33e36fb4"
+                },
+                {
+                  "name": "daemon-0.18.5-dev.1580.16c960c.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:7d6d383a002719ae2aaec0dff836068219c9717e5eed00ec61983ff454594d08"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1674213,
+                  "digest": "sha256:7c305315587dc39b4fb586d07e0549d833476cec08d7a604163b6eca84ea6d93"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1594073,
+                  "digest": "sha256:daf74ce3339efd19f701533c9fa2457b1060513fe61c8acb8dc8f519fb6d2c95"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 2809227,
+                  "digest": "sha256:d8073fe3d1a56e4b5548ee8ec204d9e731bd83227cc7e34061e0a1e28b792dc6"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3035232,
+                  "digest": "sha256:8f9a59c9fc1664c1fdec328edc3f3b3b3a3d684f2555ef8fdffa8298db708724"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
+                  "size": 1512470,
+                  "digest": "sha256:c93df24990d415d861835fe0c9516d5f60664c47f209b2bb22c8760828d9c760"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:f53d528013585417bc9ce059abe7e26b3b070f38d4887e8f954cda76fbbf4da4"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 360,
+                  "digest": "sha256:e7b3443560e17f896b71d0e0597986f846e7be36c133ae53bdcdd38453df499e"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1505214,
+                  "digest": "sha256:b6d02869a809dddbf79f605baf654e57e8cdebb1b7ad7acfa6b72d84896f4cf1"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1601714,
+                  "digest": "sha256:9876c8e63cb4831e96c13fc2ce487d9fdd645bc63c015da6a26b0eafd6ff9365"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1383896,
+                  "digest": "sha256:564e407c9506e13c13e1ef8d73967c7d5934d5ed0339100a25c4a4b7f907f409"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 544,
+                  "digest": "sha256:5bb2703d5f94e651212dc3ff7613193a3aa52fd5086d45fc0ad73e36b1ffcbda"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:da89f767f7663394a55cc366bddf32ddc71c053f141a362f191d4b4fd82aaa37"
+                }
+              ],
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/16c960c701e03c17f71135ef9803acb79379cf38",
+              "comparison_to_previous_head": {
+                "from_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+                "to_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
+                "commit_count": 2,
+                "file_count": 1
+              },
+              "classification": "moving development prototype; not formal or replica integration",
+              "review": {
+                "classification": "main development build, formal18554unchanged",
+                "source_scope": "sysroot531",
+                "not_included": "pending528sit,271SDK,532recording,449phase and impact50 experiments"
+              },
+              "superseded_at_utc": "2026-11-05T11:31:55.815245+00:00"
             }
           ],
           "source_history": [
@@ -3293,119 +3419,122 @@
             }
           ],
           "api_version": 49,
-          "change": "Main development build including531;529 only if SHA equalsc15, do not infer source parity from moving label.",
+          "change": "Developmentbuild catchesup toc15/merged529; no new mainfeature.",
           "comparison_to_recorded_main": {
             "head_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
-            "dev_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+            "dev_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
             "ahead_by": 0,
-            "behind_by": 3
+            "behind_by": 0
           },
           "development_api_version": 49,
           "source_version": "0.18.5",
           "replica_integration": "not integrated; no tracker tests/build/install/hardware acceptance",
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/16c960c701e03c17f71135ef9803acb79379cf38...c15c2377d8a80662405bb5e773351c984ad6cffc",
           "latest_increment": {
-            "from_sha": "a64ee692eebfce46a35c50b77705249752df9273",
-            "to_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
-            "commit_count": 2,
-            "file_count": 1
+            "from_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+            "to_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/16c960c701e03c17f71135ef9803acb79379cf38...c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "commit_count": 3,
+            "file_count": 7,
+            "scope_note": "Previouslyreviewed529merge nowincluded indevelopmentbuild; defaultmainunchangedc15."
           },
           "asset_inventory": [
             {
-              "name": "0.18.5-dev.1580.16c960c.manifest.json",
+              "name": "0.18.5-dev.1581.c15c237.manifest.json",
               "size": 386,
-              "digest": "sha256:35790efd87afbc01524d1b5881a17a26f350a345a18f6cc2f3ad450a7e30117e"
+              "digest": "sha256:e46e4f2a717befe7904f7731fb2f4572c09193a98e09367c5ddbb8d442138261"
             },
             {
-              "name": "0.18.5-dev.1580.16c960c.manifest.json.minisig",
+              "name": "0.18.5-dev.1581.c15c237.manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:db16ef68bde30a915c3839bba9a5ecb4332393ef0c2f0382b9718fa8f6f79df5"
+              "digest": "sha256:9363afa18df8531388a21c3f1e984ee67889fa7303b509cbfb409f3db0c30ac9"
             },
             {
-              "name": "daemon-0.18.5-dev.1580.16c960c.tar.zst",
-              "size": 15043442,
-              "digest": "sha256:c514e0392e4b99aecf75cb8e0b65c74d3e46f00d424a4c5d6dcecccc33e36fb4"
+              "name": "daemon-0.18.5-dev.1581.c15c237.tar.zst",
+              "size": 15075802,
+              "digest": "sha256:9099d1e958f37736771346a83033175012efb72c81cca82b5f3cd6ea15e33af0"
             },
             {
-              "name": "daemon-0.18.5-dev.1580.16c960c.tar.zst.minisig",
+              "name": "daemon-0.18.5-dev.1581.c15c237.tar.zst.minisig",
               "size": 279,
-              "digest": "sha256:7d6d383a002719ae2aaec0dff836068219c9717e5eed00ec61983ff454594d08"
+              "digest": "sha256:c8888f886dca5b8b27d624151c148e288b4424de43dd6d421101e6e82cd27d6b"
             },
             {
               "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
-              "size": 1674213,
-              "digest": "sha256:7c305315587dc39b4fb586d07e0549d833476cec08d7a604163b6eca84ea6d93"
+              "size": 1674212,
+              "digest": "sha256:456cad1f78989cb89998ff23e824457e1ccbd969476c99d251ae009bc55ceba0"
             },
             {
               "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
               "size": 1594073,
-              "digest": "sha256:daf74ce3339efd19f701533c9fa2457b1060513fe61c8acb8dc8f519fb6d2c95"
+              "digest": "sha256:44a483d9fbd0859a0a804fe6c35150d5eef759733329eecd3796a1d299a7f0f7"
             },
             {
               "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 2809227,
-              "digest": "sha256:d8073fe3d1a56e4b5548ee8ec204d9e731bd83227cc7e34061e0a1e28b792dc6"
+              "size": 2809229,
+              "digest": "sha256:8ff6dfd68be1519490db023f57ff2194d221e0cf352a0d001f6ed82f1683cf06"
             },
             {
               "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3035232,
-              "digest": "sha256:8f9a59c9fc1664c1fdec328edc3f3b3b3a3d684f2555ef8fdffa8298db708724"
+              "size": 3035339,
+              "digest": "sha256:335680e19a2f58159376e475a09da675d119daa7f521dd3d28122282c5e13e34"
             },
             {
               "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
-              "size": 1512470,
-              "digest": "sha256:c93df24990d415d861835fe0c9516d5f60664c47f209b2bb22c8760828d9c760"
+              "size": 1512471,
+              "digest": "sha256:6a995389a7d23fca97f52e2f35cdabe9f0c452f016d5dce50a4d73cf025b11de"
             },
             {
               "name": "duckctl-linux-aarch64.tar.gz",
               "size": 361,
-              "digest": "sha256:f53d528013585417bc9ce059abe7e26b3b070f38d4887e8f954cda76fbbf4da4"
+              "digest": "sha256:9d6910727b7a7f0ae74887e2bbb9cbfc3851cf028ca2fb4747fd3e2509dacef0"
             },
             {
               "name": "duckctl-linux-x86_64.tar.gz",
               "size": 360,
-              "digest": "sha256:e7b3443560e17f896b71d0e0597986f846e7be36c133ae53bdcdd38453df499e"
+              "digest": "sha256:c6efc396ef76df2ca10c66e306fdf54d043477ff5534df09eef8e06d44a1ed00"
             },
             {
               "name": "duckctl-macos-arm64.tar.gz",
               "size": 1505214,
-              "digest": "sha256:b6d02869a809dddbf79f605baf654e57e8cdebb1b7ad7acfa6b72d84896f4cf1"
+              "digest": "sha256:4a645f9e68a3325dc391f79fa58098acd88603e72501fe2556b975351fe9cc93"
             },
             {
               "name": "duckctl-macos-x86_64.tar.gz",
-              "size": 1601714,
-              "digest": "sha256:9876c8e63cb4831e96c13fc2ce487d9fdd645bc63c015da6a26b0eafd6ff9365"
+              "size": 1601709,
+              "digest": "sha256:22829c3c7723f087fb4da58eca11c8a7d7f49dbe3d46127aaa2c2a2decd285c1"
             },
             {
               "name": "duckctl-windows-x86_64.zip",
-              "size": 1383896,
-              "digest": "sha256:564e407c9506e13c13e1ef8d73967c7d5934d5ed0339100a25c4a4b7f907f409"
+              "size": 1383897,
+              "digest": "sha256:9a6911e6c13574343debe45cbeeb9436d955e746ae1408514a2fe60876f1e71a"
             },
             {
               "name": "manifest.json",
               "size": 544,
-              "digest": "sha256:5bb2703d5f94e651212dc3ff7613193a3aa52fd5086d45fc0ad73e36b1ffcbda"
+              "digest": "sha256:48cff46c6a75476baaa193be30a1622a57ab4fd229825660e6a8b69bcd582949"
             },
             {
               "name": "manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:da89f767f7663394a55cc366bddf32ddc71c053f141a362f191d4b4fd82aaa37"
+              "digest": "sha256:11719f053579ecfe6a20d2710a432b12823b91c5dd098ce917be9ec18391654f"
             }
           ],
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/16c960c701e03c17f71135ef9803acb79379cf38",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/c15c2377d8a80662405bb5e773351c984ad6cffc",
           "comparison_to_previous_head": {
-            "from_sha": "a64ee692eebfce46a35c50b77705249752df9273",
-            "to_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...16c960c701e03c17f71135ef9803acb79379cf38",
-            "commit_count": 2,
-            "file_count": 1
+            "from_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+            "to_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/16c960c701e03c17f71135ef9803acb79379cf38...c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "commit_count": 3,
+            "file_count": 7,
+            "scope_note": "Previouslyreviewed529merge nowincluded indevelopmentbuild; defaultmainunchangedc15."
           },
           "classification": "moving development prototype; not formal or replica integration",
           "review": {
-            "classification": "main development build, formal18554unchanged",
-            "source_scope": "sysroot531",
-            "not_included": "pending528sit,271SDK,532recording,449phase and impact50 experiments"
+            "classification": "developmentartifact ofalreadyrecordedmain",
+            "main_unchanged": true,
+            "source_scope": "NFC530,sysroot531,roller529 onrecovery/Stuck49",
+            "tracker_acceptance": false
           }
         },
         {
@@ -4368,128 +4497,122 @@
         {
           "tag": "daemon-dev-impact-guard-v3",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-impact-guard-v3",
-          "published_at": "2026-11-05T10:01:29Z",
-          "version": "daemon 0.18.5-dev.1579.dc48e98 (impact-guard-v3)",
-          "head_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+          "published_at": "2026-11-05T10:33:10Z",
+          "version": "daemon 0.18.5-dev.1582.adeb5bc (impact-guard-v3)",
+          "head_sha": "adeb5bceb753026ead1f6d2782209fb20220ee1b",
           "prerelease": true,
           "source_version": "0.18.5",
           "development_api_version": 50,
           "api_version": 50,
           "classification": "moving development prototype; not formal or replica integration",
           "review": {
-            "change": "Dynamixel startup corrects Current Limit1000mA and Goal Current whenchanged; V3 firmware==3 gets guard EEPROM blocks40/56. Torqueon defers writes, no forced torqueoff. Defaults guardtrue,1rad/s/50ms/400rad/s2/500mA/9rad/s/50%PWM; off unreachable thresholds retains V3firmware.",
-            "scope": "ROBOTIS XL330/customV3 registers and units, not HD1910 support or physical1A guarantee on stock position firmware. No firmware flashed by tracker.",
-            "telemetry": "API50 impact_guard perjoint0/1/2, nonV3null; any state subscriber with sensors adds sync read66 aftergoalwrite. Readerror omitsvector; defaultRobotIoNone. Extra bus time still affects loop; source~1ms not boardmeasurement.",
-            "hazard_report": "Updatedsource says5/5a/5b fall;6/7worked in20pushes,hold/50ms combos6fallsin31pushes; R13min32pushes on upstreamlavandiere. Externaldocumentationclaim, no rawlogs/fullrunmanifest or tracker/hardware reproduction.",
-            "validation": "Six newsoftwaredefinitions read; no tracker runs/hardwarebench/gear or gait acceptance.",
-            "priority": "low currentFeetechdelivery; high hardware-specific research gate",
-            "fixed_sources": {
-              "bus": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/duck-control/src/bus.rs",
-              "model": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/duck-control/src/model.rs",
-              "params": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/robotd-params/src/lib.rs",
-              "loop": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/robotd/src/main.rs",
-              "experiment": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/docs/robot/cheatsheet.md"
+            "change": "Rebase sixknownimpactcommits on main16c andaddRdefaultcommit. Originaldc48 notancestor: compare15commits27files includesknownNFC/sysroot; baserelative7commits12files,5of12blobsidenticalold,7changedfilesreviewed.",
+            "defaults_R": {
+              "v_min_rad_s": 6,
+              "brake_ms": 20,
+              "decel_rad_s2": 400,
+              "i_hold_ma": 32767,
+              "v_fast_rad_s": 7,
+              "pwm_fast_percent": 40
             },
-            "latest_documentation_followup": {
-              "source": "https://github.com/pollen-robotics/microduck/blob/dc48e98b0a8d6ddd81b620be8dda1283f64214c0/docs/robot/cheatsheet.md",
-              "settings_R": {
-                "v_min_rad_s": 6,
-                "brake_ms": 20,
-                "decel_rad_s2": 400,
-                "i_hold_ma": 32767,
-                "v_fast_rad_s": 7,
-                "pwm_fast_percent": 40
-              },
-              "code_defaults_unchanged": true,
-              "R_not_automatically_enabled": true,
-              "hardware": "ROBOTISV3 on lavandiere only; hold32767 is firmware-specific configuration, not HD1910 current permission. No gear-life or own gait acceptance.",
-              "author_report_only": true,
-              "tracker_tests_executed": false
-            }
+            "code_default_changed": true,
+            "details": "ImpactGuard::FACTORY renamedDEFAULT; Dynamixelinitialization,Busdefaults,template andwarncomparison useR; OFF retainsunreachablethresholds. SamecustomAPI50, no newtelemetryfield.",
+            "hardware": "ROBOTIScustomV3 only; EEPROMwritesdeferredif torqueon, current1000mA/path unchanged, no Feetechregister/unit/firmwareclaim. Holds32767 meansdisabled inthisfirmware, not HD1910allowedcurrent.",
+            "author_hardware_report": "Samepriorlavandiere13min32pushreport retained as externaldocs, no newowntrial orgearlifeproof.",
+            "tests": "Twoexistingdefaultassertions modified, one renamed; not newhardwaretestset ortrackerexecution.",
+            "priority": "low currentFeetechdelivery; highhardware-specificresearchgate",
+            "fixed_sources": {
+              "model": "https://github.com/pollen-robotics/microduck/blob/adeb5bceb753026ead1f6d2782209fb20220ee1b/duck-control/src/model.rs",
+              "params": "https://github.com/pollen-robotics/microduck/blob/adeb5bceb753026ead1f6d2782209fb20220ee1b/robotd-params/src/lib.rs",
+              "bus": "https://github.com/pollen-robotics/microduck/blob/adeb5bceb753026ead1f6d2782209fb20220ee1b/duck-control/src/bus.rs",
+              "loop": "https://github.com/pollen-robotics/microduck/blob/adeb5bceb753026ead1f6d2782209fb20220ee1b/robotd/src/main.rs",
+              "docs": "https://github.com/pollen-robotics/microduck/blob/adeb5bceb753026ead1f6d2782209fb20220ee1b/docs/robot/cheatsheet.md"
+            },
+            "tracker_tests_executed": false
           },
           "asset_inventory": [
             {
-              "name": "0.18.5-dev.1579.dc48e98.manifest.json",
+              "name": "0.18.5-dev.1582.adeb5bc.manifest.json",
               "size": 386,
-              "digest": "sha256:c74e4052344c6a8e0810817fde674c177c23856b3ca0bca074d47aaea21858a5"
+              "digest": "sha256:2d0fc0ba4273d6f887b91ce4d8a6e80b7755e5b0318b935dd67bf6907b77f205"
             },
             {
-              "name": "0.18.5-dev.1579.dc48e98.manifest.json.minisig",
+              "name": "0.18.5-dev.1582.adeb5bc.manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:15b8e9e43a8e49774497a15dccf0c473135d157b0a7180a59f41d7442e5ea55b"
+              "digest": "sha256:cf674bb51082468dc0d89403be7d76fb422921e238cc91a0d8c8d0b1aca1d218"
             },
             {
-              "name": "daemon-0.18.5-dev.1579.dc48e98.tar.zst",
-              "size": 15077118,
-              "digest": "sha256:0a001bc8759f737a84df4bf11cd1004df25969ba1b59b300eb7c0bac8f06bdce"
+              "name": "daemon-0.18.5-dev.1582.adeb5bc.tar.zst",
+              "size": 14975518,
+              "digest": "sha256:466d6aa6815aec51e2df3f2959c4566b84af4261bcc97d7b1f0e2f9cf6d1c4a2"
             },
             {
-              "name": "daemon-0.18.5-dev.1579.dc48e98.tar.zst.minisig",
+              "name": "daemon-0.18.5-dev.1582.adeb5bc.tar.zst.minisig",
               "size": 279,
-              "digest": "sha256:b138e0b318c763842c5736380270e0acebe6eabf612e64012ab696afe359eddb"
+              "digest": "sha256:4bce51cc925429658fb72d738c67b472cf37c68fc4ec701ca2fc0ebe179c54f0"
             },
             {
               "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
               "size": 1674172,
-              "digest": "sha256:1ff680cbffd7f34a681a702533f7995700ef021f57c30e3adc74ed45bf8ef2a8"
+              "digest": "sha256:83eec834c0a2905aeabf3ba94d14f77f6b4bd1fa97f855af1aae3c85c37cc979"
             },
             {
               "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
-              "size": 1593922,
-              "digest": "sha256:1d8f0663e7dbfb0516511c6e37fb1221ff7b9b272e5b3cccae73fff5188cfcbf"
+              "size": 1593923,
+              "digest": "sha256:349576cee4866f78f03d403530fced2dae812323a71edae348d0b54950def153"
             },
             {
               "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 2808903,
-              "digest": "sha256:5b212e1ad5d5a4d83596988edd33daefbb2a980bb259b9a97da703a84242ba00"
+              "size": 2808902,
+              "digest": "sha256:742db7bbbb233f246e7ddd9ee63b3e6b41c2ae116474ab24ca17032e64d8c8df"
             },
             {
               "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3035172,
-              "digest": "sha256:686ec37f088f29f1e5ee030393740a53f7b251790776735f20226e6974f958fd"
+              "size": 3035181,
+              "digest": "sha256:63c753c98bce00e08e540b645a531663e216c2777f833251146b335bf4ccfdb6"
             },
             {
               "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
-              "size": 1513196,
-              "digest": "sha256:262c86377f13b5ca6642d0983001aaa938b9e36f2125bd2140a8957615ef88d0"
+              "size": 1513198,
+              "digest": "sha256:24b72a18860ca34c9f15f8925eb51be59457239e47e3ca366ee6e7edc7915fe5"
             },
             {
               "name": "duckctl-linux-aarch64.tar.gz",
-              "size": 362,
-              "digest": "sha256:1fe7b1bf39127d01cd19ed227d2efb90f5359f893050c4d452e980094d17374e"
+              "size": 361,
+              "digest": "sha256:96fb028e364c6cae48f32e5e95b8b7a2bb8f485fe98d9bb23727100972dde83e"
             },
             {
               "name": "duckctl-linux-x86_64.tar.gz",
               "size": 361,
-              "digest": "sha256:966f5280bd71e1dff8415c12d0f70f052f4039039b25cc8acaa206343372de7c"
+              "digest": "sha256:502f285f9f103911a3fe1326c9668634179985d8af2a9a4809963ffa9a0ce128"
             },
             {
               "name": "duckctl-macos-arm64.tar.gz",
               "size": 1504976,
-              "digest": "sha256:2a5c39ae5250723281d3c383f819d637d094efc14df36e5528e6c2087cd06b57"
+              "digest": "sha256:da0ee22d29dff5689cd93a3065f2a12d192ad8895134a5983a6beb00fcd59428"
             },
             {
               "name": "duckctl-macos-x86_64.tar.gz",
               "size": 1601676,
-              "digest": "sha256:9febaee13c4eed0239149f7d1f2f25bbf659e9e0062e02d4f58a282f7f505429"
+              "digest": "sha256:e1bd61082eca5302a05a7c3e6c2e3ef25f38c0e6b58fb0b6feb5050fd28687b8"
             },
             {
               "name": "duckctl-windows-x86_64.zip",
               "size": 1384485,
-              "digest": "sha256:677b34b6b6deb23a8e9f075c3d3d829e870383b4626a7f695937f2b628c381da"
+              "digest": "sha256:a3db00f35e2938d3c95201c987f2ff835e0ec559d5b308f35b813a0eecae7f3e"
             },
             {
               "name": "manifest.json",
               "size": 566,
-              "digest": "sha256:93a228d78bb72116b46f09fb654f5c67fb9205f524e22d457dc66d5a6a1a04f0"
+              "digest": "sha256:90543fd840f91659a5ce7472355a39fd501203f4a789f9dcff2bf8010b28ef31"
             },
             {
               "name": "manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:e42744241e569f4bbe20e2869fc3e22e59c60d332e5f8afa924052ea35c754ae"
+              "digest": "sha256:0c5f7e21baf738740e5333e46e953d1774fdfe67eefeca56f8c41bceb23f822e"
             }
           ],
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/adeb5bceb753026ead1f6d2782209fb20220ee1b",
           "replica_integration": "not integrated; no tracker tests/build/install/hardware acceptance",
           "history": [
             {
@@ -4603,19 +4726,645 @@
               "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
               "replica_integration": "No monitor integration, tests, build, install or hardware acceptance.",
               "superseded_at_utc": "2026-11-05T10:26:13.762195+00:00"
+            },
+            {
+              "tag": "daemon-dev-impact-guard-v3",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-impact-guard-v3",
+              "published_at": "2026-11-05T10:01:29Z",
+              "version": "daemon 0.18.5-dev.1579.dc48e98 (impact-guard-v3)",
+              "head_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+              "prerelease": true,
+              "source_version": "0.18.5",
+              "development_api_version": 50,
+              "api_version": 50,
+              "classification": "moving development prototype; not formal or replica integration",
+              "review": {
+                "change": "Dynamixel startup corrects Current Limit1000mA and Goal Current whenchanged; V3 firmware==3 gets guard EEPROM blocks40/56. Torqueon defers writes, no forced torqueoff. Defaults guardtrue,1rad/s/50ms/400rad/s2/500mA/9rad/s/50%PWM; off unreachable thresholds retains V3firmware.",
+                "scope": "ROBOTIS XL330/customV3 registers and units, not HD1910 support or physical1A guarantee on stock position firmware. No firmware flashed by tracker.",
+                "telemetry": "API50 impact_guard perjoint0/1/2, nonV3null; any state subscriber with sensors adds sync read66 aftergoalwrite. Readerror omitsvector; defaultRobotIoNone. Extra bus time still affects loop; source~1ms not boardmeasurement.",
+                "hazard_report": "Updatedsource says5/5a/5b fall;6/7worked in20pushes,hold/50ms combos6fallsin31pushes; R13min32pushes on upstreamlavandiere. Externaldocumentationclaim, no rawlogs/fullrunmanifest or tracker/hardware reproduction.",
+                "validation": "Six newsoftwaredefinitions read; no tracker runs/hardwarebench/gear or gait acceptance.",
+                "priority": "low currentFeetechdelivery; high hardware-specific research gate",
+                "fixed_sources": {
+                  "bus": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/duck-control/src/bus.rs",
+                  "model": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/duck-control/src/model.rs",
+                  "params": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/robotd-params/src/lib.rs",
+                  "loop": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/robotd/src/main.rs",
+                  "experiment": "https://github.com/pollen-robotics/microduck/blob/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf/docs/robot/cheatsheet.md"
+                },
+                "latest_documentation_followup": {
+                  "source": "https://github.com/pollen-robotics/microduck/blob/dc48e98b0a8d6ddd81b620be8dda1283f64214c0/docs/robot/cheatsheet.md",
+                  "settings_R": {
+                    "v_min_rad_s": 6,
+                    "brake_ms": 20,
+                    "decel_rad_s2": 400,
+                    "i_hold_ma": 32767,
+                    "v_fast_rad_s": 7,
+                    "pwm_fast_percent": 40
+                  },
+                  "code_defaults_unchanged": true,
+                  "R_not_automatically_enabled": true,
+                  "hardware": "ROBOTISV3 on lavandiere only; hold32767 is firmware-specific configuration, not HD1910 current permission. No gear-life or own gait acceptance.",
+                  "author_report_only": true,
+                  "tracker_tests_executed": false
+                }
+              },
+              "asset_inventory": [
+                {
+                  "name": "0.18.5-dev.1579.dc48e98.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:c74e4052344c6a8e0810817fde674c177c23856b3ca0bca074d47aaea21858a5"
+                },
+                {
+                  "name": "0.18.5-dev.1579.dc48e98.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:15b8e9e43a8e49774497a15dccf0c473135d157b0a7180a59f41d7442e5ea55b"
+                },
+                {
+                  "name": "daemon-0.18.5-dev.1579.dc48e98.tar.zst",
+                  "size": 15077118,
+                  "digest": "sha256:0a001bc8759f737a84df4bf11cd1004df25969ba1b59b300eb7c0bac8f06bdce"
+                },
+                {
+                  "name": "daemon-0.18.5-dev.1579.dc48e98.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:b138e0b318c763842c5736380270e0acebe6eabf612e64012ab696afe359eddb"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1674172,
+                  "digest": "sha256:1ff680cbffd7f34a681a702533f7995700ef021f57c30e3adc74ed45bf8ef2a8"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1593922,
+                  "digest": "sha256:1d8f0663e7dbfb0516511c6e37fb1221ff7b9b272e5b3cccae73fff5188cfcbf"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 2808903,
+                  "digest": "sha256:5b212e1ad5d5a4d83596988edd33daefbb2a980bb259b9a97da703a84242ba00"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3035172,
+                  "digest": "sha256:686ec37f088f29f1e5ee030393740a53f7b251790776735f20226e6974f958fd"
+                },
+                {
+                  "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
+                  "size": 1513196,
+                  "digest": "sha256:262c86377f13b5ca6642d0983001aaa938b9e36f2125bd2140a8957615ef88d0"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 362,
+                  "digest": "sha256:1fe7b1bf39127d01cd19ed227d2efb90f5359f893050c4d452e980094d17374e"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:966f5280bd71e1dff8415c12d0f70f052f4039039b25cc8acaa206343372de7c"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1504976,
+                  "digest": "sha256:2a5c39ae5250723281d3c383f819d637d094efc14df36e5528e6c2087cd06b57"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1601676,
+                  "digest": "sha256:9febaee13c4eed0239149f7d1f2f25bbf659e9e0062e02d4f58a282f7f505429"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1384485,
+                  "digest": "sha256:677b34b6b6deb23a8e9f075c3d3d829e870383b4626a7f695937f2b628c381da"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 566,
+                  "digest": "sha256:93a228d78bb72116b46f09fb654f5c67fb9205f524e22d457dc66d5a6a1a04f0"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:e42744241e569f4bbe20e2869fc3e22e59c60d332e5f8afa924052ea35c754ae"
+                }
+              ],
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+              "replica_integration": "not integrated; no tracker tests/build/install/hardware acceptance",
+              "previous_head_sha": "c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
+              "change": "Two documentation-only commits: levels6-9/R and upstream lavandiere robot report. No code/default/test changes.",
+              "latest_increment": {
+                "from_sha": "c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
+                "to_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf...dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+                "commit_count": 2,
+                "file_count": 1,
+                "documentation_only": true
+              },
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf...dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+              "superseded_at_utc": "2026-11-05T11:31:55.815245+00:00"
             }
           ],
-          "previous_head_sha": "c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
-          "change": "Two documentation-only commits: levels6-9/R and upstream lavandiere robot report. No code/default/test changes.",
+          "previous_head_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+          "change": "Rebase sixknownimpactcommits on main16c andaddRdefaultcommit. Originaldc48 notancestor: compare15commits27files includesknownNFC/sysroot; baserelative7commits12files,5of12blobsidenticalold,7changedfilesreviewed.",
           "latest_increment": {
-            "from_sha": "c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
-            "to_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf...dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
-            "commit_count": 2,
-            "file_count": 1,
-            "documentation_only": true
+            "previous_observed_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+            "to_sha": "adeb5bceb753026ead1f6d2782209fb20220ee1b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/dc48e98b0a8d6ddd81b620be8dda1283f64214c0...adeb5bceb753026ead1f6d2782209fb20220ee1b",
+            "comparison_merge_base": "54e0789635ae28120be9ea0dd51750a494ab50ac",
+            "commit_count": 15,
+            "file_count": 27,
+            "is_direct_descendant_increment": false,
+            "new_base_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+            "base_relative_commit_count": 7,
+            "base_relative_file_count": 12,
+            "actual_new_default_commit": "adeb5bceb753026ead1f6d2782209fb20220ee1b",
+            "actual_new_default_files": 7
           },
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/c619ac934cbce29e2f7d2063ec78a3d1dc858ddf...dc48e98b0a8d6ddd81b620be8dda1283f64214c0"
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/dc48e98b0a8d6ddd81b620be8dda1283f64214c0...adeb5bceb753026ead1f6d2782209fb20220ee1b",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/16c960c701e03c17f71135ef9803acb79379cf38...adeb5bceb753026ead1f6d2782209fb20220ee1b",
+          "comparison_to_recorded_main": {
+            "main_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "actual_merge_base": "16c960c701e03c17f71135ef9803acb79379cf38",
+            "ahead_by": 7,
+            "behind_by": 3
+          }
+        },
+        {
+          "tag": "daemon-dev-pad-mapping",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-pad-mapping",
+          "published_at": "2026-11-05T11:09:05Z",
+          "version": "daemon 0.18.5-dev.1584.30a0e3b (pad-mapping)",
+          "head_sha": "30a0e3bb601e46913c42358a056104ee27f36500",
+          "prerelease": true,
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "development_api_version": 49,
+          "classification": "new moving development prototype; not formal/main/projectintegration",
+          "change": "13emotionsJSON/WAV vendored inbranch, layeredreleaseemotions then user/emotions.dir default/var/lib/robot/emotions; startupread. LB yes/RB no/Y excited new defaults, A/B unchanged,Xempty; explicitexistingconfiguration wins.",
+          "review": {
+            "change": "13emotionsJSON/WAV vendored inbranch, layeredreleaseemotions then user/emotions.dir default/var/lib/robot/emotions; startupread. LB yes/RB no/Y excited new defaults, A/B unchanged,Xempty; explicitexistingconfiguration wins.",
+            "player": "Finitevalues/strictlyincreasingtime; mouth0..1; no dedicatedhead/bodyhardwarerange validation. Interpolates head/bodypose/mouth, zeros twist forcurrenttick, firstsitframe requests sitonce; twist/soften/relax ignored. MissingWAV loads silent, invalidJSON skipped, user same-name replaces shipped, policynamewins duplicate.",
+            "ownership": "robot.do accepted meansqueueonly, busy requestmaydrop, latestpendingemotionwins. Sticks commands remainstored andlatestonesresume aftertimeline. Onlystartchecksc.busy; ordinaryskillhandlerstillrunsduringemotion, so no blanketfullmotionexclusion. Naturalend clearsplaying butdoesnotstopwav; independentoneshot/ridePCMownership can skiporpreempt sound without stoppinganimation.",
+            "assets": "13json filesparsed asdata; devastatedsit, play_deadexcluded, curiousneck/head_pitchzeroedbyvendor. WAVGitblobIDs only, no audiobytesdownload/decode/listening. Vendorscripttakescallerclone withoutpinned upstreamrevision; no newemotionsrepohead claim.",
+            "packaging": "Bothworkflows/devpush/package helpers include shallowemotiondirectory; sourcefixturechecks do not prove actualARMarchive/imagecontents. No archive downloaded or installed.",
+            "tests": "Nine newdefinitions read:7emotionmodule,1queue/subscription,1packagingsite; otherexistingfixturesadjusted. No realcontrolloop/audio/HD1910 reproduction.",
+            "priority": "medium-high action/audio research; hardware/ownership and delivery gate before port",
+            "fixed_sources": {
+              "player": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/robotd/src/emotion.rs",
+              "loop": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/robotd/src/main.rs",
+              "sound": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/robotd/src/sound.rs",
+              "defaults": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/robotd-params/src/lib.rs",
+              "vendor": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/scripts/vendor-emotions.py",
+              "package": "https://github.com/pollen-robotics/microduck/blob/30a0e3bb601e46913c42358a056104ee27f36500/xtask/src/main.rs"
+            },
+            "not_included": [
+              "newmodelweights/training",
+              "ASR/TTS",
+              "camera/ToF",
+              "HD1910directionorpolicyadaptation"
+            ],
+            "tracker_tests_executed": false
+          },
+          "changed_file_count": 45,
+          "commit_count": 4,
+          "actual_merge_base": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/c15c2377d8a80662405bb5e773351c984ad6cffc...30a0e3bb601e46913c42358a056104ee27f36500",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/30a0e3bb601e46913c42358a056104ee27f36500",
+          "asset_inventory": [
+            {
+              "name": "0.18.5-dev.1584.30a0e3b.manifest.json",
+              "size": 386,
+              "digest": "sha256:e5f3fbf9ae0ae90c8fc730aa43b9ee336eb84d59a735a12e26a93bb66b635a63"
+            },
+            {
+              "name": "0.18.5-dev.1584.30a0e3b.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:abe5ea3b26c106803be38f042885ac5f72dcf1fb6a708aab4498f6dc309cb1d4"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1584.30a0e3b.tar.zst",
+              "size": 16326242,
+              "digest": "sha256:0272f85cc6a861196fb3b1220d401f65967440da756312e3f46dc989483e0e05"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1584.30a0e3b.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:bb97daba61497ae7eeedc4e6ade030df8961f66dc3c17d205292b0c3474c9267"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674212,
+              "digest": "sha256:d9a283d6cf353194f8bf843e76aa80bb8954976f0effad432b9eecdce3cef126"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594073,
+              "digest": "sha256:9c677bcd38c84176abdfd89844b5db8971216b12f757eebcd36595e800256560"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809229,
+              "digest": "sha256:b383f04ac75c27bdbb16de08f160f2b9aaf8fdf422d91d2314d8a17f5dee24b5"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035988,
+              "digest": "sha256:5c1d809f69db6ad273a3608f3b17d0413bd2767d3366ed07621d5c88f71f3099"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
+              "size": 1512470,
+              "digest": "sha256:8241cb6130b9222e96096378948ca4877627d4994e090f43e8d70468a3ce91bf"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:3fb9f0660af7af211f6a3583d29ea4a9e40e6eedfb94faa17151752b2cba7817"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:f74d650c7015d441dc150cfb410f39ac1c68c17a924e2ba9f301bfd0c429faec"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505214,
+              "digest": "sha256:b993af9d6a5977a812d0108b84f67fe4d08dff4e48b04d18ae85cb194c611412"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601709,
+              "digest": "sha256:efc7a3361cb51f5563a57bbfddaab19fe8e0aa2cd096f094793e158bb77b669c"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1383897,
+              "digest": "sha256:deb23dd8959922e37414b363873acbcd6dd1e8cdf5c2cad375e2c0696c0c6480"
+            },
+            {
+              "name": "manifest.json",
+              "size": 558,
+              "digest": "sha256:3bd14c5ad02b12063238ae2d28986539970f5226aa18e86d08c14850e10084d7"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:5db6e60b954283181b5fd3ea29929aeaf5defbc6faa1ff4fe581392c84f9327b"
+            }
+          ],
+          "priority": "medium-high action/audio research; hardware/ownership and delivery gate before port",
+          "replica_integration": "Not integrated,tested,built,installed or hardwareacceptedbytracker.",
+          "emotion_asset_blobs": [
+            {
+              "path": "robotd/emotions/angry.json",
+              "git_blob": "9758c8a738fd51c3853d14d137d07a429b6bacaa"
+            },
+            {
+              "path": "robotd/emotions/angry.wav",
+              "git_blob": "d5591bf6302a128d7695a674b14143956bf166bf"
+            },
+            {
+              "path": "robotd/emotions/curious.json",
+              "git_blob": "aaf939ec51f9139e4974e97cf4c9924a9bdbdbf6"
+            },
+            {
+              "path": "robotd/emotions/curious.wav",
+              "git_blob": "e89b4f47297a43444b3501c2eefbfaa49af773bf"
+            },
+            {
+              "path": "robotd/emotions/defiant.json",
+              "git_blob": "69c5459742ba5dcd653ef3f954a12e66ddd9ac33"
+            },
+            {
+              "path": "robotd/emotions/defiant.wav",
+              "git_blob": "e1912a1b9a3758b44827458fa3ccfe27f4833468"
+            },
+            {
+              "path": "robotd/emotions/devastated.json",
+              "git_blob": "3612442bfe8333c4089a823acade3c1862049187"
+            },
+            {
+              "path": "robotd/emotions/devastated.wav",
+              "git_blob": "b3d93561bca64d3c3d33e6d2413c46608267d0d6"
+            },
+            {
+              "path": "robotd/emotions/excited.json",
+              "git_blob": "7892a8c79215bcbbd65847242cc1fbba3257d1f3"
+            },
+            {
+              "path": "robotd/emotions/excited.wav",
+              "git_blob": "1670dc8bf26957ecafde01b2128274529204fa0f"
+            },
+            {
+              "path": "robotd/emotions/impatient.json",
+              "git_blob": "af177907de0eb0eccaffcefe400266df4e1cccc8"
+            },
+            {
+              "path": "robotd/emotions/impatient.wav",
+              "git_blob": "f066f331c4473faac1c7fed4f2fd17c59a0790c8"
+            },
+            {
+              "path": "robotd/emotions/laugh.json",
+              "git_blob": "58b165de6c8cec9443998a04bc79041256efe065"
+            },
+            {
+              "path": "robotd/emotions/laugh.wav",
+              "git_blob": "82269d953b624ee3d2e4566004bda8fa30f1f50a"
+            },
+            {
+              "path": "robotd/emotions/mmh.json",
+              "git_blob": "a04fc070bafaf051f6534f218def5bda943d11b4"
+            },
+            {
+              "path": "robotd/emotions/mmh.wav",
+              "git_blob": "3cf3488e9e87499f5cae5bc14f5e31b698f6f202"
+            },
+            {
+              "path": "robotd/emotions/mock.json",
+              "git_blob": "fda02798af27421faa9499ec5ec370f2032ac783"
+            },
+            {
+              "path": "robotd/emotions/mock.wav",
+              "git_blob": "fd922f9f08246276bfe9e5af4c45949058fcf22a"
+            },
+            {
+              "path": "robotd/emotions/no.json",
+              "git_blob": "ce3ecfaaf9289141be68ee418ca0f186d3b555ab"
+            },
+            {
+              "path": "robotd/emotions/no.wav",
+              "git_blob": "48e6e5830ede900694ff9c5d432a2b396c649f40"
+            },
+            {
+              "path": "robotd/emotions/sad.json",
+              "git_blob": "26596eaecc455e14c72fadd938789b2b97c4a9f3"
+            },
+            {
+              "path": "robotd/emotions/sad.wav",
+              "git_blob": "5ba1422b809019b5f580ea038f7e7e4dcf5fd703"
+            },
+            {
+              "path": "robotd/emotions/yes.json",
+              "git_blob": "947a561b2aba20a54da1b710ff1d7a65ba4a031b"
+            },
+            {
+              "path": "robotd/emotions/yes.wav",
+              "git_blob": "e77d8a4bb73c27a2c4881c71a98b69ba278b2102"
+            },
+            {
+              "path": "robotd/emotions/yes_fast.json",
+              "git_blob": "42986b421380894445301149ff291d3d820599f3"
+            },
+            {
+              "path": "robotd/emotions/yes_fast.wav",
+              "git_blob": "110df08d3b68f00a22faf2f8e92bc19973bd0196"
+            }
+          ]
+        },
+        {
+          "tag": "daemon-dev-dev-build-refusal-message",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-dev-build-refusal-message",
+          "published_at": "2026-11-05T11:23:40Z",
+          "version": "daemon 0.18.5-dev.1585.2e4743b (dev-build-refusal-message)",
+          "head_sha": "2e4743b258890d762dc9f055b1d9a96758b951c0",
+          "prerelease": true,
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "development_api_version": 49,
+          "classification": "developmentbuild forpendingPR534; not main/formal/projectintegration",
+          "change": "After normalmanifest signatureverification fails, detectvalidsignature from knownwithhelddevkey andreturn actionableDevBuildsNotAllowed message. Stillrefuses, sameVERIFICATION_FAILEDcode, unknown/badsignaturegenericerror.",
+          "review": {
+            "change": "After normalmanifest signatureverification fails, detectvalidsignature from knownwithhelddevkey andreturn actionableDevBuildsNotAllowed message. Stillrefuses, sameVERIFICATION_FAILEDcode, unknown/badsignaturegenericerror.",
+            "scope": "Message-only diagnostic, notautomaticallowdev/trustrelaxation or ownupdatecontract. IPC49 unchanged; RustErrorvariantnew.",
+            "tests_read": [
+              "a_withheld_dev_key_is_named_only_for_its_own_signature",
+              "a_dev_signed_build_on_a_non_dev_board_says_how_to_allow_it"
+            ],
+            "tracker_tests_executed": false,
+            "priority": "low-medium update diagnosis",
+            "fixed_sources": {
+              "engine": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/engine.rs",
+              "keycheck": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/verify.rs",
+              "error": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/lib.rs"
+            }
+          },
+          "changed_file_count": 5,
+          "commit_count": 1,
+          "actual_merge_base": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/c15c2377d8a80662405bb5e773351c984ad6cffc...2e4743b258890d762dc9f055b1d9a96758b951c0",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/2e4743b258890d762dc9f055b1d9a96758b951c0",
+          "asset_inventory": [
+            {
+              "name": "0.18.5-dev.1585.2e4743b.manifest.json",
+              "size": 386,
+              "digest": "sha256:a8e1bbc696b4d4ba8bf78542fcdd5014422109bf6cb2a6082be1fe65320ee2a7"
+            },
+            {
+              "name": "0.18.5-dev.1585.2e4743b.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:98f8409e277c6ccbccef80a42e30ade150f1556f252291c17283d6c9fdd4333c"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1585.2e4743b.tar.zst",
+              "size": 14969095,
+              "digest": "sha256:1a4ad6fdc9543c53953524e61d300d0e07e02f1ff29e2e53fef2d7961f75e32e"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1585.2e4743b.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:8390d7cb43de1bd414074858f043ddafd8febf55f2ac6a07ef23f7a8c93ba2f6"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674213,
+              "digest": "sha256:231b9e1f564c6a8b1d47a04f8f8bdd9df8b985f5a040ba71a6532927221a3150"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594075,
+              "digest": "sha256:d213eb6819c38796a08d799f638ef9ca7975daf1a32137e48a4d6f745e5f58b8"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809231,
+              "digest": "sha256:c80801073859ce9343e39aa707c4d4423071fa4e870f5e347fd50598d869145e"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035339,
+              "digest": "sha256:792c28852c01653145051326da1b893e2876ab958f23f13216285e50487f73d5"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
+              "size": 1512471,
+              "digest": "sha256:83041f0237ff9ec2273f00784741dd15ccdfdbf1ab17dd86f107502fc8b9b30f"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:46f916a04af8eea93ea42ab8154d4ec5d59ffcac712b70244c6bd20f074ff093"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:1746a728e9258d77cd16cbb92f62ecc0c9cbc19f42e224c14ed750a18f9f225a"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505214,
+              "digest": "sha256:7128159af87e4ea82ccbde4c7b0095105e5522f8291545394068cc58ac48ec7e"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601714,
+              "digest": "sha256:4af5a26250c9a0979e381909b86153aae2ef5a305c797f9068032313ca65364f"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1383896,
+              "digest": "sha256:9d7aee25241705e6b37a8bead9d9d7de65a1fc52150dc0fc637d503d4e3ed399"
+            },
+            {
+              "name": "manifest.json",
+              "size": 586,
+              "digest": "sha256:d4c44ccb6830a6c21ada83a42ed55e47c0ebaaf2646efefde79933205a5e72cd"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:3b2e7e052337e55d20e37fc5e90be5a2dd04b50e70fe7a08448f9b00c65e5b72"
+            }
+          ],
+          "priority": "low-medium update diagnosis",
+          "replica_integration": "Not integrated,tested,built,installed or hardwareacceptedbytracker.",
+          "pull_request": 534
+        },
+        {
+          "tag": "daemon-dev-board-face-board-v1",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-board-face-board-v1",
+          "published_at": "2026-11-05T10:46:45Z",
+          "version": "daemon 0.18.5-dev.1583.f12beca (board-face-board-v1)",
+          "head_sha": "f12becac5aaca58f7ec42cb518c146ee54bd2883",
+          "prerelease": true,
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "development_api_version": 49,
+          "classification": "new moving development prototype; not formal/main/projectintegration",
+          "change": "Board::FaceBoardV1 label face-board-v1/hw_rev3, first matching compatible identifies it when exact specialstring precedes beta prefix. is_beta_main_board routes FaceBoardV1 asBeta.",
+          "review": {
+            "change": "Board::FaceBoardV1 label face-board-v1/hw_rev3, first matching compatible identifies it when exact specialstring precedes beta prefix. is_beta_main_board routes FaceBoardV1 asBeta.",
+            "hardware": "Reuses betaGC2093/mount0deg,bodyIMUmount,robotdheadIMU,SPIToF/NFC,CPUserial. ExplicitToFoverride retained. No LEDdriver/buttonlogic/newcalibration or HD1910HAT support.",
+            "compatibility": "Olderdaemon rejects unknown board enum and willnotstart. hw_rev3 is declaredboardidentity, not genericforkupgradepermission. Branch actualmergebasea64; currentc15target differs by5knownmaincommits.",
+            "validation": "Existing config/board/serial/ToF/headIMU testfunctions extended, no newtestfunction. Author reports specificcrate tests and aarch64clippy apart unrelated manual_option_zip; tracker does not reproduce or accept hardware.",
+            "priority": "medium officialboard tracking; low currentFeetechdelivery",
+            "fixed_sources": {
+              "board": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/board.rs",
+              "head_imu": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/lib.rs",
+              "serial": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/serial.rs",
+              "tof": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/tof/src/link.rs",
+              "robotd": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd/src/main.rs",
+              "provision": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/scripts/provision-board.sh"
+            },
+            "related_proposal": {
+              "repository": "pollen-robotics/microduck_yocto",
+              "number": 95,
+              "head_sha": "e396144ecd86d9e894c5e0547e688c8c5dda880f",
+              "state": "open"
+            },
+            "tracker_tests_executed": false
+          },
+          "changed_file_count": 10,
+          "commit_count": 1,
+          "actual_merge_base": "a64ee692eebfce46a35c50b77705249752df9273",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...f12becac5aaca58f7ec42cb518c146ee54bd2883",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/f12becac5aaca58f7ec42cb518c146ee54bd2883",
+          "asset_inventory": [
+            {
+              "name": "0.18.5-dev.1583.f12beca.manifest.json",
+              "size": 386,
+              "digest": "sha256:76d80856f58966033bb1b1c96931a7e24931c34d2d7e9bb31915c3b06b83ff55"
+            },
+            {
+              "name": "0.18.5-dev.1583.f12beca.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:bb3a8f9045c0a0090175fd36841e17f169872949d60f77c62b801390516fa4fc"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1583.f12beca.tar.zst",
+              "size": 15078872,
+              "digest": "sha256:fb3df081798afb9723912c6f9d0a54b98a1d591fb693143c411cd709f7daaf72"
+            },
+            {
+              "name": "daemon-0.18.5-dev.1583.f12beca.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:778cfef2f718e755c7c06be8b7969d79b4cd67afb30b8c7d71c479d0097ef4b0"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674213,
+              "digest": "sha256:13c9550a202ecaa9a046d4f67aeb3a6450a053bd50e631cdfb5b13c78602eb5f"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594072,
+              "digest": "sha256:4ae0c12e07d89b423f5b2cf6347832c5805aa4cc94d23346f15c8d49a91e5240"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809227,
+              "digest": "sha256:b60bc694234f994f375454f9c220cfadeaa2a9eff62b575d1af70ce4d5cbb51d"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035267,
+              "digest": "sha256:1f6ff69fcedbd38ac04fd2a4aa37ab665391c0f29929667a597e8369a9843c1c"
+            },
+            {
+              "name": "duckctl-0.18.5-py3-none-win_amd64.whl",
+              "size": 1512472,
+              "digest": "sha256:e48e3d6fa0a67170d168b8d1508c522365d95809298401e8d19aff12048708e0"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:ebed6a26ebfe3d3b61e8d53088bbcc4fb821e75f7bdfcac400fc64e93e6fddf6"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:70ada9f2fe5e1f175fe60aa94710bb3e794aeeb7c9a02ac6cf476cc859c9014a"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505214,
+              "digest": "sha256:58347484fe847f40bb2c0e9e6ab6213b0ee684163bef2cc687b7caa074623ad0"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601714,
+              "digest": "sha256:cd425894e4878b8e6dbd00986e5cc03a52e9dfa91ca1ea184ba3b821b90f28b2"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1383897,
+              "digest": "sha256:31af9d8afb805411838bc72ad6f71bd44b92de21876f395c5b08ab335559be43"
+            },
+            {
+              "name": "manifest.json",
+              "size": 574,
+              "digest": "sha256:3cda584d9cd6675c6de0b022018b7ee0d7a17d384fa1b9775ca356159bd659c9"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:9e84840d064dc37babf8b1e25af8c0fb9087a4cc9509ab165b206bc84fe7b512"
+            }
+          ],
+          "priority": "medium officialboard tracking; low currentFeetechdelivery",
+          "replica_integration": "Not integrated,tested,built,installed or hardwareacceptedbytracker."
         }
       ],
       "pending_pull_requests": [
@@ -9157,6 +9906,95 @@
           "priority": "medium",
           "replica_integration": "not integrated; no own tests or image change",
           "impact": "Audio source test seam only; no HD1910/camera/ToF/motion, model-management/weights/training or voice pipeline changes."
+        },
+        {
+          "number": 533,
+          "title": "Add the face-board-v1 board",
+          "url": "https://github.com/pollen-robotics/microduck/pull/533",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-05T10:38:35Z",
+          "updated_at": "2026-11-05T11:18:05Z",
+          "merged_at": null,
+          "merge_commit_sha": "9f0933fafc41fb0c4fbe758469ed5f2b263ce0cd",
+          "head_sha": "f12becac5aaca58f7ec42cb518c146ee54bd2883",
+          "base_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+          "base_branch": "main",
+          "actual_merge_base": "a64ee692eebfce46a35c50b77705249752df9273",
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "changed_file_count": 10,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...f12becac5aaca58f7ec42cb518c146ee54bd2883",
+          "comparison_to_recorded_main": {
+            "main_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+            "ahead_by": 1,
+            "behind_by": 5
+          },
+          "classification": "pending officialboard identity proposal; separate dev1583 exists",
+          "review": {
+            "change": "Board::FaceBoardV1 label face-board-v1/hw_rev3, first matching compatible identifies it when exact specialstring precedes beta prefix. is_beta_main_board routes FaceBoardV1 asBeta.",
+            "hardware": "Reuses betaGC2093/mount0deg,bodyIMUmount,robotdheadIMU,SPIToF/NFC,CPUserial. ExplicitToFoverride retained. No LEDdriver/buttonlogic/newcalibration or HD1910HAT support.",
+            "compatibility": "Olderdaemon rejects unknown board enum and willnotstart. hw_rev3 is declaredboardidentity, not genericforkupgradepermission. Branch actualmergebasea64; currentc15target differs by5knownmaincommits.",
+            "validation": "Existing config/board/serial/ToF/headIMU testfunctions extended, no newtestfunction. Author reports specificcrate tests and aarch64clippy apart unrelated manual_option_zip; tracker does not reproduce or accept hardware.",
+            "priority": "medium officialboard tracking; low currentFeetechdelivery",
+            "fixed_sources": {
+              "board": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/board.rs",
+              "head_imu": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/lib.rs",
+              "serial": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd-params/src/serial.rs",
+              "tof": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/tof/src/link.rs",
+              "robotd": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/robotd/src/main.rs",
+              "provision": "https://github.com/pollen-robotics/microduck/blob/f12becac5aaca58f7ec42cb518c146ee54bd2883/scripts/provision-board.sh"
+            },
+            "related_proposal": {
+              "repository": "pollen-robotics/microduck_yocto",
+              "number": 95,
+              "head_sha": "e396144ecd86d9e894c5e0547e688c8c5dda880f",
+              "state": "open"
+            },
+            "tracker_tests_executed": false
+          },
+          "priority": "medium tracking; low currenthardware applicability",
+          "replica_integration": "not integrated; no hardware/config or image change",
+          "impact": "Camera/ToF/IMU/NFC selection follows existingBeta; no HD1910 protocol/model/training/motion/sound change."
+        },
+        {
+          "number": 534,
+          "title": "updater: a dev build on a non-dev board says how to allow it",
+          "url": "https://github.com/pollen-robotics/microduck/pull/534",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-05T11:27:10Z",
+          "updated_at": "2026-11-05T11:31:04Z",
+          "merged_at": null,
+          "merge_commit_sha": "db27408b25083094feec3a119684640675a3e83a",
+          "head_sha": "2e4743b258890d762dc9f055b1d9a96758b951c0",
+          "base_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc",
+          "base_branch": "main",
+          "source_version": "0.18.5",
+          "api_version": 49,
+          "commit_count": 1,
+          "changed_file_count": 5,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/c15c2377d8a80662405bb5e773351c984ad6cffc...2e4743b258890d762dc9f055b1d9a96758b951c0",
+          "classification": "pending proposal corresponding to alreadyrevieweddev1585",
+          "review": {
+            "change": "After normalmanifest signatureverification fails, detectvalidsignature from knownwithhelddevkey andreturn actionableDevBuildsNotAllowed message. Stillrefuses, sameVERIFICATION_FAILEDcode, unknown/badsignaturegenericerror.",
+            "scope": "Message-only diagnostic, notautomaticallowdev/trustrelaxation or ownupdatecontract. IPC49 unchanged; RustErrorvariantnew.",
+            "tests_read": [
+              "a_withheld_dev_key_is_named_only_for_its_own_signature",
+              "a_dev_signed_build_on_a_non_dev_board_says_how_to_allow_it"
+            ],
+            "tracker_tests_executed": false,
+            "priority": "low-medium update diagnosis",
+            "fixed_sources": {
+              "engine": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/engine.rs",
+              "keycheck": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/verify.rs",
+              "error": "https://github.com/pollen-robotics/microduck/blob/2e4743b258890d762dc9f055b1d9a96758b951c0/updater/src/lib.rs"
+            }
+          },
+          "priority": "low-medium diagnosis",
+          "replica_integration": "not integrated or tested bytracker",
+          "impact": "Sameverifieddevkeyrefusal message, no trustpolicy, runtimehardware, camera,ToF,model,training,motion orsound adoption."
         }
       ],
       "previous_stable_releases": [
@@ -11264,6 +12102,33 @@
           ],
           "merge_commit_sha": "a7d1468736f883ba636b81d342b2923d4dde9cbf",
           "default_branch_verified_at_sha": "a7d1468736f883ba636b81d342b2923d4dde9cbf"
+        },
+        {
+          "repository": "pollen-robotics/microduck_yocto",
+          "number": 95,
+          "title": "face-board-v1: declare the board as face-board-v1",
+          "url": "https://github.com/pollen-robotics/microduck_yocto/pull/95",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-05T10:38:49Z",
+          "updated_at": "2026-11-05T10:38:49Z",
+          "merged_at": null,
+          "merge_commit_sha": "a6eba69bed24dd2cb18fffcc808920e9e51c51ab",
+          "head_sha": "e396144ecd86d9e894c5e0547e688c8c5dda880f",
+          "base_sha": "efa27b71ce9c92e07a706f7f16d065dc38bf5882",
+          "commit_count": 1,
+          "changed_file_count": 4,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/efa27b71ce9c92e07a706f7f16d065dc38bf5882...e396144ecd86d9e894c5e0547e688c8c5dda880f",
+          "classification": "pending pairedproposal for533, not merged or publishedimage",
+          "review": {
+            "change": "Machine declaresface-board-v1 withBetafallback. Existing[board]template postinst grepsseededrobotd for boardstring; no binaryerrors, absentstringfallback, no[board]table preservesnoop.",
+            "limits": "Binarysubstringpresence heuristic, not protocolcapability handshake; doesnotrevalidatefallbackstring. RAUCcompatiblemachine identity stillseparate fromBeta, not interchangeableimages.",
+            "validation": "Authorreports oelint/fakerootfs cases andhostrobotdstring; explicitlynoBitbake. No tracker execution/image/hardware acceptance.",
+            "depends_on_daemon_PR": 533,
+            "fixed_source": "https://github.com/pollen-robotics/microduck_yocto/blob/e396144ecd86d9e894c5e0547e688c8c5dda880f/meta-microduck/recipes-microduck/microduck-board/microduck-board.bb",
+            "priority": "medium paired image declaration review, not project build authorization"
+          },
+          "replica_integration": "not integrated or built; ownhardware/acceptance unchanged"
         }
       ],
       "stable_change_history": [
@@ -12123,10 +12988,10 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-05T10:27:32.168620+00:00",
+  "checked_at_utc": "2026-11-05T11:38:22.568853+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-05T08:28:53.693087+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-05T10:27:32.168620+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.5",
     "stable_release_actual_sha": "54e0789635ae28120be9ea0dd51750a494ab50ac",
@@ -12134,32 +12999,42 @@
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        532
+        533,
+        534
       ]
     },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        531,
-        529
+    "updated_pull_requests": {},
+    "new_related_pull_requests": {
+      "pollen-robotics/microduck_yocto": [
+        95
       ]
     },
-    "previous_tracked_prs_merged": true,
-    "new_development_releases": [],
+    "previous_tracked_prs_merged": false,
+    "new_development_releases": [
+      {
+        "tag": "daemon-dev-pad-mapping",
+        "head_sha": "30a0e3bb601e46913c42358a056104ee27f36500"
+      },
+      {
+        "tag": "daemon-dev-dev-build-refusal-message",
+        "head_sha": "2e4743b258890d762dc9f055b1d9a96758b951c0"
+      },
+      {
+        "tag": "daemon-dev-board-face-board-v1",
+        "head_sha": "f12becac5aaca58f7ec42cb518c146ee54bd2883"
+      }
+    ],
     "moved_development_tags": [
       {
         "tag": "daemon-dev-main",
-        "from_sha": "a64ee692eebfce46a35c50b77705249752df9273",
-        "to_sha": "16c960c701e03c17f71135ef9803acb79379cf38"
+        "from_sha": "16c960c701e03c17f71135ef9803acb79379cf38",
+        "to_sha": "c15c2377d8a80662405bb5e773351c984ad6cffc"
       },
       {
         "tag": "daemon-dev-impact-guard-v3",
-        "from_sha": "c619ac934cbce29e2f7d2063ec78a3d1dc858ddf",
-        "to_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0"
+        "from_sha": "dc48e98b0a8d6ddd81b620be8dda1283f64214c0",
+        "to_sha": "adeb5bceb753026ead1f6d2782209fb20220ee1b"
       }
-    ],
-    "retired_development_tags": [
-      "daemon-dev-cross-sysroot-truncated-deb",
-      "daemon-dev-roller-idle-and-accel"
     ],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
@@ -12169,7 +13044,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "notes": "531sysroot and529roller mergedmainc15, fixedsource0.18.5/API49, formal18554and8assets unchanged. Short-lived devlabels retired with lastbuild preserved. Impactdc48/dev1579 only docs:lavandiere findings/R not code defaultorown acceptance. New532rawPCM sourceproposal usespublicRustfieldchange/noIPCversionchange; threeunitfixtures do not invoke realworker/pump. Own15series deliveries and independent0182 unchanged."
+    "notes": "Mainc15/formal18554 unchanged; devmain1581 catchesup529. Newpadmapping30a/API49 adds13emotionpairs/player/threebuttondefaults, gate/ownership/soundlimits reviewed, no runtimeexecution. Newface533/f12dev1583 actualbasea64/API49 lacks5maincommits, pairedpendingYocto95 binary-namefallback. Impactadeb/dev1582 rebaseson16c then changescodedefaultstoR, custom50notofficialorHD1910. Newdevrefusal2e/dev1585 signed-withhelddevkey diagnosisstillrefuses. Own15seriesreleases/stable31-r1/27image and independent0182 unchanged. Devrefusal sameSHA2e nowalsoopenPR534, not anotherfeature.",
+    "source_snapshot_utc": "2026-11-05T11:35:12.530064+00:00"
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
