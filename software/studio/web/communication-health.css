@@ -7,7 +7,7 @@
 .comm-badge.warn{background:#fff2e4;color:var(--warn)}
 .comm-badge.bad{background:#ffeded;color:var(--danger)}
 .comm-badge.stale,.comm-badge.neutral{background:#f0f1f4;color:var(--text-2)}
-.sv-monitor{min-width:0;overflow:hidden}
+.sv-monitor{min-width:0;overflow:hidden;container-name:servo-monitor;container-type:inline-size}
 .sv-monitor .comm-monitor-head{padding:12px 18px 10px}
 .sv-monitor .comm-monitor-head>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .sv-monitor .comm-monitor-head h2{font-size:14px}.sv-monitor .comm-monitor-head p{margin:0}
@@ -25,6 +25,9 @@
 .comm-servo-strip{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;min-width:0;padding:2px 2px 10px;scrollbar-width:thin;scrollbar-color:#aeb9c9 transparent}
 .comm-servo-strip:focus-visible{outline:2px solid #2f7cf6;outline-offset:2px;border-radius:8px}
 .comm-servo-strip .comm-servo-card{flex:0 0 198px}
+@container servo-monitor (min-width:1440px){
+ .comm-servo-strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));overflow-x:visible}
+}
 .comm-strip-detail{margin:0 18px 10px}
 .comm-servo-card{display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left;border:1px solid var(--line);border-radius:11px;padding:11px;background:white;color:var(--text);cursor:pointer;font-size:12px;font-variant-numeric:tabular-nums}
 .comm-servo-card:hover{border-color:#9baac6;background:#fafcff}

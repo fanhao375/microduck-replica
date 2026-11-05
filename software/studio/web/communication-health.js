@@ -105,10 +105,10 @@ export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0})
     </div>
     ${attention.length ? html`<div class="comm-attention" role="status"><b>${attention.length} 颗需关注</b>
       ${attention.map(x=>html`<button type="button" onClick=${()=>onSelect(x.row.id)}>#${x.row.id} ${x.row.cn} · ${x.status.text}</button>`)}</div>`:null}
-    <div class="comm-strip-heading"><span>${rows.length} 颗舵机 · 左右滑动查看</span><span class="comm-strip-arrows">
+    <div class="comm-strip-heading"><span>${rows.length} 颗舵机 · ${ends.before||ends.after?'左右滑动查看':'全部显示'}</span>${ends.before||ends.after ? html`<span class="comm-strip-arrows">
       <button type="button" aria-label="向左查看舵机" aria-controls="servo-card-strip" disabled=${!ends.before} onClick=${()=>slide(-1)}>‹</button>
       <button type="button" aria-label="向右查看舵机" aria-controls="servo-card-strip" data-servo-next disabled=${!ends.after} onClick=${()=>slide(1)}>›</button>
-    </span></div>
+    </span>`:null}</div>
     <div class="comm-strip-wrap"><div class="comm-servo-strip" id="servo-card-strip" ref=${strip} role="region" aria-label="舵机卡片，左右滑动查看" tabindex="0">
       ${ordered.map(({row,group,label})=>{
         const status=rowStatus(row,live,elapsed);

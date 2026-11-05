@@ -86,6 +86,15 @@ try {
   assert.equal(await js(`document.querySelectorAll('.sv-monitor-row').length`),15);
   const compact=await js(`(()=>{const cards=[...document.querySelectorAll('.sv-monitor-row')];return {columns:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().left))).size,rows:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().top))).size,height:document.querySelector('.sv-monitor').getBoundingClientRect().height}})()`);
   assert.equal(compact.rows,1,'all fifteen servos stay in one horizontal row');
+  await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});
+  await js(`document.querySelector('#fixture').style.maxWidth='none'`);
+  await wait(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().top))).size===2`, 'wide screen shows two rows');
+  assert.equal(await js(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().left))).size`),8,'wide layout has eight columns');
+  assert.ok(await js(`(()=>{const s=document.querySelector('.comm-servo-strip'),r=s.getBoundingClientRect();return s.scrollWidth<=s.clientWidth+2&&[...s.children].every(e=>{const c=e.getBoundingClientRect();return c.left>=r.left&&c.right<=r.right+2})})()`),'all fifteen servos are visible without horizontal scrolling');
+  await wait(`!document.querySelector('[data-servo-next]')`, 'wide layout hides unnecessary arrows');
+  await shot('servo-cards-fullscreen');
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await wait(`!!document.querySelector('[data-servo-next]')`, 'narrow window restores scrolling arrows');
   assert.ok(await js(`document.querySelector('.comm-servo-strip').scrollWidth>document.querySelector('.comm-servo-strip').clientWidth`),'only the card strip scrolls sideways');
   await js(`document.querySelector('[data-servo-next]').click()`);
   await wait(`document.querySelector('.comm-servo-strip').scrollLeft>100`, 'next arrow scrolls cards');
