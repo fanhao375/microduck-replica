@@ -13,7 +13,6 @@ import { drawServoLabels } from './labels.js';
 import { TwoStep } from './confirm.js';
 import { Stepper } from './stepper.js';
 import { servoReplyStatus } from './startup-status.js';
-import { ServoMonitor, ServoInspector, ReadOrderPanel } from './communication-health.js';
 
 // 官方参考姿势：microduck_rl scene.xml 的关键帧（servo-web 同一份），弧度、模型约定，按 JOINT_NAMES 顺序。
 const POSES = {
@@ -42,13 +41,13 @@ let calibHandler = null;      // ServoPage 设置：各处的「中位校准」�
 
 // ---------------- 3D ----------------
 
-function ServoStage({ sv, pose, setPose, selected, onSelect, compact = false }) {
+function ServoStage({ sv, pose, setPose, selected, onSelect }) {
   const boxRef = useRef(null), canvasRef = useRef(null), duckRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [moved, setMoved] = useState(false);
 
   useEffect(() => {
-    const d = new Duck3D(canvasRef.current, { view: 'front', centerX: 0.5, centerY: compact ? 0.56 : 0.52, fill: compact ? 0.65 : 0.82 });
+    const d = new Duck3D(canvasRef.current, { view: 'front', centerX: 0.5, centerY: 0.52, fill: 0.82 });
     duckRef.current = d;
     d.onUserMove = () => setMoved(true);
     d.onPick = (name) => ID_OF[name] && onSelect(ID_OF[name]);
@@ -190,8 +189,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint }) {
 // 舵机数据每秒推 10 次：这一行显示的东西没变就不重画（15 行带滑块，整页重画会让 3D 转起来卡）
 const rowSig = (p) => { const r = p.r, c = r.comm || {};
   return [r.raw, r.deg, r.volt, r.temp, r.load, r.current_ma, r.current_raw, r.speed_raw, r.responding, r.torque, r.fresh, r.dir, r.offset, r.p, r.d, r.status,
-    r.p_run, r.d_run, r.limit, r.gains_ok, c.asked, c.ok, c.missed, c.streak, c.max_streak, c.alarm,
-    r.age_ms, p.open, p.selected, p.follow].join('|'); };
+    r.p_run, r.d_run, r.limit, r.gains_ok, c.asked, c.ok, c.missed, c.streak, c.max_streak, c.alarm, r.age_ms, p.open, p.selected, p.follow].join('|'); };
 class RowPure extends Component {
   shouldComponentUpdate(next) { return rowSig(next) !== rowSig(this.props) || next.op !== this.props.op; }
   render(props) { return html`<${Row} ...${props} />`; }
@@ -440,9 +438,7 @@ export function HandBackButton({ link }) {
     err ? html`<span class="sv-warn">${err}</span>` : null}</span>`;
 }
 
-export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
-  const [view, setView] = useState('monitor');
-  const [pendingOrder, setPendingOrder] = useState(null);
+export function ServoPage({ sv, link, leaveGuards }) {
   const acquired = useRef(false);
   const [pose, setPose] = useState('live');
   const [selected, setSelected] = useState(null);
@@ -476,8 +472,7 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
     setBusy(false);
     if (!r.ok) setMsg(r.reason || r.error || '没成功');
   };
-  // Monitoring is passive. UART ownership is acquired only by the explicit debug action.
-  // Preserve an existing session; only a session opened here may be closed on exit if idle.
+  // 本页只做调试/校准：明确点击后才接管；离开不关闭其他入口已打开的会话。
   const [ports, setPorts] = useState(null);       // {ports, port, sim}：电脑上插 USB 转 TTL 时选串口（跟 servo-web 一样）
   const [pick, setPick] = useState('');
   const loadPorts = async () => {
@@ -486,8 +481,10 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
     return r.ok ? r.data : null;
   };
   useEffect(() => {
+    // 先读取端口选项，等待明确点击「开始调舵机」。
     let alive = true;
     link.whenOpen().then(() => { if (alive) return loadPorts(); });
+    // 离开：后端看现在有没有舵机保持着（页面上的数可能旧了），有就不交还，没有才交还。不再弹「确定离开？」
     return () => { alive = false; if (acquired.current) link.cmd('servo.close', { if_idle: true }, 15000); };
   }, []);
   calibHandler = useCallback(async (ids) => {
@@ -495,23 +492,16 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
     const r = await op({ op: 'calib_plan', ids: text });
     if (r.ok) setPlan({ ...r.data, ids: text });
   }, []);
-  useEffect(() => { if (open && view === 'debug') op({ op: 'poses' }).then((r) => r.ok && setPoses(r.data.poses)); else setIdle(false); }, [open, view]);
+  useEffect(() => { if (open) op({ op: 'poses' }).then((r) => r.ok && setPoses(r.data.poses)); else setIdle(false); }, [open]);
   useEffect(() => { if (!hint) return undefined; const t = setTimeout(() => setHint(null), 4000); return () => clearTimeout(t); }, [hint]);
 
   const dr = sv?.drop_rate;
-  const order = sv?.communication?.read_order;
-  useEffect(() => {
-    if (pendingOrder && (order?.session !== pendingOrder.session || order?.generation === pendingOrder.generation)) setPendingOrder(null);
-  }, [order?.session, order?.generation, pendingOrder]);
-  const monitor = pendingOrder ? {...sv,
-    communication:{...sv?.communication, read_order:pendingOrder},
-    rows:(sv?.rows || []).map(r=>({...r,health:null}))} : sv;
   return html`<div class="sv-page">
     <header class="sv-head">
       <div class="sv-titles">
         <div class="sv-titleline">
           <h1>舵机</h1>
-          ${sv?.rows && view === 'debug' ? html`<div class="sv-stats num">
+          ${sv?.rows ? html`<div class="sv-stats num">
             <div><b>${sv.online ?? '—'}<small>/${sv.total}</small></b><span>在线</span></div>
             <div><b>${fmt(sv.avg_volts, 1)}<small> V</small></b><span>平均电压</span></div>
             <div><b>${open ? fmt(sv.hz, 0) : '—'}<small> Hz</small></b><span>刷新</span></div>
@@ -524,7 +514,7 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
             <${HandBackButton} link=${link} />`
           : busy ? '正在接管舵机总线…'
             : html`没接管 · 只读${sv?.diagnostic ? ' · 主程序启动诊断 · 原始反馈' : ''}`}
-        ${view === 'debug' ? html`<span class="sv-port">串口
+        <span class="sv-port">串口
           <select value=${pick} onFocus=${loadPorts} onChange=${(e) => setPick(e.target.value)} disabled=${open}
             title=${open ? '调舵机中不能换串口：先交还主程序' : ''}>
             <option value="">选串口…</option>
@@ -534,32 +524,21 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
           </select>
           <button class="btn-light" disabled=${open || busy || !pick} onClick=${() => run('servo.open', { port: pick })}
             title=${open ? '调舵机中不能换串口：先交还主程序' : '由 Studio 接管总线，主程序会停止'}>${open ? '换这个' : '开始调舵机'}</button>
-        </span>` : null}</div>
+        </span></div>
         ${open && sv.gains ? html`<${GainsLine} g=${sv.gains} />` : null}
       </div>
-      ${view === 'debug' ? html`<div class="sv-actions">
+      <div class="sv-actions">
         <${Toolbar} open=${open} op=${op} link=${link} motion=${motion} setMotion=${setMotion} idle=${idle} setIdle=${setIdle}
           follow=${follow} setFollow=${setFollow} poses=${poses} setHint=${setHint} syncSliders=${syncSliders}
           main=${null} />
-      </div>` : null}
+      </div>
     </header>
-    <div class="comm-view-tabs" role="tablist" aria-label="舵机页面模式">
-      <button role="tab" aria-selected=${view==='monitor'} onClick=${()=>setView('monitor')}>实时状态</button>
-      <button role="tab" aria-selected=${view==='debug'} onClick=${()=>setView('debug')}>调舵机 / 标定</button>
-    </div>
     ${msg || sv?.error ? html`<div class="banner bad" role="alert"><b>${msg || '打不开舵机总线'}</b><span class="more">${msg ? '' : sv?.error || ''}</span>
       <a href="#" onClick=${(e) => { e.preventDefault(); setMsg(null); }}>知道了</a></div>` : null}
     ${sv?.marker_error ? html`<div class="banner warn" role="status"><b>会话标记没写进去</b>
       <span class="more">${sv.marker_error}</span></div>` : null}
     ${hint ? html`<div class="banner warn" role="status"><span>${hint}</span></div>` : null}
-    ${view==='monitor' ? html`<div class="comm-monitor-grid">
-      <${ServoMonitor} sv=${monitor} selected=${selected} onSelect=${onSelect} live=${live} elapsed=${elapsed} />
-      <aside class="comm-monitor-aside">
-        <${ServoStage} sv=${sv} pose=${pose} setPose=${setPose} selected=${selected} onSelect=${onSelect} compact=${true} />
-        <${ServoInspector} sv=${monitor} selected=${selected} live=${live} elapsed=${elapsed} />
-        <${ReadOrderPanel} communication=${monitor?.communication} rows=${monitor?.rows} link=${link} live=${live && elapsed<1500}
-          onApplied=${setPendingOrder} />
-      </aside></div>` : html`<div class="sv-main">
+    <div class="sv-main">
       <div class="sv-left">
         <${ServoStage} sv=${sv} pose=${pose} setPose=${setPose} selected=${selected} onSelect=${onSelect} />
         ${pose === 'zero' ? html`<${Why} />` : null}
@@ -568,9 +547,9 @@ export function ServoPage({ sv, link, leaveGuards, live = true, elapsed = 0 }) {
         <${CalibCard} open=${open} op=${op} selected=${selected} onSelect=${onSelect} rows=${sv?.rows} />
         <${ServoList} key=${'list' + syncKey} sv=${sv || { rows: [] }} open=${open} selected=${selected} onSelect=${onSelect} op=${op} follow=${follow} setHint=${setHint} />
       </div>
-    </div>`}
-    ${view==='debug' ? html`<${MoreArea} open=${open} op=${op} motion=${motion} setMotion=${setMotion} follow=${follow} setFollow=${setFollow}
-      poses=${poses} setPoses=${setPoses} selected=${selected} onSelect=${onSelect} sv=${sv || { rows: [] }} dirs=${dirs} link=${link} />`:null}
+    </div>
+    <${MoreArea} open=${open} op=${op} motion=${motion} setMotion=${setMotion} follow=${follow} setFollow=${setFollow}
+      poses=${poses} setPoses=${setPoses} selected=${selected} onSelect=${onSelect} sv=${sv || { rows: [] }} dirs=${dirs} link=${link} />
     ${plan ? html`<${CalibDialog} plan=${plan} onCancel=${() => setPlan(null)} onOk=${async () => {
       const ids = plan.ids; setPlan(null);
       const r = await op({ op: 'calibrate', ids }, 60000);

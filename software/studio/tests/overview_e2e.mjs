@@ -576,8 +576,6 @@ if (PHASE === 'done') {
   await fakeSet({ posture: 'holding' });                          // 策略在跑时舵机页不接管（关节会冻在半步）：先站好
   await sleep(1500);
   await js(`location.hash = '#/servos'`);
-  await waitFor(`!!document.querySelector('.comm-view-tabs')`, '舵机只读状态页', 15000);
-  await js(`document.querySelectorAll('.comm-view-tabs button')[1].click()`);
   await waitFor(`!![...document.querySelectorAll('.sv-page button')].find(b=>b.textContent.trim()==='开始调舵机'&&!b.disabled)`, '明确接管入口', 10000);
   await js(`[...document.querySelectorAll('.sv-page button')].find(b=>b.textContent.trim()==='开始调舵机').click()`);
   await waitFor(`/调舵机中/.test(document.querySelector('.sv-sub')?.innerText || '')`, '舵机页接管（演示舵机）', 15000);

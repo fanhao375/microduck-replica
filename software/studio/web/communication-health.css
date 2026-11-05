@@ -73,6 +73,18 @@
 .comm-monitor-aside>*{flex-shrink:0}
 .comm-monitor-aside .sv-stage{height:310px;position:relative;top:auto}
 .comm-monitor-aside .comm-order-controls{flex-direction:column;align-items:stretch}
+.runtime-diagnostics{overflow:clip}
+.runtime-diag-toggle{display:flex;align-items:center;gap:18px;width:100%;text-align:left;padding:17px 20px;border:0;background:transparent;color:var(--text);cursor:pointer}
+.runtime-diag-title{display:flex;flex-direction:column;gap:5px;font-size:16px}
+.runtime-diag-title small{font-size:12px;font-weight:400;color:var(--text-2)}
+.runtime-diag-summary{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--text-2);margin-left:auto}
+.runtime-diag-summary b{color:var(--text);font-weight:600}.runtime-diag-summary.stale b{color:var(--text-2)}
+.runtime-diag-expand{font-size:12px;color:var(--text-2);white-space:nowrap}
+.runtime-diag-body{border-top:1px solid var(--line);padding:14px;background:#f7f8fa}
+.runtime-diag-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.runtime-diag-toolbar>a{font-size:12px;color:var(--text-2);text-decoration:none}
+.runtime-diag-body .comm-monitor-aside{top:calc(var(--bar-h,0px) + var(--band-h,0px) + 14px)}
+.runtime-diag-body .comm-monitor-aside .comm-inspector:only-child{min-height:0}
 .imu-health .comm-monitor-head{padding:0}
 .imu-health .comm-values{grid-template-columns:repeat(2,minmax(0,1fr))}
 .imu-health .comm-caption,.imu-health .comm-footer{margin-left:0;margin-right:0}
@@ -80,6 +92,7 @@
 .comm-values-note{font-size:11px;color:var(--text-2);margin:12px 0 0}.comm-sensor-values{border-top:1px solid var(--line);margin-top:14px}.comm-sensor-values.stale{color:var(--text-2);opacity:.65}
 @media(max-width:1200px){.comm-monitor-grid{grid-template-columns:minmax(0,1fr)}.comm-monitor-aside{display:grid;grid-template-columns:minmax(220px,.6fr) minmax(0,1fr);position:static;max-height:none;overflow:visible}.comm-inspector{display:none}.sv-monitor .sv-monitor-detail{display:block}}
 @media(max-width:700px){
+ .runtime-diag-toggle{padding:14px;gap:12px;flex-wrap:wrap}.runtime-diag-title{font-size:15px}.runtime-diag-summary{order:3;width:100%;margin-left:0;gap:18px;font-size:12px}.runtime-diag-expand{margin-left:auto}.runtime-diag-body{padding:10px}
  .comm-monitor-head{padding:15px 14px 10px}.comm-monitor-head h2{font-size:16px}
  .comm-summary{margin:0 12px 12px;grid-template-columns:repeat(2,minmax(0,1fr))}
  .comm-summary>div{padding:10px}.comm-summary>div:nth-child(2){border-right:0}.comm-summary>div:nth-child(-n+2){border-bottom:1px solid var(--line)}

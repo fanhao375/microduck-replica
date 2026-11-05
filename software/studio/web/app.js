@@ -7,6 +7,7 @@
 import { html, render, Component, useState, useEffect, useRef, useCallback } from './vendor/preact-htm.module.js';
 import { Duck3D } from './duck3d.js';
 import { ServoPage, HandBackButton } from './servo.js';
+import { RuntimeDiagnostics } from './runtime-diagnostics.js';
 import { ImuPage } from './imu.js';
 import { PadPage, padActivity, padGo } from './pad.js';
 import { BatteryCell } from './battery.js';
@@ -105,8 +106,15 @@ class Link {
   // pad_visible：手柄那一块现在在不在屏幕上（总览重排审查 O1）。后端只看它决定手柄快照 10 Hz 还是 1 Hz；
   // #/pad 现在是总览上的锚点，地址是它不代表看得到（往上滑回舞台，地址栏还是 #/pad）
   heartbeat() {
-    this.send({ t: 'hb', seq: ++this.seq, visible: document.visibilityState === 'visible', route: location.hash.replace(/^#/, '') || '/',
-      pad_visible: padActivity.active || this.padCapture });
+    const route=location.hash.replace(/^#/, '') || '/';
+    this.send({ t: 'hb', seq: ++this.seq, visible: document.visibilityState === 'visible', route,
+      pad_visible: padActivity.active || this.padCapture,
+      diagnostics_visible: !!this.diagnosticsVisible && (route==='/' || route==='/pad') });
+  }
+
+  setDiagnosticsVisible(active) {
+    if (!!this.diagnosticsVisible===!!active) return;
+    this.diagnosticsVisible=!!active;this.heartbeat();
   }
 
   // 模型改键只读旁路：请求快照，不改变 padActivity，也不接管网页遥控。
@@ -681,7 +689,7 @@ function Todo({ st, live }) {
 }
 
 // 总览：（开着热点时最上面是「连 WiFi」）→ 舞台 → 仪表带（5 格）→ 上手清单 → 待办 → 往下一刷就是手柄（总览重排 §1）
-function Overview({ st, live, age, diagnosticElapsed, duck, pd, onSame, tune, sensorsActive }) {
+function Overview({ st, live, age, diagnosticElapsed, duck, pd, onSame, tune, sensorsActive, sv, imu, connectionLive, svElapsed, imuElapsed }) {
   // 主机名这类英文名后面空一格再接中文：「duck-c51b 站好了」
   const short = duck?.short || '鸭子';
   const name = /[A-Za-z0-9]$/.test(short) ? short + ' ' : short;
@@ -694,6 +702,8 @@ function Overview({ st, live, age, diagnosticElapsed, duck, pd, onSame, tune, se
     <${Onboard} st=${st} live=${live} />
     <${Todo} st=${st} live=${live} />
     <${PadPage} st=${st} pad=${pd} link=${link} api=${api} previewActive=${sensorsActive} live=${live} />
+    <${RuntimeDiagnostics} st=${st} sv=${sv} imu=${imu} link=${link} active=${sensorsActive}
+      live=${connectionLive} summaryLive=${live} svElapsed=${svElapsed} imuElapsed=${imuElapsed} />
     <${TuneSection} tune=${tune} />
   </div>`;
 }
@@ -949,19 +959,19 @@ function Main({ duck }) {
   // 总览一直挂着、只是藏起来：3D 鸭子不随切页面销毁重建（three.js 每建一次留一份内部对象，
   // 浏览器能同时开的 WebGL 上下文也有限）。手柄那一块也在总览里（#/pad 是它的锚点），一直挂着：
   // 「在不在手柄区」看 padActivity，不看挂没挂上（审查 O1）
-  const overview = html`<div hidden=${!OVERVIEW(route)}><${Overview} st=${st} live=${live} age=${age} diagnosticElapsed=${now - stAt} duck=${duck} pd=${pd} onSame=${onSame} tune=${tune} sensorsActive=${OVERVIEW(route)} /></div>`;
+  const overview = html`<div hidden=${!OVERVIEW(route)}><${Overview} st=${st} live=${live} age=${age} diagnosticElapsed=${now - stAt} duck=${duck} pd=${pd} onSame=${onSame} tune=${tune} sensorsActive=${OVERVIEW(route)}
+    sv=${sv} imu=${imu} connectionLive=${status==='open'} svElapsed=${svAt?now-svAt:Infinity} imuElapsed=${imuAt?now-imuAt:Infinity} /></div>`;
   let page = null;
   if (OVERVIEW(route)) page = null;
   else if (route === '/logs') page = html`<${LogsPage} />`;
   else if (route === '/camera') page = html`<${CameraPage} api=${api} />`;
   else if (route === '/tof') page = html`<${TofPage} api=${api} />`;
-  else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards}
-    live=${status==='open'} elapsed=${svAt ? now-svAt : Infinity} />`;
+  else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards} />`;
   else if (route === '/settings' || route === '/settings/ssh') page = html`<${Settings} st=${st} tune=${tune} />`;
   else if (route === '/models') page = html`<${ModelsPage} api=${api} csrf=${csrf} link=${link} live=${live} />`;
   else if (route === '/imu') page = html`<${ImuPage} st=${st}
     imu=${imu && st?.imu?.diagnostic ? { ...imu, diagnostic: st.imu.diagnostic } : imu}
-    link=${link} live=${live} age=${age} diagnosticElapsed=${now - (st?.imu?.diagnostic ? stAt : imuAt)} healthElapsed=${imuAt ? now-imuAt : Infinity} pd=${pd} />`;
+    link=${link} live=${live} age=${age} diagnosticElapsed=${now - (st?.imu?.diagnostic ? stAt : imuAt)} pd=${pd} />`;
   else page = html`<${Later} what="这一页" />`;
 
   document.title = `${duck?.label || '鸭子'} · Microduck Studio`;
