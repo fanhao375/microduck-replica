@@ -1,5 +1,5 @@
 // Read-only views of owned snapshots. No serial reads, calibration writes or motion.
-import { html, useState, useEffect } from './vendor/preact-htm.module.js';
+import { html, useState, useEffect, useRef } from './vendor/preact-htm.module.js';
 
 const number = v => typeof v === 'number' && Number.isFinite(v);
 const fmt = (v, d = 0) => number(v) ? v.toFixed(d) : '—';
@@ -70,6 +70,26 @@ function ServoDetail({row, status}) {
 export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0}) {
   const c = sv?.communication || {};
   const rows = sv?.rows || [];
+  const strip=useRef(null), [ends,setEnds]=useState({before:false,after:false});
+  const ordered=groups.flatMap(([group,label])=>rows.filter(r=>r.group===group).map(row=>({row,group,label})));
+  const picked=rows.find(r=>r.id===selected);
+  useEffect(()=>{
+    const node=strip.current;
+    const measure=()=>{const before=node.scrollLeft>2,after=node.scrollLeft+node.clientWidth<node.scrollWidth-2;
+      setEnds(prev=>prev.before===before&&prev.after===after?prev:{before,after});};
+    measure();node.addEventListener('scroll',measure,{passive:true});
+    const observer=typeof ResizeObserver==='function'?new ResizeObserver(measure):null;
+    observer?.observe(node);window.addEventListener('resize',measure);
+    return()=>{node.removeEventListener('scroll',measure);observer?.disconnect();window.removeEventListener('resize',measure);};
+  },[rows.length]);
+  useEffect(()=>{
+    const node=strip.current,card=node?.querySelector(`[data-id="${selected}"]`);
+    if(!card)return;
+    const box=node.getBoundingClientRect(),r=card.getBoundingClientRect();
+    if(r.left<box.left || r.right>box.right)node.scrollLeft+=r.left-box.left-(node.clientWidth-r.width)/2;
+  },[selected,rows.length]);
+  const slide=direction=>strip.current?.scrollBy({left:direction*Math.max(160,strip.current.clientWidth*.8),
+    behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth'});
   const valid = rows.filter(r => rowStatus(r,live,elapsed).kind !== 'stale' && r.fresh);
   const hottest = valid.filter(r => number(r.temp)).sort((a,b)=>b.temp-a.temp)[0];
   const lowest = valid.filter(r => number(r.volt)).sort((a,b)=>a.volt-b.volt)[0];
@@ -85,14 +105,16 @@ export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0})
     </div>
     ${attention.length ? html`<div class="comm-attention" role="status"><b>${attention.length} 颗需关注</b>
       ${attention.map(x=>html`<button type="button" onClick=${()=>onSelect(x.row.id)}>#${x.row.id} ${x.row.cn} · ${x.status.text}</button>`)}</div>`:null}
-    ${groups.map(([group,label,range]) => {
-      const members=rows.filter(r=>r.group===group), picked=members.find(r=>r.id===selected);
-      return html`<div class="comm-group"><h3>${label}<small>${range}</small></h3>
-      <div class="comm-servo-grid">${members.map(row=>{
+    <div class="comm-strip-heading"><span>${rows.length} 颗舵机 · 左右滑动查看</span><span class="comm-strip-arrows">
+      <button type="button" aria-label="向左查看舵机" aria-controls="servo-card-strip" disabled=${!ends.before} onClick=${()=>slide(-1)}>‹</button>
+      <button type="button" aria-label="向右查看舵机" aria-controls="servo-card-strip" data-servo-next disabled=${!ends.after} onClick=${()=>slide(1)}>›</button>
+    </span></div>
+    <div class="comm-strip-wrap"><div class="comm-servo-strip" id="servo-card-strip" ref=${strip} role="region" aria-label="舵机卡片，左右滑动查看" tabindex="0">
+      ${ordered.map(({row,group,label})=>{
         const status=rowStatus(row,live,elapsed);
-        return html`<button type="button" class=${'sv-monitor-row comm-servo-card '+status.kind+(selected===row.id?' selected':'')} data-id=${row.id}
+        return html`<button type="button" key=${row.id} class=${'sv-monitor-row comm-servo-card '+status.kind+(selected===row.id?' selected':'')} data-id=${row.id}
           aria-expanded=${selected===row.id} aria-controls=${`servo-detail-${row.id}`} onClick=${()=>onSelect(selected===row.id?null:row.id)}>
-          <span class="comm-card-heading"><span class=${'sv-id '+group}>${row.id}</span><b>${row.cn}</b></span>
+          <span class="comm-card-heading"><span class=${'sv-id '+group}>${row.id}</span><b>${row.cn}</b><small>${label}</small></span>
           <span class="comm-card-metrics">
             <span><small>温度</small><b>${fmt(row.temp)}<em> °C</em></b></span>
             <span><small>电压</small><b>${fmt(row.volt,1)}<em> V</em></b></span>
@@ -101,10 +123,8 @@ export function ServoMonitor({sv, selected, onSelect, live = true, elapsed = 0})
           </span>
           <span class="comm-card-tail"><span class=${'comm-badge '+status.kind}>${status.text}</span><span>${selected===row.id?'收起 ▴':'详情 ▾'}</span></span>
         </button>`;
-      })}</div>
-      ${picked ? html`<${ServoDetail} row=${picked} status=${rowStatus(picked,live,elapsed)} />`:null}
-      </div>`;
-    })}
+      })}</div></div>
+    ${picked ? html`<div class="comm-strip-detail"><${ServoDetail} row=${picked} status=${rowStatus(picked,live,elapsed)} /></div>`:null}
     ${!rows.length ? html`<p class="comm-empty">等待舵机回读。主程序、调试会话和每颗舵机的状态分别显示。</p>` : null}
     <div class="comm-footer"><span>全总线坏校验 <b>${count(c.counters?.bad_checksum ?? c.counters?.bad_checksums)}</b></span>
       <span>读取失败 <b>${count(c.counters?.failed_reads)}</b></span><span>超时 <b>${count(c.counters?.timeout)}</b></span></div>
