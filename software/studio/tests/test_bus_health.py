@@ -41,7 +41,144 @@ def fake_rd(frame):
     return rd
 
 
+def native_commissioning_status(cycle=100, sequence=300, source="bus", sample_at_us=2_000_000,
+                                updated_at_us=2_002_000):
+    """Wire keys of native6af2fad feetech_commissioning::{Status,Sample,ImuStatus}.
+
+    Bus ImuStatus omits age_ms/epoch; no motion-only native.joints or IMU
+    reader/age/source fields exist in this commissioning native block.
+    """
+    imu = {"id": 200, "source": source, "ready": True, "valid": True,
+           "gravity": [0., 0., -1.], "gyro_rad_s": [.1, .2, .3],
+           "quaternion_wxyz": [1., 0., 0., 0.], "mount_verified": True}
+    if sequence is not None:
+        imu["sequence"] = sequence
+    if source != "bus":
+        imu.pop("id")
+        imu.update(age_ms=7., epoch=1, tilt_deg=0.)
+    return {"native": {"read_order": {"mode": "default", "last_id": None, "ids": list(servo.IDS),
+                "servo_ids": list(servo.IDS), "session": "commissioning-one", "generation": 0,
+                "configuration_path": "/etc/robot/feetech-ft5/servo-read-order.json"},
+                "servo_observations": {"attempted": True, "age_ms": 1, "rows": [
+                    {"id": sid, "name": servo.NAMES[sid][1], "communication": counters(cycle),
+                     "responding": True, "check_age_ms": 2, "reply_age_ms": 1, "feedback_age_ms": 1,
+                     "position_raw": 2048, "speed_raw": 3, "load_raw": 2, "current_raw": 1,
+                     "volts": 7.8, "temperature_c": 31} for sid in servo.IDS]},
+                "telemetry": {"session": "commissioning-one", "bad_checksums": 0, "timeouts": 0, "failed_reads": 0},
+                "torque_state_confirmed": False,
+                "hd1910": {"temporary_gains_applied": False, "restore_pending": False}},
+            "configured_imu_profile": "legacy", "build": "replica-bus-health-control.49",
+            "port": "/dev/ttyS1", "mode": "commissioning", "phase": "ready", "session": 123,
+            "target_hz": 50., "achieved_hz": 50., "total_cycles": cycle, "total_success": cycle,
+            "total_communication_failures": 0, "errors_by_id": {}, "device_communication": {},
+            "last_cycle_error": None, "last_failure": None,
+            "last_sample": {"cycle": cycle, "at_us": sample_at_us, "servos": [
+                {"id": sid, "joint": servo.NAMES[sid][1], "position_raw": 2048,
+                 "position_wire_raw": 2048, "position_signed_raw": 2048, "speed_raw": 3,
+                 "load_raw": 2, "current_raw": 1, "voltage_v": 7.8, "temperature_c": 31,
+                 "moving": False, "calibrated": True} for sid in servo.IDS], "imu": imu},
+            "calibrated": True, "imu_mount_verified": True,
+            "imu_bus": {"protocol": "feetech", "board": "ft6", "identity": [1, 0, 0, 0],
+                "profile": "legacy", "gyro_dps_per_lsb": .061, "identification": "probe", "quaternion": "legacy"},
+            "torque_state": "off", "torque_off_pending": None, "power_pending": False,
+            "motion": None, "policy_motion_enabled": False, "updated_at_us": updated_at_us}
+
+
+class NativeCommissioningContractTest(unittest.TestCase):
+    def backend(self, rd):
+        from studio.imu import ImuBackend
+        return ImuBackend(rd, SimpleNamespace(info=lambda *a, **kw: None, warn=lambda *a, **kw: None))
+
+    def test_bus_imu_gyro_and_freshness_use_actual_accepted_snapshot_timestamps(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            rd = fake_rd(native_commissioning_status())
+            backend = self.backend(rd)
+            first = backend.view()
+            self.assertEqual(first["gyro"], [.1, .2, .3])
+            self.assertEqual(first["health"]["source"], "bus")
+            self.assertEqual(first["health"]["age_ms"], 2.)
+            self.assertTrue(first["health"]["fresh"])
+            clock.return_value = 11.
+            rd.bus.set(native_commissioning_status(150, 350, sample_at_us=3_000_000, updated_at_us=3_002_000))
+            self.assertEqual(backend.view()["health"]["update_hz"], 50.)
+            clock.return_value = 12.
+            rd.bus.set(copy.deepcopy(rd.bus.value))
+            stale = backend.view()
+            self.assertGreaterEqual(stale["health"]["age_ms"], 1002.)
+            self.assertFalse(stale["health"]["fresh"])
+            self.assertIsNone(stale["health"]["update_hz"])
+
+    def test_commissioning_servo_rows_and_rate_use_real_status_names(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            rd = fake_rd(native_commissioning_status())
+            view = servo.view_from_robotd(rd, None)
+            self.assertEqual(view["online"], 15)
+            self.assertEqual(view["rows"][0]["volt"], 7.8)
+            self.assertEqual(view["rows"][0]["raw"], 2048)
+            self.assertEqual(view["rows"][0]["comm"]["asked"], 100)
+            clock.return_value = 11.
+            rd.bus.set(native_commissioning_status(150, 350, sample_at_us=3_000_000, updated_at_us=3_002_000))
+            view = servo.view_from_robotd(rd, None)
+            self.assertEqual(view["communication"]["sample_hz"], 50.)
+            self.assertEqual(view["rows"][0]["health"]["asked"], 50)
+
+    def test_module_age_is_added_to_accepted_snapshot_age_and_epoch_resets_rate(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            rd = fake_rd(native_commissioning_status(source="lsm6dsv16x"))
+            backend = self.backend(rd)
+            first = backend.view()
+            self.assertEqual(first["health"]["age_ms"], 9.)
+            self.assertEqual(first["metadata"]["chip"], "lsm6dsv16x")
+            self.assertIsNone(first["metadata"]["board"])
+            self.assertIsNone(first["metadata"]["protocol"])
+            clock.return_value = 11.
+            frame = native_commissioning_status(150, 350, source="lsm6dsv16x", sample_at_us=3_000_000, updated_at_us=3_002_000)
+            rd.bus.set(frame)
+            self.assertEqual(backend.view()["health"]["update_hz"], 50.)
+            clock.return_value = 12.
+            frame["last_sample"]["imu"].update(epoch=2, sequence=1)
+            rd.bus.set(frame)
+            self.assertIsNone(backend.view()["health"]["update_hz"])
+
+    def test_missing_native_timing_keeps_unknown_age_and_missing_sequence_uses_observed_timestamp_basis(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            rd = fake_rd(native_commissioning_status(sequence=None))
+            backend = self.backend(rd)
+            self.assertTrue(backend.view()["health"]["fresh"])
+            clock.return_value = 10.1
+            rd.bus.set(native_commissioning_status(105, None, sample_at_us=2_100_000, updated_at_us=2_102_000))
+            view = backend.view()
+            self.assertEqual(view["health"]["rate_basis"], "accepted_snapshot_timestamp")
+            self.assertEqual(view["health"]["update_hz"], 10.)
+            frame = native_commissioning_status()
+            frame.pop("updated_at_us")
+            frame["last_sample"].pop("at_us")
+            self.assertIsNone(self.backend(fake_rd(frame)).view()["health"]["age_ms"])
+
+    def test_disconnected_commissioning_keeps_last_known_source_and_does_not_refresh_frozen_sequence(self):
+        with mock.patch("time.monotonic", return_value=10.) as clock:
+            rd = fake_rd(native_commissioning_status())
+            backend = self.backend(rd)
+            backend.view()
+            clock.return_value = 11.
+            rd.bus.set(native_commissioning_status(150, 300, sample_at_us=3_000_000, updated_at_us=3_002_000))
+            self.assertFalse(backend.view()["health"]["fresh"])
+            clock.return_value = 15.
+            rd.present = False
+            stale = backend.view()
+            self.assertEqual(stale["health"]["source"], "bus")
+            self.assertFalse(stale["health"]["fresh"])
+            self.assertGreaterEqual(stale["health"]["age_ms"], 4002.)
+
+
 class RobotdHealthTest(unittest.TestCase):
+    def test_native_speed_raw_and_physical_velocity_are_preserved(self):
+        frame = bus_frame()
+        frame["native"]["joints"][0].update(speed_raw=7, velocity_rad_s=.75)
+        row = servo.view_from_robotd(fake_rd(frame), None)["rows"][0]
+        self.assertEqual(row["speed_raw"], 7)
+        self.assertEqual(row["velocity_rad_s"], .75)
+
     def test_counter_deltas_15_independent_ids_and_cached_repaint(self):
         with mock.patch("time.monotonic", return_value=10.) as clock:
             rd = fake_rd(bus_frame())

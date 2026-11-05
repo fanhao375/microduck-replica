@@ -196,7 +196,8 @@ class ImuBackend:
         reader = native.get("imu_reader")
         if reader is None and bus.get("mode") == "commissioning":
             reader = {"state": ("streaming" if s_imu.get("ready") else "missing"), "errors": 0}
-        health, metadata = self._health.view(self.rd, source=source, info=bus_imu_of(bus), sample=s_imu)
+        health, metadata = self._health.view(self.rd, source=source,
+            info=bus_imu_of(bus) if source == "bus" else None, sample=s_imu)
         stream = getattr(getattr(self.rd, "state", None), "value", None)
         stream = stream if isinstance(stream, dict) else {}
         stream_imu = stream.get("imu") if isinstance(stream.get("imu"), dict) else {}
@@ -217,7 +218,7 @@ class ImuBackend:
             "mount_protocol_mismatch": bus_protocol_mismatch(bus, calib, source),
             "reader": reader, "age_ms": health["age_ms"],
             "ready": health["ready"], "health": health, "metadata": metadata,
-            "gyro": vector(values.get("gyro"), 3),
+            "gyro": vector(values.get("gyro_rad_s", values.get("gyro")), 3),
             "quaternion_wxyz": vector(values.get("quaternion_wxyz", values.get("quat")), 4),
             "accel_m_s2": vector(values.get("accel_m_s2"), 3),
             "temperature_c": values.get("temperature_c") if number(values.get("temperature_c")) else None,

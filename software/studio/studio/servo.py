@@ -30,7 +30,7 @@ import threading
 import time
 
 from .bus import feetech
-from .communication import ServoHealth
+from .communication import ServoHealth, accepted_snapshot_age_ms, number
 from .startup_status import servo_observations
 
 IDS = [20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 10, 11, 12, 13, 14]     # 跟 robotd 的 JOINT_NAMES 同一个顺序
@@ -840,6 +840,27 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
         return _robotd_health(view, rd, bus)
     native = (bus or {}).get("native") if isinstance(bus, dict) and isinstance(bus.get("native"), dict) else {}
     joints = {j.get("id"): j for j in (native.get("joints") or []) if isinstance(j, dict)}
+    if (bus or {}).get("mode") == "commissioning":
+        last_sample = bus.get("last_sample") if isinstance(bus.get("last_sample"), dict) else {}
+        sampled = {r.get("id"): r for r in (last_sample.get("servos") or []) if isinstance(r, dict)}
+        observed = native.get("servo_observations") or {}
+        observed_rows = {r.get("id"): r for r in observed.get("rows", []) if isinstance(r, dict)}
+        sample_age = accepted_snapshot_age_ms(bus)
+        for sid in IDS:
+            feedback = sampled.get(sid, {})
+            check = observed_rows.get(sid, {})
+            age = sample_age
+            if number(observed.get("age_ms")) and number(check.get("feedback_age_ms")):
+                age = observed["age_ms"]+check["feedback_age_ms"]
+            joints[sid] = {"position_raw": check.get("position_raw", feedback.get("position_raw")),
+                "volts": check.get("volts", feedback.get("voltage_v")),
+                "temperature_c": check.get("temperature_c", feedback.get("temperature_c")),
+                "load_raw": check.get("load_raw", feedback.get("load_raw")),
+                "speed_raw": check.get("speed_raw", feedback.get("speed_raw")),
+                "current_raw": check.get("current_raw", feedback.get("current_raw")),
+                "sample_age_ms": age, "feedback_fresh": age is not None and age < 500.
+                    and check.get("responding", bool(feedback)) is True,
+                "communication": check.get("communication")}
     torque_on = native.get("torque_enabled")
     rows, volts = [], []
     for sid in IDS:
@@ -855,6 +876,8 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
             "raw": raw, "deg": round(angle_deg(raw, d), 1) if isinstance(raw, int) else None,
             "volt": j.get("volts"), "temp": j.get("temperature_c"), "temp_limit": None,
             "load": j.get("load_raw"), "current_ma": j.get("current_ma"), "status": None, "moving": None,
+            "speed_raw": j.get("speed_raw"), "current_raw": j.get("current_raw"),
+            "velocity_rad_s": j.get("velocity_rad_s"),
             "torque": None if torque_on is None else int(bool(torque_on)), "fresh": fresh,
             "age_ms": j.get("sample_age_ms"), "p": None, "d": None, "mode": None, "offset": None,
             "comm": dict(j["communication"]) if isinstance(j.get("communication"), dict) else
@@ -887,7 +910,7 @@ def _robotd_health(view, rd, bus):
             "eeprom": {"pdi": cached.get("eeprom_pdi"), "mode": cached.get("mode")},
             "before_arm": {key: cached.get(key) for key in ("acceleration_raw", "goal_current_raw", "goal_speed_raw")},
             "configured": hd.get("servo_parameters")}
-    session = telemetry.get("session", (order or {}).get("session"))
+    session = telemetry.get("session", (order or {}).get("session", bus.get("session")))
     identity = ("robotd", session, getattr(getattr(rd, "hello", None), "at", None),
                 (order or {}).get("generation"), tuple((order or {}).get("ids", (order or {}).get("servo_ids", []))))
     tracker = getattr(rd, "_servo_health", None) if rd is not None else None
@@ -898,7 +921,7 @@ def _robotd_health(view, rd, bus):
     receipt = getattr(getattr(rd, "bus", None), "at", None)
     if rd is None:
         receipt = time.monotonic()
-    token = (bus.get("cycle"), native.get("sample_sequence"),
+    token = (bus.get("cycle", bus.get("total_cycles")), native.get("sample_sequence"),
              tuple((r["id"], r["comm"].get("asked"), r.get("raw")) for r in view["rows"]))
     if view.get("diagnostic") and receipt is not None:
         receipt_age = max(0., time.monotonic()-receipt)*1000
@@ -909,9 +932,9 @@ def _robotd_health(view, rd, bus):
                 "failed_reads": telemetry.get("failed_reads")}
     return tracker.apply(view, identity=identity, receipt=receipt, token=token, counters=counters,
                          read_order=order, guard=robotd_read_order_guard(rd, bus),
-                         source_age_ms=native.get("sample_age_ms", 0),
+                         source_age_ms=native.get("sample_age_ms", (native.get("servo_observations") or {}).get("age_ms", 0)),
                          available=rd is None or (getattr(rd, "present", None) is not False and not rd.bus.error),
-                         sequence=bus.get("cycle"), require_age=rd is not None)
+                         sequence=bus.get("cycle", bus.get("total_cycles")), require_age=rd is not None)
 
 
 def robotd_read_order_guard(rd, bus):
