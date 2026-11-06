@@ -11251,6 +11251,129 @@
           },
           "priority": "medium_NFC_power_latency_research;low_current_Feetech_image",
           "replica_integration": "not_integrated; no runtime/model/image/device/service/browser changes by tracker"
+        },
+        {
+          "number": 546,
+          "title": "kinematics: compute Zone::Hit range from trunk axis, not sensor",
+          "url": "https://github.com/pollen-robotics/microduck/pull/546",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-06T10:43:48Z",
+          "updated_at": "2026-11-06T10:52:46Z",
+          "merged_at": null,
+          "merge_commit_sha": "a665b12bc7bcaaa99575bc901cc50ece48ff07f2",
+          "head_sha": "a42be8dbd5923cbc509e2539f6c263f3fd01d031",
+          "base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "base_branch": "main",
+          "actual_merge_base": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "source_version": "0.18.8",
+          "api_version": 50,
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...a42be8dbd5923cbc509e2539f6c263f3fd01d031",
+          "classification": "pending proposal; not main, formal188 or project integration",
+          "development_release_observed": false,
+          "replica_integration": "not_integrated; no runtime/model/image/service/browser/device modifications by tracker",
+          "review": {
+            "change": "Zone::Hit.range becomes gravity-levelled hypot(r*dir_level.x+sensor_level.x,r*dir_level.y+sensor_level.y), matching documented distance from trunk vertical axis. point remains trunk-frame coordinates.",
+            "sensor_filter": "Sensor-relative horizontal distance remains the MIN_RANGE_M=0.10 crosstalk/noise cutoff; floor filtering and point/classification order unchanged. No newsensor driver, SLAM, navigation/stop controller or measured calibration.",
+            "consumer_scope": "Linkedissue430 says no repository consumer currently readsHit.range; existing officialmonitor drawsHit.point and rawdistance. Read actualmonitor projection/markers. Therefore do not report built-in avoidance or UI behavior fixed by this field change. External navigation beside robotd is the issue author context.",
+            "adoption_inference": "For a forward-offset sensor the newrange is larger; an external consumer keeping the same stopthreshold may stop closer to the sensor. This is a geometry/threshold inference, not physical measurement. HD1910replica requires ownmount/FK/gravity/height/bodyclearance and thresholds; alpha forwardoffset is not a universal7.8cm constant.",
+            "tests": {
+              "new_test_definitions": 1,
+              "new_test": "hit_range_is_measured_from_trunk_axis",
+              "modified_existing_test": "a_forward_return_lands_a_metre_ahead",
+              "scope": "Alpha model/levelposture/defaultheight/nearcentre syntheticreturn. Existingtilt test checksfloor classification; no new tiltedrange,beta or replica physicaltest.",
+              "author_execution_or_hardware_result_in_PR_body": false,
+              "tracker_executed": false
+            },
+            "issue_context": {
+              "number": 430,
+              "url": "https://github.com/pollen-robotics/microduck/issues/430",
+              "status": "open",
+              "prior_report": "AuthorexternalMuJoCo navigation32kzones onold0.17.6 and alpha FK example offsets~6to8cm; not new546run, published model or hardware validation."
+            },
+            "fixed_sources": {
+              "projection": "https://github.com/pollen-robotics/microduck/blob/a42be8dbd5923cbc509e2539f6c263f3fd01d031/kinematics/src/tof.rs",
+              "official_consumer": "https://github.com/pollen-robotics/microduck/blob/4a763dd893f3982c3a11c136468ccf5d26bcc28a/robotctl/src/monitor.rs",
+              "version": "https://github.com/pollen-robotics/microduck/blob/a42be8dbd5923cbc509e2539f6c263f3fd01d031/Cargo.toml",
+              "protocol": "https://github.com/pollen-robotics/microduck/blob/a42be8dbd5923cbc509e2539f6c263f3fd01d031/duck-ipc-proto/src/lib.rs"
+            },
+            "validation": "Onefilefixedpatch and fullprojection/consumer/sourceidentities inspected. No tests/build, downloadedsoftwareexecution, sensor/robot or previewaccess."
+          },
+          "priority": "high_geometry_and_stopthreshold_review_before_navigation_adoption;medium_ToF_reference;low_current_image_delivery",
+          "impact": {
+            "HD1910": "No actuator adaptation; geometry must match actualhead/mount/body.",
+            "camera": "unchanged",
+            "ToF": "Hit.range semantic correction only; no rawmeasurement or floor/noise boundary change",
+            "model_management": "unchanged",
+            "training": "no model/weights/training change",
+            "motion": "External stopthreshold consumers need coordinate/clearance review; no new robot movement command",
+            "sound": "unchanged"
+          }
+        },
+        {
+          "number": 547,
+          "title": "robotd: snap applied twist to zero once stopped target decays",
+          "url": "https://github.com/pollen-robotics/microduck/pull/547",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-06T10:59:01Z",
+          "updated_at": "2026-11-06T10:59:01Z",
+          "merged_at": null,
+          "merge_commit_sha": "baaae1a1ac9c7547bedbe3b2f382bd451262a9a4",
+          "head_sha": "264a71f125fbc8bfd2983015bddfae6b185dd329",
+          "base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "base_branch": "main",
+          "actual_merge_base": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "source_version": "0.18.8",
+          "api_version": 50,
+          "changed_file_count": 1,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...264a71f125fbc8bfd2983015bddfae6b185dd329",
+          "classification": "pending proposal; not main, formal188 or project integration",
+          "development_release_observed": false,
+          "replica_integration": "not_integrated; no runtime/model/image/service/browser/device modifications by tracker",
+          "review": {
+            "change": "update_twist_ema retains each axisramp/EMA and optionalaccelerationlimit. Afterupdate, only exactlyzero effective target plusallfiniteEMA abs<1e-3 snaps allthreecomponents tozero. Sharednumericthreshold applies vx/vy/yaw; not a measured joint-velocity threshold or globalnorm.",
+            "nonzero_boundary": "Any nonzero target, including0.0005 in newfixture, prevents snap. Nonfinite EMA failsfiniteguard. This is postdecay snap, not immediate stop or torqueoff. Head/bodyfilters and deadmantimeout unchanged.",
+            "restart_advisory": "Drivingmoving remains step.busy||command.twist_magnitude()>0; safeToRestart forcebusy and moving&&!fallen gate unchanged. Scriptedmotion/homing/rest/limpfall/heldramp paths can still bebusy. Snapped commandedtwist is not physicalstillness, restartlock or removalofotherupdatepreflightchecks.",
+            "numerical_claim_boundary": "PRbody/comment saysEMAcomponents underflowtozero in~1670ticks/~33s. Linkedissue351 instead explicitly derives when magnitude squaredterms underflowtozero; componentvalues can remain nonzero subnormals. Existingobs::twist_magnitude is sqrt(sum(v*v)), verified. Treat~33s as authors specificnumericcalculation, not tracker reproduction, universaldelay or physicalstoptime.",
+            "tests": {
+              "new_test_definitions": 2,
+              "names": [
+                "stopped_twist_snaps_to_zero_after_decay",
+                "small_nonzero_target_does_not_snap"
+              ],
+              "stop_fixture": "Initial[0.5,0.2,0.1],targetzero,accel1each,dt0.02,alpha0.2. Assertion0.5<=elapsed<1.0seconds and loop<100ticks; message~35ticks is not exactassertion. No measured~0.8sec guarantee.",
+              "scope": "Calls purehelper, notcontrol_loop,deadmangate,safeToRestart RPC/updater/device. No newnonfinite/boundarythreshold/alternativeparameter/hardwaretest inpatch.",
+              "author_execution_or_hardware_result_in_PR_body": false,
+              "tracker_executed": false
+            },
+            "issue_context": {
+              "number": 351,
+              "url": "https://github.com/pollen-robotics/microduck/issues/351",
+              "status": "open",
+              "prior_report": "Oldmain9136aa4 robotd--sim appearedstationary withnonzeroappliedtwist. Duration33s is numericalcalculation, not physicalmeasurement or current547test."
+            },
+            "fixed_sources": {
+              "helper_loop_and_tests": "https://github.com/pollen-robotics/microduck/blob/264a71f125fbc8bfd2983015bddfae6b185dd329/robotd/src/main.rs",
+              "magnitude": "https://github.com/pollen-robotics/microduck/blob/4a763dd893f3982c3a11c136468ccf5d26bcc28a/duck-control/src/obs.rs",
+              "version": "https://github.com/pollen-robotics/microduck/blob/264a71f125fbc8bfd2983015bddfae6b185dd329/Cargo.toml",
+              "protocol": "https://github.com/pollen-robotics/microduck/blob/264a71f125fbc8bfd2983015bddfae6b185dd329/duck-ipc-proto/src/lib.rs"
+            },
+            "validation": "Onefilefixedpatch and actualcommand/moving/advisory chain read. No tests/build, downloadedsoftwareexecution, hardware, service or browsercheck."
+          },
+          "priority": "high_command_stop_and_restart_advisory_review_before_adoption;medium_control_reference;low_current_image_delivery",
+          "impact": {
+            "HD1910": "No Feetech register,driver,torque or braking guarantee; validate servo/modeltiming and truephysicalstillness separately.",
+            "camera": "unchanged",
+            "ToF": "unchanged",
+            "model_management": "unchanged",
+            "training": "no model/weights/training change",
+            "motion": "Explicit smallresidual commandedtwist snap afterzeroeffective target; may release misleadingwalking advisory when otherbusyconditions absent",
+            "sound": "unchanged"
+          }
         }
       ],
       "previous_stable_releases": [
@@ -15652,48 +15775,27 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-06T09:52:11.567123+00:00",
+  "checked_at_utc": "2026-11-06T11:09:27.096662+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-06T02:59:46.279343+00:00",
-    "source_snapshot_utc": "2026-11-06T09:43:15.151493+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-06T09:52:11.567123+00:00",
-    "default_branch_changes": true,
-    "new_stable_release": true,
+    "previous_substantive_review_utc": "2026-11-06T09:52:11.567123+00:00",
+    "source_snapshot_utc": "2026-11-06T11:05:45.282980+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-06T11:09:27.096662+00:00",
+    "default_branch_changes": false,
+    "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+    "stable_assets_changed": false,
     "stable_asset_count": 8,
-    "intermediate_formal_release": "daemon-v0.18.7",
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        540,
-        541,
-        542,
-        543,
-        544,
-        545
+        546,
+        547
       ]
     },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        493,
-        533
-      ],
-      "pollen-robotics/microduck_yocto": [
-        95
-      ]
-    },
-    "previous_tracked_prs_merged": true,
-    "new_development_releases": [
-      "daemon-dev-nfcd-poll-less"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-main"
-    ],
-    "newly_retired_development_tags": [
-      "daemon-dev-configd-label-pin",
-      "daemon-dev-pad-mapping",
-      "daemon-dev-board-face-board-v1"
-    ],
+    "updated_pull_requests": {},
+    "previous_tracked_prs_merged": false,
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -15702,10 +15804,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "canonical_text_sources_verified": 68,
-    "emotion_asset_blob_ids_compared": 26,
-    "notes": "Formal187/API50 and188/API50 source and8assets each,4smallmanifests checked. 188initial0assets became8 beforefinalcheck;not availabilityfailure. Merged533/540/493/542/544/543/541 plusYocto95 reviewed. NFC545/dev1610 pending.3retiredtags both404 preserve lastknownsource. Fourrepo/HF/blog/own15seriesreleases and independent0182 records otherwise unchanged. No runtime/environment/test/build/image/hardware action.",
-    "transient_transport_error": "One additional GitHub Cargo source read returned EOF; retried that missing read and recovered before publication."
+    "canonical_text_sources_verified": 11,
+    "notes": "Newpending546trunkaxisHit.range withsensor10cmfilterretained; actualmonitor usespoint/rawdistance; no inrepoavoidancefix claimed. Newpending547zeroeffective target+finiteabs<1e-3 postramp snap,2purehelpertests only; issue351magnitude-squareunderflow distinction retained, no physicalstoptime guarantee. Both188/API50headsnotformal. Fourdefaults,stable1888assets,devsources,knownPRs,HF/blog,own15series/independent0182records unchanged. OneHFSSL EOFread recoveredbeforepublication; no environment/test/build/install/hardware action."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
