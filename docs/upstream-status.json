@@ -11374,6 +11374,74 @@
             "motion": "Explicit smallresidual commandedtwist snap afterzeroeffective target; may release misleadingwalking advisory when otherbusyconditions absent",
             "sound": "unchanged"
           }
+        },
+        {
+          "number": 549,
+          "title": "kinematics, robotd: clamp non-finite gaze targets and refuse non-finite robot.look",
+          "url": "https://github.com/pollen-robotics/microduck/pull/549",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-06T11:37:22Z",
+          "updated_at": "2026-11-06T11:37:22Z",
+          "merged_at": null,
+          "merge_commit_sha": "b59ea210517fb44fcbaa541ed595501b3a5f2628",
+          "head_sha": "515e0e725a45b0da04b6f37ba7f262604e7d0aae",
+          "base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "base_branch": "main",
+          "actual_merge_base": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "source_version": "0.18.8",
+          "api_version": 50,
+          "changed_file_count": 2,
+          "commit_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...515e0e725a45b0da04b6f37ba7f262604e7d0aae",
+          "classification": "pending proposal; not main/formal188 or replica integration",
+          "development_release_observed": false,
+          "priority": "high_numeric_input_and_RobotLook_contract_review_before_adoption;medium_headpointing_reference;low_current_image_delivery",
+          "replica_integration": "not_integrated;no runtime/model/image/service/device/browser changes by tracker",
+          "review": {
+            "library_behavior": "HeadFk::look_at replaces nonfinite neck_pitch with0; finite neck remainsclamped to modelrange. Only nonfinite target coordinates return immediately withfinite[neck,0,0,0] andclampedtrue. Finite target plusnonfinite neck continues solving; clampedtrue notguaranteed. PRsummary saying either invalidinput immediatelyclamps differs fromcode.",
+            "solver_guards": "Break on nonfinite determinant, nonfinite or<1e-12 stepnorm, or nonfinite nextpitch/yaw; finalclamped is residual>=tolerance OR nonfiniteresidual. Existing30iteration/dampedIK/modelranges retained. Not calibration, measuredtargetlock or hardwarelimit certification.",
+            "RPC_behavior": "RobotLook rejects anynonfinite x/y/z/neck_pitch with existingINVALID_PARAMS=-32602 before HEAD_FK/intentswrite. Finite unreachable target stilluses closestpossiblegazeresult. API50/source188 unchanged but acceptedinput/errorbehavior changes; oldNeverrefused comment nowoverbroad. No newRPC method.",
+            "tests": {
+              "new_test_definitions": 2,
+              "names": [
+                "non_finite_target_or_neck_clamps_without_nan",
+                "a_non_finite_look_target_is_refused"
+              ],
+              "library_fixture": "AlphaFK: xNaN,y+infinity,z-infinity requirefinitejoints/clampedtrue; separatefinite[1,0,0]+neckNaN assertsfinitejoints only, notclamped.",
+              "RPC_fixture": "DirectRustdispatch ofxNaN into defaultintents; assertserror-32602/message andfinitehead. Does not setnonzero sentinel andassert unchangedvalues.",
+              "coverage_limit": "NoJSONserialization/parsing/socket/BLE/WebRTC,fullcontrol_loop,policy/safetyorhardwareexercise. Does not demonstratewiretransportaccepts literalNaN or exhaustiveeveryfield/nonfinitepattern.",
+              "author_reported_kinematics_unit_tests": 31,
+              "author_reported_robotd_unit_tests": 260,
+              "author_reported_fmt_and_targeted_clippy": true,
+              "author_execution_environment_or_full_logs_independently_verified": false,
+              "tracker_executed": false
+            },
+            "downstream_claim_boundary": "Authorissue548/PR says badgaze latchesNaN andSafety::NotFinite holdswhole robot. Existingintents.set_head storesrawvalues, but actualheadEMA calls slew thatalreadydrops nonfinitetarget. Newtests do not runthatloop orSafety; do not report persistentwhole-robotfreeze or itsrepair asindependentlyproven.",
+            "fixed_sources": {
+              "library_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/kinematics/src/head.rs",
+              "RPC_loop_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/robotd/src/main.rs",
+              "protocol_and_code": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/duck-ipc-proto/src/lib.rs",
+              "version": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/Cargo.toml",
+              "existing_intent_storage": "https://github.com/pollen-robotics/microduck/blob/4a763dd893f3982c3a11c136468ccf5d26bcc28a/robotd/src/intents.rs"
+            },
+            "issue_context": {
+              "number": 548,
+              "url": "https://github.com/pollen-robotics/microduck/issues/548",
+              "state": "open",
+              "scope": "AuthorreportednumericalIKanddownstreamfailure; nothardwareacceptance."
+            },
+            "validation": "Bothactualpatches and relevantfullsolver/RPC/headfilter/intents/protocolsources read,5canonicalGitbyte/blob/hashidentities checked. No tests,compiled/downloadedsoftwareexecution,installation,environmentrepairorrobotaccess."
+          },
+          "impact": {
+            "HD1910": "Numericinput defense reference only; no servo protocol/register,mountcalibration,necktravel orrealmotionacceptance.",
+            "camera": "Camera-axispointingIK getsfiniteinput/solverguards; no imagepipeline,visualdetection/intrinsics/distortion/previewrepair.",
+            "ToF": "No sensorprojection/ranging/filter/SLAMchange despite sharedHeadFk geometry.",
+            "model_management": "unchanged",
+            "training": "no model/weight/trainingchange",
+            "motion": "InvalidRobotLook request refusedbeforeintentwrite; finite libraryfallback semantics differfromRPC. Physicaltracking/whole-robotbehavior unverified.",
+            "sound": "unchanged"
+          }
         }
       ],
       "previous_stable_releases": [
@@ -15775,11 +15843,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-06T11:09:27.096662+00:00",
+  "checked_at_utc": "2026-11-06T12:04:08.271491+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-06T09:52:11.567123+00:00",
-    "source_snapshot_utc": "2026-11-06T11:05:45.282980+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-06T11:09:27.096662+00:00",
+    "previous_substantive_review_utc": "2026-11-06T11:09:27.096662+00:00",
+    "source_snapshot_utc": "2026-11-06T12:01:12.274704+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-06T12:04:08.271491+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
@@ -15788,8 +15856,7 @@
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        546,
-        547
+        549
       ]
     },
     "updated_pull_requests": {},
@@ -15804,8 +15871,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published": false,
-    "canonical_text_sources_verified": 11,
-    "notes": "Newpending546trunkaxisHit.range withsensor10cmfilterretained; actualmonitor usespoint/rawdistance; no inrepoavoidancefix claimed. Newpending547zeroeffective target+finiteabs<1e-3 postramp snap,2purehelpertests only; issue351magnitude-squareunderflow distinction retained, no physicalstoptime guarantee. Both188/API50headsnotformal. Fourdefaults,stable1888assets,devsources,knownPRs,HF/blog,own15series/independent0182records unchanged. OneHFSSL EOFread recoveredbeforepublication; no environment/test/build/install/hardware action."
+    "canonical_text_sources_verified": 5,
+    "notes": "Pending549515/equivalent188API50: coordinateinvalidlibraryfinitefallback; neck-onlyinvalidsanitized0butcontinuesIK; RPCnonfinite-32602beforeintents.2newdirecthelper/dispatchtests,author31/260targetedreportsunreproduced. Existingheadslewfiniteguard meanswholeloopfreezerepairnotindependentlyproven. Main/stable1888assets,otherPR/dev/HF/blog/projectrecords unchanged. GitHubtag/sourceEOFs recovered; no runtime/environment/test/build/image/hardwareaction."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
