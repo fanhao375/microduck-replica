@@ -101,6 +101,40 @@ class HomeCoarseTest(unittest.TestCase):
         self.assertIs(b.last_result, result)
         switch.assert_not_called()
 
+    def test_supported_home_verification_saves_without_unloading_or_restarting(self):
+        b = self.home()
+        b.rd.calib.value['imu_home_verification_contract'] = 'home_mount_v1'
+        b.rd.calib.value['calibration']['motion_enabled'] = True
+        b.view()
+        mount = [0.5] * 4
+        b.last_result = {'ok': True, 'mode': 'coarse', 'mount': mount}
+        b._result_basis = b._sampling_basis(b.rd.bus.value)
+        before = copy.deepcopy(b.rd.calib.value['calibration'])
+        old_call = b.rd.cmd.call
+        calls = []
+
+        async def robotd(method, params, timeout):
+            calls.append((method, params))
+            if params.get('action') == 'verify-imu-home':
+                self.assertEqual(params['expected_mount_wxyz'], before['imu_mount_quat'])
+                self.assertTrue(b.rd.bus.value['native']['torque_enabled'])
+                return b.rd.verify(params)
+            return await old_call(method, params, timeout)
+
+        b.rd.cmd.call = robotd
+        self.assertFalse(b.view()['coarse_sampling']['needs_unload'])
+        with mock.patch.object(helper, 'imu_recalibrate') as switch:
+            result = asyncio.run(b.handle({'op':'verify','confirmed':True,'mount_wxyz':mount}))
+        self.assertTrue(result['ok'])
+        self.assertEqual(b.rd.bus.value['mode'], 'motion')
+        self.assertTrue(b.rd.bus.value['native']['torque_enabled'])
+        self.assertFalse(b.rd.bus.value['policy_enabled'])
+        expected = {**before, 'imu_mount_quat': mount, 'imu_mount_verified': True}
+        self.assertEqual(b.rd.calib.value['calibration'], expected)
+        self.assertEqual([params['action'] for _, params in calls],
+                         ['calibration-status', 'verify-imu-home', 'calibration-status'])
+        switch.assert_not_called()
+
     def test_solve_refuses_samples_after_saved_mount_changes(self):
         b = self.home()
         b._capture_basis = b._sampling_basis(b.rd.bus.value)
@@ -108,6 +142,55 @@ class HomeCoarseTest(unittest.TestCase):
         with mock.patch('studio.imu.imu_calib.solve') as solve, self.assertRaisesRegex(Refused, '重新采静止'):
             asyncio.run(b.handle({'op':'solve','mode':'coarse','samples':[{'g':[0,0,-1]}]}))
         solve.assert_not_called()
+
+    def test_full_calibration_can_verify_its_mount_without_combined_joint_commit(self):
+        b = self.home()
+        b.rd.calib.value['imu_home_verification_contract'] = 'home_mount_v1'
+        old_mount = b.view()['mount']['quat']
+        mount = [0.5] * 4
+        old_call = b.rd.cmd.call
+
+        async def robotd(method, params, timeout):
+            if params.get('action') == 'verify-imu-home':
+                return b.rd.verify(params)
+            return await old_call(method, params, timeout)
+
+        b.rd.cmd.call = robotd
+        with mock.patch('studio.imu.imu_calib.solve', return_value={'ok': True, 'mode': 'full', 'mount': mount}), \
+             mock.patch('studio.commit.save_pending') as pending, \
+             mock.patch.object(helper, 'imu_recalibrate') as switch:
+            solved = asyncio.run(b.handle({'op':'solve', 'mode':'full', 'basis_mount_wxyz':old_mount,
+                                           'samples':[{'g':[0,0,-1]}]}))
+            self.assertTrue(solved['live_verify'])
+            result = asyncio.run(b.handle({'op':'verify','confirmed':True,'mount_wxyz':mount}))
+        self.assertTrue(result['ok'])
+        self.assertTrue(b.rd.bus.value['native']['torque_enabled'])
+        pending.assert_not_called()
+        switch.assert_not_called()
+
+    def test_capable_controller_requires_held_home_and_never_falls_back_to_restart(self):
+        b = self.home()
+        b.rd.calib.value['imu_home_verification_contract'] = 'home_mount_v1'
+        b.view()
+        mount = [0.5] * 4
+        b.last_result = {'ok': True, 'mode': 'coarse', 'mount': mount}
+        b._result_basis = b._sampling_basis(b.rd.bus.value)
+        b.rd.bus.value['native'].update(torque_enabled=False, torque_state_confirmed=False)
+        self.assertTrue(b.view()['coarse_sampling']['live_verify'])
+        with mock.patch.object(helper, 'imu_recalibrate') as switch, self.assertRaisesRegex(Refused, '等 HOME 站稳'):
+            asyncio.run(b.handle({'op':'verify', 'confirmed':True, 'mount_wxyz':mount}))
+        switch.assert_not_called()
+
+    def test_held_home_uses_available_imu_or_host_sample_age(self):
+        for board, age_field in (('ft6', 'imu_age_upper_bound_ms'), ('imu_to_dxl', 'sample_age_ms')):
+            b = self.home()
+            native = b.rd.bus.value['native']
+            native['imu_bus'] = {'protocol':'feetech', 'board':board, 'identity':[1, 2, 3]}
+            del native['imu_age_ms']
+            native[age_field] = 10
+            self.assertIsNone(b.view()['coarse_sampling']['reason'])
+            native[age_field] = 251
+            self.assertIn('不新鲜', b.view()['coarse_sampling']['reason'])
 
     def test_solve_drops_result_if_mount_changes_during_calculation(self):
         b = self.home()

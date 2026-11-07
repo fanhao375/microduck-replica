@@ -301,6 +301,16 @@ try {
   await js(`props.imu={...props.imu,coarse_sampling:{...props.imu.coarse_sampling,needs_unload:false}};draw()`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'motion HOME unload preserves solved candidate');
   assert.equal(await js(`calls.some(c=>c.args.op==='redo-start'||c.name==='relax'||c.args.op==='verify')`),false);
+  // A capable controller stays in motion/HOME for the final verification too.
+  await js(`props.imu={...props.imu,coarse_sampling:{...props.imu.coarse_sampling,live_verify:true}};draw()`);
+  await wait(`document.querySelector('.imu-coarse').innerText.includes('当前站姿下保存并应用方向')`, 'live-save guidance');
+  assert.doesNotMatch(await js(`document.querySelector('.imu-coarse').innerText`), /先扶稳并点「失能/);
+  await js(`clickText('交给主程序验证')`);
+  await wait(`calls.length===4`, 'direct HOME verify');
+  assert.deepEqual(await js(`calls[3]`), {name:'imu.op',args:{op:'verify',confirmed:true,mount_wxyz:[1,0,0,0]}});
+  await js(`replies.shift()({ok:true,data:{note:'安装方向已核验、保存并生效，保持当前站姿'}})`);
+  await wait(`document.querySelector('.imu-coarse').innerText.includes('保持当前站姿')`, 'live-save result');
+  assert.equal(await js(`props.st.posture`), 'holding');
   // A persisted redo session may hold HOME for sampling, but must unload before
   // final verification/cancellation. Unloading must keep the solved samples.
   await js(`window.calls=[];window.replies=[];window.confirm=()=>true;
