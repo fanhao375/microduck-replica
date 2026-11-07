@@ -769,7 +769,7 @@ function CollectCard({ st, imu, live, W, act, muted, setMuted }) {
 
 const GRADE = { good: ['好', 'ok'], ok: ['能用', 'warn'], coarse: ['粗校', 'warn'] };
 
-function ResultCard({ res, imu, link, onRedo }) {
+function ResultCard({ res, imu, link, live, onRedo }) {
   const [checks, setChecks] = useState({});
   const [busy, setBusy] = useState(false);
   const [out, setOut] = useState(null);
@@ -780,8 +780,19 @@ function ResultCard({ res, imu, link, onRedo }) {
   const allChecked = confirms.every((_, i) => checks[i]);
   const [gw, gk] = GRADE[Q.grade] || ['—', ''];
   const redo = (res.redo || []).filter((k) => STEP[k]);
-  const save = () => {
-    // 站着精校的结果后端已经记进 imu-pending.json；真正写进主程序统一走第 3 步
+  const canSave = live !== false && link.status === 'open' &&
+    imu?.coarse_sampling?.live_verify === true && !imu?.coarse_sampling?.reason &&
+    !imu?.coarse_sampling?.verify_reason;
+  const save = async () => {
+    if (res.live_verify) {
+      if (!canSave || busy || !allChecked) return;
+      setBusy(true);
+      setOut(null);
+      const r = await link.cmd('imu.op', { op: 'verify', confirmed: true, mount_wxyz: res.mount }, 90000);
+      setBusy(false);
+      setOut({ ok: r.ok, text: r.ok ? r.data?.note || '安装方向已保存' : r.reason || r.error || '验证未通过' });
+      return;
+    }
     setOut({ ok: true, text: '这次的方向已经记在 Studio 里：去上手清单第 3 步点「写进主程序」。' });
     location.hash = '#/';
     setTimeout(() => document.querySelector('[data-step="commit"]')?.scrollIntoView({ block: 'center' }), 300);
@@ -816,7 +827,11 @@ function ResultCard({ res, imu, link, onRedo }) {
     ${(res.notes || []).map((n) => html`<p class="sv-small">· ${n}</p>`)}
     ${res.ok ? html`<details class="imu-details"><summary>详细数据</summary>${detail}</details>` : detail}
     ${confirms.map((c, i) => html`<label class="imu-confirm"><input type="checkbox" checked=${!!checks[i]} onChange=${(e) => setChecks({ ...checks, [i]: e.target.checked })} /> ${c}</label>`)}
-    ${res.ok ? html`<div class="imu-save">
+    ${res.ok && res.live_verify ? html`<div class="imu-save">
+      <button class="btn-dark" disabled=${!res.mount || !canSave || !allChecked || busy || out?.ok}
+        onClick=${save}>${busy ? '正在核验…' : out?.ok ? '已保存' : '验证并保存 IMU 方向'}</button>
+      <span class="sv-small">保持 HOME。先把实物回正并停住，再点验证。按提示在 20 秒内托住躯干前倾 15–30°，通过后直接保存。</span>
+    </div>` : res.ok ? html`<div class="imu-save">
       <button class="btn-dark" disabled=${!res.mount} onClick=${save}>去上手清单第 3 步</button>
       <span class="sv-small">这里只记下方向；第 3 步「写进主程序」才会重启主程序、切到运动模式</span>
     </div>` : null}
@@ -824,8 +839,6 @@ function ResultCard({ res, imu, link, onRedo }) {
     ${out ? html`<div class=${'banner ' + (out.ok ? 'warn' : 'bad')} role="status"><b>${out.ok ? '写好了' : '没写成'}</b><span class="more">${out.text}</span></div>` : null}
   </section>`;
 }
-
-// 站着精校的结果先记在 Studio（imu-pending.json）；写进主程序统一在上手清单第 3 步做。
 
 // ---------------- 方向没确认、站不起来：先粗校 ----------------
 
@@ -844,6 +857,7 @@ function CoarseCard({ st, imu, link, live }) {
   const hold = st?.hold || imu?.hold || null;
   const sampling = imu?.coarse_sampling || {};
   const inPlace = mode === 'motion' && sampling.available && !redo.active;
+  const liveVerify = inPlace && sampling.live_verify === true;
   const needsUnload = inPlace ? sampling.needs_unload !== false : !!redo.active && !!hold;
   const captureWhy = inPlace ? sampling.reason : hold && (hold.stage !== 'holding' || !Number.isFinite(hold.max_error_deg)
     || hold.max_error_deg < 0 || hold.max_error_deg > 5)
@@ -878,7 +892,9 @@ function CoarseCard({ st, imu, link, live }) {
     ${!showSteps && !redo.active ? html`<div class="imu-actions"><${TwoStep}
       label="重新标定方向" ask=${inPlace ? '保持 HOME，确认采集安装方向？' : commissioning ? '扶好鸭子，确认重新采集？' : '扶好并已卸力，确认重启并进入标定模式？'}
       cls="btn-dark" disabled=${!!startWhy || busy} title=${startWhy} onConfirm=${start} busyLabel="正在进入标定模式…" /></div>
-      <p class="sv-small">${inPlace
+      <p class="sv-small">${liveVerify
+        ? '保持 HOME 站姿，扶稳后可以采数、验证并保存。先停下模型，采前倾时托住整个躯干。'
+        : inPlace
         ? '现在可保持 HOME 站姿，直接采静止和前倾，不用先卸力，也不重启主程序。最后验证写入前再扶稳并卸力，采好的结果会保留。'
         : commissioning
         ? '双手扶稳，可卸力托住，也可站姿使能后等站稳，再重新采集。'
@@ -886,13 +902,14 @@ function CoarseCard({ st, imu, link, live }) {
       ${startWhy ? html`<p class="sv-warn">${startWhy}</p>` : null}` : null}
     ${captureWhy ? html`<p class="sv-warn">${captureWhy}</p>` : null}
     ${showSteps ? html`<${CoarseSteps} key=${context} link=${link} disabled=${!open || busy || working || !!captureWhy}
-      redoSession=${!!redo.active} inPlace=${!!inPlace} needsUnload=${needsUnload}
+      redoSession=${!!redo.active} inPlace=${!!inPlace} liveVerify=${liveVerify} needsUnload=${needsUnload}
+      verifyWhy=${liveVerify ? sampling.verify_reason : null}
       onBegin=${() => setOpened(true)} onDone=${(text) => setMsg({ ok: true, text })} />` : null}
     ${msg ? html`<div class=${'banner ' + (msg.ok ? 'warn' : 'bad')} role="status"><span>${msg.text}</span></div>` : null}
   </section>`;
 }
 
-function CoarseSteps({ link, disabled, redoSession, inPlace, needsUnload, onBegin, onDone }) {
+function CoarseSteps({ link, disabled, redoSession, inPlace, liveVerify, needsUnload, verifyWhy, onBegin, onDone }) {
   const [step, setStep] = useState('idle');       // idle / still / fwd / confirm / verifying / done / failed
   const [still, setStill] = useState(null);
   const [res, setRes] = useState(null);
@@ -935,7 +952,7 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, needsUnload, onBegi
   };
   const reset = () => { setStep('idle'); setStill(null); setRes(null); setChecks({}); setOut(null); };
   const verify = async () => {
-    if (disabled || busy || needsUnload || !res?.mount) return;
+    if (disabled || busy || needsUnload || verifyWhy || !res?.mount) return;
     setBusy(true); setStep('verifying'); setOut(null);
     const r = await link.cmd('imu.op', { op: 'verify', confirmed: true, mount_wxyz: res.mount }, 90000);
     if (!alive.current) return;
@@ -948,7 +965,9 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, needsUnload, onBegi
   const allChecked = confirms.every((_, i) => checks[i]);
   const nowStep = step === 'idle' ? 'still' : step;
   return html`<div class="imu-coarse-steps">
-    <p class="sv-small">${inPlace
+    <p class="sv-small">${liveVerify
+      ? '保持 HOME，先停下模型。扶稳后采静止，托住整个躯干采前倾。验证通过后会在当前站姿下保存并应用方向。'
+      : inPlace
       ? '保持 HOME、模型不要接管，直接采静止；再托住整个躯干前倾采数。采数不卸力、不切换模式。最后验证写入前，再扶稳并卸力。'
       : redoSession
       ? '本次重标定可先点「站姿使能」，等站稳后扶住采集；也可失能（卸力）后托住采集。交给主程序验证或取消前，再先失能（卸力）。'
@@ -980,10 +999,11 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, needsUnload, onBegi
       ${confirms.map((c, i) => html`<label class="imu-confirm"><input type="checkbox" checked=${!!checks[i]}
         onChange=${(e) => setChecks({ ...checks, [i]: e.target.checked })} /> ${c}</label>`)}
       <div class="imu-actions">
-        <button class="btn-dark" disabled=${busy || disabled || needsUnload || !res.mount || !allChecked} onClick=${verify}>交给主程序验证</button>
+        <button class="btn-dark" disabled=${busy || disabled || needsUnload || !!verifyWhy || !res.mount || !allChecked} onClick=${verify}>交给主程序验证</button>
         <button class="btn-light" disabled=${busy} onClick=${reset}>重做</button>
       </div>
-      ${redoSession || inPlace ? html`<p class=${needsUnload ? 'sv-warn' : 'sv-small'}>先扶稳并点「失能（卸力）」，已采集和求解的结果会保留。${inPlace ? '点击验证后才备份原方向并切换模式；' : ''}验证通过后恢复原运行模式。</p>` : null}
+      ${verifyWhy ? html`<p class="sv-warn">${verifyWhy}</p>` : null}
+      ${(redoSession || inPlace) && !liveVerify ? html`<p class=${needsUnload ? 'sv-warn' : 'sv-small'}>先扶稳并点「失能（卸力）」，已采集和求解的结果会保留。${inPlace ? '点击验证后才备份原方向并切换模式；' : ''}验证通过后恢复原运行模式。</p>` : null}
       <p class="sv-small"><b>点击验证前，先把实物回正并停住。</b>点了以后，再按提示在 20 秒内往前倾 15–30° 并停住。</p>
     </div>` : null}
     ${nowStep === 'verifying' ? html`<div class="imu-coarse-step">
@@ -1037,10 +1057,17 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
   }, [context]);
 
   useEffect(() => {
+    if (W.current.mountBasis && ['collect', 'short'].includes(W.current.phase) &&
+        (live === false || !imu?.coarse_sampling?.live_verify || imu.coarse_sampling.verify_reason)) {
+      W.current.phase = 'error';
+      W.current.error = '采集时 HOME 保持中断，请站稳后重新采集';
+      redraw();
+      return;
+    }
     if (!feed(W.current, st, live)) return;
     for (const e of W.current.events.splice(0)) if (!mutedRef.current) beep(e);
     redraw();
-  }, [st, live]);
+  }, [st, live, imu?.coarse_sampling?.live_verify, imu?.coarse_sampling?.verify_reason]);
 
   // 采完了：交给后端算（旧方向后端自己从 calibration-status 拿，不用页面传）
   const phase = W.current.phase;
@@ -1048,7 +1075,8 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
     if (phase !== 'solving') return undefined;
     let dead = false;
     const w = W.current;
-    link.cmd('imu.op', { op: 'solve', frame: 'body', mode: 'full', samples: payload(w) }, 15000).then((r) => {
+    const basis = w.mountBasis ? { basis_mount_wxyz: w.mountBasis } : {};
+    link.cmd('imu.op', { op: 'solve', frame: 'body', mode: 'full', samples: payload(w), ...basis }, 15000).then((r) => {
       if (dead || W.current !== w) return;
       if (r.ok && r.data) { w.phase = 'done'; w.result = r.data; setRes(r.data); }
       else { w.phase = 'error'; w.error = r.reason || r.error || '没算出来'; }
@@ -1058,7 +1086,13 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
   }, [phase, context]);
 
   const act = {
-    start: () => { audioUnlock(); startCollect(W.current, performance.now() / 1000); setRes(null); redraw(); },
+    start: () => {
+      audioUnlock();
+      startCollect(W.current, performance.now() / 1000);
+      W.current.mountBasis = imu?.coarse_sampling?.live_verify ? imu.mount?.quat : null;
+      setRes(null);
+      redraw();
+    },
     end: () => { endCollect(W.current); redraw(); },
     resume: () => { audioUnlock(); resumeCollect(W.current); redraw(); },
   };
@@ -1074,6 +1108,8 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
   const w = W.current;
   const S = statusOf(st, imu, live);
   const F = freshText(st, live, age);
+  const applied = res?.live_verify && imu?.mount?.verified &&
+    res.mount?.every((value, i) => Math.abs(value - imu.mount.quat?.[i]) < 1e-8);
   const arrow = w.phase === 'collect' && w.done.still ? nextTodo(w) : null;
   const cue = w.phase === 'collect' ? (!w.done.still ? '静止 3 秒：别碰它' : arrow ? `下一个：${STEP[arrow].cn}（顺序随便）` : null) : null;
   return html`<div class="imu-page">
@@ -1090,7 +1126,7 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
     ${msg ? html`<div class=${'banner ' + (msg.ok ? 'warn' : 'bad')} role="status"><span>${msg.text}</span>
       <a href="#" onClick=${(e) => { e.preventDefault(); setMsg(null); }}>知道了</a></div>` : null}
     <div class="imu-grid">
-      <${ImuStage} st=${st} stale=${!F.live} corr=${res?.ok ? res.correction : null} parts=${res?.parts}
+      <${ImuStage} st=${st} stale=${!F.live} corr=${res?.ok && !applied ? res.correction : null} parts=${res?.parts}
         collecting=${w.phase === 'collect'} arrow=${arrow} cue=${cue} />
       <div class="imu-side">
         <${StatusCard} st=${st} imu=${imu} live=${live} age=${age} diagnosticElapsed=${diagnosticElapsed} />
@@ -1098,7 +1134,7 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
         <${CoarseCard} st=${st} imu=${imu} link=${link} live=${live} />
         <${StanceCard} st=${st} imu=${imu} pd=${pd} link=${link} live=${live} />
         <${CollectCard} st=${st} imu=${imu} live=${live} W=${w} act=${act} muted=${muted} setMuted=${setMuted} />
-        <${ResultCard} res=${w.phase === 'done' ? res || w.result : null} imu=${imu} link=${link} onRedo=${onRedo} />
+        <${ResultCard} res=${w.phase === 'done' ? res || w.result : null} imu=${imu} link=${link} live=${live} onRedo=${onRedo} />
         <${ChipCard} imu=${imu} link=${link} live=${live} diagnosticElapsed=${diagnosticElapsed} />
       </div>
     </div>

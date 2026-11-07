@@ -199,9 +199,9 @@ class StartupObservationsTest(unittest.TestCase):
         self.assertIsNotNone(view["rows"][0]["deg"])
 
     def test_api_version_matches_native_observation_contract(self):
-        self.assertEqual(API_VERSION, 42)
+        self.assertEqual(API_VERSION, 44)
         for build in ("0791fcd-feetech-qinmo-control.45", "0791fcd-feetech-qinmo-control.46",
-                      "0791fcd-feetech-qinmo-control.47"):
+                      "0791fcd-feetech-qinmo-control.47", "replica-imu-home-control.49"):
             self.assertIn(build, KNOWN_BUILDS)
 
 
