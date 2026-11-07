@@ -17094,11 +17094,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
+  "checked_at_utc": "2026-11-07T11:54:30.502120+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-07T01:56:51.036900+00:00",
-    "source_snapshot_utc": "2026-11-07T07:55:18.843550+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
+    "previous_substantive_review_utc": "2026-11-07T07:56:16.725610+00:00",
+    "source_snapshot_utc": "2026-11-07T11:53:50.553748+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-07T11:54:30.502120+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
@@ -17112,13 +17112,14 @@
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
-    "project_public_image_release_status_changed": true,
+    "project_public_image_release_status_changed": false,
     "project_public_software_status_changed": false,
     "runtime_code_changed_by_heartbeat": false,
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "GitHub now lists the existing November 4 replica image as the latest formal release. The tag and attachment inventory match the November 4 snapshot. The matching software remains a prerelease. The release body keeps its pending hardware acceptance items."
+    "notes": "GitHub Latest API and the public download redirect point to the October 27 image. November 4 remains a formal image on its original tag. This observation records the download selection and retains the earlier November 4 Latest observation.",
+    "project_github_latest_target_changed": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -18703,12 +18704,37 @@
       "canonical_text_sources_verified": 105,
       "small_policy_manifests_reviewed": 3,
       "notes": "Main189/API51unreleased550/552/553;formal189ref/release404,188unchanged. v9tagreappeared/restoresv7identities,notnewtraining. ImpactV4OFFandEEPROMsemantics/pending551186API51;mic363188API51audio/videovotes,crouch188API50no model;phase449189API52sync-only10of11lineequal. 105pinnedGittexts+3smallHFmanifestbytes,modelLFSmetadataonly;no weights/program/test/build/install/robot/previewaction. Interruptedpriorcapturestagesretained. TransientGitHubreadsrecovered."
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-07T01:56:51.036900+00:00",
+      "source_snapshot_utc": "2026-11-07T07:55:18.843550+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": true,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "GitHub now lists the existing November 4 replica image as the latest formal release. The tag and attachment inventory match the November 4 snapshot. The matching software remains a prerelease. The release body keeps its pending hardware acceptance items."
     }
   ],
   "replica_public_image": {
     "recorded_on": "2026-11-07",
-    "checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
-    "classification": "Formal replica image and GitHub Latest release",
+    "checked_at_utc": "2026-11-07T11:54:30.502120+00:00",
+    "classification": "Formal replica image",
     "release_tag": "microduck-replica-image-20261104",
     "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
     "release_id": 433776261,
@@ -18718,7 +18744,7 @@
     "release_updated_at_tokyo": "2026-11-07T16:24:38+09:00",
     "draft": false,
     "prerelease": false,
-    "github_latest": true,
+    "github_latest": false,
     "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
     "native_source_sha": "eecac1878136d3188370a5f6460b7d0521cf845d",
     "runtime_family": "0.15.1",
@@ -18841,6 +18867,82 @@
       "model_management_and_training": "The existing November 4 policy payload and model provenance apply.",
       "actions_and_sound": "The existing action and voice payloads apply. Walking and getting up after a fall are pending hardware acceptance."
     },
-    "priority": "High for accurate download navigation and release-state tracking."
+    "priority": "High for accurate download navigation and release-state tracking.",
+    "github_latest_observation_history": [
+      {
+        "observed_at_utc": "2026-11-07T07:56:16.725610+00:00",
+        "github_latest": true
+      }
+    ],
+    "current_latest_download_record": "#/replica_github_latest"
+  },
+  "replica_github_latest": {
+    "observed_at_utc": "2026-11-07T11:54:30.502120+00:00",
+    "observed_at_tokyo": "2026-11-07T20:54:30.502120+09:00",
+    "switch_time_utc": null,
+    "release_tag": "microduck-replica-image-20261027",
+    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027",
+    "release_id": 425090056,
+    "tag_object_sha": "4e814132bcbc48d730ce280b1b0edc283761cfa4",
+    "tag_actual_sha": "e382f0741d7dfe4e972605e2843474df7219cade",
+    "published_at_utc": "2026-10-27T06:48:08Z",
+    "prerelease": false,
+    "asset_inventory": [
+      {
+        "name": "microduck-replica-20261027-licenses.txt",
+        "size": 13349,
+        "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
+      },
+      {
+        "name": "microduck-replica-20261027-manifest.txt",
+        "size": 9734,
+        "digest": "sha256:50609044b6cf0bf92e519717b4cbee33f2c4ddb95204ccd0572d3a763275c3af"
+      },
+      {
+        "name": "microduck-replica-20261027-models.txt",
+        "size": 7477,
+        "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
+      },
+      {
+        "name": "microduck-replica-20261027-third-party.txt",
+        "size": 4931,
+        "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
+      },
+      {
+        "name": "microduck-replica-20261027-voice.txt",
+        "size": 345,
+        "digest": "sha256:fb0e9dd923163e556fb177982707f385994e7bf5dfe0a803158b4d8f74626bbc"
+      },
+      {
+        "name": "microduck-replica-20261027.img.xz",
+        "size": 741604104,
+        "digest": "sha256:91ab5550e0f409d634722718a638d6e9615412b779b5d26c0af5c777056d0194"
+      },
+      {
+        "name": "microduck-replica-20261027.img.xz.sha256",
+        "size": 100,
+        "digest": "sha256:5665833142b39dec04a1c9181bb8f0558abfa9802a21041c5c458170f3941c27"
+      },
+      {
+        "name": "README.txt",
+        "size": 1159,
+        "digest": "sha256:cd15233d0696ed4df7250c08c6ecfeac9c0c38e721d9d45c2974380227a04a3f"
+      }
+    ],
+    "previous_observation": {
+      "observed_at_utc": "2026-11-07T07:56:16.725610+00:00",
+      "release_tag": "microduck-replica-image-20261104",
+      "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+      "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009"
+    },
+    "sources": {
+      "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/425090056",
+      "latest_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest",
+      "public_download_entry": "https://github.com/fanhao375/microduck-replica/releases/latest",
+      "public_redirect_confirmed_at_utc": "2026-11-07T11:54:51Z",
+      "fixed_source": "https://github.com/fanhao375/microduck-replica/commit/e382f0741d7dfe4e972605e2843474df7219cade"
+    },
+    "impact": "Default download navigation now selects the already published October 27 image. The two formal image releases, November 4 companion prerelease, and their recorded validation scopes remain available.",
+    "priority": "High for download navigation."
   }
 }
