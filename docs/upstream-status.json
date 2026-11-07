@@ -17094,49 +17094,31 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-07T01:56:51.036900+00:00",
+  "checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-06T14:05:20.762419+00:00",
-    "source_snapshot_utc": "2026-11-07T01:48:05.686366+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-07T01:56:51.036900+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-07T01:56:51.036900+00:00",
+    "source_snapshot_utc": "2026-11-07T07:55:18.843550+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        550,
-        551,
-        552,
-        553
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        449
-      ]
-    },
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      "daemon-dev-mediad-mic-track",
-      "daemon-dev-crouchstand"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-main",
-      "daemon-dev-impact-guard-v3"
-    ],
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
-    "model_metadata_changed": true,
+    "model_metadata_changed": false,
     "local_migration_record_changed": false,
-    "project_public_prereleases_changed": false,
+    "project_public_image_release_status_changed": true,
+    "project_public_software_status_changed": false,
     "runtime_code_changed_by_heartbeat": false,
     "tests_executed_by_tracker": false,
     "robot_connected": false,
-    "image_built_or_published": false,
-    "canonical_text_sources_verified": 105,
-    "small_policy_manifests_reviewed": 3,
-    "notes": "Main189/API51unreleased550/552/553;formal189ref/release404,188unchanged. v9tagreappeared/restoresv7identities,notnewtraining. ImpactV4OFFandEEPROMsemantics/pending551186API51;mic363188API51audio/videovotes,crouch188API50no model;phase449189API52sync-only10of11lineequal. 105pinnedGittexts+3smallHFmanifestbytes,modelLFSmetadataonly;no weights/program/test/build/install/robot/previewaction. Interruptedpriorcapturestagesretained. TransientGitHubreadsrecovered."
+    "image_built_or_published_by_tracker": false,
+    "notes": "GitHub now lists the existing November 4 replica image as the latest formal release. The tag and attachment inventory match the November 4 snapshot. The matching software remains a prerelease. The release body keeps its pending hardware acceptance items."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -18677,5 +18659,188 @@
     },
     "impact": "IMU/HD-1910 commissioning and packaging changes in15series; preserves earlier camera/gamepad/music features. Does not establish new upstream ToF, model/training or motion/sound contracts, independent0182 delivery, or gait/getup improvement.",
     "priority": "Candidate for isolated spare-card acceptance; published prerelease is not a stable-image replacement or an instruction to deploy."
+  },
+  "review_history": [
+    {
+      "previous_substantive_review_utc": "2026-11-06T14:05:20.762419+00:00",
+      "source_snapshot_utc": "2026-11-07T01:48:05.686366+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-07T01:56:51.036900+00:00",
+      "default_branch_changes": true,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          550,
+          551,
+          552,
+          553
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          449
+        ]
+      },
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [
+        "daemon-dev-mediad-mic-track",
+        "daemon-dev-crouchstand"
+      ],
+      "moved_development_tags": [
+        "daemon-dev-main",
+        "daemon-dev-impact-guard-v3"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": true,
+      "local_migration_record_changed": false,
+      "project_public_prereleases_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published": false,
+      "canonical_text_sources_verified": 105,
+      "small_policy_manifests_reviewed": 3,
+      "notes": "Main189/API51unreleased550/552/553;formal189ref/release404,188unchanged. v9tagreappeared/restoresv7identities,notnewtraining. ImpactV4OFFandEEPROMsemantics/pending551186API51;mic363188API51audio/videovotes,crouch188API50no model;phase449189API52sync-only10of11lineequal. 105pinnedGittexts+3smallHFmanifestbytes,modelLFSmetadataonly;no weights/program/test/build/install/robot/previewaction. Interruptedpriorcapturestagesretained. TransientGitHubreadsrecovered."
+    }
+  ],
+  "replica_public_image": {
+    "recorded_on": "2026-11-07",
+    "checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
+    "classification": "Formal replica image and GitHub Latest release",
+    "release_tag": "microduck-replica-image-20261104",
+    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+    "release_id": 433776261,
+    "release_name": "20261104 正式镜像 · IMU站姿重标与热点恢复",
+    "published_at_utc": "2026-11-04T10:57:46Z",
+    "release_updated_at_utc": "2026-11-07T07:24:38Z",
+    "release_updated_at_tokyo": "2026-11-07T16:24:38+09:00",
+    "draft": false,
+    "prerelease": false,
+    "github_latest": true,
+    "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+    "native_source_sha": "eecac1878136d3188370a5f6460b7d0521cf845d",
+    "runtime_family": "0.15.1",
+    "robotd_build": "replica-imu-verify-control.48",
+    "robotd_api": 43,
+    "asset_inventory": [
+      {
+        "name": "microduck-replica-20261104-licenses.txt",
+        "size": 13349,
+        "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
+      },
+      {
+        "name": "microduck-replica-20261104-manifest.txt",
+        "size": 9734,
+        "digest": "sha256:47935e29ef69e29024ca9171b40e97e75d765272f253e8b6d01ceadef5d4c2b4"
+      },
+      {
+        "name": "microduck-replica-20261104-models.txt",
+        "size": 7477,
+        "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
+      },
+      {
+        "name": "microduck-replica-20261104-software-components.json",
+        "size": 1671,
+        "digest": "sha256:caa5cf32701de1a9185a1873f62afd55d67d71c6fd07ed580cfd66cb8a688e81"
+      },
+      {
+        "name": "microduck-replica-20261104-third-party.txt",
+        "size": 4931,
+        "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
+      },
+      {
+        "name": "microduck-replica-20261104-verification.json",
+        "size": 3293,
+        "digest": "sha256:82d153834404444ae7745909a76fd3119897ee39af18b82041fa330852c029bb"
+      },
+      {
+        "name": "microduck-replica-20261104.img.xz",
+        "size": 755670732,
+        "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78"
+      },
+      {
+        "name": "microduck-replica-20261104.img.xz.sha256",
+        "size": 100,
+        "digest": "sha256:0f9e72fb6a5e1b297994679c919c3c31a4da517b182c83eb51b9fd5510288dcf"
+      },
+      {
+        "name": "README.txt",
+        "size": 1178,
+        "digest": "sha256:7f08b0ef024ff8f4dc09d2fb9f5a97ec00c776dd2d01ba8d84ec47cb8808c0e1"
+      },
+      {
+        "name": "runtime-provenance.json",
+        "size": 1687,
+        "digest": "sha256:e8a186255f7b6eb0280c9f61c40560dc445a45768004eabf249cc42abdad9492"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size": 1202,
+        "digest": "sha256:a63e5e2c6013592cda5345c1501ca6b5fc876e8189e3fd79836ce734a5e99b74"
+      },
+      {
+        "name": "update-summary.txt",
+        "size": 4239,
+        "digest": "sha256:df8fed785b2de40684f591e38c90ee89a0eb78af75731ee52130410602c6989b"
+      },
+      {
+        "name": "validation-report.json",
+        "size": 4048,
+        "digest": "sha256:b9ab24e097a5e9d95bc6fbb0f182aeb79445439172311f970bc1e7dd881b1582"
+      }
+    ],
+    "package": {
+      "name": "microduck-replica-20261104.img.xz",
+      "size": 755670732,
+      "sha256": "f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+      "verification": "microduck-replica-20261104-verification.json"
+    },
+    "previous_image_prerelease_snapshot": "#/replica_public_prereleases/image",
+    "previous_github_latest_image": {
+      "tag": "microduck-replica-image-20261027",
+      "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027",
+      "tag_object_sha": "4e814132bcbc48d730ce280b1b0edc283761cfa4",
+      "actual_sha": "e382f0741d7dfe4e972605e2843474df7219cade",
+      "published_at_utc": "2026-10-27T06:48:08Z",
+      "asset_count": 8,
+      "retained": true
+    },
+    "matching_software": {
+      "tag": "microduck-software-v2026.11.4",
+      "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.4",
+      "prerelease": true,
+      "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+      "asset_count": 15
+    },
+    "hardware_acceptance": {
+      "new_card_boot": false,
+      "real_hotspot_recovery": false,
+      "direction_motion": false,
+      "gait_or_getup_fix": false
+    },
+    "verification": {
+      "tag_and_commit_checked": true,
+      "release_assets_name_size_digest_match_previous": true,
+      "package_downloaded_or_rehashed_by_tracker": false,
+      "tests_executed_by_tracker": false,
+      "independent_0182_acceptance_changed": false
+    },
+    "fixed_sources": {
+      "source_commit": "https://github.com/fanhao375/microduck-replica/commit/f215b658a4f24b669cf664b6381a559c61472009",
+      "release_notes": "https://github.com/fanhao375/microduck-replica/blob/f215b658a4f24b669cf664b6381a559c61472009/docs/更新说明-20261104.md",
+      "image_verification": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-replica-image-20261104/microduck-replica-20261104-verification.json",
+      "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
+      "latest_release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest"
+    },
+    "impact": {
+      "HD1910": "Latest image points to the November 4 Radxa Zero 3W and HD-1910 package. Fresh-card boot and real Wi-Fi hotspot recovery are pending.",
+      "camera": "The existing November 4 camera and Studio components retain their recorded verification scope.",
+      "ToF": "The publication status change introduces no ToF implementation.",
+      "model_management_and_training": "The existing November 4 policy payload and model provenance apply.",
+      "actions_and_sound": "The existing action and voice payloads apply. Walking and getting up after a fall are pending hardware acceptance."
+    },
+    "priority": "High for accurate download navigation and release-state tracking."
   }
 }
