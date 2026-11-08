@@ -234,9 +234,11 @@ class ImuBackend:
                and hd.get("restore_pending") is False and hd.get("temporary_gains_applied") is False)
         guard = bus.get("home_start_guard") or {}
         error = guard.get("max_joint_error_deg") if isinstance(guard, dict) else None
+        legacy_ready = (isinstance(error, (int, float)) and not isinstance(error, bool)
+                        and math.isfinite(error) and 0 <= error <= 5)
+        hold_ready = bus.get("imu_calibration_hold_ready", legacy_ready)
         held = (native.get("torque_state_confirmed") is True and native.get("torque_enabled") is True
-                and bus.get("homed") is True and isinstance(error, (int, float)) and not isinstance(error, bool)
-                and math.isfinite(error) and 0 <= error <= 5)
+                and bus.get("homed") is True and hold_ready is True)
         age = native.get("imu_age_ms")
         if age is None:
             age = native.get("imu_age_upper_bound_ms")
@@ -254,7 +256,7 @@ class ImuBackend:
               or bus.get("torque_off_pending") or bus.get("power_pending") or bus.get("motion")):
             reason = "先停下模型并保持 HOME：正在起身或策略接管时不能采数"
         elif not (held or off):
-            reason = "先等 HOME 站稳（关节误差 ≤5°），或确认全部卸力"
+            reason = "等关节停稳后再采数，也可扶稳并卸力后采数"
         elif (native.get("imu_ready") is not True or not isinstance(age, (int, float))
               or isinstance(age, bool) or not math.isfinite(age) or not 0 <= age <= 250
               or bus.get("all_joints_fresh") is not True or bus.get("fresh_sample") is not True):
@@ -264,6 +266,7 @@ class ImuBackend:
         live_verify = (available and isinstance(calib, dict)
                        and calib.get("imu_home_verification_contract") == "home_mount_v1")
         return {"available": available, "reason": reason,
+                "hold_ready": held,
                 "live_verify": live_verify,
                 "verify_reason": None if held else "先站姿使能并等 HOME 站稳，再验证和保存",
                 "needs_unload": not (off or live_verify)}
@@ -338,16 +341,16 @@ class ImuBackend:
                          or bus.get("power_pending") or bus.get("motion") or bus.get("home_recovery")
                          or bus.get("policy_enabled") is True or bus.get("policy_motion_enabled") is True)
         error = hold.get("max_error_deg")
+        legacy_ready = (isinstance(error, (int, float)) and not isinstance(error, bool)
+                        and math.isfinite(error) and 0 <= error <= 5)
         settled_hold = (bus.get("mode") == "commissioning"
                         and bus.get("phase") == "holding" and bus.get("torque_state") == "all_enabled"
                         and hold.get("stage") == "holding" and native.get("torque_state_confirmed") is not False
-                        and isinstance(error, (int, float)) and not isinstance(error, bool)
-                        and math.isfinite(error) and 0 <= error <= 5)
+                        and hold.get("imu_calibration_ready", legacy_ready) is True)
         relaxed = (bus.get("torque_state") == "off" and native.get("torque_state_confirmed") is not True
                    and not hold)
         if transitioning or not (relaxed or settled_hold):
-            raise Refused("初次 IMU 粗校需要已卸力，或标定模式的站姿使能已站稳（HOME 误差 ≤5°）；"
-                          "正在起身、运动或卸力未确认时不能采数。双手扶稳鸭子")
+            raise Refused("双手扶稳鸭子，等站姿关节停稳或确认已卸力后再采数")
         if redo.get("active"):
             if redo.get("phase") not in ("commissioning", "finish_failed"):
                 raise Refused(redo.get("reason") or "重做初次 IMU 校准的模式切换未完成：先取消或恢复会话")
@@ -543,7 +546,7 @@ class ImuBackend:
             msg = "低头方向不对：模块装法可能反了，或者绕竖直轴转了约 90°。对照模块实际装法重做"
         elif "no nose-down tip" in low or "within 20 s" in low:
             msg = "超时没看到往前低头：摆正以后要在 20 秒内往前低头 15–30° 并停住"
-        elif "verify-imu-home cancelled" in low:
+        elif "verify-imu-home cancelled" in low or "the calibration hold is not steady" in low:
             msg = "HOME 保持中断或反馈不再新鲜：扶稳后再验证"
         elif "cancelled by relax" in low:
             msg = "验证被卸力打断了：扶好鸭子，重新做一次"
@@ -641,7 +644,7 @@ class ImuBackend:
         if not last.get("ok") or last.get("mode") != "coarse" or last.get("mount") != mount:
             raise Refused("这份方向不是刚刚粗校算出来的：重新算一次再验证")
         await self._require_verification_contract(source)
-        self.job = {"kind": "coarse", "title": "交给主程序验证",
+        self.job = {"kind": "coarse", "phase": "verify", "title": "交给主程序验证",
                     "msg": "摆正，然后 20 秒内往前低头 15–30°", "target_deg": 20}
         try:
             # fork 的 command_timeout 是 20 秒窗口 + 10 秒；再加 5 秒余量
@@ -717,7 +720,7 @@ class ImuBackend:
                     self.rd.calib.set(status)
                 self.last_result = None
                 raise Refused("主程序使用的原 IMU 方向已改变：重新采静止和前倾")
-            self.job = {"kind": "coarse", "title": "保持 HOME 验证 IMU 方向",
+            self.job = {"kind": "coarse", "phase": "verify", "title": "保持站姿验证 IMU 方向",
                         "msg": "摆正，然后 20 秒内往前低头 15–30°", "target_deg": 20}
             self._redo_busy = True
             self.home_verification_task = asyncio.current_task()
