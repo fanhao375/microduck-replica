@@ -267,13 +267,18 @@ try {
   await wait(`document.querySelector('#main-imu').textContent==='unknown'`, 'Main new hello clears same-phase prior daemon identity');
   // The actual reported entry is motion/HOME with torque already enabled.
   // It must expose collection in place, without sending redo-start or relax.
+  const staleReadings = 'IMU 或关节读数不新鲜：等实时数据恢复再采数';
   await js(`window.calls=[];window.replies=[];
     props.st={mode:'motion',posture:'holding',gravity:[0,0,-1],joints_age_ms:5,imu:{status:'ok'},hold:null};
     props.imu={source:'bus',mode:'motion',mount:{quat:[1,0,0,0],verified:true},
       imu_bus:{protocol:'feetech',board:'imu_to_dxl',identity:[1,1,0,68,77]},
-      coarse_sampling:{available:true,reason:null,needs_unload:true},
+      coarse_sampling:{available:true,reason:${JSON.stringify(staleReadings)},needs_unload:true},
       redo:{can_start:false,reason:'先扶稳并卸力，等主程序确认全部失能'}};
     props.live=true;draw()`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&b.disabled)`, 'stale readings block entry');
+  assert.equal(await js(`[...document.querySelectorAll('.imu-coarse .sv-warn')].filter(p=>p.textContent===${JSON.stringify(staleReadings)}).length`), 1,
+    'the shared entry and capture warning appears once');
+  await js(`props.imu.coarse_sampling.reason=null;draw()`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&!b.disabled)`, 'motion HOME installation entry enabled');
   await js(`clickText('重新标定方向')`);
   await pause(750);
