@@ -360,7 +360,7 @@ export function VoicePage({ st, pad, live, name, say }) {
     // ctx：把实时站姿递进去，「走一小步」「坐下」会自己先开策略，不用先喊一句「开始走」
     const out = await runAction(link, cmd, { getPosture: () => st?.posture });
     const cn = CMD_CN[cmd] || out.cn;
-    setSent({ cn, ok: out.ok });
+    setSent({ cn, ok: out.ok, why: out.ok ? null : (out.error || null) });
     remember(cn, out.ok);
     if (!out.ok) { setErr(out.error || '发指令没成功'); return; }
     setErr(null);
@@ -497,8 +497,9 @@ export function VoicePage({ st, pad, live, name, say }) {
     const cn = CMD_CN[last.command] || last.command;
     setHeard(cn);
     setIsInterim(false);
-    setSent({ cn, ok: last.accepted !== false });
-    remember(cn, last.accepted !== false);
+    const failed = last.accepted === false;
+    setSent({ cn, ok: !failed, why: failed ? (last.reason || null) : null });
+    remember(cn, !failed);
   }, [boardOn, last, remember]);
 
   const submitTyped = (e) => {
@@ -542,6 +543,10 @@ export function VoicePage({ st, pad, live, name, say }) {
       </p>
       ${!boardOk ? html`<div class="m-banner bad" style="text-align:left">
         板载语音没连上：${audio.why || audio.error || 'duck-echo 没在跑'}。先用「手机说话」或打字。
+      </div>` : audio.voice_ready === false ? html`<div class="m-banner bad" style="text-align:left">
+        板载麦克风连上了，但语音识别还没准备好${audio.error ? `：${audio.error}` : '（模型加载中，稍等十几秒；一直这样就看一眼 duck-echo 日志）'}。
+      </div>` : audio.error ? html`<div class="m-banner bad" style="text-align:left">
+        板载语音报错：${audio.error}
       </div>` : null}
     </div>` : html`<div>
       <div class=${'m-mic-wrap' + (listening ? ' live' : '')}>
@@ -551,7 +556,8 @@ export function VoicePage({ st, pad, live, name, say }) {
           onContextMenu=${(e) => e.preventDefault()}
           aria-label="按住说话，松开发送">
           <${MicIcon} />
-          <span class="t1">按住说话</span>
+          <span class="t1">${listening ? (stage || '现在说') : '按住说话'}</span>
+          ${listening ? html`<span class="t2">${stage ? '先别说话' : '说完松开'}</span>` : null}
         </button>
       </div>
       ${perm === 'denied' ? html`<div class="m-banner bad" style="text-align:left">
@@ -564,7 +570,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       </div>` : null}
       <p class="m-tip">
         ${phoneOk
-          ? html`按住说「<b>点头</b>」「<b>走一小步</b>」，松开会把这段声音传回${name}自己认（识别在板子上做，不联网）。`
+          ? html`按住<b>别松手</b>，等按钮变成「<b>现在说</b>」再开口，说完松开（识别在板子上做，不联网）。`
           : html`${phoneWhy}这条路暂时走不通，但下面的输入框（配上<b>输入法的话筒键</b>听写）和板载麦克风都能用。`}
       </p>
       <p class="m-tip"><a href="/diag">长按还是没反应？点这里做一次自检 →</a></p>
@@ -575,7 +581,7 @@ export function VoicePage({ st, pad, live, name, say }) {
     </div>`}
 
     <div class="m-sent">
-      ${sent ? html`已发送：<b>${sent.cn}</b>${sent.ok ? '' : '（没成功）'}` : html`<span style="color:var(--text-3)">还没有指令</span>`}
+      ${sent ? html`已发送：<b>${sent.cn}</b>${sent.ok ? '' : (sent.why ? `（没成功：${sent.why}）` : '（没成功）')}` : html`<span style="color:var(--text-3)">还没有指令</span>`}
     </div>
 
     <div class="m-heard">${mode === 'board' ? '它听到' : '听到你说'}</div>

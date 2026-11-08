@@ -33,7 +33,7 @@ import zipfile
 from pathlib import Path
 
 from starlette.applications import Starlette
-from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, Response
+from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
@@ -43,6 +43,10 @@ from . import helper
 from .rpc import open_conn
 from .servo import boot_id, view_from_robotd
 from .sshkeys import BadKey, SshKeys
+try:                      # https 之后手机要用到的两个功能，详见 phone_bridge 的注释
+    from . import phone_bridge
+except Exception:         # 模块不在就只是这两个功能没有，别把整个网页拖垮
+    phone_bridge = None
 from .state import summarize
 from .pad import Refused as PadRefused, robot_view  # 手柄页
 from .ai_connections import AiError
@@ -1568,6 +1572,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         if net is not None:
             net.start()
         restore = asyncio.create_task(servo_restore())        # 上次退出时舵机会话开着：接着管（审查 D1）
+        if phone_bridge is not None:
+            # 后台先加载语音模型：第一句话不该自带 5~25 秒的冷启动
+            asr_warm = asyncio.create_task(asyncio.to_thread(phone_bridge.warmup))
         log.info(f"Studio {VERSION} 启动 · Python {platform.python_version()} · {platform.node()}", cat="系统",
                  dedup=False)
         yield
@@ -1596,6 +1603,55 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         log.info("Studio 停止", cat="系统", dedup=False)
         log.flush()
 
+    # ---- 手机走 https 后必须补的两件事 ----
+    # 摄像头：mediad 的信令是明文 ws，https 页面直连会被当混合内容挡掉。
+    # 这里挂一个同域同协议的 /media-ws，由 Studio 转发到本机 8443。
+    async def media_ws_proxy(ws: WebSocket):
+        if phone_bridge is None:
+            await ws.close(code=1011)
+            return
+        if not origin_ok(ws):
+            await ws.close(code=4403)
+            return
+        _, sess = session_of(ws)
+        if not sess:
+            await ws.accept()
+            await ws.close(code=4401)
+            return
+        await ws.accept()
+        try:
+            await phone_bridge.pump_media(ws)
+        except Exception as exc:
+            log.info(f"摄像头信令转发结束（{_client_desc(ws)}）：{exc}", cat="连接")
+
+    # 手机说话：浏览器语音识别在安卓上走谷歌服务，国内基本不通。把手机录的 PCM 传回来，
+    # 用板上 duck-echo 同一套 Vosk 中文模型来认，效果跟对着鸭子说话一致。
+    async def api_asr(request):
+        no_store = {"Cache-Control": "no-store"}
+        _, sess = session_of(request)
+        if not sess:
+            return JSONResponse({"ok": False, "error": "登录过期了，重新登录再试"}, 401, headers=no_store)
+        if not origin_ok(request):
+            return JSONResponse({"ok": False, "error": "请求校验失败，刷新页面再试"}, 403, headers=no_store)
+        if phone_bridge is None:
+            return JSONResponse({"ok": False, "error": "这块板子没有装语音识别模块"}, 503, headers=no_store)
+        body = await request.body()
+        if len(body) < 3200:          # 16 kHz / 16 bit：0.1 秒都不到，什么也认不出来
+            return JSONResponse({"ok": False, "error": "这段太短了，再说一次"}, 400, headers=no_store)
+        if len(body) > 12 * 1024 * 1024:
+            return JSONResponse({"ok": False, "error": "这段录音太长了"}, 413, headers=no_store)
+        # free=1：不用命令词表，走通用解码。自检页用它看「板子到底听到什么」，
+        # 也用来区分「没听清」和「词不在词表里」。慢得多，只给排查用。
+        free = (request.query_params.get("free") or "").lower() in ("1", "true", "yes")
+        detail = await asyncio.get_running_loop().run_in_executor(
+            None, phone_bridge.transcribe_detail, body, not free)
+        if detail.get("error"):
+            return JSONResponse({"ok": False, "error": f"识别没跑起来：{detail['error']}"},
+                                503, headers=no_store)
+        return JSONResponse({"ok": True, "data": {"text": detail.get("text") or "",
+                                                    "info": detail.get("info") or {}}},
+                            headers=no_store)
+
     routes = [
         Route("/healthz", healthz),
         Route("/api/session", api_session),
@@ -1615,6 +1671,10 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         Route("/api/models/op", api_model_op, methods=["POST"]),
         Route("/api/models/import", api_model_import, methods=["POST"]),
         Route("/model/meshes.bin", meshes),
+        Route("/m", lambda request: RedirectResponse("/m.html", status_code=307)),
+        # 手机走 https 之后才用得上：摄像头信令同域转发、手机录音转文字
+        Route("/api/asr", api_asr, methods=["POST"]),
+        WebSocketRoute("/media-ws", media_ws_proxy),
         WebSocketRoute("/ws", ws_endpoint),
         Mount("/", AppStatic(directory=str(web_dir), html=True)),
     ]

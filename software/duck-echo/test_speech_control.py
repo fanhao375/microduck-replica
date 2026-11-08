@@ -53,6 +53,36 @@ class SpeechTests(unittest.TestCase):
         self.assertEqual(self.executor.commands, ['sit'])
         self.assertEqual(self.echoed, [])
 
+    def test_merged_utterance_runs_every_command_in_order(self):
+        # 端点检测把连说的几句并成一段时的实际形态（2026-11-01 上机实录）
+        control = self.make(FakeRecognizer('鸭 鸭 点头 鸭 鸭 摇头 鸭 鸭 歪头', 0.80))
+        control.submit(b'pcm')
+        self.assertTrue(control.idle.wait(1))
+        self.assertEqual(self.executor.commands, ['nod', 'shake', 'tilt'])
+        self.assertEqual(control.last_view()['command'], 'tilt')
+
+    def test_stops_at_first_refused_command_in_a_merged_utterance(self):
+        class Refusing(FakeExecutor):
+            def execute(self, command, allowed):
+                self.commands.append(command)
+                return {'accepted': command == 'nod',
+                        'reason': 'robot is sitting; stand up first'}
+
+        self.echoed = []
+        self.executor = Refusing()
+        control = speech.VoiceControl(lambda: FakeRecognizer('鸭 鸭 点头 鸭 鸭 摇头', 0.9),
+                                      self.executor, self.echoed.append)
+        self.addCleanup(control.close)
+        self.assertTrue(control.ready.wait(1))
+        control.submit(b'pcm')
+        self.assertTrue(control.idle.wait(1))
+        # 第一条做不成，后面的就不做了——省得在半截状态下继续动作
+        self.assertEqual(self.executor.commands, ['nod', 'shake'])
+        view = control.last_view()
+        self.assertFalse(view['accepted'])
+        # 失败原因要带给手机页 / 桌面（robotd 的公开理由，不含识别原话）
+        self.assertEqual(view['reason'], 'robot is sitting; stand up first')
+
     def test_ready_exposes_existing_recognizer_for_shared_model_without_new_factory(self):
         recognizer = FakeRecognizer()
         control = self.make(recognizer)

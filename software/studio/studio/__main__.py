@@ -34,6 +34,8 @@ def parse(argv=None):
     ap = argparse.ArgumentParser(prog="studio", description="Microduck Studio")
     ap.add_argument("cmd", nargs="?", default="serve", choices=["serve", "set-password"])
     ap.add_argument("--listen", default=None, help="监听地址:端口（鸭子上默认 0.0.0.0:8000；台架模式默认 127.0.0.1:18080）")
+    ap.add_argument("--tls-cert", default=None, help="https 证书链（PEM）。配 --tls-key 一起用；手机收语音的前提")
+    ap.add_argument("--tls-key", default=None, help="https 私钥（PEM）；和 --tls-cert 必须成对出现")
     ap.add_argument("--robotd", default=None, help="默认 unix:/run/robotd.sock；台架模式不连")
     ap.add_argument("--configd", default=None, help="默认 unix:/run/configd.sock；台架模式不连")
     ap.add_argument("--tof", default="unix:/run/tofd/tof.sock", help="ToF 只读服务地址；none 表示不连接")
@@ -111,6 +113,16 @@ def main(argv=None):
         log.info("没设密码：同一个网络里打开网页就能用（想加密码：更多 → 登录密码）", cat="系统",
                  hint=f"网页里设，或者用 radxa 用户运行：python3 -I {ROOT / 'run.py'} set-password（别用 sudo）")
     host, _, port = a.listen.rpartition(":")
+    scheme = "http"
+    tls = {}
+    if bool(a.tls_cert) != bool(a.tls_key):
+        raise SystemExit("--tls-cert 和 --tls-key 要给就两个都给")
+    if a.tls_cert and a.tls_key:
+        for path in (a.tls_cert, a.tls_key):
+            if not os.path.isfile(path):
+                raise SystemExit(f"证书文件不存在：{path}")
+        tls = {"ssl_certfile": a.tls_cert, "ssl_keyfile": a.tls_key}
+        scheme = "https"
     if a.dev_autologin and host != "127.0.0.1":
         raise SystemExit("--dev-autologin 只能配 --listen 127.0.0.1:端口 用")
     if a.dev_autologin and (os.path.exists("/run/robotd.sock") or a.robotd.startswith("unix:")):
@@ -158,16 +170,18 @@ def main(argv=None):
     app = build_app(auth=auth, robotd=rd, log=log, web_dir=a.web_dir, duck=duck, names=names, state_dir=state_dir,
                     dev_autologin=a.dev_autologin, servo=servo, imu=imu, pad=pad, onboard=onboard, battery=battery,
                     tune=tune, net=net, commit=commit, models=models, sensors=sensors)
-    log.info(f"网页地址：http://{host if host not in ('0.0.0.0', '') else '<鸭子 IP>'}:{port}/", cat="系统", dedup=False)
+    log.info(f"网页地址：{scheme}://{host if host not in ('0.0.0.0', '') else '<鸭子 IP>'}:{port}/", cat="系统", dedup=False)
+    if tls:
+        log.info(f"已启用 https（手机可以在 {scheme}://<鸭子 IP>:{port}/m 用麦克风说话）", cat="系统", dedup=False)
     if a.bench:
         import threading
         import webbrowser
-        url = f"http://{host or '127.0.0.1'}:{port}/#/servos"
+        url = f"{scheme}://{host or '127.0.0.1'}:{port}/#/servos"
         log.info(f"台架模式：不连主程序，浏览器打开 {url}，在舵机页选 COM 口连接", cat="系统", dedup=False)
         threading.Timer(1.5, webbrowser.open, args=(url,)).start()
     from .ws_protocol import MusicWebSocketProtocol
     uvicorn.run(app, host=host or "0.0.0.0", port=int(port), ws=MusicWebSocketProtocol, http="h11", lifespan="on",
-                log_level="warning", server_header=False, proxy_headers=False, access_log=False)
+                log_level="warning", server_header=False, proxy_headers=False, access_log=False, **tls)
 
 
 if __name__ == "__main__":
