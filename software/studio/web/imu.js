@@ -864,6 +864,7 @@ function CoarseCard({ st, imu, link, live }) {
     ? '站姿使能还未站稳：等 HOME 误差不超过 5°，再采静止或前倾' : null;
   const canCollect = !imu?.profile_error && (inPlace || commissioning && (!redo.active || ['commissioning', 'finish_failed'].includes(redo.phase)));
   const showSteps = canCollect && (!verified || opened || redo.active);
+  const showStart = !showSteps && !redo.active;
   const startWhy = !open ? '连不上鸭子：等它回来' : imu?.profile_error ? imu.profile_error : working ? '上一项操作还没结束'
     : commissioning ? null : inPlace ? sampling.reason : !redo.can_start ? redo.reason || '暂时不能返回标定模式：先卸力并等待读数更新' : null;
   const run = async (op) => {
@@ -889,7 +890,7 @@ function CoarseCard({ st, imu, link, live }) {
       <div class="imu-actions"><${TwoStep} label="取消并恢复原参数" ask="扶好鸭子，确认恢复原方向和模式？"
         disabled=${!open || busy || working || needsUnload}
         onConfirm=${() => run('redo-cancel')} busyLabel="正在恢复…" /></div>` : null}
-    ${!showSteps && !redo.active ? html`<div class="imu-actions"><${TwoStep}
+    ${showStart ? html`<div class="imu-actions"><${TwoStep}
       label="重新标定方向" ask=${inPlace ? '保持 HOME，确认采集安装方向？' : commissioning ? '扶好鸭子，确认重新采集？' : '扶好并已卸力，确认重启并进入标定模式？'}
       cls="btn-dark" disabled=${!!startWhy || busy} title=${startWhy} onConfirm=${start} busyLabel="正在进入标定模式…" /></div>
       <p class="sv-small">${liveVerify
@@ -900,7 +901,7 @@ function CoarseCard({ st, imu, link, live }) {
         ? '双手扶稳，可卸力托住，也可站姿使能后等站稳，再重新采集。'
         : '重新标定前先点「失能（卸力）」并扶住鸭子。进入和完成时会重启主程序，并备份原 IMU 方向。'}保留舵机零位、方向和限位；验证通过才采用新方向。</p>
       ${startWhy ? html`<p class="sv-warn">${startWhy}</p>` : null}` : null}
-    ${captureWhy ? html`<p class="sv-warn">${captureWhy}</p>` : null}
+    ${captureWhy && (!showStart || captureWhy !== startWhy) ? html`<p class="sv-warn">${captureWhy}</p>` : null}
     ${showSteps ? html`<${CoarseSteps} key=${context} link=${link} disabled=${!open || busy || working || !!captureWhy}
       redoSession=${!!redo.active} inPlace=${!!inPlace} liveVerify=${liveVerify} needsUnload=${needsUnload}
       verifyWhy=${liveVerify ? sampling.verify_reason : null}
