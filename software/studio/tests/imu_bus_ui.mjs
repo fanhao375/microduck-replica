@@ -275,15 +275,15 @@ try {
       coarse_sampling:{available:true,reason:${JSON.stringify(staleReadings)},needs_unload:true},
       redo:{can_start:false,reason:'先扶稳并卸力，等主程序确认全部失能'}};
     props.live=true;draw()`);
-  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&b.disabled)`, 'stale readings block entry');
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&!b.disabled)`, 'stale readings still allow opening the wizard');
   assert.equal(await js(`[...document.querySelectorAll('.imu-coarse .sv-warn')].filter(p=>p.textContent===${JSON.stringify(staleReadings)}).length`), 1,
     'the shared entry and capture warning appears once');
-  await js(`props.imu.coarse_sampling.reason=null;draw()`);
-  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='重新标定方向'&&!b.disabled)`, 'motion HOME installation entry enabled');
   await js(`clickText('重新标定方向')`);
-  await pause(750);
-  await js(`clickText('保持 HOME，确认采集安装方向？')`);
+  await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&b.disabled)`, 'open wizard waits for fresh settled data');
+  await js(`props.st={...props.st,posture:'homing',guard:{max_joint_error_deg:5.1,joint_tolerance_deg:5}};
+    props.imu.coarse_sampling={...props.imu.coarse_sampling,hold_ready:true,reason:null};draw()`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&!b.disabled)`, 'motion HOME can collect still');
+  assert.match(await js(`document.querySelector('.imu-stance-now').innerText`), /站姿已停稳，可以标定/);
   assert.equal(await js(`calls.length`),0, 'opening collection never changes mode or torque');
   await js(`clickText('采静止（3 秒）')`);
   await wait(`calls.length===1`, 'motion HOME still request');
@@ -313,9 +313,16 @@ try {
   await js(`clickText('交给主程序验证')`);
   await wait(`calls.length===4`, 'direct HOME verify');
   assert.deepEqual(await js(`calls[3]`), {name:'imu.op',args:{op:'verify',confirmed:true,mount_wxyz:[1,0,0,0]}});
-  await js(`replies.shift()({ok:true,data:{note:'安装方向已核验、保存并生效，保持当前站姿'}})`);
+  await js(`window.beforeTip={st:props.st,imu:props.imu};
+    props.st={...props.st,posture:'homing'};
+    props.imu={...props.imu,job:{phase:'verify',kind:'coarse'},coarse_sampling:{...props.imu.coarse_sampling,
+      hold_ready:false,reason:'等关节停稳后再采数'}};draw()`);
+  await wait(`document.querySelector('.imu-coarse').innerText.includes('在 20 秒内往前倾')`, 'active verification prompts the tip');
+  assert.doesNotMatch(await js(`document.querySelector('.imu-side').innerText`), /等关节停稳后再采数|正在站起来：等它站稳/);
+  await js(`props.st=beforeTip.st;props.imu=beforeTip.imu;draw();
+    replies.shift()({ok:true,data:{note:'安装方向已核验、保存并生效，保持当前站姿'}})`);
   await wait(`document.querySelector('.imu-coarse').innerText.includes('保持当前站姿')`, 'live-save result');
-  assert.equal(await js(`props.st.posture`), 'holding');
+  assert.match(await js(`document.querySelector('.imu-stance-now').innerText`), /站姿已停稳，可以标定/);
   // A persisted redo session may hold HOME for sampling, but must unload before
   // final verification/cancellation. Unloading must keep the solved samples.
   await js(`window.calls=[];window.replies=[];window.confirm=()=>true;
@@ -331,7 +338,7 @@ try {
   await js(`replies.shift()({ok:true,data:{accepted:true}});
     props.st={...props.st,hold:{stage:'ramping',max_error_deg:8}};props.imu={...props.imu,hold:props.st.hold};draw()`);
   await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&b.disabled)`, 'ramping cannot collect');
-  await js(`props.st={...props.st,hold:{stage:'holding',max_error_deg:0.4}};props.imu={...props.imu,hold:props.st.hold};draw()`);
+  await js(`props.st={...props.st,hold:{stage:'holding',max_error_deg:5.1,imu_calibration_ready:true}};props.imu={...props.imu,hold:props.st.hold};draw()`);
   await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='采静止（3 秒）'&&!b.disabled)`, 'settled redo hold can collect');
   assert.match(await js(`document.querySelector('.imu-coarse').innerText`), /站姿使能/);
   await js(`clickText('采静止（3 秒）')`);

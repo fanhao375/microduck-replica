@@ -577,7 +577,8 @@ class ImuBackendTest(unittest.TestCase):
     def test_factory_coarse_capture_solve_and_verify_while_holding_home(self):
         bus = commissioning_bus()
         bus.update(phase="holding", torque_state="all_enabled",
-                   hold={"stage": "holding", "max_error_deg": 0.6, "directions": [-1] * 15})
+                   hold={"stage": "holding", "max_error_deg": 5.1, "imu_calibration_ready": True,
+                         "directions": [-1] * 15})
         b = self.backend(bus=bus, calib=factory_calib())
         original_joints = copy.deepcopy(b.rd.calib.value["calibration"]["joints"])
         still = asyncio.run(b.handle({"op": "coarse-capture", "phase": "still", "seconds": 3}))
@@ -597,6 +598,7 @@ class ImuBackendTest(unittest.TestCase):
     def test_factory_coarse_rejects_unsettled_or_conflicting_home_hold(self):
         mutations = [
             lambda b: b["hold"].update(stage="ramping"),
+            lambda b: b["hold"].update(imu_calibration_ready=False),
             lambda b: b.update(phase="moving"),
             lambda b: b.update(torque_state="unknown"),
             lambda b: b.update(torque_state="single_joint_enabled"),

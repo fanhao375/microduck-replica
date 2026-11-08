@@ -50,6 +50,8 @@ class HomeCoarseTest(unittest.TestCase):
 
     def test_home_still_forward_solve_without_mode_switch_or_actuator_rpc(self):
         b = self.home()
+        b.rd.bus.value['home_start_guard']['max_joint_error_deg'] = 5.1
+        b.rd.bus.value['imu_calibration_hold_ready'] = True
         original = copy.deepcopy(b.rd.calib.value)
         with mock.patch.object(helper, 'imu_recalibrate') as switch, \
              mock.patch.object(b, '_rpc_once') as command:
@@ -69,6 +71,7 @@ class HomeCoarseTest(unittest.TestCase):
         for mutation in (
             {'policy_enabled': True}, {'homed': False}, {'home_recovery': True},
             {'home_start_guard': {'max_joint_error_deg': 5.1}},
+            {'imu_calibration_hold_ready': False},
             {'home_start_guard': {'max_joint_error_deg': float('nan')}},
             {'native': {'torque_state_confirmed': None}},
             {'native': {'imu_ready': False}}, {'native': {'imu_age_ms': 2000}},
@@ -103,6 +106,8 @@ class HomeCoarseTest(unittest.TestCase):
 
     def test_supported_home_verification_saves_without_unloading_or_restarting(self):
         b = self.home()
+        b.rd.bus.value['home_start_guard']['max_joint_error_deg'] = 5.1
+        b.rd.bus.value['imu_calibration_hold_ready'] = True
         b.rd.calib.value['imu_home_verification_contract'] = 'home_mount_v1'
         b.rd.calib.value['calibration']['motion_enabled'] = True
         b.view()
