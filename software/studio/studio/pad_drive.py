@@ -97,6 +97,8 @@ TICK_S = 0.04             # 后台 25 Hz：按住的键、看门狗、清理
 RELAX_CLEAR_DELAY_S = 0.1   # 卸力引起的头 / 身体清理排在卸力请求之后（三 V1 第 5 条）
 MOVE_MIN_GAP_S = 0.04     # 同一通道两帧至少隔这么久；来得太密的不丢，等一下发最新的那个（审查 21）
 WALK_STOP_WAIT_S = 1.0
+WALK_VERIFY_S = 3.0       # 「开始走」回执之后再回读这么久，看到 policy_enabled 才算真的开起来
+WALK_VERIFY_POLL_S = 0.1
 CMD_TIMEOUT_S = 3.0
 BINDINGS_STALE_S = 10.0   # pad.bindings 这么旧了，按图上的键之前先拉一次（三 V14；padd 每秒重读配置 padd:806-817）
 LOW_BATTERY = 10          # 不再用：电量低不拦「站起来」（用户 10-18 电池只警告，见 studio/battery.py）
@@ -1667,9 +1669,9 @@ class DriveMixin:
 
     # ================= 站起来 / 开始走 / 坐下 / 技能 / 声音：按 =================
 
-    def _call(self, what, method, params, by, ctx=None, posture_target=None, ordered=False):
+    def _call(self, what, method, params, by, ctx=None, posture_target=None, ordered=False, verify=None):
         if posture_target is None:
-            return self._call_rpc(what, method, params, by, ctx)
+            return self._call_rpc(what, method, params, by, ctx, verify=verify)
         motion = self.motion_studio
         with (nullcontext() if ordered else self._send_lk):
             with self._lk:
@@ -1698,8 +1700,13 @@ class DriveMixin:
                 return {"accepted": True, "reason": "已经达到目标姿态"}
             return self._call_rpc(what, method, params, by, ctx, posture_token=token, record_origin=origin)
 
-    def _call_rpc(self, what, method, params, by, ctx=None, posture_token=None, record_origin=None):
-        """一个要回话的请求：记「发出 → 回执 · 耗时」（log_cmd，分类「命令」），拒绝的原因翻成人话抛 Refused。"""
+    def _call_rpc(self, what, method, params, by, ctx=None, posture_token=None, record_origin=None,
+                  verify=None):
+        """一个要回话的请求：记「发出 → 回执 · 耗时」（log_cmd，分类「命令」），拒绝的原因翻成人话抛 Refused。
+
+        verify：回执之后再查一次真实状态；返回原因就按失败记日志并抛 Refused。用给「开始走」这种
+        回执 accepted 但主程序可能没真的启动命令（见 _verify_policy_started），别再写「成功」骗人。
+        """
         if self.robot is None:
             raise Refused("这只鸭子没配主程序的地址")
         if self._update_blocked() and not neutral_robot_command(method,params):
@@ -1736,6 +1743,11 @@ class DriveMixin:
                 why = plain_refusal(r.get("reason"))
                 t.fail(f"主程序没接受：{r.get('reason')}", raw=r, hint=why)
                 raise Refused(why)
+            if verify is not None:
+                why = verify()
+                if why:
+                    t.fail(f"主程序收下了，但没真的执行：{why}", raw=r, hint=why)
+                    raise Refused(why)
             if posture_token:
                 if not isinstance(r, dict) or r.get("accepted") is not True:
                     self.motion_studio.posture_reply(posture_token, None, reason="回执格式不明确")
@@ -1745,6 +1757,43 @@ class DriveMixin:
         if method == "robot.sound":
             self.motion_studio.accepted_from(record_origin, method, params)
         return r
+
+    @staticmethod
+    def _policy_refusal(bus):
+        """robotd 没把策略开起来时给的原因：busStatus 的 last_enable_refusal / home_start_guard.reason。"""
+        if not isinstance(bus, dict):
+            return None
+        why = bus.get("last_enable_refusal")
+        if isinstance(why, str) and why:
+            return why
+        guard = bus.get("home_start_guard")
+        if isinstance(guard, dict):
+            why = guard.get("reason")
+            if isinstance(why, str) and why:
+                return why
+        return None
+
+    def _verify_policy_started(self):
+        """robot.enable 只是收下请求（fork robotd："the policy starts when it is ready"），真正的启动在
+        控制循环里做，站姿 / IMU 没稳定时会被 home_start_guard 拒（不能进入保持：…）。所以回读
+        busStatus，看到 policy_enabled 才当成功；等不到就把主程序给的原话回给页面。
+
+        按次数等，不看注入的时钟：时钟停了（测试、或者别的毛病）也不会卡死在这里。
+        """
+        step = max(0.01, float(self.w.get("walk_verify_poll", WALK_VERIFY_POLL_S)))
+        span = max(step, float(self.w.get("walk_verify", WALK_VERIFY_S)))
+        bus = None
+        for _ in range(int(span / step) + 1):
+            try:
+                r = self.robot.call("robot.busStatus", {}, CMD_TIMEOUT_S)
+            except (Unreachable, Timeout):
+                r = None
+            if isinstance(r, dict):
+                bus = r
+                if r.get("policy_enabled") is True:
+                    return None
+            self._cancel_wait(step)
+        return self._policy_refusal(bus) or "主程序没把走路策略开起来（可能还在回中或者没扶正）"
 
     def _motion_cmd(self, op, args, conn, by, label=None):  # noqa: C901
         """一次性的命令：不拿方向盘（审查二 I1）。别人正在推摇杆时不让点（停下、叫一声除外）；一次只发一个
@@ -1802,7 +1851,10 @@ class DriveMixin:
                 else:
                     r = self._call(what + "（坐着：sit_toggle）", "robot.do", {"skill": "sit_toggle"}, by, ctx, posture_target="stand")
             elif op == "walk":
-                r = self._call(what, "robot.enable", {"on": True, "toggle": False}, by, ctx)
+                # 回执 accepted 不等于策略真的开起来：在同一个日志条目里回读 busStatus 确认，
+                # 没起来就把主程序的真原因报出来（不再写「成功」）
+                r = self._call(what, "robot.enable", {"on": True, "toggle": False}, by, ctx,
+                               verify=self._verify_policy_started)
             elif op == "walk_stop":
                 with self._lk:
                     d = self._driver

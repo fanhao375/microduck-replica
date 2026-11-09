@@ -25,6 +25,10 @@ const HELD = {
   mouth: { id: 'mouth', label: '张嘴', cn: '张嘴', ms: 900 },
 };
 
+// 头的指令进的是策略的观测，策略没跑时发了也不动（pad_combo.py 文件头、NEEDS_POLICY）。
+// 嘴不受这个限制：fork robotd 只要站好了（含保持、坐着）就动，所以 mouth 不在里面。
+const HELD_NEEDS_POLICY = new Set(['nod', 'shake', 'tilt']);
+
 // 手柄页的动作分组。站和走单独一组：用户最容易卡在「站着不动 / 摇杆没反应」上
 // 「开始走」不在组里：它是开走路策略的总开关，手柄页把它单独拎到摇杆下面、
 // 贴品牌黄底（gamepad.js 的 m-start-row），别让它和普通动作键混在一起被漏掉。
@@ -69,8 +73,10 @@ const whyOf = (r) => String((r && (r.reason || r.error)) || '');
 const good = (r) => Boolean(r) && r.ok !== false;
 // 后端把「已经在走」也当成失败回话（这时按钮已经换成「停下」了），对调用方来说这是成功
 const isReady = (r) => good(r) || /准备好走|已经在走/.test(whyOf(r));
-// 后端一次只发一个独占指令，前一个没回话会把后一个顶回来；站起 / 回中也都要等几拍
-const BUSY_WHY = /还没回话|等一下|等一秒|还在回站姿|还在站起来|正在起来|站稳了再点/;
+// 后端一次只发一个独占指令，前一个没回话会把后一个顶回来；站起 / 回中也都要等几拍。
+// robotd 的 home_start_guard 还要「连续几帧 HOME + 直立」才肯启动策略（不能进入保持：…），
+// 刚站起来时会连续拒几次；等一会儿再发就能过，所以这类原因也当成「忙」来重试。
+const BUSY_WHY = /还没回话|等一下|等一秒|还在回站姿|还在站起来|正在起来|站稳了再点|不能进入保持|确认实际 HOME|关节实际位置|舵机反馈|反馈已过期|直立姿态|扶正/;
 // 策略真在跑的两种站姿（pad_drive.DRIVING）。holding = 站着但策略没跑，摇杆推了不动
 const DRIVING = new Set(['policy', 'walking']);
 
@@ -172,9 +178,25 @@ export async function runAction(link, key, ctx) {
   }
   const held = HELD[key];
   if (!held) return { ok: false, cn: key, error: '不认识这个动作' };
+  // 点头 / 摇头 / 歪头只是给策略喂观测：策略没在跑，发下去也不会动（NEEDS_POLICY）。
+  // 「站起来后点头没反应 / 让我先点开始走」就卡在这——先替他把走路策略开起来。
+  if (HELD_NEEDS_POLICY.has(key)) {
+    const p = await ensurePolicy(link, ctx);
+    if (!p.ok) return { ok: false, cn: held.cn, error: p.error };
+  }
   const tag = ++press;
-  const start = await link.cmd('pad.op', { op: 'action_start', id: held.id, press: tag }, 8000);
-  if (start.ok === false) return { ok: false, cn: held.cn, error: start.reason || start.error };
+  const tries = HELD_NEEDS_POLICY.has(key) ? 3 : 1;      // 嘴不用等策略，一次就够
+  for (let i = 0; i < tries; i++) {
+    const start = await link.cmd('pad.op', { op: 'action_start', id: held.id, press: tag }, 8000);
+    if (start.ok !== false) break;
+    const why = whyOf(start);
+    // 后端可能晚一拍才把站姿算成「正在走」：等它一下再试；其它原因（真的拒绝）直接报
+    if (i < tries - 1 && (BUSY_WHY.test(why) || /准备好走|开始走|策略/.test(why))) {
+      await waitDriving(ctx, 2000);
+      continue;
+    }
+    return { ok: false, cn: held.cn, error: why };
+  }
   const t0 = performance.now();
   const hb = setInterval(() => { link.cmd('pad.op', { op: 'action_hold', press: tag }, 8000); }, 150);
   await new Promise((r) => setTimeout(r, held.ms));

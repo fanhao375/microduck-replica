@@ -165,6 +165,35 @@ SHAKE_AMP, SHAKE_PERIOD_S, SHAKE_TIMES = 0.6, 0.8, 2
 TILT_AMP, TILT_S, TILT_RAMP_S = 0.4, 1.2, 0.25
 HEAD_ZERO = {'neck_pitch': 0.0, 'head_pitch': 0.0, 'head_yaw': 0.0, 'head_roll': 0.0}
 
+# robot.enable 只是收下「启动策略」的请求：fork robotd 的原话是 "the policy starts when it is ready"，
+# 真正的启动在控制循环里做。刚站起来时 IMU 还在收敛，home_start_guard 会连续拒几次
+# （不能进入保持：正在确认实际 HOME 和直立姿态…；舵机反馈不完整或不新鲜…）。
+# 所以发一次不算数：在窗口里反复确认 policy_enabled，失败时把主程序给的原因原样报出来。
+POLICY_START_S = 3.0
+POLICY_RETRY_S = 0.5
+_POLICY_SETTLING = ('不能进入保持', '确认实际 HOME', '实际 HOME', '关节实际位置', '舵机反馈',
+                    '反馈已过期', '直立姿态', '请回 HOME', '扶正', 'IMU')
+
+
+def _policy_settling(reason):
+    """这个拒绝是不是「还在等姿态 / 反馈稳定」——值得过一会儿再试。别的（没装策略、更新）立刻报。"""
+    return any(word in reason for word in _POLICY_SETTLING)
+
+
+def _policy_refusal(bus):
+    """主程序为什么没把策略开起来：busStatus 的 last_enable_refusal / home_start_guard.reason。"""
+    if not isinstance(bus, dict):
+        return None
+    why = bus.get('last_enable_refusal')
+    if isinstance(why, str) and why:
+        return why
+    guard = bus.get('home_start_guard')
+    if isinstance(guard, dict):
+        why = guard.get('reason')
+        if isinstance(why, str) and why:
+            return why
+    return None
+
 
 def head_seconds(command):
     """这个头部动作要做多久（秒）。"""
@@ -457,23 +486,33 @@ class PostureCommands:
     def _ensure_policy(self, request, allowed):
         """站起来之后把「走策略」自己开起来（等同手机页的「开始走策略」按钮）。
 
-        以前说「站起来」只是站起来，策略还停着，必须人工点一下才能继续走 / 点头。
-        这里在站好、上劲、回过中之后用同一套 stop → enable 把策略开起来；
-        已经开着就什么都不做。开不起来才抛，理由原样报给手机页。
+        robot.enable 的回执不代表策略真的启动了：fork robotd 会先把请求收下，等 IMU 收敛后
+        才在控制循环里启动；站姿 / 反馈还没稳定时它连续拒（不能进入保持：…）。所以这里在
+        一个窗口里反复 enable + 回读 policy_enabled，可恢复的拒绝就再等一会儿；窗口用完仍
+        没起来，就把主程序给的原因（last_enable_refusal / home_start_guard.reason）原样报出去，
+        让用户知道要回 HOME、扶正。
         """
-        _, bus = self.state()
-        if bus.get('policy_enabled') is True:
-            return
-        request('robot.stop')
-        request('robot.enable', {'on': True, 'toggle': False})
-        deadline = self.clock() + 1.2
+        deadline = self.clock() + POLICY_START_S
+        next_try, last, bus = 0.0, None, None
         while True:
             _, bus = self.state()
             if bus.get('policy_enabled') is True:
                 return
-            if self.clock() >= deadline or not allowed():
-                raise RuntimeError('walking policy was not started')
-            self.sleep(0.05)
+            if not allowed():
+                raise RuntimeError('cancelled')
+            now = self.clock()
+            if now >= next_try:
+                try:
+                    request('robot.stop')
+                    request('robot.enable', {'on': True, 'toggle': False})
+                except RuntimeError as error:
+                    last = str(error)
+                    if not _policy_settling(last):
+                        raise
+                next_try = now + POLICY_RETRY_S
+            if now >= deadline:
+                raise RuntimeError(_policy_refusal(bus) or last or 'walking policy was not started')
+            self.sleep(0.1)
 
     def _play_head(self, command, allowed):
         """发一串 robot.head 通知把点头 / 摇头 / 歪头做完，结束时一定回正。
@@ -493,7 +532,9 @@ class PostureCommands:
                     break
                 self.robot.notify('robot.head', head_frame(command, elapsed) or dict(HEAD_ZERO))
                 left = total - (self.clock() - start)
-                if left <= 0:
+                if left <= 1e-6:
+                    # 到点了。留一微秒的余量：剩下的时间小到浮点加不上去时，sleep(0) 会让
+                    # elapsed 永远差一点、死循环（真机时钟和测试的假时钟都会这样）。
                     break
                 self.sleep(min(HEAD_TICK_S, left))
             return {'accepted': True, 'head': command}
@@ -566,8 +607,7 @@ class PostureCommands:
                 if command == 'stop':
                     request('robot.stop')
                     return {'accepted': True, 'changed': True, 'sitting': False, 'stopped': True}
-                request('robot.stop')
-                request('robot.enable', {'on': True, 'toggle': False})
+                self._ensure_policy(request, allowed)
                 deadline = self.clock() + max(0.2, float(self.STEP_S))
                 while self.clock() < deadline and allowed():
                     self.sleep(0.05)
@@ -591,16 +631,7 @@ class PostureCommands:
                 if bus.get('policy_enabled') is not True:
                     if policies['sitting']:
                         raise RuntimeError('sitting with policy off; use the existing recovery procedure')
-                    request('robot.stop')
-                    request('robot.enable', {'on': True, 'toggle': False})
-                    deadline = time.monotonic() + 1.2
-                    while True:
-                        _, bus = self.state()
-                        if bus.get('policy_enabled') is True:
-                            break
-                        if time.monotonic() >= deadline or not allowed():
-                            raise RuntimeError('policy enable was not confirmed')
-                        self.sleep(0.05)
+                    self._ensure_policy(request, allowed)
                 # Refresh the toggle state immediately before using the toggle API.
                 policies, _ = self.state()
                 if policies['sitting'] != desired:

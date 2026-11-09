@@ -285,6 +285,70 @@ class SoundSkillTests(unittest.TestCase):
         self.assertEqual(result['reason'], 'test refusal')
 
 
+class PolicyStartTests(unittest.TestCase):
+    """robot.enable 的回执不等于策略真的启动：home_start_guard 会先拒几次，必须回读 policy_enabled。"""
+
+    def test_transient_home_guard_refusal_is_retried_until_policy_starts(self):
+        class Guarded(FakeRobot):
+            def __init__(self):
+                super().__init__(enabled=False)
+                self.refusals = 2
+
+            def call(self, method, params=None):
+                if method == 'robot.enable' and self.refusals > 0:
+                    self.refusals -= 1
+                    self.calls.append((method, params or {}))
+                    return {'accepted': False,
+                            'reason': '不能进入保持：正在确认实际 HOME 和直立姿态（连续 3 帧）'}
+                return super().call(method, params)
+
+        robot = Guarded()
+        _, sleep, clock = fake_clock()
+        result = voice.PostureCommands(robot, sleep=sleep, clock=clock).execute('nod')
+        self.assertTrue(result['accepted'], result)
+        self.assertEqual(robot.refusals, 0)                 # 拒了两次之后真的开起来了
+        heads = [params for method, params in robot.mutations() if method == 'robot.head']
+        self.assertTrue(heads and heads[-1] == voice.HEAD_ZERO)
+
+    def test_persistent_home_guard_refusal_is_reported_verbatim(self):
+        class StuckGuard(FakeRobot):
+            def call(self, method, params=None):
+                if method == 'robot.enable':
+                    self.calls.append((method, params or {}))
+                    return {'accepted': False,
+                            'reason': '不能进入保持：正在确认实际 HOME 和直立姿态（连续 3 帧）；请回 HOME、扶正后重新按键'}
+                return super().call(method, params)
+
+        robot = StuckGuard(enabled=False)
+        _, sleep, clock = fake_clock()
+        result = voice.PostureCommands(robot, sleep=sleep, clock=clock).execute('nod')
+        self.assertFalse(result['accepted'])
+        self.assertIn('不能进入保持', result['reason'])
+        # 策略没跑起来就绝不能往策略里喂头部观测
+        self.assertEqual([m for m, _ in robot.calls if m == 'robot.head'], [])
+
+    def test_accepted_ack_without_actual_start_reports_bus_refusal(self):
+        class AckOnly(FakeRobot):
+            def call(self, method, params=None):
+                if method == 'robot.enable':
+                    self.calls.append((method, params or {}))
+                    return {'accepted': True}               # 只是收下请求，策略没开
+                if method == 'robot.busStatus':
+                    self.calls.append((method, params or {}))
+                    return {'phase': 'control', 'mode': 'motion',
+                            'policy_enabled': False,
+                            'native': {'torque_state_confirmed': True},
+                            'last_enable_refusal': '不能进入保持：舵机反馈不完整或不新鲜'}
+                return super().call(method, params)
+
+        robot = AckOnly(enabled=False)
+        _, sleep, clock = fake_clock()
+        result = voice.PostureCommands(robot, sleep=sleep, clock=clock).execute('nod')
+        self.assertFalse(result['accepted'])
+        self.assertIn('舵机反馈不完整', result['reason'])
+        self.assertEqual([m for m, _ in robot.calls if m == 'robot.head'], [])
+
+
 class _FakeSock:
     """假的 unix socket：只记下写了什么，fail=True 时连不上 / 写不进。"""
 
