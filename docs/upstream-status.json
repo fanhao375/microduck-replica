@@ -7588,6 +7588,157 @@
           },
           "pull_request_url": "https://github.com/pollen-robotics/microduck/pull/558",
           "change": "Reduce idle search from 3 to 1 Hz. Keep tracking at 15 Hz. Extend robotd sighting freshness and browser overlay silence timeouts to 2500 ms. Keep target memory at 1000 ms. The second commit changes only a test fixture loop."
+        },
+        {
+          "tag": "daemon-dev-nfc-tag-pad-address",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-tag-pad-address",
+          "head_sha": "70d781ed074e299d6a3baaae631505c5d26f9add",
+          "version": "daemon 0.18.9-dev.1660.70d781e (nfc-tag-pad-address)",
+          "published_at": "2026-11-09T12:15:34Z",
+          "published_at_jst": "2026-11-09T21:15:34+09:00",
+          "source_author_at_utc": "2026-11-09T11:57:19Z",
+          "source_committed_at_utc": "2026-11-09T11:57:19Z",
+          "prerelease": true,
+          "source_version": "0.18.9",
+          "version_family": "0.18.9",
+          "api_version": 51,
+          "development_api_version": 51,
+          "asset_inventory": [
+            {
+              "name": "0.18.9-dev.1660.70d781e.manifest.json",
+              "size": 386,
+              "digest": "sha256:8e70a8df2a7c3e4ec693031013d162a0732e29ff48395847ae2d2a8fe2e9eb34"
+            },
+            {
+              "name": "0.18.9-dev.1660.70d781e.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:c3c0e748dbe0106962deadbca5e73f970483f7dbb5610f3f2f21e65c59d58002"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1660.70d781e.tar.zst",
+              "size": 16252028,
+              "digest": "sha256:9174ac554456aa578627de897c2c687cf49b93efd4be0ef4f1831d948bbd9075"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1660.70d781e.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:0421180501d1bc5d68e5baeb003eee8132de1cb24cbd177f84376a3955d45bc7"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674122,
+              "digest": "sha256:85d3827d5ef955595d254b7bdee6814dd5e9a05667c514324cf61f04beae90e5"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
+              "size": 1593986,
+              "digest": "sha256:a191aca18771e1e9929576dd7ee1be6b15152bacc907461df25e2a8da2dc1b83"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809078,
+              "digest": "sha256:ecd3a576fef0c9cf273ae602dbdd409afcdfdb76ad52e9eb1bb0e3b80282cca5"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035783,
+              "digest": "sha256:752dd85bf40a4c4c80d16759bccbec1a79e13f2d036a0e1844816c3922e9ad78"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
+              "size": 1512108,
+              "digest": "sha256:84d41ec2c5d96a2aa0417ff84997d31d46c56257202525467f05de4c59e3af18"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:26bb527b395a5b65473f8168b62f6cca30bff5b82f493430e3bec81241eb493d"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:2390dcb65f7beb5e52fa265fbd924078dab94db09081152ea64a938157e47ddf"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505031,
+              "digest": "sha256:71fc7d0fa85133a5f06725405607932aa08f938742af7470ede58d585ff88e27"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601500,
+              "digest": "sha256:9f8af56860097d4451d76e313b030372ae88eb0e6e32bf200e3a14631b8d4236"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1383591,
+              "digest": "sha256:d8af07bb49e75160a02b6574768b195c9aafbc4e7bbeae7cf7b1e61ffc45a3ad"
+            },
+            {
+              "name": "manifest.json",
+              "size": 574,
+              "digest": "sha256:c22d7549f6096593ac95d1c865f264f4aacbad5f5984704ac5419875758d6b3c"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:35305f7bbf0bc49463c3ed59793f55ab4c82675bb4ee3c3ff71a94d6d744df8f"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-09T12:43:43.522996+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/70d781ed074e299d6a3baaae631505c5d26f9add",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...70d781ed074e299d6a3baaae631505c5d26f9add",
+          "comparison_to_recorded_main": {
+            "from_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+            "to_sha": "70d781ed074e299d6a3baaae631505c5d26f9add",
+            "merge_base_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "commit_count": 1,
+            "file_count": 5,
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...70d781ed074e299d6a3baaae631505c5d26f9add"
+          },
+          "classification": "Independent NFC pairing development prerelease. No matching PR observed. Not on main or in formal 0.18.8.",
+          "review": {
+            "tag_format": "Accepts the case-sensitive microduck_gamepad_pairing token alone or followed by whitespace and six colon-separated ASCII hexadecimal octets. NDEF text or URI values are trimmed and valid MACs are normalized to uppercase. Uses the first valid pairing record in record order.",
+            "compatibility": "Generic tags still use the existing discovery path and refuse if candidates remain ambiguous. A malformed named record is ignored, with no fallback based on that record. A separate valid record on a multi-record tag can still trigger pairing. Legacy address-only cards remain inactive.",
+            "request": "nfcd passes an optional MAC in the existing PadPairParams. The inherited configd explicit path matches the requested in-range address and bypasses the heuristic gamepad classification. No substitution with another device if the target is missing.",
+            "control_and_audio": "One attempt per touch and connected-pad protection are unchanged. With an eligible touch, the existing chirp precedes the request and greet follows a successful pairing.",
+            "protocol_and_reader": "IPC and configd BlueZ blobs match main API51, including main pairing candidate reporting. ST25R100 and Type 5 reader blobs match main. This does not broaden reader or board support.",
+            "tests_read": [
+              "a_pairing_tag_may_name_its_pad",
+              "an_address_that_does_not_parse_pairs_nothing",
+              "a_tag_naming_a_pad_pairs_that_pad",
+              "a_tag_naming_a_pad_still_does_nothing_while_one_is_connected"
+            ],
+            "validation_boundary": "Read four new parser or fake-device test definitions. GitHub build/publish jobs succeeded for the fixed head. Actual NFC reads, multi-pad pairing, HID operation and replica acceptance remain unverified.",
+            "upstream_build_publish_urls": {
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42614205497/job/129154161183",
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/42614205497/job/129149914623"
+            },
+            "fixed_sources": {
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/duck-ipc-proto/src/lib.rs",
+              "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/docs/robot/pair-a-gamepad.md",
+              "nfc/Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/nfc/Cargo.toml",
+              "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/nfc/src/main.rs",
+              "nfc/src/ndef.rs": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/nfc/src/ndef.rs",
+              "nfc/src/pairing.rs": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/nfc/src/pairing.rs",
+              "configd/src/bluez.rs": "https://github.com/pollen-robotics/microduck/blob/70d781ed074e299d6a3baaae631505c5d26f9add/configd/src/bluez.rs"
+            }
+          },
+          "impact": {
+            "HD1910": "Pairing workflow reference with compatible NFC hardware. No servo register or driver change.",
+            "camera": "No camera change.",
+            "ToF": "No ToF change.",
+            "model_management": "Inherits main model pin. No model-management change.",
+            "training": "No new training or weights.",
+            "motion": "Affects how a pad is selected for pairing. No control mapping or motion-policy change.",
+            "sound": "Reuses chirp and greet. No sound asset or pipeline change."
+          },
+          "priority": "Medium pairing reference where an NFC reader and supported Bluetooth controller are available. Low priority for the current replica image.",
+          "replica_integration": "Source and release metadata reviewed. Not integrated into the replica."
         }
       ],
       "pending_pull_requests": [
@@ -18352,32 +18503,23 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-09T09:42:38.440669+00:00",
+  "checked_at_utc": "2026-11-09T12:42:59.174850+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-09T08:43:47.700806+00:00",
-    "source_snapshot_utc": "2026-11-09T09:42:38.440669+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-09T09:43:16.096469+00:00",
+    "previous_substantive_review_utc": "2026-11-09T09:42:38.440669+00:00",
+    "source_snapshot_utc": "2026-11-09T12:42:59.174850+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-09T12:43:43.522996+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        558
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        532,
-        551
-      ]
-    },
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [],
-    "moved_development_tags": [
-      "daemon-dev-laser-track"
+    "new_development_releases": [
+      "daemon-dev-nfc-tag-pad-address"
     ],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -18387,7 +18529,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Laser PR #558 matches dev1659 and lowers the idle search rate. #532 squashes to an identical Git tree. #551 keeps its head and adds a single-servo ROBOTIS V4 bench report. Main, formal daemon 0.18.8, official blog and replica records retain their baselines.",
+    "notes": "NFC dev1660 adds optional explicit pad addresses while preserving generic pairing tags and the main API51 contract. No matching PR, main merge, formal release or replica integration observed. Other baselines retained.",
     "project_github_latest_target_changed": false
   },
   "replica_migration": {
@@ -20094,6 +20236,43 @@
       "robot_connected": false,
       "image_built_or_published_by_tracker": false,
       "notes": "Official daemon 0.18.8 and da34 main are unchanged. Laser tracking dev1657 is an independent API52 prototype. Open #532 replays its two PCM reader commits onto main API51 without a new audio feature delta. Other repositories, official articles, tracked model metadata and replica records retain their prior baselines.",
+      "project_github_latest_target_changed": false
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-09T08:43:47.700806+00:00",
+      "source_snapshot_utc": "2026-11-09T09:42:38.440669+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-09T09:43:16.096469+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          558
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          532,
+          551
+        ]
+      },
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [
+        "daemon-dev-laser-track"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Laser PR #558 matches dev1659 and lowers the idle search rate. #532 squashes to an identical Git tree. #551 keeps its head and adds a single-servo ROBOTIS V4 bench report. Main, formal daemon 0.18.8, official blog and replica records retain their baselines.",
       "project_github_latest_target_changed": false
     }
   ],
