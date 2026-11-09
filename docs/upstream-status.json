@@ -7224,6 +7224,150 @@
             "motion": "Author reports command gate timings. Walking and stopping distance remain open.",
             "sound": "No audio transport or sound asset change in the patch."
           }
+        },
+        {
+          "tag": "daemon-dev-laser-track",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-laser-track",
+          "head_sha": "5064ac4b2e602f909ed64eed928f37b060ad086d",
+          "published_at": "2026-11-09T08:27:52Z",
+          "published_at_jst": "2026-11-09T17:27:52+09:00",
+          "version": "daemon 0.18.9-dev.1657.5064ac4 (laser-track)",
+          "prerelease": true,
+          "source_version": "0.18.9",
+          "version_family": "0.18.9",
+          "api_version": 52,
+          "development_api_version": 52,
+          "asset_inventory": [
+            {
+              "name": "0.18.9-dev.1657.5064ac4.manifest.json",
+              "size": 386,
+              "digest": "sha256:5932d59db68e01037ad5474dd06090d2c106288a0deae3c21d25bf4d40eff9b9"
+            },
+            {
+              "name": "0.18.9-dev.1657.5064ac4.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:17d9bcc1242df53dffa512936c62be90c25ec88f1f2495b06ab00284ec7ee075"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1657.5064ac4.tar.zst",
+              "size": 16334719,
+              "digest": "sha256:9835a86ee6c0c51a942174e406eb5605aafd3a4bcbbb49fad82badae38a3f678"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1657.5064ac4.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:1e2ad2543123e2b70061964aff6bf75d979a2334b408d41f088748e7d617836b"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674086,
+              "digest": "sha256:3ba67d14c89cd6bb2aaff9addb06bda96c92ca31cb33fb388e01f1aeadf32e72"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594128,
+              "digest": "sha256:c1d7ca31ad3f5551533f9f292fbdaa6ee312130975222f147b04341b605e9cf7"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809524,
+              "digest": "sha256:ee9ac1792c1cd57fbe13d82ce36f40b17b1ab9f60618a4a7c1c8a0ac8cb23f2a"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3036947,
+              "digest": "sha256:ad47c8a104546cea7aeaecf44ec3744266a2049d955c1c838cce7ebe92e023bf"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
+              "size": 1512879,
+              "digest": "sha256:5287f21ff411c812eb29778f8a35d0342aeca34b4830fc529f21011f50559ca7"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:52efd2a2d946d306f01380aa7005e10f5d3886548d3e6a609dbe1034211d8eea"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:f10e02678bfe520439df5d4bd45acb20d4cf69e18b988002ea12cd90613e1bc6"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505335,
+              "digest": "sha256:67de9b9683759feef6a42be6e1f9cfb15a735de1f524a949aea946cebd5b9c51"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601413,
+              "digest": "sha256:866754a596e97397390f60cbeaff423e7bb21b3f8749e861bb93352e4501df6a"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384287,
+              "digest": "sha256:6aaec99434d3d593d81e679daf2d104ae161a6e17cc4965b270e0bbc9a9dcba6"
+            },
+            {
+              "name": "manifest.json",
+              "size": 558,
+              "digest": "sha256:7deb1369049638e902fd9e3bee80831d2baf9ac7088fd9b8324956f9096d0cb0"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:d5e1a72d99ca3a2e604c484ae56d336fcbfb82ecd168d54810b1b6ecb448cd80"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-09T08:47:20.076407+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/5064ac4b2e602f909ed64eed928f37b060ad086d",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...5064ac4b2e602f909ed64eed928f37b060ad086d",
+          "comparison_to_recorded_main": {
+            "status": "ahead",
+            "ahead_by": 4,
+            "behind_by": 0,
+            "from_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+            "to_sha": "5064ac4b2e602f909ed64eed928f37b060ad086d",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...5064ac4b2e602f909ed64eed928f37b060ad086d",
+            "commit_count": 4,
+            "file_count": 29,
+            "merge_base_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9"
+          },
+          "classification": "Independent laser tracking development prerelease. No matching PR observed in the snapshot.",
+          "replica_integration": "Source and release metadata reviewed. The replica has no integration for this prototype.",
+          "review": {
+            "camera": "mediad uses the existing UYVY frames and exposure, thresholds bright red candidates, filters blob size and maps through board intrinsics to an upright camera ray. The default search/tracking rates are 3/15 Hz. The board presets retain Zero3W quarter-turn and beta/FaceBoardV1 upright GC2093 mounts.",
+            "control": "robotd uses measured head joints, IMU attitude and odometry to project the ray onto a floor plane and feed existing head IK and walking intent. Tracking is off by default. When enabled, head and walk are both on by default and independently configurable. Fresh nonzero manual intent has priority for its axis. Emotion head targets are applied afterward.",
+            "target_expiry": "A lost dot, invalid ray or disconnected media stream can leave the previous floor target active until its memory expires. Default memory is 1000 ms. Range is limited to 2.5 m, with 0.25 m target standoff and caps of 0.25 m/s and 0.8 rad/s. These are source parameters for target following. ToF obstacle avoidance and physical stopping were not established.",
+            "contract": "API52 includes robot.laserTrack, robot.state.laser, media.laser and WebRTC media.laserDot. The overlay adds frame and candidate_px to this prerelease contract. WebRTC permits the toggle, BLE rejects it. The numeric version is also used by independent impact-guard and phase-skill contracts.",
+            "overlay": "The accepted dot draws a red ring. A size-rejected candidate can draw a dashed amber ring with peak color diagnostics. The detector subscribes through the local media socket when robotd tracking is active. The existing encoding path is retained.",
+            "validation_boundary": "Release asset metadata and fixed source reviewed. Runtime, camera load, physical tracking, stop distances and replica acceptance remain unverified.",
+            "fixed_sources": {
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/duck-ipc-proto/src/lib.rs",
+              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/mediad/src/laser.rs",
+              "mediad/src/frame.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/mediad/src/frame.rs",
+              "mediad/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/mediad/src/main.rs",
+              "mediad/webclient/index.html": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/mediad/webclient/index.html",
+              "robotd/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/robotd/src/laser.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/robotd/src/main.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/robotd-params/src/lib.rs",
+              "robotd-params/src/board.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/robotd-params/src/board.rs",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/docs/robot/cheatsheet.md",
+              "mediad/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/mediad/src/route.rs",
+              "btd/src/route.rs": "https://github.com/pollen-robotics/microduck/blob/5064ac4b2e602f909ed64eed928f37b060ad086d/btd/src/route.rs"
+            }
+          },
+          "priority": "High camera geometry, command ownership and motion safety review before considering adoption. Medium offline overlay reference.",
+          "impact": {
+            "HD1910": "No servo driver change. Replica head kinematics, limits and walking command handoff require separate validation.",
+            "camera": "Uses raw color frames and per-board geometry. Replica mounting, intrinsics, false positives, frame copying and CPU cost require separate measurement.",
+            "ToF": "No new ToF path. The floor point comes from vision and pose. Target standoff has no obstacle clearance meaning.",
+            "model_management": "Uses existing walking control. No model management or weight delivery change.",
+            "training": "No new training code or result.",
+            "motion": "Adds optional head and walking intents, target memory and manual override arbitration.",
+            "sound": "No sound, audio input or expression asset change."
+          }
         }
       ],
       "pending_pull_requests": [
@@ -11979,21 +12123,21 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-05T09:57:18Z",
-          "updated_at": "2026-11-06T02:36:38Z",
+          "updated_at": "2026-11-09T08:41:53Z",
           "merged_at": null,
-          "merge_commit_sha": "c412284d47abfd375d1eba3647d905ef334ccce2",
+          "merge_commit_sha": "c96a91a2f97a9d0fce59257ea414ba6907afa22e",
           "url": "https://github.com/pollen-robotics/microduck/pull/532",
-          "head_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
-          "base_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+          "head_sha": "4f6abd0781db1e564b4e0c3f07e247d62fe27774",
+          "base_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
           "base_branch": "main",
           "changed_file_count": 2,
           "commit_count": 2,
-          "source_version": "0.18.5",
-          "api_version": 49,
-          "classification": "pending offline PCM read-path proposal with stronger reader tests; not main/formal186",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...e5c355289352cc9ea42624d4d70bba42c2662c8b",
+          "source_version": "0.18.9",
+          "api_version": 51,
+          "classification": "Open proposal rebased onto main. No dedicated development prerelease observed.",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...4f6abd0781db1e564b4e0c3f07e247d62fe27774",
           "review": {
-            "change": "Extract real read_block from pump; EOF None, otherwise shared S16LE conversion, odd read byte count errors. read_recording now logs Eof completion separately from Shutdown interruption. No new Rust config shape beyond original AudioSource change; wire API49 unchanged.",
+            "change": "Replays the two existing commits onto da34 main. The audio feature changes are equivalent to the previous review. API51 is inherited from main and the PR does not change IPC.",
             "recording": "Still raw signed16-bit LE mono16kHz PCM, no WAV/MP3 decoding, rate detection or resampling. Odd per-read byte count fails; no cross-read byte carry. File read once without microphone retry; microphone EOF remains restart/backoff failure.",
             "runtime_dependency": "PetHandle::spawn still constructs ONNX PettingDetector before the worker. read_block extraction enables model-free read tests; it does not remove the production model dependency.",
             "tests_read": [
@@ -12004,7 +12148,7 @@
             ],
             "coverage_change": "Four recording-related definitions among nine total worker tests: EOF and loud tests now use actual read_block; one new odd-byte test; missing-path test retained. Bounded EOF loop checks sample total, termination and repeat EOF; loud16/quiet3 frames pass through same conversion and SoundSentry.",
             "test_limits": "Tests still do not call worker_loop/read_recording/pump/PetHandle or load ONNX. Missing-file case is File::open, not warning/no-retry behavior proof. Shutdown log fix is source-reviewed, not tested via full worker.",
-            "author_validation_claim": "Updated body says EOF-empty-block and removed odd-byte-check mutations fail the relevant tests, bounded EOF avoids harness timeout; local build/test review reported without an independently inspected final run log or new full-workspace/hardware result.",
+            "author_validation_claim": "Previously recorded author mutation and reader checks apply to the earlier reviewed source. This comparison verified an identical worker blob. A new run on this rebased head was not verified.",
             "not_included": [
               "self-audio rejection",
               "memory",
@@ -12015,11 +12159,12 @@
             "tracker_tests_executed": false,
             "priority": "medium offline audio validation reference; low current image delivery",
             "fixed_sources": {
-              "worker": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/pet-detect/src/worker.rs",
-              "robotd": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/robotd/src/main.rs",
-              "api": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/duck-ipc-proto/src/lib.rs"
+              "worker": "https://github.com/pollen-robotics/microduck/blob/4f6abd0781db1e564b4e0c3f07e247d62fe27774/pet-detect/src/worker.rs",
+              "robotd": "https://github.com/pollen-robotics/microduck/blob/4f6abd0781db1e564b4e0c3f07e247d62fe27774/robotd/src/main.rs",
+              "api": "https://github.com/pollen-robotics/microduck/blob/4f6abd0781db1e564b4e0c3f07e247d62fe27774/duck-ipc-proto/src/lib.rs",
+              "workspace": "https://github.com/pollen-robotics/microduck/blob/4f6abd0781db1e564b4e0c3f07e247d62fe27774/Cargo.toml"
             },
-            "source_boundary": "0.18.5/API49 on a64 base; not rebased to formal186/API50. AudioSource replaces a public Rust field; numeric IPC parity is not Rust source compatibility."
+            "source_boundary": "The proposal retains the public Rust AudioSource field change and robotd continues to select ALSA. No user-facing TOML or CLI recording input was added."
           },
           "priority": "medium",
           "replica_integration": "not integrated; no own tests or image change",
@@ -12072,16 +12217,88 @@
               "priority": "medium",
               "replica_integration": "not integrated; no own tests or image change",
               "impact": "Audio source test seam only; no HD1910/camera/ToF/motion, model-management/weights/training or voice pipeline changes."
+            },
+            {
+              "number": 532,
+              "title": "Let the pet worker read a recording instead of the mic",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-05T09:57:18Z",
+              "updated_at": "2026-11-06T02:36:38Z",
+              "merged_at": null,
+              "merge_commit_sha": "c412284d47abfd375d1eba3647d905ef334ccce2",
+              "url": "https://github.com/pollen-robotics/microduck/pull/532",
+              "head_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
+              "base_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+              "base_branch": "main",
+              "changed_file_count": 2,
+              "commit_count": 2,
+              "source_version": "0.18.5",
+              "api_version": 49,
+              "classification": "pending offline PCM read-path proposal with stronger reader tests; not main/formal186",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/a64ee692eebfce46a35c50b77705249752df9273...e5c355289352cc9ea42624d4d70bba42c2662c8b",
+              "review": {
+                "change": "Extract real read_block from pump; EOF None, otherwise shared S16LE conversion, odd read byte count errors. read_recording now logs Eof completion separately from Shutdown interruption. No new Rust config shape beyond original AudioSource change; wire API49 unchanged.",
+                "recording": "Still raw signed16-bit LE mono16kHz PCM, no WAV/MP3 decoding, rate detection or resampling. Odd per-read byte count fails; no cross-read byte carry. File read once without microphone retry; microphone EOF remains restart/backoff failure.",
+                "runtime_dependency": "PetHandle::spawn still constructs ONNX PettingDetector before the worker. read_block extraction enables model-free read tests; it does not remove the production model dependency.",
+                "tests_read": [
+                  "a_recording_is_read_to_eof_and_stops",
+                  "an_odd_byte_count_is_an_error_not_an_end",
+                  "a_loud_recording_produces_the_event_the_mic_would",
+                  "a_missing_recording_is_a_warning_not_a_restart_loop"
+                ],
+                "coverage_change": "Four recording-related definitions among nine total worker tests: EOF and loud tests now use actual read_block; one new odd-byte test; missing-path test retained. Bounded EOF loop checks sample total, termination and repeat EOF; loud16/quiet3 frames pass through same conversion and SoundSentry.",
+                "test_limits": "Tests still do not call worker_loop/read_recording/pump/PetHandle or load ONNX. Missing-file case is File::open, not warning/no-retry behavior proof. Shutdown log fix is source-reviewed, not tested via full worker.",
+                "author_validation_claim": "Updated body says EOF-empty-block and removed odd-byte-check mutations fail the relevant tests, bounded EOF avoids harness timeout; local build/test review reported without an independently inspected final run log or new full-workspace/hardware result.",
+                "not_included": [
+                  "self-audio rejection",
+                  "memory",
+                  "new sound event notification/state contract",
+                  "ASR/TTS",
+                  "weights/training"
+                ],
+                "tracker_tests_executed": false,
+                "priority": "medium offline audio validation reference; low current image delivery",
+                "fixed_sources": {
+                  "worker": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/pet-detect/src/worker.rs",
+                  "robotd": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/robotd/src/main.rs",
+                  "api": "https://github.com/pollen-robotics/microduck/blob/e5c355289352cc9ea42624d4d70bba42c2662c8b/duck-ipc-proto/src/lib.rs"
+                },
+                "source_boundary": "0.18.5/API49 on a64 base; not rebased to formal186/API50. AudioSource replaces a public Rust field; numeric IPC parity is not Rust source compatibility."
+              },
+              "priority": "medium",
+              "replica_integration": "not integrated; no own tests or image change",
+              "impact": "Audio source test seam only; no HD1910/camera/ToF/motion, model-management/weights/training or voice pipeline changes.",
+              "previous_head_sha": "3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583",
+              "latest_increment": {
+                "from_sha": "3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583",
+                "to_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583...e5c355289352cc9ea42624d4d70bba42c2662c8b",
+                "commit_count": 1,
+                "file_count": 1
+              }
             }
           ],
-          "previous_head_sha": "3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583",
+          "previous_head_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
           "latest_increment": {
-            "from_sha": "3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583",
-            "to_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/3ac2cf1f3263b1da74d753ea0ec4ae1b58e3d583...e5c355289352cc9ea42624d4d70bba42c2662c8b",
-            "commit_count": 1,
-            "file_count": 1
-          }
+            "status": "diverged",
+            "ahead_by": 44,
+            "behind_by": 2,
+            "from_sha": "e5c355289352cc9ea42624d4d70bba42c2662c8b",
+            "to_sha": "4f6abd0781db1e564b4e0c3f07e247d62fe27774",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/e5c355289352cc9ea42624d4d70bba42c2662c8b...4f6abd0781db1e564b4e0c3f07e247d62fe27774",
+            "commit_count": 44,
+            "file_count": 90,
+            "merge_base_sha": "a64ee692eebfce46a35c50b77705249752df9273",
+            "scope_note": "Divergent comparison includes inherited main history. Both base-relative feature files retain the same nonblank added and removed lines. The pet worker Git blob is identical.",
+            "feature_files": [
+              "pet-detect/src/worker.rs",
+              "robotd/src/main.rs"
+            ],
+            "worker_blob_sha": "a20072d0fae4d339badd2b8b7d8efd286c9e55e6"
+          },
+          "updated_at_jst": "2026-11-09T17:41:53+09:00",
+          "actual_merge_base": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9"
         },
         {
           "number": 533,
@@ -17743,34 +17960,27 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-09T03:42:11.153909+00:00",
+  "checked_at_utc": "2026-11-09T08:43:47.700806+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-07T11:54:30.502120+00:00",
-    "source_snapshot_utc": "2026-11-09T03:42:11.153909+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-09T03:44:58.790106+00:00",
+    "previous_substantive_review_utc": "2026-11-09T03:42:11.153909+00:00",
+    "source_snapshot_utc": "2026-11-09T08:43:47.700806+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-09T08:47:20.076407+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        556
-      ]
-    },
+    "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        551
+        532
       ]
     },
     "previous_tracked_prs_merged": false,
     "new_development_releases": [
-      "daemon-dev-codex/secure-media-and-ble-defaults"
+      "daemon-dev-laser-track"
     ],
-    "moved_development_tags": [
-      "daemon-dev-impact-guard-v3",
-      "daemon-dev-stress-test"
-    ],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -17780,7 +17990,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Official 0.18.8 and main da34 remain the recorded baseline. Open #551 rebases the impact extension to API52. Original stress-test incorporates it and carries robot.trip at API53. Draft #556 and dev1653 use API51 with different media/BLE access requirements. The earlier combined a13 and separate stress-test-v2 remain tracked. Companion app PR5 is linked by the author, with API access unavailable.",
+    "notes": "Official daemon 0.18.8 and da34 main are unchanged. Laser tracking dev1657 is an independent API52 prototype. Open #532 replays its two PCM reader commits onto main API51 without a new audio feature delta. Other repositories, official articles, tracked model metadata and replica records retain their prior baselines.",
     "project_github_latest_target_changed": false
   },
   "replica_migration": {
@@ -19417,6 +19627,45 @@
       "image_built_or_published_by_tracker": false,
       "notes": "GitHub Latest API and the public download redirect point to the October 27 image. November 4 remains a formal image on its original tag. This observation records the download selection and retains the earlier November 4 Latest observation.",
       "project_github_latest_target_changed": true
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-07T11:54:30.502120+00:00",
+      "source_snapshot_utc": "2026-11-09T03:42:11.153909+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-09T03:44:58.790106+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          556
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          551
+        ]
+      },
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [
+        "daemon-dev-codex/secure-media-and-ble-defaults"
+      ],
+      "moved_development_tags": [
+        "daemon-dev-impact-guard-v3",
+        "daemon-dev-stress-test"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Official 0.18.8 and main da34 remain the recorded baseline. Open #551 rebases the impact extension to API52. Original stress-test incorporates it and carries robot.trip at API53. Draft #556 and dev1653 use API51 with different media/BLE access requirements. The earlier combined a13 and separate stress-test-v2 remain tracked. Companion app PR5 is linked by the author, with API access unavailable.",
+      "project_github_latest_target_changed": false
     }
   ],
   "replica_public_image": {
