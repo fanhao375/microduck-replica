@@ -124,6 +124,7 @@ class StateFileTest(Base):
                 self.assertEqual(v["mode"], mode)
                 self.assertEqual(v["hostname"], "duck-c51b")
                 self.assertEqual(v["url_local"], "http://duck-c51b.local:8000/")
+                self.assertEqual(v["url_hotspot"], "http://10.42.0.1:8000/m")
                 self.assertEqual(v["hotspot"], {"ssid": "Microduck-c51b", "ip": "10.42.0.1", "psk": "microduck"})
 
     def test_local_url_uses_the_listen_port(self):
@@ -131,6 +132,32 @@ class StateFileTest(Base):
         self.write_state(mode="wifi")
         self.net._read_once()
         self.assertEqual(self.net.view()["url_local"], "http://duck-c51b.local:8123/")
+
+    def test_addresses_takes_the_scheme(self):
+        """开了 HTTPS 以后，给用户的地址也得是 https，不然手机麦克风那条路还是用不了。"""
+        self.assertEqual([u["url"] for u in N.addresses("duck-x", "1.2.3.4", 9000, "https")],
+                         ["https://1.2.3.4:9000/", "https://duck-x:9000/", "https://duck-x.local:9000/"])
+        self.assertEqual([u["url"] for u in N.addresses("duck-x", None, scheme="https")],
+                         ["https://duck-x:8000/", "https://duck-x.local:8000/"])
+
+    def test_https_scheme_reaches_every_url(self):
+        net = N.Net("tcp:127.0.0.1:1", self.state, self.dir / "state", self.log, dev_mode=False,
+                    hostname="duck-c51b", scheme="https")
+        self.write_state(mode="hotspot")
+        net._read_once()
+        v = net.view()
+        self.assertEqual(v["url_local"], "https://duck-c51b.local:8000/")
+        self.assertEqual(v["url_host"], "https://duck-c51b:8000/")
+        self.assertEqual(v["url_hotspot"], "https://10.42.0.1:8000/m")
+        self.assertEqual([u["url"] for u in v["urls"]],
+                         ["https://10.42.0.1:8000/", "https://duck-c51b:8000/", "https://duck-c51b.local:8000/"])
+
+    def test_unknown_scheme_falls_back_to_http(self):
+        net = N.Net("tcp:127.0.0.1:1", self.state, self.dir / "state", self.log, dev_mode=False,
+                    hostname="duck-c51b", scheme="ftp")
+        self.write_state(mode="wifi")
+        net._read_once()
+        self.assertEqual(net.view()["url_local"], "http://duck-c51b.local:8000/")
 
     def test_status_fields_and_last_try_text(self):
         self.write_state(mode="wifi")
@@ -385,6 +412,91 @@ class ConnectTest(Base):
         self.assertEqual(rec["detail"], N.PERMISSION)
         self.assertIn("configd 没放行 radxa", json.loads(
             (self.dir / "state" / "net-last-try.json").read_text(encoding="utf-8"))["detail"])
+
+
+class HotspotOpTest(Base):
+    """户外模式：手机点「开/关热点」→ net.op → hotspot_up/down。这里只验证顺序、busy 和报错文案。"""
+
+    def setUp(self):
+        super().setUp()
+        self.write_state(mode="wifi")
+        self.net._read_once()
+
+    def test_begin_hotspot_locks_and_resets(self):
+        self.assertTrue(self.net.begin_hotspot())
+        self.assertEqual(self.net.view()["busy"], "hotspot")
+        self.assertFalse(self.net.begin_hotspot())          # 第二次不给进
+        self.assertFalse(self.net.begin_connect())          # 连 WiFi 也不插队
+        self.net.busy = None
+        self.assertTrue(self.net.begin_connect())           # 清掉后别人能用
+
+    def test_begin_hotspot_unknown_state_is_refused(self):
+        net = N.Net("tcp:127.0.0.1:1", self.dir / "missing.json", self.dir / "state", self.log,
+                    dev_mode=False, hostname="duck-c51b")
+        net._read_once()
+        with self.assertRaises(N.Refused):
+            net.begin_hotspot()
+
+    async def test_hotspot_up_success_and_busy_reset(self):
+        self.net.begin_hotspot()
+        with mock.patch.object(N.helper, "wifi_hotspot_up", return_value=(True, "hotspot_up", {})) as up:
+            ok, why = await self.net.hotspot_up("手机")
+        self.assertTrue(ok)
+        self.assertIsNone(why)
+        self.assertIsNone(self.net.busy)
+        up.assert_called_once_with("手机")
+
+    async def test_hotspot_up_already_up_still_ok(self):
+        with mock.patch.object(N.helper, "wifi_hotspot_up", return_value=(True, "already_up", {})):
+            ok, why = await self.net.hotspot_up("手机")
+        self.assertTrue(ok)
+        self.assertIsNone(why)
+
+    async def test_hotspot_up_bad_verb_points_to_reinstall(self):
+        with mock.patch.object(N.helper, "wifi_hotspot_up", return_value=(False, "bad_verb", "unknown verb")):
+            ok, why = await self.net.hotspot_up("手机")
+        self.assertFalse(ok)
+        self.assertIn("wifi-hotspot-up", why)
+        self.assertIn("install.sh", why)
+        self.assertIsNone(self.net.busy)
+
+    async def test_hotspot_up_helper_raises_is_reported(self):
+        with mock.patch.object(N.helper, "wifi_hotspot_up", side_effect=OSError("boom")):
+            ok, why = await self.net.hotspot_up("手机")
+        self.assertFalse(ok)
+        self.assertIn("小助手没跑成", why)
+        self.assertIsNone(self.net.busy)
+
+    async def test_hotspot_up_without_helper_refuses(self):
+        with mock.patch.object(N.helper, "available", return_value=False):
+            with self.assertRaises(N.Refused):
+                await self.net.hotspot_up("手机")
+        self.assertIsNone(self.net.busy)
+
+    async def test_hotspot_down_success(self):
+        self.write_state(mode="hotspot")
+        self.net._read_once()
+        self.net.begin_hotspot()
+        with mock.patch.object(N.helper, "wifi_hotspot_down", return_value=(True, "hotspot_down", {})) as down:
+            ok, why = await self.net.hotspot_down("手机", "Home")
+        self.assertTrue(ok)
+        self.assertIsNone(why)
+        self.assertIsNone(self.net.busy)
+        down.assert_called_once_with("手机", "Home")
+
+    async def test_hotspot_down_bad_verb_points_to_reinstall(self):
+        with mock.patch.object(N.helper, "wifi_hotspot_down", return_value=(False, "bad_verb", "unknown verb")):
+            ok, why = await self.net.hotspot_down("手机")
+        self.assertFalse(ok)
+        self.assertIn("wifi-hotspot-down", why)
+        self.assertIn("install.sh", why)
+        self.assertIsNone(self.net.busy)
+
+    async def test_hotspot_down_without_helper_refuses(self):
+        with mock.patch.object(N.helper, "available", return_value=False):
+            with self.assertRaises(N.Refused):
+                await self.net.hotspot_down("手机")
+        self.assertIsNone(self.net.busy)
 
 
 class ValidateTest(unittest.TestCase):

@@ -47,6 +47,29 @@ class Run:
         return SimpleNamespace(returncode=self.returncode, stdout=self.stdout, stderr=self.stderr)
 
 
+class TlsRun(Run):
+    """假 openssl：按 -out 参数造占位文件；调用 x509 时顺手记下 extfile 内容。"""
+
+    def __init__(self, returncode=0, stderr=""):
+        super().__init__(returncode=returncode, stderr=stderr)
+        self.ext_text = ""
+
+    def __call__(self, args, timeout=None):
+        self.calls.append((list(args), timeout))
+        a = list(args)
+        if self.returncode == 0:
+            if "-extfile" in a:
+                try:
+                    self.ext_text = Path(a[a.index("-extfile") + 1]).read_text(encoding="utf-8")
+                except OSError:
+                    pass
+            if "-out" in a:
+                out = Path(a[a.index("-out") + 1])
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.write_text("placeholder\n", encoding="utf-8")
+        return SimpleNamespace(returncode=self.returncode, stdout="", stderr=self.stderr)
+
+
 def make_tree(tmp, *, serial=b"bb7b734a7717ac41\x00\n", hostname="microduck"):
     root = Path(tmp)
     for rel in ["etc/NetworkManager/system-connections", "etc/robot/feetech-ft5",
@@ -389,7 +412,7 @@ class FlowTests(unittest.TestCase):
             shutil.rmtree(nm)
             nm.write_text("not a directory\n", encoding="utf-8")
             log = io.StringIO()
-            fb = make_fb(root, fake_spec={"/dev/i2c-4": dict(ImuTests.BNO4A)}, log=log)
+            fb = make_fb(root, fake_spec={"/dev/i2c-4": dict(ImuTests.BNO4A)}, run=Run(), log=log)
             rc = fb.run()
             self.assertEqual(rc, 0)
             self.assertEqual((root / "etc/hostname").read_text(encoding="utf-8"), "duck-c51b\n")
@@ -401,7 +424,7 @@ class FlowTests(unittest.TestCase):
     def test_marker_written_after_naming(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = make_tree(tmp)
-            fb = make_fb(root, fake_spec={})
+            fb = make_fb(root, fake_spec={}, run=Run())
             fb.run()
             text = (root / "var/lib/microduck/firstboot.done").read_text(encoding="utf-8")
             self.assertRegex(text, r"^1790000000\.000000 duck-c51b\n$")
@@ -458,6 +481,127 @@ class HotspotOnlyTests(unittest.TestCase):
             text = hotspot.read_text(encoding="utf-8")
             self.assertIn("ssid=Microduck-c51b", text)
             self.assertNotIn("broken", text)
+
+
+class TlsTests(unittest.TestCase):
+    """首次开机生成局部 CA + 服务器证书；旧的自签 leaf 迁移时先备份。"""
+
+    def tls(self, tmp, *, run=None):
+        root = make_tree(tmp, hostname="duck-c51b")
+        log = io.StringIO()
+        fb = make_fb(root, fake_spec={}, run=run or TlsRun(), log=log)
+        return root, fb, log
+
+    def test_generates_local_ca_and_server_cert(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, log = self.tls(tmp)
+            cert = fb.setup_tls("duck-c51b")
+            directory = root / "etc/microduck/tls"
+            self.assertEqual(cert, directory / "duck.crt")
+            for name in ("ca.key", "ca.crt", "duck.key", "duck.crt"):
+                self.assertTrue((directory / name).exists(), name)
+            self.assertFalse((directory / "duck.csr").exists())      # 中间文件不留下
+            self.assertFalse((directory / "duck.ext").exists())
+            self.assertIn("已生成 HTTPS 证书", log.getvalue())
+            run = fb.run_cmd
+            verbs = [a[1] for a, _ in run.calls if a and a[0] == "openssl"]
+            self.assertEqual(verbs.count("genrsa"), 2)
+            self.assertIn("req", verbs)
+            self.assertIn("x509", verbs)
+
+    def test_san_covers_hotspot_hostname_and_loopback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, fb, _ = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            ext = fb.run_cmd.ext_text
+            for want in ("DNS:duck-c51b", "DNS:duck-c51b.local", "DNS:localhost",
+                         "IP:10.42.0.1", "IP:127.0.0.1",
+                         "extendedKeyUsage=serverAuth"):
+                self.assertIn(want, ext)
+            self.assertIn("basicConstraints=CA:FALSE", ext)
+
+    def test_ca_subject_is_the_local_ca(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, fb, _ = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            argv = [a for a, _ in fb.run_cmd.calls if a and a[1] == "req"
+                    and "-x509" in a][0]
+            self.assertIn(fb.TLS_SUBJECT, argv)
+
+    def test_existing_certs_are_not_overwritten(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, fb, log = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            run = fb.run_cmd
+            before = len(run.calls)
+            fb.setup_tls("duck-c51b")
+            self.assertEqual(len(run.calls), before)               # 没有再次调用 openssl
+            self.assertIn("已存在，不覆盖", log.getvalue())
+
+    def test_old_leaf_without_ca_is_backed_up_and_regenerated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, log = self.tls(tmp)
+            directory = root / "etc/microduck/tls"
+            directory.mkdir(parents=True)
+            (directory / "duck.key").write_text("old-key\n", encoding="utf-8")
+            (directory / "duck.crt").write_text("old-crt\n", encoding="utf-8")
+            fb.setup_tls("duck-c51b")
+            self.assertTrue((directory / "ca.crt").exists())
+            backups = sorted(p.name for p in directory.glob("*.bak-*"))
+            self.assertTrue(any(name.startswith("duck.key.bak-") for name in backups), backups)
+            self.assertTrue(any(name.startswith("duck.crt.bak-") for name in backups), backups)
+            self.assertIn("备份旧证书", log.getvalue())
+
+    def test_force_backs_up_even_when_complete(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, _ = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            fb.setup_tls("duck-c51b", force=True)
+            directory = root / "etc/microduck/tls"
+            backups = [p.name for p in directory.glob("*.bak-*")]
+            self.assertTrue(any(name.startswith("ca.crt.bak-") for name in backups), backups)
+            self.assertTrue(any(name.startswith("duck.crt.bak-") for name in backups), backups)
+
+    def test_openssl_failure_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, _ = self.tls(tmp, run=TlsRun(returncode=2, stderr="bad key\n"))
+            with self.assertRaises(RuntimeError) as ctx:
+                fb.setup_tls("duck-c51b")
+            self.assertIn("openssl", str(ctx.exception))
+            self.assertIn("生成 CA 私钥", str(ctx.exception))
+
+    def test_key_modes_on_unix(self):
+        if os.name == "nt":
+            self.skipTest("Windows 不保留 Unix 权限")
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, _ = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            directory = root / "etc/microduck/tls"
+            for name, mode in (("ca.key", 0o600), ("duck.key", 0o600),
+                               ("ca.crt", 0o644), ("duck.crt", 0o644)):
+                self.assertEqual(stat.S_IMODE((directory / name).stat().st_mode), mode, name)
+
+    def test_tls_only_run_generates_without_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, log = self.tls(tmp)
+            self.assertEqual(fb.run(tls_only=True), 0)
+            directory = root / "etc/microduck/tls"
+            self.assertTrue((directory / "duck.crt").exists())
+            self.assertFalse((root / "var/lib/microduck/firstboot.done").exists())
+            self.assertIn("只生成 HTTPS 证书", log.getvalue())
+
+    def test_tls_only_failure_returns_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, fb, log = self.tls(tmp, run=TlsRun(returncode=2, stderr="nope\n"))
+            self.assertEqual(fb.run(tls_only=True), 1)
+            self.assertIn("HTTPS 证书没有生成", log.getvalue())
+
+    def test_full_run_generates_tls_before_writing_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, fb, _ = self.tls(tmp)
+            self.assertEqual(fb.run(), 0)
+            self.assertTrue((root / "etc/microduck/tls/duck.crt").exists())
+            self.assertTrue((root / "var/lib/microduck/firstboot.done").exists())
 
 
 class PythonFinderTests(unittest.TestCase):

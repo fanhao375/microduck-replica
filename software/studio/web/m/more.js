@@ -5,6 +5,16 @@ import { html, useState, useEffect } from '../vendor/preact-htm.module.js';
 import { link } from './link.js';
 
 const SRC_KEY = 'duck.voice.source';
+const HOT_KEY = 'duck.hotspot';
+
+// 切热点会把这台手机的连接断掉，可能收不到后端的状态和回执；先把热点信息留在本机。
+function loadHotspot() {
+  try { return JSON.parse(localStorage.getItem(HOT_KEY) || 'null') || null; } catch { return null; }
+}
+
+function saveHotspot(h) {
+  try { localStorage.setItem(HOT_KEY, JSON.stringify(h)); } catch { /* 隐私模式 */ }
+}
 
 const PAGES = [
   { href: '#/more/camera', label: '摄像头', desc: '手机版实时画面' },
@@ -37,9 +47,54 @@ export function MorePage({ hello, st, conn, say, nick, rename }) {
     say(draft.trim() ? `以后就叫它「${draft.trim()}」` : '名字恢复成默认的「鸭鸭」');
   };
 
+  // 户外：热点信息跟状态同步，同时留在本机（切热点会把连接断掉）
+  const net = st?.net;
+  const hs = net?.hotspot;
+  const [hot, setHot] = useState(loadHotspot);
+  const [outdoorAsk, setOutdoorAsk] = useState(false);
+  const [netBusy, setNetBusy] = useState(false);
+  const [netNote, setNetNote] = useState(null);
+  useEffect(() => {
+    if (hs && hs.ssid) {
+      const clean = { ssid: hs.ssid, psk: hs.psk || 'microduck', ip: hs.ip || '10.42.0.1',
+                      url: net?.url_hotspot || '' };
+      setHot(clean);
+      saveHotspot(clean);
+    }
+  }, [hs?.ssid, hs?.psk, hs?.ip, net?.url_hotspot]);
+
+  const netBusyNow = netBusy || !!net?.busy;
+  const netOp = async (op) => {
+    if (netBusyNow) return;
+    setNetBusy(true);
+    setNetNote(null);
+    const r = await link.cmd('net.op', { op }, 45000);
+    setNetBusy(false);
+    if (r.ok) {
+      if (op === 'hotspot-up') setOutdoorAsk(false);
+      setNetNote(r.reason || '已经在处理');
+      return;
+    }
+    const dropped = r.error === '和鸭子的连接断了' || r.error === '鸭子没回话（超时）';
+    if (dropped) {
+      if (op === 'hotspot-up') setOutdoorAsk(false);
+      setNetNote(op === 'hotspot-up'
+        ? '连接已经断开，热点应该正在开。按下面三步连上去。'
+        : '连接断了，热点应该正在关。稍后手机重新连回家里的 WiFi。');
+      return;
+    }
+    setNetNote(r.reason || r.error || '没发出去');
+  };
+
   const secure = window.isSecureContext !== false;
   const version = hello?.version || '—';
   const duck = hello?.duck || {};
+  const hotspot = hs || hot;
+  const hotspotSsid = hotspot?.ssid || 'Microduck-xxxx';
+  const hotspotPsk = hotspot?.psk || 'microduck';
+  const hotspotUrl = net?.url_hotspot || hotspot?.url
+    || `${location.protocol}//${hotspot?.ip || '10.42.0.1'}:8000/m`;
+  const atHotspot = net?.mode === 'hotspot';
 
   return html`<div>
     <h2 class="m-h2">给它起个名字</h2>
@@ -67,9 +122,60 @@ export function MorePage({ hello, st, conn, say, nick, rename }) {
       </ul>
     </div>
     ${!secure ? html`<div class="m-banner">
-      现在是 http 打开，浏览器不给麦克风。要手机收音，得让 Studio 用 https 起（见 README「手机中控」一节）。
+      现在是 http 打开，浏览器不给麦克风。先按下面「手机麦克风证书」装好证书，再用 https 地址打开本页；
       在那之前用板载麦克风或打字。
     </div>` : null}
+
+    <h2 class="m-h2">手机麦克风证书</h2>
+    <div class="m-card m-pad">
+      <div class="m-sub">第一次用「手机说话」前，让手机信任鸭子自己的 https 证书。只影响手机麦克风；板载麦克风和实体手柄不需要。</div>
+      <a class="m-btn" href="/ca.crt" download="Microduck-Local-CA.crt">下载证书</a>
+      <ol class="m-tip" style="padding-left:18px;margin:10px 0 0">
+        <li>iPhone：点下载 → 设置 → 已下载描述文件 → 安装；再到 设置 → 通用 → 关于本机 → 证书信任设置，打开 Microduck Local CA。</li>
+        <li>Android：设置 → 安全 → 加密与凭据 → 安装证书 → CA 证书，选刚下载的文件。</li>
+        <li>装完刷新本页，再试「手机说话」。</li>
+      </ol>
+    </div>
+
+    ${net?.known ? html`
+      <h2 class="m-h2">户外（没有路由器）</h2>
+      <div class="m-card m-pad">
+        <div class="m-sub">
+          ${atHotspot ? '手机现在连的是鸭子自己的热点。'
+            : net.mode === 'wifi' ? `鸭子现在连着家里的 WiFi${net.ssid ? `（${net.ssid}）` : ''}。`
+            : '鸭子现在没有连 WiFi。'}
+          没有路由器时，鸭子自己开热点：手机连它，「手机说话」走板载 Vosk，不需要互联网。实体手柄走蓝牙，跟 WiFi 无关。
+        </div>
+        <div class="m-kv"><span class="k">热点名</span><span class="v">${hotspotSsid}</span></div>
+        <div class="m-kv"><span class="k">密码</span><span class="v">${hotspotPsk}</span></div>
+        <div class="m-kv"><span class="k">手机打开</span><span class="v">${hotspotUrl}</span></div>
+        ${atHotspot ? html`
+          <div class="m-btns" style="margin-top:12px">
+            <button class="m-btn" onClick=${() => netOp('hotspot-down')} disabled=${netBusyNow}>关热点，回家里 WiFi</button>
+          </div>
+          <p class="m-tip">关掉热点后，鸭子会自动连回保存过的家庭 WiFi；手机也要重新连回家里的 WiFi。</p>
+        ` : outdoorAsk ? html`
+          <div class="m-banner">
+            <b>接下来手机会断线，按这三步重连：</b>
+            <ol style="padding-left:18px;margin:8px 0 0">
+              <li>打开手机 WiFi 列表，连「${hotspotSsid}」（密码 ${hotspotPsk}）</li>
+              <li>提示「无互联网」时选「保持连接」，并临时关掉移动数据</li>
+              <li>浏览器打开 ${hotspotUrl}</li>
+            </ol>
+          </div>
+          <div class="m-btns" style="margin-top:12px">
+            <button class="m-btn primary" onClick=${() => netOp('hotspot-up')} disabled=${netBusyNow}>确认，开热点</button>
+            <button class="m-btn" onClick=${() => setOutdoorAsk(false)} disabled=${netBusyNow}>取消</button>
+          </div>
+        ` : html`
+          <div class="m-btns" style="margin-top:12px">
+            <button class="m-btn primary" onClick=${() => setOutdoorAsk(true)} disabled=${netBusyNow}>开热点（当前连接会断开）</button>
+          </div>
+        `}
+        ${netNote ? html`<div class="m-banner" style="margin-top:12px">${netNote}</div>` : null}
+        <p class="m-tip">户外演示前先在「设置 → 登录密码」设网页密码：热点密码是公开的默认值，不设密码同一热点下的人都能操作。</p>
+      </div>
+    ` : null}
 
     <h2 class="m-h2">这一版没重做的页</h2>
     <div class="m-card">

@@ -492,6 +492,97 @@ class Firstboot:
         self.log("已写热点配置：Microduck-Hotspot（SSID Microduck-%s，地址 10.42.0.1/24）" % suffix)
         return target
 
+    # ---- HTTPS 证书（局部 CA） ----
+
+    TLS_DIR = "/etc/microduck/tls"
+    TLS_SUBJECT = "/CN=Microduck-Local-CA"
+
+    def _openssl(self, args, what):
+        result = self._call(["openssl"] + args, timeout=60)
+        if result.returncode != 0:
+            lines = (result.stderr or result.stdout or "").strip().splitlines()
+            detail = lines[-1] if lines else ""
+            raise RuntimeError("openssl %s 失败（退出 %s）：%s" % (what, result.returncode, detail))
+        return result
+
+    def _backup_tls(self, directory):
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        for name in ("ca.key", "ca.crt", "duck.key", "duck.crt", "duck-fullchain.crt"):
+            src = directory / name
+            if not src.exists():
+                continue
+            dst = directory / ("%s.bak-%s" % (name, stamp))
+            try:
+                os.replace(src, dst)
+                self.log("备份旧证书：%s -> %s" % (src.name, dst.name))
+            except OSError as exc:
+                self.log("备份旧证书失败：%s：%s" % (src, exc))
+
+    def _chmod_tls(self, directory):
+        for name, mode in (("ca.key", 0o600), ("duck.key", 0o600),
+                           ("ca.crt", 0o644), ("duck.crt", 0o644)):
+            try:
+                os.chmod(directory / name, mode)
+            except OSError:
+                pass
+        if not (IS_ROOT and hasattr(os, "chown")):
+            return
+        try:
+            import pwd
+            entry = pwd.getpwnam("radxa")
+        except (ImportError, KeyError):
+            return
+        # leaf 私钥要能被 Studio（radxa）读；CA 私钥保持 root。
+        try:
+            os.chown(directory / "duck.key", entry.pw_uid, entry.pw_gid)
+        except OSError as exc:
+            self.log("提示：duck.key 属主没改成 radxa：%s" % exc)
+
+    def setup_tls(self, name=None, force=False):
+        """生成局部 CA + 服务器证书（SAN 含 hotspot 地址、主机名和 .local）。
+        幂等：ca.crt / duck.crt / duck.key 都在就跳过；旧的自签 leaf 没有 ca.crt 时先备份再重生成。"""
+        name = name or self.hostname or self._read_hostname()
+        if not name:
+            name, _ = self.pick_name()
+        directory = self.path(self.TLS_DIR)
+        ca_key, ca_crt = directory / "ca.key", directory / "ca.crt"
+        key, crt = directory / "duck.key", directory / "duck.crt"
+        if crt.exists() and key.exists() and ca_crt.exists() and not force:
+            self.log("HTTPS 证书已存在，不覆盖：%s" % directory)
+            return crt
+        directory.mkdir(parents=True, exist_ok=True)
+        try:
+            os.chmod(directory, 0o755)
+        except OSError:
+            pass
+        if force or ((crt.exists() or key.exists()) and not ca_crt.exists()):
+            self._backup_tls(directory)
+        self._openssl(["genrsa", "-out", str(ca_key), "2048"], "生成 CA 私钥")
+        self._openssl(["req", "-x509", "-new", "-nodes", "-key", str(ca_key),
+                       "-days", "3650", "-sha256", "-subj", self.TLS_SUBJECT,
+                       "-out", str(ca_crt)], "生成 CA 证书")
+        self._openssl(["genrsa", "-out", str(key), "2048"], "生成服务器私钥")
+        csr, ext = directory / "duck.csr", directory / "duck.ext"
+        self._openssl(["req", "-new", "-key", str(key), "-subj", "/CN=%s" % name,
+                       "-out", str(csr)], "生成服务器请求")
+        _atomic_write(ext, (
+            "basicConstraints=CA:FALSE\n"
+            "keyUsage=critical,digitalSignature,keyEncipherment\n"
+            "extendedKeyUsage=serverAuth\n"
+            "subjectAltName=DNS:%s,DNS:%s.local,DNS:localhost,IP:10.42.0.1,IP:127.0.0.1\n"
+            % (name, name)).encode("utf-8"), 0o600)
+        self._openssl(["x509", "-req", "-in", str(csr), "-CA", str(ca_crt), "-CAkey", str(ca_key),
+                       "-CAcreateserial", "-days", "3650", "-sha256", "-extfile", str(ext),
+                       "-out", str(crt)], "签发服务器证书")
+        for leftover in (csr, ext, directory / "ca.srl"):
+            try:
+                leftover.unlink()
+            except OSError:
+                pass
+        self._chmod_tls(directory)
+        self.log("已生成 HTTPS 证书：%s（SAN %s、%s.local、10.42.0.1）" % (crt, name, name))
+        return crt
+
     # ---- IMU ----
 
     I2C_BUSES = ("/dev/i2c-3", "/dev/i2c-4")
@@ -813,7 +904,22 @@ class Firstboot:
         _atomic_write(target, text.encode("utf-8"), 0o644)
         self.log("已写完成标记：%s" % target)
 
-    def run(self, detect_only=False, force=False, hotspot_only=False):
+    def run(self, detect_only=False, force=False, hotspot_only=False, tls_only=False):
+        if tls_only:
+            self.log("==> 只生成 HTTPS 证书")
+            name = self._read_hostname()
+            if not name:
+                name, _ = self.pick_name()
+            self.hostname = name
+            try:
+                self.setup_tls(name, force=force)
+            except Exception as exc:
+                self.log("错误：生成 HTTPS 证书失败：%s" % exc)
+                self.log("汇总：HTTPS 证书没有生成")
+                return 1
+            self.log("汇总：HTTPS 证书已生成（手机连热点后打开 https）")
+            return 0
+
         if hotspot_only:
             self.log("==> 只重建热点连接")
             name = self._read_hostname()
@@ -843,8 +949,9 @@ class Firstboot:
         failures = []
         name_ok = False
         hotspot_ok = False
+        tls_ok = False
 
-        self.log("==> 1/3 起名")
+        self.log("==> 1/4 起名")
         try:
             self.setup_hostname()
             name_ok = True
@@ -852,7 +959,7 @@ class Firstboot:
             failures.append("起名")
             self.log("错误：起名失败：%s" % exc)
 
-        self.log("==> 2/3 配置热点")
+        self.log("==> 2/4 配置热点")
         try:
             name = self.hostname
             if not name:
@@ -865,21 +972,32 @@ class Firstboot:
             self.log("错误：热点配置失败：%s" % exc)
             self.log("热点配置没有成功，本次不写完成标记；下次开机会再试。")
 
-        self.log("==> 3/3 识别躯干 IMU")
+        self.log("==> 3/4 生成 HTTPS 证书")
+        try:
+            self.setup_tls(self.hostname)
+            tls_ok = True
+        except Exception as exc:
+            failures.append("HTTPS 证书")
+            self.log("错误：生成 HTTPS 证书失败：%s" % exc)
+            self.log("证书没有生成，本次不写完成标记；下次开机会再试。")
+
+        self.log("==> 4/4 识别躯干 IMU")
         try:
             self.detect_imu()
         except Exception as exc:
             failures.append("IMU 识别")
             self.log("错误：IMU 识别失败：%s" % exc)
 
-        if name_ok and hotspot_ok:
+        if name_ok and hotspot_ok and tls_ok:
             try:
                 self._write_marker()
             except Exception as exc:
                 failures.append("完成标记")
                 self.log("错误：写完成标记失败：%s" % exc)
-        elif not name_ok:
-            self.log("起名没成功，不写完成标记")
+        else:
+            missing = [label for ok, label in ((name_ok, "起名"), (hotspot_ok, "热点配置"),
+                                               (tls_ok, "HTTPS 证书")) if not ok]
+            self.log("%s没成功，不写完成标记" % "、".join(missing))
 
         if failures:
             self.log("汇总：%d 步失败：%s" % (len(failures), "、".join(failures)))
@@ -892,13 +1010,14 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Microduck 第一次开机初始化")
     parser.add_argument("--detect-imu-only", action="store_true", help="只识别躯干 IMU")
     parser.add_argument("--hotspot-only", action="store_true", help="只重建热点连接，不起名、不识别 IMU")
-    parser.add_argument("--force", action="store_true", help="替换已有的 trunk_imu 段")
+    parser.add_argument("--tls-only", action="store_true", help="只生成 / 迁移 HTTPS 局部 CA 证书")
+    parser.add_argument("--force", action="store_true", help="替换已有的 trunk_imu 段；配 --tls-only 时重建已有证书")
     parser.add_argument("--root", default=DEFAULT_ROOT,
                         help="测试用根目录（默认 /，也可用 MICRODUCK_ROOT）")
     args = parser.parse_args(argv)
     firstboot = Firstboot(root=args.root)
     return firstboot.run(detect_only=args.detect_imu_only, force=args.force,
-                         hotspot_only=args.hotspot_only)
+                         hotspot_only=args.hotspot_only, tls_only=args.tls_only)
 
 
 if __name__ == "__main__":

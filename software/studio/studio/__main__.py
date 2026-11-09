@@ -34,8 +34,10 @@ def parse(argv=None):
     ap = argparse.ArgumentParser(prog="studio", description="Microduck Studio")
     ap.add_argument("cmd", nargs="?", default="serve", choices=["serve", "set-password"])
     ap.add_argument("--listen", default=None, help="监听地址:端口（鸭子上默认 0.0.0.0:8000；台架模式默认 127.0.0.1:18080）")
-    ap.add_argument("--tls-cert", default=None, help="https 证书链（PEM）。配 --tls-key 一起用；手机收语音的前提")
-    ap.add_argument("--tls-key", default=None, help="https 私钥（PEM）；和 --tls-cert 必须成对出现")
+    ap.add_argument("--tls-cert", default=None,
+                    help="https 证书链（PEM）。配 --tls-key 一起用；手机收语音的前提。不给就自动用 /etc/microduck/tls/duck.crt")
+    ap.add_argument("--tls-key", default=None,
+                    help="https 私钥（PEM）；和 --tls-cert 必须成对出现。不给就自动用 /etc/microduck/tls/duck.key")
     ap.add_argument("--robotd", default=None, help="默认 unix:/run/robotd.sock；台架模式不连")
     ap.add_argument("--configd", default=None, help="默认 unix:/run/configd.sock；台架模式不连")
     ap.add_argument("--tof", default="unix:/run/tofd/tof.sock", help="ToF 只读服务地址；none 表示不连接")
@@ -115,6 +117,11 @@ def main(argv=None):
     host, _, port = a.listen.rpartition(":")
     scheme = "http"
     tls = {}
+    # 首次开机生成的局部 CA 证书放这儿；没显式给 --tls-* 就自动用它（镜像不用额外 drop-in）
+    tls_dir = "/etc/microduck/tls"
+    auto_cert, auto_key = os.path.join(tls_dir, "duck.crt"), os.path.join(tls_dir, "duck.key")
+    if not a.tls_cert and not a.tls_key and os.path.isfile(auto_cert) and os.path.isfile(auto_key):
+        a.tls_cert, a.tls_key = auto_cert, auto_key
     if bool(a.tls_cert) != bool(a.tls_key):
         raise SystemExit("--tls-cert 和 --tls-key 要给就两个都给")
     if a.tls_cert and a.tls_key:
@@ -123,6 +130,9 @@ def main(argv=None):
                 raise SystemExit(f"证书文件不存在：{path}")
         tls = {"ssl_certfile": a.tls_cert, "ssl_keyfile": a.tls_key}
         scheme = "https"
+    ca_cert = os.path.join(tls_dir, "ca.crt")
+    if not os.path.isfile(ca_cert):
+        ca_cert = None
     if a.dev_autologin and host != "127.0.0.1":
         raise SystemExit("--dev-autologin 只能配 --listen 127.0.0.1:端口 用")
     if a.dev_autologin and (os.path.exists("/run/robotd.sock") or a.robotd.startswith("unix:")):
@@ -153,7 +163,8 @@ def main(argv=None):
     battery = BatteryService(rd, log, state_dir, servo=servo, onboard=onboard)
     from .net import Net
     # 配网状态：电脑上开发 / 没装小助手时，连 WiFi 不关热点（日志里写一句）
-    net = Net(a.configd, a.net_state, state_dir, log, dev_mode=bool(a.dev_autologin), port=int(port))
+    net = Net(a.configd, a.net_state, state_dir, log, dev_mode=bool(a.dev_autologin), port=int(port),
+              scheme=scheme)
     # 总览下面「运行和调参」、设置页的模型（调参方案 T1–T3，只读）。台架模式不连主程序，就不开
     tune = None
     models = None
@@ -169,10 +180,13 @@ def main(argv=None):
                       camera_signaling_port=a.camera_signaling_port, camera_addr=a.camera_socket)
     app = build_app(auth=auth, robotd=rd, log=log, web_dir=a.web_dir, duck=duck, names=names, state_dir=state_dir,
                     dev_autologin=a.dev_autologin, servo=servo, imu=imu, pad=pad, onboard=onboard, battery=battery,
-                    tune=tune, net=net, commit=commit, models=models, sensors=sensors)
+                    tune=tune, net=net, commit=commit, models=models, sensors=sensors, ca_cert=ca_cert)
     log.info(f"网页地址：{scheme}://{host if host not in ('0.0.0.0', '') else '<鸭子 IP>'}:{port}/", cat="系统", dedup=False)
     if tls:
         log.info(f"已启用 https（手机可以在 {scheme}://<鸭子 IP>:{port}/m 用麦克风说话）", cat="系统", dedup=False)
+    else:
+        log.info("没有 https 证书：现在用 http 起，手机麦克风用不了（想开：sudo microduck-firstboot --tls-only）",
+                 cat="系统", dedup=False)
     if a.bench:
         import threading
         import webbrowser

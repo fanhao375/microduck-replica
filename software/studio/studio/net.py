@@ -88,14 +88,15 @@ def validate_connect(ssid, psk):
     return validate_ssid(ssid), validate_psk(psk)
 
 
-def addresses(host, ip, port=PORT):
+def addresses(host, ip, port=PORT, scheme="http"):
     """「这只鸭子的地址」：现在能用的几个，按设备说该用哪个（10-20 真机：开着 Clash 系统代理的 Windows 打不开 .local——
-    走了代理、502；不带点的主机名 Windows 用 LLMNR 问得到，代理按 <local> 绕过；IP 哪儿都能开）。"""
+    走了代理、502；不带点的主机名 Windows 用 LLMNR 问得到，代理按 <local> 绕过；IP 哪儿都能开）。
+    scheme 跟 Studio 实际监听一致：开了 --tls-cert 就是 https，不然页面会把 http 地址给人。"""
     out = []
     if ip:
-        out.append({"kind": "ip", "url": f"http://{ip}:{port}/", "note": "IP：哪台设备都能打开（换了路由器、重新分了地址会变）"})
-    out.append({"kind": "host", "url": f"http://{host}:{port}/", "note": "Windows 电脑用这个：开着代理也能打开"})
-    out.append({"kind": "local", "url": f"http://{host}.local:{port}/", "note": "苹果手机、Mac 用这个"})
+        out.append({"kind": "ip", "url": f"{scheme}://{ip}:{port}/", "note": "IP：哪台设备都能打开（换了路由器、重新分了地址会变）"})
+    out.append({"kind": "host", "url": f"{scheme}://{host}:{port}/", "note": "Windows 电脑用这个：开着代理也能打开"})
+    out.append({"kind": "local", "url": f"{scheme}://{host}.local:{port}/", "note": "苹果手机、Mac 用这个"})
     return out
 
 
@@ -144,11 +145,12 @@ class Net:
     """配网状态 + 操作。start() 起两个循环：2 秒读 net.json、5 秒问 configd net.status（只在文件在时）。"""
 
     def __init__(self, configd_addr, state_file=NET_STATE, state_dir=None, log=None, *, dev_mode=False,
-                 hostname=None, port=PORT):
+                 hostname=None, port=PORT, scheme="http"):
         self.configd_addr = configd_addr
         self.state_file = Path(state_file)
         self.hostname = hostname
         self.port = int(port)
+        self.scheme = "https" if scheme == "https" else "http"
         self.log = log
         self.dev_mode = bool(dev_mode)
         self.last_try_path = Path(state_dir) / LAST_TRY_NAME if state_dir else None
@@ -272,6 +274,7 @@ class Net:
         ip4 = st.get("ip4") if connected else None
         # 现在能用的 IP：热点模式就是鸭子热点的地址（10.42.0.1），否则是 configd net.status 的 ip4（没连上就没有）
         ip_now = (self.info.get("hotspot_ip") or HOTSPOT_IP) if mode == "hotspot" else ip4
+        hotspot_ip = self.info.get("hotspot_ip") or HOTSPOT_IP
         return {
             "known": True,
             "mode": mode,
@@ -280,10 +283,11 @@ class Net:
             "ip4": ip4,
             "ip_now": ip_now,
             "hostname": host,
-            "url_local": f"http://{host}.local:{self.port}/",
-            "url_host": f"http://{host}:{self.port}/",
-            "urls": addresses(host, ip_now, self.port),
-            "hotspot": {"ssid": self.info.get("hotspot_ssid"), "ip": self.info.get("hotspot_ip"),
+            "url_local": f"{self.scheme}://{host}.local:{self.port}/",
+            "url_host": f"{self.scheme}://{host}:{self.port}/",
+            "url_hotspot": f"{self.scheme}://{hotspot_ip}:{self.port}/m",
+            "urls": addresses(host, ip_now, self.port, self.scheme),
+            "hotspot": {"ssid": self.info.get("hotspot_ssid"), "ip": hotspot_ip,
                         "psk": self.info.get("hotspot_psk")},
             "last_try": last,
             "busy": self.busy,
@@ -296,6 +300,16 @@ class Net:
         if self.busy is not None:
             return False
         self.busy = "connecting"
+        return True
+
+    def begin_hotspot(self):
+        """占住热点开关：已有操作回 False，不知道配网状态时抛 Refused。
+        跟 begin_connect 分开，页面上「正在连 WiFi」和「正在开关热点」不会互相插队。"""
+        if not isinstance(self.info, dict):
+            raise Refused("不知道鸭子的配网状态：WiFi 功能现在用不了")
+        if self.busy is not None:
+            return False
+        self.busy = "hotspot"
         return True
 
     # ---- 扫描 ----
@@ -434,19 +448,59 @@ class Net:
         return {"ok": False, "reason": "other", "detail": _scrub(f"看不懂的回包：{r}", psk), "ip4": None}
 
     async def _hotspot_up(self, by):
+        """开热点；返回 (ok, 给页面的一句话)。连接失败回补热点和「户外模式」按钮共用。"""
         with log_cmd(self.log, "开热点", "小助手 wifi-hotspot-up", who=by) as t:
             try:
                 ok, result, detail = await asyncio.to_thread(helper.wifi_hotspot_up, by)
             except Exception as e:  # noqa: BLE001
-                t.fail(f"{type(e).__name__}: {e}", hint="连接窗口结束后 netcheck 也会自己开")
-                return
+                why = f"小助手没跑成：{type(e).__name__}: {e}"
+                t.fail(why, hint="连接窗口结束后 netcheck 也会自己开")
+                return False, why
             if result == "bad_verb":
-                t.fail("小助手太旧，不认 wifi-hotspot-up", hint="重装 deploy/install.sh；连接窗口结束后 netcheck 也会自己开")
-            elif ok:
+                why = "小助手太旧，不认 wifi-hotspot-up，重装 deploy/install.sh"
+                t.fail(why, hint="连接窗口结束后 netcheck 也会自己开")
+                return False, why
+            if ok:
                 t.ok({"result": result})
-            else:
-                t.fail(helper.friendly(result, detail, "wifi-hotspot-up"), raw=str(detail),
-                       hint="连接窗口结束后 netcheck 也会自己开")
+                return True, None
+            why = helper.friendly(result, detail, "wifi-hotspot-up")
+            t.fail(why, raw=str(detail), hint="连接窗口结束后 netcheck 也会自己开")
+            return False, why
+
+    async def hotspot_up(self, by):
+        """户外模式：马上开热点，不等 netcheck。调用前先 begin_hotspot()。返回 (ok, reason)。"""
+        try:
+            if not helper.available(refresh=True):
+                raise Refused("还没装小助手：先在鸭子上运行 deploy/install.sh，Studio 才能开热点")
+            return await self._hotspot_up(by)
+        finally:
+            self.busy = None
+
+    async def hotspot_down(self, by, ssid=None):
+        """户外模式：关热点，NetworkManager 会按已保存的配置连回家里的 WiFi。
+        调用前先 begin_hotspot()。ssid 只写给 netcheck 的连接窗口，可为空。返回 (ok, reason)。"""
+        try:
+            if not helper.available(refresh=True):
+                raise Refused("还没装小助手：先在鸭子上运行 deploy/install.sh，Studio 才能关热点")
+            with log_cmd(self.log, "关热点", "小助手 wifi-hotspot-down", who=by) as t:
+                try:
+                    ok, result, detail = await asyncio.to_thread(helper.wifi_hotspot_down, by, ssid)
+                except Exception as e:  # noqa: BLE001
+                    why = f"小助手没跑成：{type(e).__name__}: {e}"
+                    t.fail(why, hint="看小助手装没装、版本对不对")
+                    return False, why
+                if result == "bad_verb":
+                    why = "小助手太旧，不认 wifi-hotspot-down，重装 deploy/install.sh"
+                    t.fail(why, hint="重装 deploy/install.sh")
+                    return False, why
+                if ok:
+                    t.ok({"result": result})
+                    return True, None
+                why = helper.friendly(result, detail, "wifi-hotspot-down")
+                t.fail(why, raw=str(detail), hint="看 nmcli 是不是能看到 Microduck-Hotspot")
+                return False, why
+        finally:
+            self.busy = None
 
     async def _forget_bad_key(self, ssid, by):
         """密码错了：官方 connect 已经用这次的错密码替换了同名配置，先忘掉，免得 netcheck 以后还去试。"""

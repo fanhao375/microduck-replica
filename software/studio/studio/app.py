@@ -159,7 +159,8 @@ def _bus_give_back(by, servo=None):
 
 
 def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev_autologin=False, servo=None, imu=None, pad=None,
-              onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None):
+              onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None,
+              ca_cert=None):
     guard = OriginGuard(names=names)
     ai = AiService(state_dir)
     updates = updates or Updates()
@@ -1124,6 +1125,35 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     return
                 await send({"t": "result", "id": cid, "ok": True, "data": data})
                 return
+            if op in ("hotspot-up", "hotspot-down"):
+                try:
+                    started = net.begin_hotspot()
+                except NetRefused as e:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": str(e)})
+                    return
+                if not started:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": "正在处理 WiFi，等一下"})
+                    return
+                what = "开热点" if op == "hotspot-up" else "关热点"
+                # 先回执：切 AP 模式会把这台手机的连接断掉，回执要在断之前发出去
+                await send({"t": "result", "id": cid, "ok": True, "reason": f"正在{what}"})
+                ssid = args.get("ssid") if isinstance(args.get("ssid"), str) else None
+
+                async def do_hotspot():
+                    try:
+                        if op == "hotspot-up":
+                            ok, reason = await net.hotspot_up(by)
+                        else:
+                            ok, reason = await net.hotspot_down(by, ssid)
+                        if not ok:
+                            log.info(f"{what}没成：{reason}", cat="网络", step=op)
+                    except Exception as e:  # noqa: BLE001
+                        net.busy = None
+                        log.error(f"{what}的后台任务出错", cat="网络", raw=f"{type(e).__name__}: {e}", exc=True,
+                                  hint="这是 Studio 的问题，导出诊断包发出来")
+                # 跟 connect 一样：手机断线以后页面的处理函数结束，后台这一路还要跑完
+                net.connect_task = asyncio.create_task(do_hotspot())
+                return
             await send({"t": "result", "id": cid, "ok": False, "reason": f"不认识的配网操作：{op}"})
 
         async def run_onboard_op(cid, args):
@@ -1652,6 +1682,19 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                                                     "info": detail.get("info") or {}}},
                             headers=no_store)
 
+    # 手机装一次本地 CA 才会信任 https://10.42.0.1:8000 并放出麦克风。这个文件要在登录前就能下载。
+    async def api_ca(request):
+        no_store = {"Cache-Control": "no-store"}
+        if not ca_cert:
+            return Response("这块板子没有本地 CA", status_code=404, headers=no_store)
+        try:
+            body = await asyncio.to_thread(Path(ca_cert).read_bytes)
+        except OSError:
+            return Response("这块板子没有本地 CA", status_code=404, headers=no_store)
+        return Response(body, media_type="application/x-x509-ca-cert",
+                        headers={"Content-Disposition": 'attachment; filename="Microduck-Local-CA.crt"',
+                                 **no_store})
+
     routes = [
         Route("/healthz", healthz),
         Route("/api/session", api_session),
@@ -1672,7 +1715,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         Route("/api/models/import", api_model_import, methods=["POST"]),
         Route("/model/meshes.bin", meshes),
         Route("/m", lambda request: RedirectResponse("/m.html", status_code=307)),
-        # 手机走 https 之后才用得上：摄像头信令同域转发、手机录音转文字
+        # 手机走 https 之后才用得上：本地 CA 下载、摄像头信令同域转发、手机录音转文字
+        Route("/ca.crt", api_ca),
         Route("/api/asr", api_asr, methods=["POST"]),
         WebSocketRoute("/media-ws", media_ws_proxy),
         WebSocketRoute("/ws", ws_endpoint),

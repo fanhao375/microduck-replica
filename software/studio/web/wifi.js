@@ -96,9 +96,10 @@ function minutesSince(at) {
 // 不带点的 duck-xxxx Windows 用 LLMNR 问得到，代理按 <local> 绕过；IP 哪儿都能开）
 export function openLines(net) {
   const host = net.hostname || 'duck-xxxx';
+  const proto = typeof location !== 'undefined' && location.protocol === 'https:' ? 'https' : 'http';
   return [
-    `Windows 电脑：${net.url_host || `http://${host}:8000/`}（开着代理也能打开）`,
-    `苹果手机、Mac：${net.url_local || `http://${host}.local:8000/`}`,
+    `Windows 电脑：${net.url_host || `${proto}://${host}:8000/`}（开着代理也能打开）`,
+    `苹果手机、Mac：${net.url_local || `${proto}://${host}.local:8000/`}`,
     `安卓手机，或者上面都打不开：去路由器的设备列表找 ${host}，用它的 IP 打开`,
     '电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连',
   ];
@@ -110,10 +111,12 @@ export const FIND_GIVEUP_MS = 3 * 60 * 1000; // 最多找 3 分钟
 export const FIND_PROBE_MS = 6000;           // 一次探测最多等这么久（连不上的地址可能挂几十秒才报错）
 export const FIND_SILENT_MS = 5000;          // 这么久没收到 Studio 的任何消息也算断了（WebSocket 有时不马上报断）
 
-/** 要找的地址：http://<hostname>:<端口>/ 和 http://<hostname>.local:<端口>/（net.json 的 hostname，端口跟 --listen 一致）。 */
+/** 要找的地址：<proto>://<hostname>:<端口>/ 和 <proto>://<hostname>.local:<端口>/（net.json 的 hostname，端口跟 --listen 一致）。
+ *  proto 跟当前页面一致：Studio 开了 https 就不要再探 http（80/8000 上没人应答）。 */
 export function findUrls(net) {
   const host = (net && net.hostname) || 'duck-xxxx';
-  const urls = [(net && net.url_host) || `http://${host}:8000/`, (net && net.url_local) || `http://${host}.local:8000/`];
+  const proto = typeof location !== 'undefined' && location.protocol === 'https:' ? 'https' : 'http';
+  const urls = [(net && net.url_host) || `${proto}://${host}:8000/`, (net && net.url_local) || `${proto}://${host}.local:8000/`];
   return urls.filter((u, i) => urls.indexOf(u) === i);
 }
 
