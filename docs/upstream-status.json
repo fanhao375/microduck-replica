@@ -6903,6 +6903,179 @@
           },
           "priority": "Medium pairing reference where an NFC reader and supported Bluetooth controller are available. Low priority for the current replica image.",
           "replica_integration": "Source and release metadata reviewed. Not integrated into the replica."
+        },
+        {
+          "tag": "daemon-dev-setup-code-from-eeprom",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-setup-code-from-eeprom",
+          "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+          "version": "daemon 0.18.9-dev.1677.ac535e9 (setup-code-from-eeprom)",
+          "published_at": "2026-11-10T11:28:03Z",
+          "published_at_jst": "2026-11-10T20:28:03+09:00",
+          "prerelease": true,
+          "source_version": "0.18.9",
+          "version_family": "0.18.9",
+          "api_version": 51,
+          "development_api_version": 51,
+          "asset_inventory": [
+            {
+              "name": "0.18.9-dev.1677.ac535e9.manifest.json",
+              "size": 386,
+              "digest": "sha256:928114b007b6d1a37b2b4e8fd5f8c97b1ae3de6300657760c4e3410d7d67d945"
+            },
+            {
+              "name": "0.18.9-dev.1677.ac535e9.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:174f67abda95d4cec4125df960b998644df2ca084bacb884df680c54e3b4cd4c"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1677.ac535e9.tar.zst",
+              "size": 17508128,
+              "digest": "sha256:2fa4a86e60cdbe5452d272805e097679c748c857c379ea8404a95f27051e781f"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1677.ac535e9.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:3f6622a9ea8a79e368483874adc618f988d7fb814b33ad4142e5231d143020aa"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674214,
+              "digest": "sha256:37dc3bed43fcd282657a63e385a9e98c4850c86135c1ff688c6f425ac6a2dbc0"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
+              "size": 1593975,
+              "digest": "sha256:4f8a140c0724094fa8d93da8af2077785d552091cecc522069e6c0dea4aaa777"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809052,
+              "digest": "sha256:d51db10bd134ccb147b887ae0e4a533e5f545ba65c327b3aaedd0fc1210679f9"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3035786,
+              "digest": "sha256:da6d1c9cb22d5d8428a3f81b4cd005ee1825cf8609a688e2b2f958972d684de4"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
+              "size": 1512004,
+              "digest": "sha256:a314d8afb06a54d96f0ab3c7df800e6e267adf2325ec856db77cf1f37e8f08ae"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:7bcc6276106d8e7676c21e57ca93516f9523674a018fcc450e8407a6d34e5092"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 360,
+              "digest": "sha256:417ced4e5931a8ec323bb1ff3e95288f2dc9c2b009a927029b91117867d7af29"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1504999,
+              "digest": "sha256:53195b8e648270dbf4b491e03debf5e28e16ba01cb74782f800e503081b9e70a"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601620,
+              "digest": "sha256:d8003d90b92404f576c38b1783a42b912e2ad8704bb84ee8700bccd9c6c0f7c3"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1383517,
+              "digest": "sha256:645b585852fa590274977c5d97eab1c886a68a4e85da90bbfef87ea88f76dc76"
+            },
+            {
+              "name": "manifest.json",
+              "size": 580,
+              "digest": "sha256:32537f3d8f2f9d2f0c04cfb0980f6c811cc648aa982a766eaebb9225a5b5ca70"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:e157d83a3f3687a27f006615878a0ae21d6f0d96f746f0d8c96a5ff3e6b38708"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-10T11:47:51.895254+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d2e8d7b880f94ee4cc718e707bf0917225fafb09...ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+          "comparison_to_recorded_base": {
+            "from_sha": "d2e8d7b880f94ee4cc718e707bf0917225fafb09",
+            "to_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+            "merge_base_sha": "d2e8d7b880f94ee4cc718e707bf0917225fafb09",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d2e8d7b880f94ee4cc718e707bf0917225fafb09...ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+            "commit_count": 3,
+            "file_count": 13
+          },
+          "classification": "Open proposal targeting the #556 draft branch. Independent development build.",
+          "pull_request_url": "https://github.com/pollen-robotics/microduck/pull/563",
+          "parent_pull_request": 556,
+          "priority": "High access and credential lifecycle review before considering adoption.",
+          "replica_integration": "not_integrated",
+          "review": {
+            "change": "Open #563 targets the secure media/BLE draft #556. It adds EEPROM-backed setup codes and automatic credential import. Daemon IPC stays at the parent branch API51.",
+            "layout": "Beta and FaceBoardV1 ID EEPROM on I2C1 at 0x50. Bytes 0–17 remain the label serial; byte 18 is a colon; the md1 code starts at 19 and ends at NUL or 0xFF. The production QR includes the label serial prefix. ASCII format with no checksum.",
+            "key_precedence": "Root export prefers an EEPROM code whose id matches the SoC-derived first name. With an absent or empty code area it may read the developer file. A malformed, unreadable or wrong-id EEPROM is an error and blocks that fallback. install refuses both a populated and an unreadable EEPROM.",
+            "boot_and_recovery": "configd ExecStartPre runs export with failures ignored for configd startup. Export writes the root-only key under /run/credstore or removes a stale key on a no-code or invalid-code outcome when removal succeeds. On the default unit path, btd uses the PIN when no key is imported. A valid label serial continues to supply the existing label PIN.",
+            "gateway": "btd and duck-gateway are ordered after configd and import the credential. Explicit key-file overrides remain. With the imported key the gateway can listen on 9443 and forward authenticated sessions to loopback 8443. Without a key it exits without listening. The gateway adds an Install section for daemon postinstall enablement. Yocto integration remains separate.",
+            "validation_boundary": "Author reports tests and clippy for the five named crates, explicitly no board run. Source definitions cover decoding, wrong id and QR layout. Fixed-head CI coverage, board job and publish are successful. The general check job was still in progress at the captured observation. No production provisioning, app compatibility with the prefixed QR, reflash, rollback or replica acceptance verified.",
+            "fixed_sources": {
+              "btd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/btd/src/main.rs",
+              "btd/systemd/btd.service": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/btd/systemd/btd.service",
+              "configd/src/identity.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/configd/src/identity.rs",
+              "configd/systemd/configd.service": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/configd/systemd/configd.service",
+              "docs/design/app-path-design.md": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/docs/design/app-path-design.md",
+              "docs/design/factory-provisioning.md": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/docs/design/factory-provisioning.md",
+              "docs/robot/authenticated-app-mvp.md": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/docs/robot/authenticated-app-mvp.md",
+              "duck-gateway/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/duck-gateway/src/main.rs",
+              "duck-gateway/systemd/duck-gateway.service": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/duck-gateway/systemd/duck-gateway.service",
+              "robotctl/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/robotctl/src/main.rs",
+              "robotctl/src/setup_code.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/robotctl/src/setup_code.rs",
+              "robotd-params/src/label.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/robotd-params/src/label.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/robotd-params/src/lib.rs",
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/duck-ipc-proto/src/lib.rs",
+              "robotd-params/src/serial.rs": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/robotd-params/src/serial.rs",
+              "scripts/install.sh": "https://github.com/pollen-robotics/microduck/blob/ac535e98e88cf3195227a0f8b9cabf9ab398a099/scripts/install.sh"
+            },
+            "upstream_ci_at_observation": {
+              "publish": {
+                "html_url": "https://github.com/pollen-robotics/microduck/actions/runs/42807031937/job/129800890893",
+                "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              "coverage": {
+                "html_url": "https://github.com/pollen-robotics/microduck/actions/runs/42807039504/job/129798820715",
+                "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              "check": {
+                "html_url": "https://github.com/pollen-robotics/microduck/actions/runs/42807039504/job/129798820650",
+                "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+                "status": "in_progress",
+                "conclusion": null
+              },
+              "board": {
+                "html_url": "https://github.com/pollen-robotics/microduck/actions/runs/42807039504/job/129798820207",
+                "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+                "status": "completed",
+                "conclusion": "success"
+              }
+            }
+          },
+          "impact": {
+            "HD1910": "High provisioning review before any adoption. Verify replica board identity, EEPROM and systemd credential support, recovery and app pairing. No servo driver change.",
+            "camera": "Authentication changes how the local camera/control gateway becomes available. No sensor, calibration or encoder change.",
+            "ToF": "No ToF or obstacle algorithm change.",
+            "model_management": "No model-management change.",
+            "training": "No new training or weights.",
+            "motion": "Authentication affects control reachability and recovery, with no new motion policy or mapping.",
+            "sound": "No sound pipeline or asset change."
+          }
         }
       ],
       "pending_pull_requests": [
@@ -13566,6 +13739,39 @@
           "merged_at_jst": "2026-11-10T16:45:28+09:00",
           "all_feature_blob_ids_match_actual_merge_tree": true,
           "merged_source_api_version": 53
+        },
+        {
+          "number": 563,
+          "title": "Setup code from the ID EEPROM, and secure mode whenever a robot has one",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-10T10:59:01Z",
+          "updated_at": "2026-11-10T11:45:57Z",
+          "merged_at": null,
+          "merge_commit_sha": "45789dd1cd39640d504a53a64ada9bd57278b6ff",
+          "url": "https://github.com/pollen-robotics/microduck/pull/563",
+          "head_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+          "base_sha": "d2e8d7b880f94ee4cc718e707bf0917225fafb09",
+          "base_branch": "codex/secure-media-and-ble-defaults",
+          "actual_merge_base": "d2e8d7b880f94ee4cc718e707bf0917225fafb09",
+          "created_at_jst": "2026-11-10T19:59:01+09:00",
+          "updated_at_jst": "2026-11-10T20:45:57+09:00",
+          "source_version": "0.18.9",
+          "api_version": 51,
+          "commit_count": 3,
+          "changed_file_count": 13,
+          "classification": "Open proposal targeting the #556 draft branch. Independent development build.",
+          "parent_pull_request": 556,
+          "development_tag": "daemon-dev-setup-code-from-eeprom",
+          "development_release_url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-setup-code-from-eeprom",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d2e8d7b880f94ee4cc718e707bf0917225fafb09...ac535e98e88cf3195227a0f8b9cabf9ab398a099",
+          "review": {
+            "change": "Open #563 targets the secure media/BLE draft #556. It adds EEPROM-backed setup codes and automatic credential import. Daemon IPC stays at the parent branch API51.",
+            "shared_development_review_tag": "daemon-dev-setup-code-from-eeprom",
+            "shared_development_review_sha": "ac535e98e88cf3195227a0f8b9cabf9ab398a099"
+          },
+          "priority": "High access and credential lifecycle review before considering adoption.",
+          "replica_integration": "not_integrated"
         }
       ],
       "previous_stable_releases": [
@@ -20072,27 +20278,27 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-10T08:40:11.875976+00:00",
+  "checked_at_utc": "2026-11-10T11:46:52.461265+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-10T06:37:23.060236+00:00",
-    "source_snapshot_utc": "2026-11-10T08:40:11.875976+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-10T08:40:54.770103+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-10T08:40:11.875976+00:00",
+    "source_snapshot_utc": "2026-11-10T11:46:52.461265+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-10T11:47:51.895254+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
+    "new_pull_requests": {
       "pollen-robotics/microduck": [
-        562
+        563
       ]
     },
-    "previous_tracked_prs_merged": true,
-    "new_development_releases": [],
-    "moved_development_tags": [
-      "daemon-dev-main"
+    "updated_pull_requests": {},
+    "previous_tracked_prs_merged": false,
+    "new_development_releases": [
+      "daemon-dev-setup-code-from-eeprom"
     ],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -20102,23 +20308,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Main dev1674 includes #562 and retires the matching dev1672 tag. Training develop adds the v7 yaw-remap recipe and bench. Official Hub v9 velstand and formal daemon 0.18.8 remain unchanged.",
-    "project_github_latest_target_changed": false,
-    "default_branch_change_repositories": [
-      "pollen-robotics/microduck",
-      "pollen-robotics/microduck_rl"
-    ],
-    "merged_tracked_prs_into_default_branch": {
-      "pollen-robotics/microduck": [
-        562
-      ]
-    },
-    "retired_development_tags": [
-      "daemon-dev-home-flashlight-on-release"
-    ],
-    "experimental_model_metadata_status": {
-      "apirrone/velstand_v7_yaw_remap": 401
-    }
+    "notes": "Open #563 and dev1677 add EEPROM-backed setup codes to a branch based on #556. The parent draft, main dev1674, official 0.18.8 and replica records retain their baselines.",
+    "project_github_latest_target_changed": false
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -22058,6 +22249,53 @@
       "image_built_or_published_by_tracker": false,
       "notes": "Open #449 syncs the reviewed main and renumbers its phase skill extension to API54. The base-relative phase logic is unchanged. Official 0.18.8, main dev1673 and replica baselines are unchanged.",
       "project_github_latest_target_changed": false
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-10T06:37:23.060236+00:00",
+      "source_snapshot_utc": "2026-11-10T08:40:11.875976+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-10T08:40:54.770103+00:00",
+      "default_branch_changes": true,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          562
+        ]
+      },
+      "previous_tracked_prs_merged": true,
+      "new_development_releases": [],
+      "moved_development_tags": [
+        "daemon-dev-main"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Main dev1674 includes #562 and retires the matching dev1672 tag. Training develop adds the v7 yaw-remap recipe and bench. Official Hub v9 velstand and formal daemon 0.18.8 remain unchanged.",
+      "project_github_latest_target_changed": false,
+      "default_branch_change_repositories": [
+        "pollen-robotics/microduck",
+        "pollen-robotics/microduck_rl"
+      ],
+      "merged_tracked_prs_into_default_branch": {
+        "pollen-robotics/microduck": [
+          562
+        ]
+      },
+      "retired_development_tags": [
+        "daemon-dev-home-flashlight-on-release"
+      ],
+      "experimental_model_metadata_status": {
+        "apirrone/velstand_v7_yaw_remap": 401
+      }
     }
   ],
   "replica_public_image": {
