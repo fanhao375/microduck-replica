@@ -16,12 +16,13 @@ import uuid
 
 PAYLOAD_SCHEMA='microduck-controller-payload/1'
 SCHEMA='microduck-controller-update/1'
-ROBOTD_SHA256='e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'
-ROBOTD_SIZE=7275792
-ROBOTD_SOURCE='eecac1878136d3188370a5f6460b7d0521cf845d'
-ROBOTD_BUILD='replica-imu-verify-control.48'
+ROBOTD_SHA256='f8c720a3acf2eb5e6c844ba041d79d7312f49a50e99c04182c5ec0dc4bb9ac9e'
+ROBOTD_SIZE=7065952
+ROBOTD_SOURCE='56046c5aa10be4de12d4389ae0463e4f129df940'
+ROBOTD_BUILD='replica-imu-home-control.50'
 LEGACY_ROBOTD_SHA256='725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00'
-PREDECESSOR_PROCEDURE='已完成的 .47 配套驱动请先明确确认“恢复旧配套驱动”，再安装本版；操作说明：docs/native-update-20261104.md'
+VERIFY_ROBOTD_SHA256='e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'
+PREDECESSOR_PROCEDURE='已完成的 {} 配套驱动请先明确确认“恢复旧配套驱动”，再安装本版；操作说明：docs/native-update-20261104.md'
 # Frozen from two independent, byte-identical builds and actual QEMU status.
 PADD_SHA256='dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec'
 PADD_SIZE=3522648
@@ -61,7 +62,7 @@ def bundle_manifest(version,robotd_bytes,padd_bytes):
         raise ValueError('invalid software version')
     return {'schema':PAYLOAD_SCHEMA,'architecture':'aarch64','software_version':version,
         'components':{
-            'robotd':{'sha256':sha(robotd_bytes),'size':len(robotd_bytes),'source_revision':ROBOTD_SOURCE,'build':ROBOTD_BUILD,'ipc_api':43},
+            'robotd':{'sha256':sha(robotd_bytes),'size':len(robotd_bytes),'source_revision':ROBOTD_SOURCE,'build':ROBOTD_BUILD,'ipc_api':44},
             'padd':{'sha256':sha(padd_bytes),'size':len(padd_bytes),'source_revision':PADD_SOURCE,'mapping_api':1,
                     'supported_installed_sha256':list(SUPPORTED_PADD_SHA256)}},
         'units':{path:{'sha256':sha(body),'mode':0o644} for path,body in UNITS.items()},
@@ -262,7 +263,7 @@ class BundleTransaction:
                     or type(m.get('active')) is not bool or not re.fullmatch('[0-9a-f]{32}',m.get('transaction_id',''))
                     or m.get('mode')!='motion' or [r['path'] for r in m['records']]!=list(self.paths())
                     or set(m['services'])!=set(SERVICES) or any(s not in ('active','inactive','failed','absent') for s in m['services'].values())
-                    or m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256) or m.get('target_padd')!=PADD_SHA256
+                    or m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256,VERIFY_ROBOTD_SHA256) or m.get('target_padd')!=PADD_SHA256
                     or type(m.get('restore_pending')) is not bool or type(m.get('cleanup_pending')) is not bool
                     or type(m.get('running_verified')) is not bool or m.get('bundle_schema')!=PAYLOAD_SCHEMA
                     or m.get('targets')!=self.targets(m.get('target_robotd'))
@@ -305,8 +306,11 @@ class BundleTransaction:
         except (OSError,ValueError,TypeError,KeyError,AttributeError):
             self.refuse('伴随升级记录或备份无效，保留保护并恢复','controller_tampered')
 
+    def predecessor_build(self, m):
+        return '.48' if m['target_robotd']==VERIFY_ROBOTD_SHA256 else '.47'
+
     def legacy_terminal(self,m,prepared=None):
-        # Only the published .47 vector shares these exact service/voice bytes.
+        # The published .47 and .48 vectors share these exact service/voice bytes.
         # Unmarked unfinished recovery remains with the original signed updater.
         if m['old_sha256'] not in self.legacy.SUPPORTED_SHA256:raise ValueError('unknown predecessor preimage')
         if 'restore_origin_sha256' in m or 'restore_updater_sha256' in m:
@@ -324,7 +328,7 @@ class BundleTransaction:
         if (m['active'] or m['restore_pending'] or m['cleanup_pending']
                 or m['phase'] not in ('completed','restored') or not m['running_verified']
                 or (not historical and (self.base.has_exclusion() or self.present(PREPARED)))):
-            self.refuse('上一版 .47 配套驱动尚未完成：请使用该版已签名软件包的更新器恢复后再更新',
+            self.refuse(f'上一版 {self.predecessor_build(m)} 配套驱动尚未完成：请使用该版已签名软件包的更新器恢复后再更新',
                         'controller_recovery_required')
         if m['phase']=='completed':
             if not self.vector_current(m):raise ValueError('predecessor completed vector changed')
@@ -334,7 +338,7 @@ class BundleTransaction:
     def owned_restore_origin(self,m):
         raw=self.read(STATE+'/'+m['transaction_id']+'/restore-origin.json',65536)
         origin=json.loads(raw)
-        if (m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256)
+        if (m.get('target_robotd') not in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256,VERIFY_ROBOTD_SHA256)
                 or m.get('restore_updater_sha256')!=ROBOTD_SHA256 or m.get('restore_origin_sha256')!=sha(raw)
                 or m['phase'] not in ('restoring','recovery_required','restored')
                 or (m['phase']!='restored' and not m['active'])
@@ -590,7 +594,7 @@ class BundleTransaction:
         current=json.loads(self.read(self.legacy.PROTECTED,65536)) if self.present(self.legacy.PROTECTED) else None
         lost=current is None and self.ctx.boot_id()!=m.get('baseline_boot_id',m['original_process']['boot_id'])
         allowed=[m.get('protected'),m.get('protected_next')]
-        if m.get('target_robotd') in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256) and m.get('restore_updater_sha256')==ROBOTD_SHA256:
+        if m.get('target_robotd') in (ROBOTD_SHA256,LEGACY_ROBOTD_SHA256,VERIFY_ROBOTD_SHA256) and m.get('restore_updater_sha256')==ROBOTD_SHA256:
             allowed.append(self.owned_restore_origin(m).get('protected_next'))
         if current not in allowed and not lost:
             self.refuse('软件升级器的 native 进程基线被外部改变，保留现场')
@@ -816,7 +820,7 @@ class BundleTransaction:
             installed_sha256=robot_hash,target_sha256=ROBOTD_SHA256,
             components={'robotd':{'installed_sha256':robot_hash,'target_sha256':ROBOTD_SHA256},
                         'padd':{'installed_sha256':pad_hash,'target_sha256':PADD_SHA256}})
-        if m and m['target_robotd']!=ROBOTD_SHA256 and m['phase']=='completed':detail['reason']=PREDECESSOR_PROCEDURE
+        if m and m['target_robotd']!=ROBOTD_SHA256 and m['phase']=='completed':detail['reason']=PREDECESSOR_PROCEDURE.format(self.predecessor_build(m))
         return self.op.finish(0,'controller_status',detail=detail)
 
     def run(self,action):
@@ -860,7 +864,7 @@ class BundleTransaction:
                     self.owned(m)
                     if not self.vector_current(m):self.refuse('已完成的组件向量已改变，不能当作重复安装成功')
                     self.target_health(m)
-                    if m['target_robotd']!=ROBOTD_SHA256:self.refuse(PREDECESSOR_PROCEDURE,'controller_predecessor_restore_required')
+                    if m['target_robotd']!=ROBOTD_SHA256:self.refuse(PREDECESSOR_PROCEDURE.format(self.predecessor_build(m)),'controller_predecessor_restore_required')
                     return self.status()
             if m is None and self.factory_current():return self.status()
             payload=self.payload();m=self.prepare(payload,m)

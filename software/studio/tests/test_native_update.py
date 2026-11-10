@@ -29,11 +29,12 @@ def elf(tail):
 OLD, PREVIOUS, STARTUP, PUBLISHED, NEW = (elf(b'old'), elf(b'previous-reviewed'),
                               elf(b'startup-status-reviewed'), elf(b'published47'), elf(b'new'))
 SHA = lambda data: hashlib.sha256(data).hexdigest()
-APPROVED_SHA256 = 'e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0'
+APPROVED_SHA256 = 'f8c720a3acf2eb5e6c844ba041d79d7312f49a50e99c04182c5ec0dc4bb9ac9e'
 PREDECESSOR_SHA256 = ('edf182edb7bf11aeeeedfdab98170ab2ec48a9ec18417f9b68c744b0a60c6d16',
                       'febf44e2e5d4e573f4513f25a1ae6480b976c3988dd3d5e7cdfcf84d2a2d5063',
                       '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422',
-                      '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00')
+                      '725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00',
+                      'e5ff7fb429fd0dfb762eb4da1bcc5a26b48b6d2dfdae4bb4904213e37e022ed0')
 TARGET = '/opt/robot/feetech-ft5-r5/robotd'
 ARGS = [TARGET, '--socket', '/run/robotd.sock', '--params', H.IMU_CONFIG, '--port', '/dev/ttyS2']
 STATE = '/var/lib/microduck-helper/native-update'
@@ -43,7 +44,7 @@ FILES = (H.IMU_CONFIG, H.IMU_CONFIG_SAVED, H.CALIB, H.CALIB_SAVED)
 
 class NativeReleaseTest(unittest.TestCase):
     def artifact(self):
-        relative = 'chengshenzhilu/Robot/Microduck/artifacts/image-release-20261104/robotd-control48-aarch64'
+        relative = 'chengshenzhilu/Robot/Microduck/artifacts/image-rc-20261110/robotd-control50-aarch64'
         for root in ('F:/', '/mnt/f/'):
             path = Path(root + relative)
             if path.exists(): return path.read_bytes()
@@ -51,10 +52,10 @@ class NativeReleaseTest(unittest.TestCase):
 
     def test_reviewed_identity_and_supported_predecessors_are_exact(self):
         self.assertEqual(N.REVIEWED_SHA256, APPROVED_SHA256)
-        self.assertEqual(N.REVIEWED_SIZE, 7275792)
-        self.assertEqual(N.SOURCE, 'eecac1878136d3188370a5f6460b7d0521cf845d')
-        self.assertEqual(N.BUILD, 'replica-imu-verify-control.48')
-        self.assertEqual(N.IPC_API, 43)
+        self.assertEqual(N.REVIEWED_SIZE, 7065952)
+        self.assertEqual(N.SOURCE, '56046c5aa10be4de12d4389ae0463e4f129df940')
+        self.assertEqual(N.BUILD, 'replica-imu-home-control.50')
+        self.assertEqual(N.IPC_API, 44)
         self.assertEqual(N.SUPPORTED_SHA256, PREDECESSOR_SHA256)
         self.assertEqual((N.LEGACY_OLD_SHA256, N.LEGACY_TARGET_SHA256), PREDECESSOR_SHA256[:2])
         self.assertNotIn(N.REVIEWED_SHA256, N.SUPPORTED_SHA256)
@@ -63,24 +64,25 @@ class NativeReleaseTest(unittest.TestCase):
         baseline, previous = PREDECESSOR_SHA256[:2]
         startup = '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422'
         self.assertEqual(N.LEGACY_STARTUP_SHA256, startup)
-        published=PREDECESSOR_SHA256[3]
+        published, verify = PREDECESSOR_SHA256[3:]
         self.assertEqual(N.LEGACY_PUBLISHED_SHA256,published)
-        self.assertEqual(N.PREDECESSOR_IPC_API, {baseline: 40, previous: 40, startup: 41,published:42})
+        self.assertEqual(N.PREDECESSOR_IPC_API, {baseline: 40, previous: 40, startup: 41,published:42,verify:43})
         self.assertEqual(N.LEGACY_TRANSACTIONS, {(baseline, previous): '.45',
                                                (baseline, startup): '.46', (previous, startup): '.46',
-                                               **{(old,published):'.47' for old in (baseline,previous,startup)}})
+                                               **{(old,published):'.47' for old in (baseline,previous,startup)},
+                                               **{(old,verify):'.48' for old in (baseline,previous,startup,published)}})
 
     def test_actual_approved_artifact_matches_exact_manifest(self):
         data = self.artifact()
         self.assertTrue(N.is_aarch64(data))
-        self.assertEqual(len(data), 7275792)
+        self.assertEqual(len(data), 7065952)
         self.assertEqual(SHA(data), APPROVED_SHA256)
         self.assertEqual(N.native_manifest('2026.10.30', data), {
             'schema': 'microduck-native-payload/1', 'architecture': 'aarch64',
             'software_version': '2026.10.30',
-            'source_revision': 'eecac1878136d3188370a5f6460b7d0521cf845d',
-            'build': 'replica-imu-verify-control.48', 'official_version': '0.15.1',
-            'model_api': 2, 'ipc_api': 43, 'size': 7275792, 'sha256': APPROVED_SHA256,
+            'source_revision': '56046c5aa10be4de12d4389ae0463e4f129df940',
+            'build': 'replica-imu-home-control.50', 'official_version': '0.15.1',
+            'model_api': 2, 'ipc_api': 44, 'size': 7065952, 'sha256': APPROVED_SHA256,
             'supported_installed_sha256': list(PREDECESSOR_SHA256)})
 
     def test_actual_approved_payload_is_accepted(self):
@@ -123,7 +125,7 @@ class NativeWorld(RedoWorld):
         self.fail = None
         self.hook = None
         self.absent_units=set()
-        self.hello_apis = {OLD: 40, PREVIOUS: 40, STARTUP: 41, PUBLISHED: 42, NEW: 43}
+        self.hello_apis = {OLD: 40, PREVIOUS: 40, STARTUP: 41, PUBLISHED: 42, NEW: 44}
         self.hello_seen = []
         self.units['duck-echo'] = 'active'
         self.exec_override = ' '.join(ARGS)
@@ -193,7 +195,7 @@ class NativeWorld(RedoWorld):
             return 0, '', ''
         if argv == [TARGET, 'deployment-info']:
             data=self.path(TARGET).read_bytes()
-            build = ('replica-imu-verify-control.48' if data==NEW else
+            build = ('replica-imu-home-control.50' if data==NEW else
                      '0791fcd-feetech-qinmo-control'+{OLD: '.44', PREVIOUS: '.45', STARTUP: '.46', PUBLISHED: '.47'}[data])
             return 0, json.dumps({'build': build, 'model_api': 2, 'official_version': '0.15.1'}), ''
         return super().run(argv)
@@ -234,7 +236,7 @@ class NativeTest(unittest.TestCase):
         self.ctx = NativeCtx(self.w, b'{}')
         self.op = H.Op(self.ctx, 'robotd-update')
         self.pins = mock.patch.multiple(N, REVIEWED_SHA256=SHA(NEW), REVIEWED_SIZE=len(NEW),
-            BUILD='replica-imu-verify-control.48', IPC_API=43,
+            BUILD='replica-imu-home-control.50', IPC_API=44,
             SUPPORTED_SHA256=(SHA(OLD), SHA(PREVIOUS), SHA(STARTUP), SHA(PUBLISHED)),
             LEGACY_OLD_SHA256=SHA(OLD), LEGACY_TARGET_SHA256=SHA(PREVIOUS), LEGACY_STARTUP_SHA256=SHA(STARTUP),
             PREDECESSOR_IPC_API={SHA(OLD): 40, SHA(PREVIOUS): 40, SHA(STARTUP): 41, SHA(PUBLISHED):42},
@@ -286,7 +288,7 @@ class NativeTest(unittest.TestCase):
         self.assertEqual(self.w.live_mode, 'motion')
         self.assertTrue(all(self.w.path(p).read_bytes()==v for p,v in self.saved.items()))
         self.assertEqual(self.w.units['padd'], 'active')
-        self.assertEqual(self.w.hello_seen, [(NEW, 'commissioning', 43), (NEW, 'motion', 43)])
+        self.assertEqual(self.w.hello_seen, [(NEW, 'commissioning', 44), (NEW, 'motion', 44)])
 
     def test_previous_reviewed_binary_can_upgrade_to_current(self):
         self.w.path(TARGET).write_bytes(PREVIOUS)
@@ -321,12 +323,12 @@ class NativeTest(unittest.TestCase):
         self.assertEqual(self.journal()['phase'], 'rolled_back')
         self.assertEqual(self.w.hello_seen[-2:], [(PREVIOUS, 'commissioning', 40), (PREVIOUS, 'motion', 40)])
 
-    def test_startup46_binary_can_upgrade_to_current_api43(self):
+    def test_startup46_binary_can_upgrade_to_current_api44(self):
         self.w.path(TARGET).write_bytes(STARTUP)
         self.w.publish_process()
         self.assertEqual(self.update(), 0)
         self.assertEqual(self.journal()['old_sha256'], SHA(STARTUP))
-        self.assertEqual(self.w.hello_seen, [(NEW, 'commissioning', 43), (NEW, 'motion', 43)])
+        self.assertEqual(self.w.hello_seen, [(NEW, 'commissioning', 44), (NEW, 'motion', 44)])
 
     def test_published47_binary_upgrade_and_rollback_require_exact_api42(self):
         self.w.path(TARGET).write_bytes(PUBLISHED);self.w.publish_process()
@@ -335,7 +337,7 @@ class NativeTest(unittest.TestCase):
         self.assertEqual(self.journal()['phase'],'rolled_back')
         self.assertEqual(self.w.hello_seen[-2:],[(PUBLISHED,'commissioning',42),(PUBLISHED,'motion',42)])
 
-    def test_api42_target_cannot_be_mistaken_for_api43(self):
+    def test_api42_target_cannot_be_mistaken_for_api44(self):
         self.w.hello_apis[NEW]=42
         self.assertEqual(self.update(),5)
         self.assertEqual(self.journal()['phase'],'rolled_back')

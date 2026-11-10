@@ -21,11 +21,11 @@ SHA=lambda data:hashlib.sha256(data).hexdigest()
 
 
 class PublishedContract(unittest.TestCase):
-    def test_pair_has_one_robotd_identity_and_api43(self):
+    def test_pair_has_one_robotd_identity_and_api44(self):
         self.assertEqual((C.ROBOTD_SHA256,C.ROBOTD_SIZE,C.ROBOTD_SOURCE,C.ROBOTD_BUILD),
                          (legacy.N.REVIEWED_SHA256,legacy.N.REVIEWED_SIZE,legacy.N.SOURCE,legacy.N.BUILD))
-        self.assertEqual(legacy.N.IPC_API,43)
-        self.assertEqual(C.bundle_manifest('2026.11.4',b'',b'')['components']['robotd']['ipc_api'],43)
+        self.assertEqual(legacy.N.IPC_API,44)
+        self.assertEqual(C.bundle_manifest('2026.11.4',b'',b'')['components']['robotd']['ipc_api'],44)
 
     def test_published_padd_bytes_and_source_remain_exact(self):
         self.assertEqual((C.PADD_SHA256,C.PADD_SIZE,C.PADD_SOURCE),
@@ -53,7 +53,7 @@ class BundleManifest(unittest.TestCase):
         self.assertEqual(manifest['schema'],'microduck-controller-payload/1')
         self.assertEqual(set(manifest['components']),{'robotd','padd'})
         self.assertEqual(manifest['components']['padd']['sha256'],SHA(NEW_PAD))
-        self.assertEqual(manifest['components']['robotd']['ipc_api'],43)
+        self.assertEqual(manifest['components']['robotd']['ipc_api'],44)
         self.assertEqual(set(manifest['units']),set(C.UNITS))
         C.validate_bundle(legacy.NEW,NEW_PAD,manifest,'2026.10.31')
 
@@ -232,7 +232,7 @@ class BundleTransaction(unittest.TestCase):
         self.assertIsNotNone(C)
         with mock.patch.object(legacy,'NativeWorld',BundleWorld):legacy.NativeTest.setUp(self)
         patch=mock.patch.multiple(C,ROBOTD_SHA256=SHA(legacy.NEW),ROBOTD_SIZE=len(legacy.NEW),
-            ROBOTD_BUILD='replica-imu-verify-control.48',
+            ROBOTD_BUILD='replica-imu-home-control.50',
             PADD_SHA256=SHA(NEW_PAD),PADD_SIZE=len(NEW_PAD),PADD_SOURCE='a'*40,SUPPORTED_PADD_SHA256=(SHA(OLD_PAD),),MEDIAD_SHA256=SHA(MEDIA))
         patch.start();self.addCleanup(patch.stop)
         predecessor=mock.patch.object(C,'LEGACY_ROBOTD_SHA256',SHA(legacy.PUBLISHED),create=True)
