@@ -7,9 +7,9 @@
     "pollen-robotics/microduck": {
       "default_branch": "main",
       "head": {
-        "sha": "9259844672fcb92477509a6e3fe240f53109db17",
-        "committed_at": "2026-11-10T05:17:20Z",
-        "subject": "Merge pull request #551 from pollen-robotics/impact-guard-v3"
+        "sha": "967461b210b511837b808743eb93146bb0485dc9",
+        "committed_at": "2026-11-10T07:45:27Z",
+        "subject": "Merge pull request #562 from pollen-robotics/home-flashlight-on-release"
       },
       "latest_stable_release": {
         "tag_name": "daemon-v0.18.8",
@@ -2689,11 +2689,11 @@
         {
           "tag": "daemon-dev-main",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
-          "published_at": "2026-11-10T05:21:53Z",
-          "head_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+          "published_at": "2026-11-10T07:49:59Z",
+          "head_sha": "967461b210b511837b808743eb93146bb0485dc9",
           "prerelease": true,
-          "scope_note": "Same commit as unreleased main API53. The separate stress-test API53 and formal 0.18.8 have different contracts.",
-          "previous_head_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+          "scope_note": "Same commit as unreleased main API53. No formal or replica promotion.",
+          "previous_head_sha": "9259844672fcb92477509a6e3fe240f53109db17",
           "head_history": [
             "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
             "2091d42286fa29a1e24ea4f072191a4836fd1a6e",
@@ -2707,9 +2707,10 @@
             "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
             "c15c2377d8a80662405bb5e773351c984ad6cffc",
             "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
-            "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460"
+            "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+            "9259844672fcb92477509a6e3fe240f53109db17"
           ],
-          "version": "daemon 0.18.9-dev.1673.9259844 (main)",
+          "version": "daemon 0.18.9-dev.1674.967461b (main)",
           "history": [
             {
               "tag": "daemon-dev-main",
@@ -4420,151 +4421,297 @@
                 "sound": "No sound pipeline or asset change."
               },
               "published_at_jst": "2026-11-10T13:04:17+09:00"
+            },
+            {
+              "tag": "daemon-dev-main",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
+              "published_at": "2026-11-10T05:21:53Z",
+              "head_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+              "prerelease": true,
+              "scope_note": "Same commit as unreleased main API53. The separate stress-test API53 and formal 0.18.8 have different contracts.",
+              "previous_head_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+              "version": "daemon 0.18.9-dev.1673.9259844 (main)",
+              "api_version": 53,
+              "change": "dev1673 built from the laser plus guard main merge.",
+              "comparison_to_recorded_main": {
+                "from_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "head_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "dev_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "ahead_by": 0,
+                "behind_by": 0,
+                "commit_count": 0,
+                "file_count": 0,
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...9259844672fcb92477509a6e3fe240f53109db17"
+              },
+              "development_api_version": 53,
+              "source_version": "0.18.9",
+              "replica_integration": "not_integrated;no runtime/model/image/device/service/browser changes",
+              "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
+              "latest_increment": {
+                "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
+                "commit_count": 25,
+                "file_count": 33,
+                "ahead_by": 25,
+                "behind_by": 0,
+                "merged_pull_requests": [
+                  558,
+                  551
+                ],
+                "scope_note": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default."
+              },
+              "asset_inventory": [
+                {
+                  "name": "0.18.9-dev.1673.9259844.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:5c4b2e130d0abb6058765b521b901d30b66782874cd820b8e292a33c173626a3"
+                },
+                {
+                  "name": "0.18.9-dev.1673.9259844.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:915f293c3453de4470ca111110f99fb69292f76fb66da49b9a6138b9fbc9bfcc"
+                },
+                {
+                  "name": "daemon-0.18.9-dev.1673.9259844.tar.zst",
+                  "size": 16351808,
+                  "digest": "sha256:14714f796738f9a3522a82c8a1b015e8a7b42fe05b340017f8c405b861c3b0ab"
+                },
+                {
+                  "name": "daemon-0.18.9-dev.1673.9259844.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:a05f5d106360191370909085ad2fdf5b90419c467535e96c01fbf2762fd87851"
+                },
+                {
+                  "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1674122,
+                  "digest": "sha256:c38b2c6d330582535604c8b0b05306022cc86366d862affaa063a1efe7d2c993"
+                },
+                {
+                  "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1594098,
+                  "digest": "sha256:3110f7a5417b82b1eb7d21fc90eb5a1d8f1fca6a3ea7873bab93d29a159a2776"
+                },
+                {
+                  "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 2809526,
+                  "digest": "sha256:5a327bead26d65582bfbdac733f7b36a223b7ea566dc4c308b106019eae05dc9"
+                },
+                {
+                  "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3036939,
+                  "digest": "sha256:ca6dfc46498bade9ee559d6a62c6314839e782c4c48cb36ffd00c5cc4c2fef60"
+                },
+                {
+                  "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
+                  "size": 1513460,
+                  "digest": "sha256:94ce53a491536d2da0830554408b852f833f631e4e8c95b9b1bb44c6d64cc3d3"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 360,
+                  "digest": "sha256:b1c4a76479c286f32aaf0c033ac98412991edb010b7bc96a271a0e71272d9d3e"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 360,
+                  "digest": "sha256:68b429e1a05165f7a895398a8d37772563db39a2a6edd639642e265a2fe13832"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1505297,
+                  "digest": "sha256:6ec4546a5d969b2ce83e2d92fa7502efc61e19cba21fc12e431ed0993274868e"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1601445,
+                  "digest": "sha256:37d083850670178e572fafb27b589e89789bd09a7a0f3f4e2cbac7032868ee8d"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1384520,
+                  "digest": "sha256:9d99b3f08aac93e168d1ec39bdfffc0fd5a6f78a85118565624df876a2b59de5"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 544,
+                  "digest": "sha256:3025576e08f0a0b0d47514fec9cb75b26999c024d683f1ed1026df955986aa4a"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:9c3c0594f387b5483bbc9e22e8945c22cd14fd79ec7bea7f3b209ac4ecd57b07"
+                }
+              ],
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/9259844672fcb92477509a6e3fe240f53109db17",
+              "comparison_to_previous_head": {
+                "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+                "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
+                "commit_count": 25,
+                "file_count": 33,
+                "ahead_by": 25,
+                "behind_by": 0
+              },
+              "classification": "Development prerelease at current main. Not a formal 0.18.9 release.",
+              "review": {
+                "change": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
+                "reviewed_main_sha": "9259844672fcb92477509a6e3fe240f53109db17"
+              },
+              "assets_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...9259844672fcb92477509a6e3fe240f53109db17",
+              "priority": "medium_reference;high_contract_and_hardware_review_before_adoption",
+              "impact": {
+                "HD1910": "High priority to verify motor protocol, limits and stopping before porting. ROBOTIS V3/V4 firmware registers and 1000 mA policy are specific to the upstream bus.",
+                "camera": "Laser detection and WebRTC overlay enter main. Review mount, calibration, false positives and camera load on the replica.",
+                "ToF": "Laser range is a camera and pose floor projection. No new ToF obstacle input or safety guarantee.",
+                "model_management": "No model-management or policy-pin change in this increment.",
+                "training": "No new training or weight delivery.",
+                "motion": "Opt-in head/walk laser intent and ROBOTIS guard. Guard is off by default after the stress observations. Validate override and stop behavior separately.",
+                "sound": "No new audio pipeline or sound assets in this increment."
+              },
+              "published_at_jst": "2026-11-10T14:21:53+09:00"
             }
           ],
           "api_version": 53,
-          "change": "dev1673 built from the laser plus guard main merge.",
+          "change": "Development build of the #562 main merge.",
           "comparison_to_recorded_main": {
-            "from_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-            "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-            "head_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-            "dev_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+            "from_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "to_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "head_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "dev_sha": "967461b210b511837b808743eb93146bb0485dc9",
             "ahead_by": 0,
             "behind_by": 0,
             "commit_count": 0,
             "file_count": 0,
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...9259844672fcb92477509a6e3fe240f53109db17"
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/967461b210b511837b808743eb93146bb0485dc9...967461b210b511837b808743eb93146bb0485dc9"
           },
           "development_api_version": 53,
           "source_version": "0.18.9",
           "replica_integration": "not_integrated;no runtime/model/image/device/service/browser changes",
-          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
+          "fixed_incremental_diff_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...967461b210b511837b808743eb93146bb0485dc9",
           "latest_increment": {
-            "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-            "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-            "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
-            "commit_count": 25,
-            "file_count": 33,
-            "ahead_by": 25,
-            "behind_by": 0,
+            "from_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+            "to_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...967461b210b511837b808743eb93146bb0485dc9",
+            "commit_count": 2,
+            "file_count": 3,
             "merged_pull_requests": [
-              558,
-              551
+              562
             ],
-            "scope_note": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default."
+            "scope_note": "Main merges #562 and dev1674 is built from that head. A short Home press triggers the existing flashlight toggle on release. Holds observed at or past one second and interrupted presses are discarded."
           },
           "asset_inventory": [
             {
-              "name": "0.18.9-dev.1673.9259844.manifest.json",
+              "name": "0.18.9-dev.1674.967461b.manifest.json",
               "size": 386,
-              "digest": "sha256:5c4b2e130d0abb6058765b521b901d30b66782874cd820b8e292a33c173626a3"
+              "digest": "sha256:500f237892dbe5c9f53536972696db3330c97a837260298a06bbb6c7dbfe0d4a"
             },
             {
-              "name": "0.18.9-dev.1673.9259844.manifest.json.minisig",
+              "name": "0.18.9-dev.1674.967461b.manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:915f293c3453de4470ca111110f99fb69292f76fb66da49b9a6138b9fbc9bfcc"
+              "digest": "sha256:49e7f1f57f259473530b197cd0dc15de6d2129d3013c7de5a65c30fb83248f4d"
             },
             {
-              "name": "daemon-0.18.9-dev.1673.9259844.tar.zst",
-              "size": 16351808,
-              "digest": "sha256:14714f796738f9a3522a82c8a1b015e8a7b42fe05b340017f8c405b861c3b0ab"
+              "name": "daemon-0.18.9-dev.1674.967461b.tar.zst",
+              "size": 16350342,
+              "digest": "sha256:e636307d0c8e74af4e5ce22d10f5fe208c2200c169d5e9faf50c6b9850805785"
             },
             {
-              "name": "daemon-0.18.9-dev.1673.9259844.tar.zst.minisig",
+              "name": "daemon-0.18.9-dev.1674.967461b.tar.zst.minisig",
               "size": 279,
-              "digest": "sha256:a05f5d106360191370909085ad2fdf5b90419c467535e96c01fbf2762fd87851"
+              "digest": "sha256:ed517451b0c534d5251a9dffa2a2473e42bdc82c83704117249d50146ac04e01"
             },
             {
               "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
               "size": 1674122,
-              "digest": "sha256:c38b2c6d330582535604c8b0b05306022cc86366d862affaa063a1efe7d2c993"
+              "digest": "sha256:70da0a77dbfc272e94ba103b0d75a4e5c7e6f67114b8ba904fdd0f7c28106fe0"
             },
             {
               "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
-              "size": 1594098,
-              "digest": "sha256:3110f7a5417b82b1eb7d21fc90eb5a1d8f1fca6a3ea7873bab93d29a159a2776"
+              "size": 1594097,
+              "digest": "sha256:809e2094931a10433f91aaa95c4f89d463faf6bc0aa63d04eb04a02b939a813a"
             },
             {
               "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 2809526,
-              "digest": "sha256:5a327bead26d65582bfbdac733f7b36a223b7ea566dc4c308b106019eae05dc9"
+              "size": 2809527,
+              "digest": "sha256:7d2752567b944468fcad9c7e1eee46d777f38ca7549db80a3b0e1fd9d1ebe660"
             },
             {
               "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3036939,
-              "digest": "sha256:ca6dfc46498bade9ee559d6a62c6314839e782c4c48cb36ffd00c5cc4c2fef60"
+              "size": 3036924,
+              "digest": "sha256:3c7b981c3b86c613572067f160c0c139b7ede7f56803412a6bfadfde64758995"
             },
             {
               "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
-              "size": 1513460,
-              "digest": "sha256:94ce53a491536d2da0830554408b852f833f631e4e8c95b9b1bb44c6d64cc3d3"
+              "size": 1513462,
+              "digest": "sha256:f3ee1b5cd59cd45f2b8bb6b0496a0bc67abff38f30c3fdd47aacc21d134fb53a"
             },
             {
               "name": "duckctl-linux-aarch64.tar.gz",
-              "size": 360,
-              "digest": "sha256:b1c4a76479c286f32aaf0c033ac98412991edb010b7bc96a271a0e71272d9d3e"
+              "size": 361,
+              "digest": "sha256:ae008c1a69366b76b0acbfbe474802f4d62cc5bcce8628853d87eb967d13f068"
             },
             {
               "name": "duckctl-linux-x86_64.tar.gz",
-              "size": 360,
-              "digest": "sha256:68b429e1a05165f7a895398a8d37772563db39a2a6edd639642e265a2fe13832"
+              "size": 361,
+              "digest": "sha256:ed4656f4d080ffd21154883553a23d0f13788cd04f836652c207bca2d1b90aba"
             },
             {
               "name": "duckctl-macos-arm64.tar.gz",
-              "size": 1505297,
-              "digest": "sha256:6ec4546a5d969b2ce83e2d92fa7502efc61e19cba21fc12e431ed0993274868e"
+              "size": 1505295,
+              "digest": "sha256:18c95f37f8241687b1234699f047c8b83cdc043999e9cd4bf220e9e12c5f9cc7"
             },
             {
               "name": "duckctl-macos-x86_64.tar.gz",
               "size": 1601445,
-              "digest": "sha256:37d083850670178e572fafb27b589e89789bd09a7a0f3f4e2cbac7032868ee8d"
+              "digest": "sha256:346aaa083cb987728a28bb5fdddab84eb15458bcc56fb244208a5b6dab1decff"
             },
             {
               "name": "duckctl-windows-x86_64.zip",
-              "size": 1384520,
-              "digest": "sha256:9d99b3f08aac93e168d1ec39bdfffc0fd5a6f78a85118565624df876a2b59de5"
+              "size": 1384516,
+              "digest": "sha256:85c555ea7ab2fb1bbfbabf839b06eeb23048dabf8161df50a8ae26043400ef0b"
             },
             {
               "name": "manifest.json",
               "size": 544,
-              "digest": "sha256:3025576e08f0a0b0d47514fec9cb75b26999c024d683f1ed1026df955986aa4a"
+              "digest": "sha256:0b572874a86a787ace48eeaa2f280c5b6c509748856a055d09014ac28ddc9dea"
             },
             {
               "name": "manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:9c3c0594f387b5483bbc9e22e8945c22cd14fd79ec7bea7f3b209ac4ecd57b07"
+              "digest": "sha256:f71f44ce114e41d92029c29c6816a5b58c31b10cb2aa71f4b5e9379415b78457"
             }
           ],
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/9259844672fcb92477509a6e3fe240f53109db17",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/967461b210b511837b808743eb93146bb0485dc9",
           "comparison_to_previous_head": {
-            "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-            "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-            "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
-            "commit_count": 25,
-            "file_count": 33,
-            "ahead_by": 25,
-            "behind_by": 0
+            "from_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+            "to_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...967461b210b511837b808743eb93146bb0485dc9",
+            "commit_count": 2,
+            "file_count": 3
           },
           "classification": "Development prerelease at current main. Not a formal 0.18.9 release.",
           "review": {
-            "change": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
-            "reviewed_main_sha": "9259844672fcb92477509a6e3fe240f53109db17"
+            "change": "Main merges #562 and dev1674 is built from that head. A short Home press triggers the existing flashlight toggle on release. Holds observed at or past one second and interrupted presses are discarded.",
+            "reviewed_main_sha": "967461b210b511837b808743eb93146bb0485dc9"
           },
-          "assets_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...9259844672fcb92477509a6e3fe240f53109db17",
+          "assets_checked_at_utc": "2026-11-10T08:40:54.770103+00:00",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/967461b210b511837b808743eb93146bb0485dc9...967461b210b511837b808743eb93146bb0485dc9",
           "priority": "medium_reference;high_contract_and_hardware_review_before_adoption",
           "impact": {
-            "HD1910": "High priority to verify motor protocol, limits and stopping before porting. ROBOTIS V3/V4 firmware registers and 1000 mA policy are specific to the upstream bus.",
-            "camera": "Laser detection and WebRTC overlay enter main. Review mount, calibration, false positives and camera load on the replica.",
-            "ToF": "Laser range is a camera and pose floor projection. No new ToF obstacle input or safety guarantee.",
-            "model_management": "No model-management or policy-pin change in this increment.",
-            "training": "No new training or weight delivery.",
-            "motion": "Opt-in head/walk laser intent and ROBOTIS guard. Guard is off by default after the stress observations. Validate override and stop behavior separately.",
-            "sound": "No new audio pipeline or sound assets in this increment."
+            "HD1910": "Medium controller usability reference. Verify Home events and actual flashlight support on the replica.",
+            "camera": "Only flashlight input timing. No camera driver or media stream change.",
+            "ToF": "No change.",
+            "model_management": "No change.",
+            "training": "No change in daemon main.",
+            "motion": "No walking policy or motion mapping change.",
+            "sound": "No audio change."
           },
-          "published_at_jst": "2026-11-10T14:21:53+09:00"
+          "published_at_jst": "2026-11-10T16:49:59+09:00"
         },
         {
           "tag": "daemon-dev-ground-grasp-x",
@@ -6756,143 +6903,6 @@
           },
           "priority": "Medium pairing reference where an NFC reader and supported Bluetooth controller are available. Low priority for the current replica image.",
           "replica_integration": "Source and release metadata reviewed. Not integrated into the replica."
-        },
-        {
-          "tag": "daemon-dev-home-flashlight-on-release",
-          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-home-flashlight-on-release",
-          "head_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
-          "version": "daemon 0.18.9-dev.1672.872baf5 (home-flashlight-on-release)",
-          "published_at": "2026-11-10T05:19:36Z",
-          "published_at_jst": "2026-11-10T14:19:36+09:00",
-          "prerelease": true,
-          "source_version": "0.18.9",
-          "version_family": "0.18.9",
-          "api_version": 52,
-          "development_api_version": 52,
-          "asset_inventory": [
-            {
-              "name": "0.18.9-dev.1672.872baf5.manifest.json",
-              "size": 386,
-              "digest": "sha256:aa943a4f6a38d44fdcd2d5a1bed6cf81e8dc78c479f8bfad8c5c45e781cdf05f"
-            },
-            {
-              "name": "0.18.9-dev.1672.872baf5.manifest.json.minisig",
-              "size": 279,
-              "digest": "sha256:1c16b729260e4c6a917b813434368c8bce26e8653c63694f2421e73994c6e50f"
-            },
-            {
-              "name": "daemon-0.18.9-dev.1672.872baf5.tar.zst",
-              "size": 16346829,
-              "digest": "sha256:43e4df695fd9abfc3755d80db93f23d4ea719437cdcf635d8161a929f38e68d3"
-            },
-            {
-              "name": "daemon-0.18.9-dev.1672.872baf5.tar.zst.minisig",
-              "size": 279,
-              "digest": "sha256:b97ae3f20600a6e5dc893101b6a8cc0f507ba26595dc70d7b053cb83b613266d"
-            },
-            {
-              "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
-              "size": 1674084,
-              "digest": "sha256:d016d46b90baed5ac7377362503c2627341efda560caf20179bda724b8255db5"
-            },
-            {
-              "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
-              "size": 1594128,
-              "digest": "sha256:2b64b9f357d7e61e0a449753e69e9328fa8051df117287ed06513c1025d72c22"
-            },
-            {
-              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 2809526,
-              "digest": "sha256:c6e3572449af2bdee7483b401004f7da9e48b26b01a468b3a793d10e98124413"
-            },
-            {
-              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3036936,
-              "digest": "sha256:85b499dcb49d3b2bb6b8ac56e6d6a26fd525adbb411a5670e08205a4f165456e"
-            },
-            {
-              "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
-              "size": 1512877,
-              "digest": "sha256:ba608a9b8acf74f6573b62d274b8aa4d91061d88b68818afd627d978f6b828b4"
-            },
-            {
-              "name": "duckctl-linux-aarch64.tar.gz",
-              "size": 362,
-              "digest": "sha256:00e2a360feda8e57cfd5fa0ee09c081ee74f430f4cfc0926909132e1c343adc5"
-            },
-            {
-              "name": "duckctl-linux-x86_64.tar.gz",
-              "size": 360,
-              "digest": "sha256:47d82a68e9b9f3f0815ab7b5d505cc8cc3bd695269c9dd626089ec3f3313b61f"
-            },
-            {
-              "name": "duckctl-macos-arm64.tar.gz",
-              "size": 1505335,
-              "digest": "sha256:eb150d679adc8f4a1fd0107f02bb3609db1c8215f3115a7cf729f7e835163407"
-            },
-            {
-              "name": "duckctl-macos-x86_64.tar.gz",
-              "size": 1601413,
-              "digest": "sha256:c3547c395fbdc1f74d0e0e62343e96181149dab3c8145afd58175f808f1ec746"
-            },
-            {
-              "name": "duckctl-windows-x86_64.zip",
-              "size": 1384287,
-              "digest": "sha256:6d4faebdeda05479f776708fe720e66a5d78c8d3d367efe313c19ee41ca221d1"
-            },
-            {
-              "name": "manifest.json",
-              "size": 588,
-              "digest": "sha256:8a54b65e072de310d67300ac0ac1a3ff20ea86cf3a8077661506022c219b592a"
-            },
-            {
-              "name": "manifest.json.minisig",
-              "size": 279,
-              "digest": "sha256:78ca9b5714f6e20fecc52f499c4824b0e5b2a37760fbd2638ffc2fa58e4dde17"
-            }
-          ],
-          "assets_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/872baf5f4058d12c40ca6c966ed6b3307052ae08",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
-          "comparison_to_recorded_base": {
-            "from_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
-            "to_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
-            "merge_base_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
-            "commit_count": 1,
-            "file_count": 3,
-            "ahead_by": 1,
-            "behind_by": 0
-          },
-          "classification": "Open PR with matching independent dev1672. Based on laser-only main before the API53 guard merge.",
-          "pull_request_url": "https://github.com/pollen-robotics/microduck/pull/562",
-          "review": {
-            "change": "Uses the shared HoldButton for Home. A tap emits the existing robot.flashlight toggle on release, a hold sampled at or past 1 second is ignored, and pad_gone spends the interrupted press. No new RPC.",
-            "validation_boundary": "Author reports pad-map tests and clippy, without a robot run. The test definition covers tap, hold and dropout. The exact prerelease head has passing GitHub check, board and publish statuses.",
-            "fixed_sources": {
-              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/duck-ipc-proto/src/lib.rs",
-              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/Cargo.toml",
-              "pad-map/src/hold.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/pad-map/src/hold.rs",
-              "pad-map/src/mapper.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/pad-map/src/mapper.rs",
-              "padd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/padd/src/main.rs"
-            },
-            "upstream_ci_urls": {
-              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42760969230/job/129647693834",
-              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42760978423/job/129646321582",
-              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42760978423/job/129646320967"
-            }
-          },
-          "impact": {
-            "HD1910": "Medium controller usability reference. Verify Home events on the actual controller and flashlight support.",
-            "camera": "Only flashlight input timing. No camera sensor or stream change.",
-            "ToF": "No change.",
-            "model_management": "No change.",
-            "training": "No change.",
-            "motion": "No movement mapping or skill change.",
-            "sound": "No change."
-          },
-          "priority": "Medium controller/flashlight reference. Low current image delivery.",
-          "replica_integration": "not_integrated"
         }
       ],
       "pending_pull_requests": [
@@ -13491,34 +13501,71 @@
         {
           "number": 562,
           "title": "pad-map: Home toggles the flashlight on a tap's release",
-          "state": "open",
+          "state": "closed",
           "draft": false,
           "created_at": "2026-11-10T05:15:21Z",
-          "updated_at": "2026-11-10T05:19:19Z",
-          "merged_at": null,
-          "merge_commit_sha": "f605cd299771c4a83ad950caa9fb8b9903612111",
+          "updated_at": "2026-11-10T07:45:30Z",
+          "merged_at": "2026-11-10T07:45:28Z",
+          "merge_commit_sha": "967461b210b511837b808743eb93146bb0485dc9",
           "url": "https://github.com/pollen-robotics/microduck/pull/562",
           "head_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
           "base_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
           "base_branch": "main",
           "created_at_jst": "2026-11-10T14:15:21+09:00",
-          "updated_at_jst": "2026-11-10T14:19:19+09:00",
+          "updated_at_jst": "2026-11-10T16:45:30+09:00",
           "actual_merge_base": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
           "source_version": "0.18.9",
           "api_version": 52,
           "commit_count": 1,
           "changed_file_count": 3,
-          "classification": "Open PR with matching independent dev1672. Based on laser-only main before the API53 guard merge.",
+          "classification": "Merged into current main and dev1674. Historical dev1672 retired.",
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
           "development_tag": "daemon-dev-home-flashlight-on-release",
           "development_release_url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-home-flashlight-on-release",
           "review": {
-            "change": "Uses the shared HoldButton for Home. A tap emits the existing robot.flashlight toggle on release, a hold sampled at or past 1 second is ignored, and pad_gone spends the interrupted press. No new RPC.",
-            "shared_development_review_tag": "daemon-dev-home-flashlight-on-release",
-            "shared_development_review_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08"
+            "change": "Main merges #562 and dev1674 is built from that head. A short Home press triggers the existing flashlight toggle on release. Holds observed at or past one second and interrupted presses are discarded.",
+            "reviewed_main_sha": "967461b210b511837b808743eb93146bb0485dc9",
+            "historical_development_tag": "daemon-dev-home-flashlight-on-release"
           },
           "priority": "Medium controller/flashlight reference. Low current image delivery.",
-          "replica_integration": "not_integrated"
+          "replica_integration": "not_integrated",
+          "history": [
+            {
+              "number": 562,
+              "title": "pad-map: Home toggles the flashlight on a tap's release",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-10T05:15:21Z",
+              "updated_at": "2026-11-10T05:19:19Z",
+              "merged_at": null,
+              "merge_commit_sha": "f605cd299771c4a83ad950caa9fb8b9903612111",
+              "url": "https://github.com/pollen-robotics/microduck/pull/562",
+              "head_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
+              "base_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
+              "base_branch": "main",
+              "created_at_jst": "2026-11-10T14:15:21+09:00",
+              "updated_at_jst": "2026-11-10T14:19:19+09:00",
+              "actual_merge_base": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
+              "source_version": "0.18.9",
+              "api_version": 52,
+              "commit_count": 1,
+              "changed_file_count": 3,
+              "classification": "Open PR with matching independent dev1672. Based on laser-only main before the API53 guard merge.",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
+              "development_tag": "daemon-dev-home-flashlight-on-release",
+              "development_release_url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-home-flashlight-on-release",
+              "review": {
+                "change": "Uses the shared HoldButton for Home. A tap emits the existing robot.flashlight toggle on release, a hold sampled at or past 1 second is ignored, and pad_gone spends the interrupted press. No new RPC.",
+                "shared_development_review_tag": "daemon-dev-home-flashlight-on-release",
+                "shared_development_review_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08"
+              },
+              "priority": "Medium controller/flashlight reference. Low current image delivery.",
+              "replica_integration": "not_integrated"
+            }
+          ],
+          "merged_at_jst": "2026-11-10T16:45:28+09:00",
+          "all_feature_blob_ids_match_actual_merge_tree": true,
+          "merged_source_api_version": 53
         }
       ],
       "previous_stable_releases": [
@@ -14119,13 +14166,10 @@
       },
       "main_since_latest_stable": {
         "from_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
-        "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-        "merge_base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...9259844672fcb92477509a6e3fe240f53109db17",
-        "commit_count": 33,
-        "file_count": 40,
-        "ahead_by": 33,
-        "behind_by": 0,
+        "to_sha": "967461b210b511837b808743eb93146bb0485dc9",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...967461b210b511837b808743eb93146bb0485dc9",
+        "commit_count": 35,
+        "file_count": 42,
         "version_family": "0.18.9",
         "main_api_version": 53,
         "classification": "Unreleased main. Formal daemon-v0.18.9 tag and release are absent.",
@@ -14136,9 +14180,10 @@
           553,
           561,
           558,
-          551
+          551,
+          562
         ],
-        "scope_note": "The previously recorded v9, pairing candidates and reverse default are followed by the laser and ROBOTIS guard merges."
+        "scope_note": "Prior v9, pairing, reverse, laser and impact guard changes followed by the Home flashlight release edge."
       },
       "retired_development_releases": [
         {
@@ -17529,12 +17574,155 @@
           "promoted_main_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
           "reviewed_current_main_sha": "9259844672fcb92477509a6e3fe240f53109db17",
           "retirement_scope_note": "Moved to source history. No stable release promotion at this cutoff. Main dev1673 is a distinct build."
+        },
+        {
+          "tag": "daemon-dev-home-flashlight-on-release",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-home-flashlight-on-release",
+          "head_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
+          "version": "daemon 0.18.9-dev.1672.872baf5 (home-flashlight-on-release)",
+          "published_at": "2026-11-10T05:19:36Z",
+          "published_at_jst": "2026-11-10T14:19:36+09:00",
+          "prerelease": true,
+          "source_version": "0.18.9",
+          "version_family": "0.18.9",
+          "api_version": 52,
+          "development_api_version": 52,
+          "asset_inventory": [
+            {
+              "name": "0.18.9-dev.1672.872baf5.manifest.json",
+              "size": 386,
+              "digest": "sha256:aa943a4f6a38d44fdcd2d5a1bed6cf81e8dc78c479f8bfad8c5c45e781cdf05f"
+            },
+            {
+              "name": "0.18.9-dev.1672.872baf5.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:1c16b729260e4c6a917b813434368c8bce26e8653c63694f2421e73994c6e50f"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1672.872baf5.tar.zst",
+              "size": 16346829,
+              "digest": "sha256:43e4df695fd9abfc3755d80db93f23d4ea719437cdcf635d8161a929f38e68d3"
+            },
+            {
+              "name": "daemon-0.18.9-dev.1672.872baf5.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:b97ae3f20600a6e5dc893101b6a8cc0f507ba26595dc70d7b053cb83b613266d"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674084,
+              "digest": "sha256:d016d46b90baed5ac7377362503c2627341efda560caf20179bda724b8255db5"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594128,
+              "digest": "sha256:2b64b9f357d7e61e0a449753e69e9328fa8051df117287ed06513c1025d72c22"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809526,
+              "digest": "sha256:c6e3572449af2bdee7483b401004f7da9e48b26b01a468b3a793d10e98124413"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3036936,
+              "digest": "sha256:85b499dcb49d3b2bb6b8ac56e6d6a26fd525adbb411a5670e08205a4f165456e"
+            },
+            {
+              "name": "duckctl-0.18.9-py3-none-win_amd64.whl",
+              "size": 1512877,
+              "digest": "sha256:ba608a9b8acf74f6573b62d274b8aa4d91061d88b68818afd627d978f6b828b4"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 362,
+              "digest": "sha256:00e2a360feda8e57cfd5fa0ee09c081ee74f430f4cfc0926909132e1c343adc5"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 360,
+              "digest": "sha256:47d82a68e9b9f3f0815ab7b5d505cc8cc3bd695269c9dd626089ec3f3313b61f"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505335,
+              "digest": "sha256:eb150d679adc8f4a1fd0107f02bb3609db1c8215f3115a7cf729f7e835163407"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601413,
+              "digest": "sha256:c3547c395fbdc1f74d0e0e62343e96181149dab3c8145afd58175f808f1ec746"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384287,
+              "digest": "sha256:6d4faebdeda05479f776708fe720e66a5d78c8d3d367efe313c19ee41ca221d1"
+            },
+            {
+              "name": "manifest.json",
+              "size": 588,
+              "digest": "sha256:8a54b65e072de310d67300ac0ac1a3ff20ea86cf3a8077661506022c219b592a"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:78ca9b5714f6e20fecc52f499c4824b0e5b2a37760fbd2638ffc2fa58e4dde17"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/872baf5f4058d12c40ca6c966ed6b3307052ae08",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
+          "comparison_to_recorded_base": {
+            "from_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
+            "to_sha": "872baf5f4058d12c40ca6c966ed6b3307052ae08",
+            "merge_base_sha": "7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7ad9c99245bcb78645da69f5d6d83fc9a7f7fe4d...872baf5f4058d12c40ca6c966ed6b3307052ae08",
+            "commit_count": 1,
+            "file_count": 3,
+            "ahead_by": 1,
+            "behind_by": 0
+          },
+          "classification": "Open PR with matching independent dev1672. Based on laser-only main before the API53 guard merge.",
+          "pull_request_url": "https://github.com/pollen-robotics/microduck/pull/562",
+          "review": {
+            "change": "Uses the shared HoldButton for Home. A tap emits the existing robot.flashlight toggle on release, a hold sampled at or past 1 second is ignored, and pad_gone spends the interrupted press. No new RPC.",
+            "validation_boundary": "Author reports pad-map tests and clippy, without a robot run. The test definition covers tap, hold and dropout. The exact prerelease head has passing GitHub check, board and publish statuses.",
+            "fixed_sources": {
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/duck-ipc-proto/src/lib.rs",
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/Cargo.toml",
+              "pad-map/src/hold.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/pad-map/src/hold.rs",
+              "pad-map/src/mapper.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/pad-map/src/mapper.rs",
+              "padd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/872baf5f4058d12c40ca6c966ed6b3307052ae08/padd/src/main.rs"
+            },
+            "upstream_ci_urls": {
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42760969230/job/129647693834",
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42760978423/job/129646321582",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42760978423/job/129646320967"
+            }
+          },
+          "impact": {
+            "HD1910": "Medium controller usability reference. Verify Home events on the actual controller and flashlight support.",
+            "camera": "Only flashlight input timing. No camera sensor or stream change.",
+            "ToF": "No change.",
+            "model_management": "No change.",
+            "training": "No change.",
+            "motion": "No movement mapping or skill change.",
+            "sound": "No change."
+          },
+          "priority": "Medium controller/flashlight reference. Low current image delivery.",
+          "replica_integration": "not_integrated",
+          "tracking_status": "retired_tag_and_release_not_found",
+          "last_checked_at_utc": "2026-11-10T08:40:54.770103+00:00",
+          "availability_note": "Git ref and release by tag returned HTTP 404 after #562 merged. Last known source and asset metadata retained.",
+          "promoted_pull_request": 562,
+          "promoted_main_sha": "967461b210b511837b808743eb93146bb0485dc9",
+          "retirement_scope_note": "dev1672 remains a historical API52 build. Main dev1674 has the same three feature blobs under API53."
         }
       ],
       "previous_head": {
-        "sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-        "committed_at": "2026-11-10T03:54:24Z",
-        "subject": "Merge pull request #561 from pollen-robotics/pad-drive-vx-min"
+        "sha": "9259844672fcb92477509a6e3fe240f53109db17",
+        "committed_at": "2026-11-10T05:17:20Z",
+        "subject": "Merge pull request #551 from pollen-robotics/impact-guard-v3"
       },
       "tracked_model_metadata": [
         {
@@ -17671,6 +17859,11 @@
           "sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
           "committed_at": "2026-11-10T03:54:24Z",
           "subject": "Merge pull request #561 from pollen-robotics/pad-drive-vx-min"
+        },
+        {
+          "sha": "9259844672fcb92477509a6e3fe240f53109db17",
+          "committed_at": "2026-11-10T05:17:20Z",
+          "subject": "Merge pull request #551 from pollen-robotics/impact-guard-v3"
         }
       ],
       "main_since_latest_stable_history": [
@@ -17922,67 +18115,69 @@
             561
           ],
           "scope_note": "v9 restores v7 velstand, structured pairing candidates, release preparation, and lower gamepad reverse default. Separate development contracts remain separate."
+        },
+        {
+          "from_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+          "merge_base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...9259844672fcb92477509a6e3fe240f53109db17",
+          "commit_count": 33,
+          "file_count": 40,
+          "ahead_by": 33,
+          "behind_by": 0,
+          "version_family": "0.18.9",
+          "main_api_version": 53,
+          "classification": "Unreleased main. Formal daemon-v0.18.9 tag and release are absent.",
+          "replica_integration": "not_integrated",
+          "merged_pull_requests": [
+            550,
+            552,
+            553,
+            561,
+            558,
+            551
+          ],
+          "scope_note": "The previously recorded v9, pairing candidates and reverse default are followed by the laser and ROBOTIS guard merges."
         }
       ],
       "latest_main_change": {
-        "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-        "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
-        "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
-        "commit_count": 25,
-        "file_count": 33,
-        "ahead_by": 25,
-        "behind_by": 0,
+        "from_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+        "to_sha": "967461b210b511837b808743eb93146bb0485dc9",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...967461b210b511837b808743eb93146bb0485dc9",
+        "commit_count": 2,
+        "file_count": 3,
         "version_family": "0.18.9",
         "main_api_version": 53,
         "classification": "Unreleased main. Formal daemon-v0.18.9 tag and release are absent.",
         "replica_integration": "not_integrated",
         "merged_pull_requests": [
-          558,
-          551
+          562
         ],
-        "scope_note": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
+        "scope_note": "Main merges #562 and dev1674 is built from that head. A short Home press triggers the existing flashlight toggle on release. Holds observed at or past one second and interrupted presses are discarded.",
         "incremental_domain_impacts": {
-          "HD1910": "High priority to verify motor protocol, limits and stopping before porting. ROBOTIS V3/V4 firmware registers and 1000 mA policy are specific to the upstream bus.",
-          "camera": "Laser detection and WebRTC overlay enter main. Review mount, calibration, false positives and camera load on the replica.",
-          "ToF": "Laser range is a camera and pose floor projection. No new ToF obstacle input or safety guarantee.",
-          "model_management": "No model-management or policy-pin change in this increment.",
-          "training": "No new training or weight delivery.",
-          "motion": "Opt-in head/walk laser intent and ROBOTIS guard. Guard is off by default after the stress observations. Validate override and stop behavior separately.",
-          "sound": "No new audio pipeline or sound assets in this increment."
+          "HD1910": "Medium controller usability reference. Verify Home events and actual flashlight support on the replica.",
+          "camera": "Only flashlight input timing. No camera driver or media stream change.",
+          "ToF": "No change.",
+          "model_management": "No change.",
+          "training": "No change in daemon main.",
+          "motion": "No walking policy or motion mapping change.",
+          "sound": "No audio change."
         },
         "review": {
-          "change": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
-          "contract": "Main 0.18.9/API53 includes the v52 laser RPC and v53 impact_guard telemetry. The separately tracked API53 stress build carries robot.trip, which is absent from main.",
-          "laser": "The #558 feature blobs match its actual merge in 27 of 29 files. The remaining two shared files inherit #561 reverse defaults. Detector, WebRTC overlay, 1/15 Hz rates and 1000 ms target retention are carried forward. Boot tracking remains off.",
-          "guard": "All 12 #551 feature blobs match main. V3 off uses inert settings; V4 off uses register 67 with every torque-on. Setting R remains the opt-in preset. The startup 1000 mA Current Limit correction and Goal Current write when a correction is made are independent of that toggle and defer while torque is on.",
-          "author_stress_report": {
-            "source_url": "https://github.com/pollen-robotics/microduck/pull/551",
-            "period_reported": "2026-11-03 through 2026-11-09",
-            "guard_robot": "One plastic-gear robot ran R with a 1.0 A cap, first V3 then V4. 5.5 logged hours, 1.17 km, 1039 falls including 487 unprovoked, one gearbox broken.",
-            "stock_robot": "One stock plastic-gear robot logged 5.7 hours, 1.19 km, 762 falls including 105 unprovoked, and six gearboxes broken.",
-            "interpretation": "47 percent of guard-robot falls were unprovoked versus 8–14 percent across other configurations. One-robot-per-condition, current cap, hardware changes and a policy switch confound attribution. The merge disables the guard by default while retaining the current cap.",
-            "validation_boundary": "Author report, not independently reproduced or a final dev1673 run. The single-servo V4 bench and earlier laser benchmarks retain their original provenance."
-          },
+          "change": "Main merges #562 and dev1674 is built from that head. A short Home press triggers the existing flashlight toggle on release. Holds observed at or past one second and interrupted presses are discarded.",
+          "source_equivalence": "All three feature file blobs match the earlier dev1672 PR. Workspace version and daemon API53 stay unchanged. The feature PR had API52 because it was based before the impact guard merge.",
+          "validation_boundary": "Earlier pad-map tests and clippy remain author-reported on their original source. The actual main merge has successful check, board and publish job statuses. Physical controller shutdown/reconnect and replica flashlight behavior remain unverified.",
           "upstream_ci_urls": {
-            "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42761193312/job/129648475711",
-            "board": "https://github.com/pollen-robotics/microduck/actions/runs/42761193023/job/129646996370",
-            "check": "https://github.com/pollen-robotics/microduck/actions/runs/42761193023/job/129646996339"
+            "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42777525842/job/129701051921",
+            "board": "https://github.com/pollen-robotics/microduck/actions/runs/42777526038/job/129699419606",
+            "check": "https://github.com/pollen-robotics/microduck/actions/runs/42777526038/job/129699419246"
           },
           "fixed_sources": {
-            "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/Cargo.toml",
-            "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-ipc-proto/src/lib.rs",
-            "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/deploy/robotd.toml",
-            "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd-params/src/lib.rs",
-            "robotd-params/src/registry.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd-params/src/registry.rs",
-            "duck-control/src/bus.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/bus.rs",
-            "duck-control/src/model.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/model.rs",
-            "duck-control/src/io.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/io.rs",
-            "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd/src/main.rs",
-            "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/mediad/src/laser.rs",
-            "mediad/webclient/index.html": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/mediad/webclient/index.html",
-            "robotd/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd/src/laser.rs",
-            "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/docs/robot/cheatsheet.md"
+            "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/967461b210b511837b808743eb93146bb0485dc9/Cargo.toml",
+            "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/967461b210b511837b808743eb93146bb0485dc9/duck-ipc-proto/src/lib.rs",
+            "pad-map/src/hold.rs": "https://github.com/pollen-robotics/microduck/blob/967461b210b511837b808743eb93146bb0485dc9/pad-map/src/hold.rs",
+            "pad-map/src/mapper.rs": "https://github.com/pollen-robotics/microduck/blob/967461b210b511837b808743eb93146bb0485dc9/pad-map/src/mapper.rs",
+            "padd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/967461b210b511837b808743eb93146bb0485dc9/padd/src/main.rs"
           }
         }
       },
@@ -18269,6 +18464,68 @@
               "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460/Cargo.toml",
               "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460/duck-ipc-proto/src/lib.rs",
               "padd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460/padd/src/main.rs"
+            }
+          }
+        },
+        {
+          "from_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+          "to_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+          "merge_base_sha": "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460...9259844672fcb92477509a6e3fe240f53109db17",
+          "commit_count": 25,
+          "file_count": 33,
+          "ahead_by": 25,
+          "behind_by": 0,
+          "version_family": "0.18.9",
+          "main_api_version": 53,
+          "classification": "Unreleased main. Formal daemon-v0.18.9 tag and release are absent.",
+          "replica_integration": "not_integrated",
+          "merged_pull_requests": [
+            558,
+            551
+          ],
+          "scope_note": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
+          "incremental_domain_impacts": {
+            "HD1910": "High priority to verify motor protocol, limits and stopping before porting. ROBOTIS V3/V4 firmware registers and 1000 mA policy are specific to the upstream bus.",
+            "camera": "Laser detection and WebRTC overlay enter main. Review mount, calibration, false positives and camera load on the replica.",
+            "ToF": "Laser range is a camera and pose floor projection. No new ToF obstacle input or safety guarantee.",
+            "model_management": "No model-management or policy-pin change in this increment.",
+            "training": "No new training or weight delivery.",
+            "motion": "Opt-in head/walk laser intent and ROBOTIS guard. Guard is off by default after the stress observations. Validate override and stop behavior separately.",
+            "sound": "No new audio pipeline or sound assets in this increment."
+          },
+          "review": {
+            "change": "Main merges the previously reviewed laser tracker followed by the ROBOTIS guard. The final guard head makes bus.impact_guard false by default.",
+            "contract": "Main 0.18.9/API53 includes the v52 laser RPC and v53 impact_guard telemetry. The separately tracked API53 stress build carries robot.trip, which is absent from main.",
+            "laser": "The #558 feature blobs match its actual merge in 27 of 29 files. The remaining two shared files inherit #561 reverse defaults. Detector, WebRTC overlay, 1/15 Hz rates and 1000 ms target retention are carried forward. Boot tracking remains off.",
+            "guard": "All 12 #551 feature blobs match main. V3 off uses inert settings; V4 off uses register 67 with every torque-on. Setting R remains the opt-in preset. The startup 1000 mA Current Limit correction and Goal Current write when a correction is made are independent of that toggle and defer while torque is on.",
+            "author_stress_report": {
+              "source_url": "https://github.com/pollen-robotics/microduck/pull/551",
+              "period_reported": "2026-11-03 through 2026-11-09",
+              "guard_robot": "One plastic-gear robot ran R with a 1.0 A cap, first V3 then V4. 5.5 logged hours, 1.17 km, 1039 falls including 487 unprovoked, one gearbox broken.",
+              "stock_robot": "One stock plastic-gear robot logged 5.7 hours, 1.19 km, 762 falls including 105 unprovoked, and six gearboxes broken.",
+              "interpretation": "47 percent of guard-robot falls were unprovoked versus 8–14 percent across other configurations. One-robot-per-condition, current cap, hardware changes and a policy switch confound attribution. The merge disables the guard by default while retaining the current cap.",
+              "validation_boundary": "Author report, not independently reproduced or a final dev1673 run. The single-servo V4 bench and earlier laser benchmarks retain their original provenance."
+            },
+            "upstream_ci_urls": {
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42761193312/job/129648475711",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42761193023/job/129646996370",
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42761193023/job/129646996339"
+            },
+            "fixed_sources": {
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-ipc-proto/src/lib.rs",
+              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/deploy/robotd.toml",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd-params/src/lib.rs",
+              "robotd-params/src/registry.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd-params/src/registry.rs",
+              "duck-control/src/bus.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/bus.rs",
+              "duck-control/src/model.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/model.rs",
+              "duck-control/src/io.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/duck-control/src/io.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd/src/main.rs",
+              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/mediad/src/laser.rs",
+              "mediad/webclient/index.html": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/mediad/webclient/index.html",
+              "robotd/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/robotd/src/laser.rs",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/9259844672fcb92477509a6e3fe240f53109db17/docs/robot/cheatsheet.md"
             }
           }
         }
@@ -18972,9 +19229,9 @@
     "pollen-robotics/microduck_rl": {
       "default_branch": "develop",
       "head": {
-        "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
-        "committed_at": "2026-10-27T15:00:04Z",
-        "subject": "Merge branch 'share_training' into develop"
+        "sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+        "committed_at": "2026-11-10T14:58:01Z",
+        "subject": "Merge branch 'velstand_v9_is_v7' into develop"
       },
       "pending_pull_requests": [
         {
@@ -19629,53 +19886,141 @@
         }
       ],
       "previous_head": {
-        "sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
-        "committed_at": "2026-10-12T11:58:55Z",
-        "subject": "Merge branch 'improve_standup_velstand' into develop"
+        "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+        "committed_at": "2026-10-27T15:00:04Z",
+        "subject": "Merge branch 'share_training' into develop"
       },
       "latest_main_change": {
-        "from_sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
-        "to_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
-        "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3...bae39f5900b318f7e87fc485c30a31213cfa14eb",
-        "commit_count": 5,
-        "file_count": 13,
+        "from_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+        "to_sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+        "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/bae39f5900b318f7e87fc485c30a31213cfa14eb...0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+        "commit_count": 4,
+        "file_count": 5,
         "commits": [
           {
-            "sha": "3b8759e9dad2bd12dae03129bc4a07fe24a48026",
-            "subject": "Training bundles: opt-in sharing of training checkpoints on the Hub",
-            "committed_at": "2026-10-27T14:42:09Z"
+            "sha": "1a5391ab2bb0f2a2bc79d494e6bac00c91b1a4e9",
+            "subject": "velstand: back to the v7 recipe (Hub v9 = v7 j4i6yoq2@1250)",
+            "committed_at": "2026-11-09T11:06:22Z"
           },
           {
-            "sha": "e2866e0ade2b38b4a912d462f76f7b74458d1c74",
-            "subject": "distill: teachers default to their Hub training bundles (wandb stays the fallback)",
-            "committed_at": "2026-10-27T14:43:45Z"
+            "sha": "06fb48c4f17adf2a88d62ac580eae126637152aa",
+            "subject": "velstand: v7 + anchor yaw remap only (turn-in-place fix experiment)",
+            "committed_at": "2026-11-09T13:23:58Z"
           },
           {
-            "sha": "31c9aaa02f1a69f2352fab656fc50fb14145a84b",
-            "subject": "Merge branch 'share_training' into develop",
-            "committed_at": "2026-10-27T14:47:41Z"
+            "sha": "c4cf4dad94021b539f68d27dd0c521874a0a880e",
+            "subject": "velstand: document v7 + yaw remap (n3fg9pgq@2000), add the sim bench",
+            "committed_at": "2026-11-10T14:57:57Z"
           },
           {
-            "sha": "91066b84672b4d4ad12d3df7044427d4141fe890",
-            "subject": "find_onnx_source: skip checkpoints that fail to download",
-            "committed_at": "2026-10-27T14:58:52Z"
-          },
-          {
-            "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
-            "subject": "Merge branch 'share_training' into develop",
-            "committed_at": "2026-10-27T15:00:04Z"
+            "sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+            "subject": "Merge branch 'velstand_v9_is_v7' into develop",
+            "committed_at": "2026-11-10T14:58:01Z"
           }
         ],
-        "scope_note": "Training bundles: opt-in full .pt checkpoint sharing separate from ONNX repo, default-private new bundle repo, checkpoint/code/config/parent/teacher provenance, hf:// init/export/publish, local>HF>wandb teacher priority, richer ONNX export metadata and source search tolerating download failures. Does not merge jumpPR86, modify HD1910 BAM, retrain a policy or deliver model bytes in this13file diff.",
-        "priority": "high_training_platform_and_provenance_reference; review ownHD1910 task/obs/action/normalizer/code provenance before adopting",
-        "replica_integration": "not_integrated; no checkpoint download/load, export, training, upload or model replacement",
-        "this_review": "Read-only fixed patches including new offline test source; no downloaded code/tests executed and no Hub bundle availability certified.",
-        "limitations": [
-          "Private/permissioned bundle access not checked",
-          "Default teacher refs remain upstream tasks, not validatedHD1910 teachers",
-          "Checkpoint provenance recorded in manifest does not certify full end-to-end resume behavior here"
-        ]
-      }
+        "observed_at_utc": "2026-11-10T08:40:11.875976+00:00",
+        "observed_at_jst": "2026-11-10T17:40:11.875976+09:00",
+        "head_committer_at_jst": "2026-11-10T23:58:01+09:00",
+        "timestamp_note": "The raw Git committer time is later than this observation. It is retained as Git metadata, not treated as a publication time.",
+        "scope_note": "Develop incorporates the v7-based yaw remap training recipe and a new headless simulation bench. No GitHub formal release, official model promotion or replica integration.",
+        "review": {
+          "config": "Anchor yaw remap remains enabled against the prior checkout. The masked stand teacher and wide-spawn variants become opt-in. With yaw remap enabled, the recipe also selects the fine yaw reward and in-place turns from 0.2 rad/s.",
+          "random_seed": "At zero SO(3) probability the prone initializer builds a false mask without drawing random numbers. This preserves the old random stream for that disabled option.",
+          "benchmark": "Flat simulation with backlash, fixed commands, a batched Torch reconstruction of exported ONNX and probe/rise/push groups. Probe averages exclude fallen environments. Reported ±1 rad/s in-place commands yield +0.88/−0.94 in the candidate and +0.48/−0.41 in v7. At strongest push end-upright rate is 91% vs 98%. Source and reported results reviewed without a new run.",
+          "validation_boundary": "The document reports an upstream robot turn observation, with no Feetech acceptance. No training, sim, export, model download or validation run by this tracker.",
+          "fixed_sources": {
+            "AGENTS.md": "https://github.com/pollen-robotics/microduck_rl/blob/0daab160d3fb1c2cbaba16a4a19052f36709dd9e/AGENTS.md",
+            "docs/velstand_policy.md": "https://github.com/pollen-robotics/microduck_rl/blob/0daab160d3fb1c2cbaba16a4a19052f36709dd9e/docs/velstand_policy.md",
+            "scripts/velstand_bench.py": "https://github.com/pollen-robotics/microduck_rl/blob/0daab160d3fb1c2cbaba16a4a19052f36709dd9e/scripts/velstand_bench.py",
+            "src/mjlab_microduck/tasks/mdp.py": "https://github.com/pollen-robotics/microduck_rl/blob/0daab160d3fb1c2cbaba16a4a19052f36709dd9e/src/mjlab_microduck/tasks/mdp.py",
+            "src/mjlab_microduck/tasks/microduck_velstand_env_cfg.py": "https://github.com/pollen-robotics/microduck_rl/blob/0daab160d3fb1c2cbaba16a4a19052f36709dd9e/src/mjlab_microduck/tasks/microduck_velstand_env_cfg.py"
+          },
+          "official_velstand": {
+            "official_hub_repo": "pollen-robotics/microduck-policies",
+            "official_checkpoint": "j4i6yoq2@1250",
+            "v7_ref_commit": "f745f1089051c64f9fd1fc2a3b1ef67feec14703",
+            "v9_ref_commit": "8dc9feca069ca4e89f0e307d405cf9e1f0bb1ee9",
+            "file": "velstand.onnx",
+            "lfs_sha256": "ce894d30b3343036d499bfac1102bdaa58d59a21c1b58401ecb70fb6a2f63e0a",
+            "size_bytes": 793705,
+            "fixed_metadata_urls": {
+              "v7": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/f745f1089051c64f9fd1fc2a3b1ef67feec14703",
+              "v9": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/8dc9feca069ca4e89f0e307d405cf9e1f0bb1ee9"
+            },
+            "boundary": "Verified metadata only. The official v7 and v9 velstand entries are byte-identical by their LFS digest. No weight file downloaded."
+          },
+          "experimental_checkpoint": {
+            "author_reported_checkpoint": "n3fg9pgq@2000",
+            "resume_from": "j4i6yoq2@1250",
+            "author_linked_repo": "https://huggingface.co/apirrone/velstand_v7_yaw_remap",
+            "public_metadata_http_status": 401,
+            "boundary": "Author-reported candidate. No independent repo revision, file availability or weight digest verified. The official v9 pin is unchanged."
+          }
+        },
+        "incremental_domain_impacts": {
+          "HD1910": "High priority training reference. The upstream backlash, morphology, observations, actions, normalization and recovery need Feetech-specific comparison.",
+          "camera": "No change.",
+          "ToF": "No change.",
+          "model_management": "Official v9 stays pinned. Record the experimental checkpoint separately from the official model.",
+          "training": "Develop now selects the v7 recipe with anchor yaw remap, fine yaw reward and turn-in-place sampling. V8-only masked teacher and wide spawns default off. Zero SO(3) probability skips the extra random draw. A new headless benchmark is included.",
+          "motion": "Author reports stronger in-place turns on the candidate, with weaker recovery in some simulation cases. No replica motion validation.",
+          "sound": "No change."
+        },
+        "priority": "High for training, checkpoint provenance and model/actuator compatibility review. Experimental candidate remains separate.",
+        "replica_integration": "not_integrated"
+      },
+      "head_history": [
+        {
+          "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "committed_at": "2026-10-27T15:00:04Z",
+          "subject": "Merge branch 'share_training' into develop"
+        }
+      ],
+      "main_change_history": [
+        {
+          "from_sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+          "to_sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "fixed_url": "https://github.com/pollen-robotics/microduck_rl/compare/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3...bae39f5900b318f7e87fc485c30a31213cfa14eb",
+          "commit_count": 5,
+          "file_count": 13,
+          "commits": [
+            {
+              "sha": "3b8759e9dad2bd12dae03129bc4a07fe24a48026",
+              "subject": "Training bundles: opt-in sharing of training checkpoints on the Hub",
+              "committed_at": "2026-10-27T14:42:09Z"
+            },
+            {
+              "sha": "e2866e0ade2b38b4a912d462f76f7b74458d1c74",
+              "subject": "distill: teachers default to their Hub training bundles (wandb stays the fallback)",
+              "committed_at": "2026-10-27T14:43:45Z"
+            },
+            {
+              "sha": "31c9aaa02f1a69f2352fab656fc50fb14145a84b",
+              "subject": "Merge branch 'share_training' into develop",
+              "committed_at": "2026-10-27T14:47:41Z"
+            },
+            {
+              "sha": "91066b84672b4d4ad12d3df7044427d4141fe890",
+              "subject": "find_onnx_source: skip checkpoints that fail to download",
+              "committed_at": "2026-10-27T14:58:52Z"
+            },
+            {
+              "sha": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+              "subject": "Merge branch 'share_training' into develop",
+              "committed_at": "2026-10-27T15:00:04Z"
+            }
+          ],
+          "scope_note": "Training bundles: opt-in full .pt checkpoint sharing separate from ONNX repo, default-private new bundle repo, checkpoint/code/config/parent/teacher provenance, hf:// init/export/publish, local>HF>wandb teacher priority, richer ONNX export metadata and source search tolerating download failures. Does not merge jumpPR86, modify HD1910 BAM, retrain a policy or deliver model bytes in this13file diff.",
+          "priority": "high_training_platform_and_provenance_reference; review ownHD1910 task/obs/action/normalizer/code provenance before adopting",
+          "replica_integration": "not_integrated; no checkpoint download/load, export, training, upload or model replacement",
+          "this_review": "Read-only fixed patches including new offline test source; no downloaded code/tests executed and no Hub bundle availability certified.",
+          "limitations": [
+            "Private/permissioned bundle access not checked",
+            "Default teacher refs remain upstream tasks, not validatedHD1910 teachers",
+            "Checkpoint provenance recorded in manifest does not certify full end-to-end resume behavior here"
+          ]
+        }
+      ]
     },
     "pollen-robotics/elec_RPI_Robot_HAT": {
       "default_branch": "main",
@@ -19727,12 +20072,12 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-10T06:37:23.060236+00:00",
+  "checked_at_utc": "2026-11-10T08:40:11.875976+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-10T05:34:09.094567+00:00",
-    "source_snapshot_utc": "2026-11-10T06:37:23.060236+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-10T06:37:53.888023+00:00",
-    "default_branch_changes": false,
+    "previous_substantive_review_utc": "2026-11-10T06:37:23.060236+00:00",
+    "source_snapshot_utc": "2026-11-10T08:40:11.875976+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-10T08:40:54.770103+00:00",
+    "default_branch_changes": true,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
@@ -19740,12 +20085,14 @@
     "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        449
+        562
       ]
     },
-    "previous_tracked_prs_merged": false,
+    "previous_tracked_prs_merged": true,
     "new_development_releases": [],
-    "moved_development_tags": [],
+    "moved_development_tags": [
+      "daemon-dev-main"
+    ],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -19755,8 +20102,23 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Open #449 syncs the reviewed main and renumbers its phase skill extension to API54. The base-relative phase logic is unchanged. Official 0.18.8, main dev1673 and replica baselines are unchanged.",
-    "project_github_latest_target_changed": false
+    "notes": "Main dev1674 includes #562 and retires the matching dev1672 tag. Training develop adds the v7 yaw-remap recipe and bench. Official Hub v9 velstand and formal daemon 0.18.8 remain unchanged.",
+    "project_github_latest_target_changed": false,
+    "default_branch_change_repositories": [
+      "pollen-robotics/microduck",
+      "pollen-robotics/microduck_rl"
+    ],
+    "merged_tracked_prs_into_default_branch": {
+      "pollen-robotics/microduck": [
+        562
+      ]
+    },
+    "retired_development_tags": [
+      "daemon-dev-home-flashlight-on-release"
+    ],
+    "experimental_model_metadata_status": {
+      "apirrone/velstand_v7_yaw_remap": 401
+    }
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -21666,6 +22028,36 @@
         "daemon-dev-impact-guard-v3",
         "daemon-dev-laser-track"
       ]
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-10T05:34:09.094567+00:00",
+      "source_snapshot_utc": "2026-11-10T06:37:23.060236+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-10T06:37:53.888023+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          449
+        ]
+      },
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Open #449 syncs the reviewed main and renumbers its phase skill extension to API54. The base-relative phase logic is unchanged. Official 0.18.8, main dev1673 and replica baselines are unchanged.",
+      "project_github_latest_target_changed": false
     }
   ],
   "replica_public_image": {
