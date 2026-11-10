@@ -9386,52 +9386,67 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-10-24T20:42:52Z",
-          "updated_at": "2026-11-06T19:21:23Z",
+          "updated_at": "2026-11-10T06:28:05Z",
           "merged_at": null,
-          "merge_commit_sha": "d597c146be5b7a669963407e12b55fa656558634",
-          "head_sha": "5aa965671d960e53990ae10252c378d5988f150b",
-          "base_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+          "merge_commit_sha": "7da13c9c2bd934b6f72648736e960e98d9776e74",
+          "head_sha": "225d887389cde26b1be918eea0b05dfa1179c794",
+          "base_sha": "9259844672fcb92477509a6e3fe240f53109db17",
           "base_branch": "main",
-          "actual_merge_base": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+          "actual_merge_base": "9259844672fcb92477509a6e3fe240f53109db17",
           "source_version": "0.18.9",
-          "api_version": 52,
-          "commit_count": 7,
+          "api_version": 54,
+          "commit_count": 8,
           "changed_file_count": 11,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...5aa965671d960e53990ae10252c378d5988f150b",
-          "classification": "pending proposal;not formal or projectintegration",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/9259844672fcb92477509a6e3fe240f53109db17...225d887389cde26b1be918eea0b05dfa1179c794",
+          "classification": "Open phase-skill proposal with API54 on main API53. No matching development prerelease observed.",
           "priority": "medium_motion_research;high_contract_review",
           "replica_integration": "not_integrated; no runtime/model/image/environment/device/browser change",
-          "previous_head_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
+          "previous_head_sha": "5aa965671d960e53990ae10252c378d5988f150b",
           "latest_increment": {
-            "from_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
-            "to_sha": "5aa965671d960e53990ae10252c378d5988f150b",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/bdad4127d37612ccbbedf1fddcdbf80c4dfdc362...5aa965671d960e53990ae10252c378d5988f150b",
-            "commits": 30,
-            "files": 71,
-            "feature_comparison": "10 of 11 nonblank added/removed file-line lists identical; IPC51 to 52 numbering/comments only. New base189/API51, phaseAPI52."
+            "from_sha": "5aa965671d960e53990ae10252c378d5988f150b",
+            "to_sha": "225d887389cde26b1be918eea0b05dfa1179c794",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/5aa965671d960e53990ae10252c378d5988f150b...225d887389cde26b1be918eea0b05dfa1179c794",
+            "commits": 28,
+            "files": 34,
+            "new_base_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+            "feature_comparison": "Ten of eleven base-relative nonblank change-line lists are identical. The remaining IPC list only changes the API constants and comments from a 51-to-52 extension to a 53-to-54 extension."
           },
           "feature_review": {
-            "change": "30 known main-sync/merge commits; current base189 relative 7 historical commits / 11 files. Ten nonblank added/removed feature-line lists identical; IPC only renumbers 51 to 52 and corresponding comments. Phase behavior unchanged; no new tempo override or models.",
+            "change": "Merge main with the already reviewed laser and impact guard changes. The phase extension moves to API54 without a change to the phase algorithm or model import behavior.",
+            "phase_contract": "The three SkillParams fields encoding, period_s and end_phase carry fixed manifest timing. Episodic skills return at end_phase. Perpetual skills require hold and wrap. No per-run music or tempo override.",
             "source_version": "0.18.9",
-            "api_version": 52,
-            "classification": "pending; not in formal188 or current main189",
-            "validation_scope": "Source comparison only; prior author reports are not final5aa whole-tree rerun evidence. No tracker test, build or hardware execution.",
+            "api_version": 54,
+            "base_api_version": 53,
+            "classification": "Open proposal only. Current main and dev1673 remain API53. Formal daemon remains 0.18.8.",
+            "validation_scope": "Compared base-relative source changes and fixed blobs. The author comment identifies a main sync and API renumbering. No GitHub check-run results were returned for this exact head at this cutoff. Earlier author workspace reports retain their original provenance.",
             "replica_integration": "not integrated",
-            "previous_feature_review": {
-              "change": "20 known main-sync/merge commits. Base98 relative6 historical commits/11files;10 nonblank feature-line lists identical, IPC only50->51 numbering/comments. Phaseclock/skill semantics unchanged; no new tempo override/model or final-source rerun evidence.",
-              "api_version": 51,
-              "source_version": "0.18.6",
-              "classification": "pending; notformal186",
-              "validation_scope": "Read isolated feature comparisons and canonical constants only; historical author test claim unchanged, no tracker test/hardware.",
-              "replica_integration": "not integrated"
-            },
+            "author_sync_comment_url": "https://github.com/pollen-robotics/microduck/pull/449#issuecomment-6760704070",
             "latest_sync": {
-              "from_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
-              "to_sha": "5aa965671d960e53990ae10252c378d5988f150b",
-              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/bdad4127d37612ccbbedf1fddcdbf80c4dfdc362...5aa965671d960e53990ae10252c378d5988f150b",
-              "commits": 30,
-              "files": 71,
-              "feature_comparison": "10 of 11 nonblank added/removed file-line lists identical; IPC51 to 52 numbering/comments only. New base189/API51, phaseAPI52."
+              "from_sha": "5aa965671d960e53990ae10252c378d5988f150b",
+              "to_sha": "225d887389cde26b1be918eea0b05dfa1179c794",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/5aa965671d960e53990ae10252c378d5988f150b...225d887389cde26b1be918eea0b05dfa1179c794",
+              "commits": 28,
+              "files": 34,
+              "new_base_sha": "9259844672fcb92477509a6e3fe240f53109db17",
+              "feature_comparison": "Ten of eleven base-relative nonblank change-line lists are identical. The remaining IPC list only changes the API constants and comments from a 51-to-52 extension to a 53-to-54 extension."
+            },
+            "fixed_sources": {
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/duck-ipc-proto/src/lib.rs",
+              "robotctl/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/robotctl/src/main.rs",
+              "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/robotd/src/control.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/robotd/src/main.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/robotd-params/src/lib.rs",
+              "docs/policy-manifest.md": "https://github.com/pollen-robotics/microduck/blob/225d887389cde26b1be918eea0b05dfa1179c794/docs/policy-manifest.md"
+            },
+            "impact": {
+              "HD1910": "High contract review before applying any phase skill to the replica. The sync adds no servo adaptation.",
+              "camera": "Inherits the main laser camera path. No phase-specific camera change.",
+              "ToF": "No phase-specific ToF or obstacle behavior change.",
+              "model_management": "Phase manifest and registration semantics are unchanged since the previous proposal.",
+              "training": "No new training, weights or downloadable models.",
+              "motion": "Medium research reference. Validate phase timing, exit and recovery on the replica before adoption.",
+              "sound": "No sound assets or per-run synchronization to music."
             }
           },
           "history": [
@@ -9612,8 +9627,65 @@
               "replica_integration": "Not integrated or tested by this tracker; own source/validation records unchanged.",
               "source_version": "0.18.6",
               "api_version": 51
+            },
+            {
+              "number": 449,
+              "title": "Phase-encoded policies can run as skills",
+              "url": "https://github.com/pollen-robotics/microduck/pull/449",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-10-24T20:42:52Z",
+              "updated_at": "2026-11-06T19:21:23Z",
+              "merged_at": null,
+              "merge_commit_sha": "d597c146be5b7a669963407e12b55fa656558634",
+              "head_sha": "5aa965671d960e53990ae10252c378d5988f150b",
+              "base_sha": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+              "base_branch": "main",
+              "actual_merge_base": "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+              "source_version": "0.18.9",
+              "api_version": 52,
+              "commit_count": 7,
+              "changed_file_count": 11,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...5aa965671d960e53990ae10252c378d5988f150b",
+              "classification": "pending proposal;not formal or projectintegration",
+              "priority": "medium_motion_research;high_contract_review",
+              "replica_integration": "not_integrated; no runtime/model/image/environment/device/browser change",
+              "previous_head_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
+              "latest_increment": {
+                "from_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
+                "to_sha": "5aa965671d960e53990ae10252c378d5988f150b",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/bdad4127d37612ccbbedf1fddcdbf80c4dfdc362...5aa965671d960e53990ae10252c378d5988f150b",
+                "commits": 30,
+                "files": 71,
+                "feature_comparison": "10 of 11 nonblank added/removed file-line lists identical; IPC51 to 52 numbering/comments only. New base189/API51, phaseAPI52."
+              },
+              "feature_review": {
+                "change": "30 known main-sync/merge commits; current base189 relative 7 historical commits / 11 files. Ten nonblank added/removed feature-line lists identical; IPC only renumbers 51 to 52 and corresponding comments. Phase behavior unchanged; no new tempo override or models.",
+                "source_version": "0.18.9",
+                "api_version": 52,
+                "classification": "pending; not in formal188 or current main189",
+                "validation_scope": "Source comparison only; prior author reports are not final5aa whole-tree rerun evidence. No tracker test, build or hardware execution.",
+                "replica_integration": "not integrated",
+                "previous_feature_review": {
+                  "change": "20 known main-sync/merge commits. Base98 relative6 historical commits/11files;10 nonblank feature-line lists identical, IPC only50->51 numbering/comments. Phaseclock/skill semantics unchanged; no new tempo override/model or final-source rerun evidence.",
+                  "api_version": 51,
+                  "source_version": "0.18.6",
+                  "classification": "pending; notformal186",
+                  "validation_scope": "Read isolated feature comparisons and canonical constants only; historical author test claim unchanged, no tracker test/hardware.",
+                  "replica_integration": "not integrated"
+                },
+                "latest_sync": {
+                  "from_sha": "bdad4127d37612ccbbedf1fddcdbf80c4dfdc362",
+                  "to_sha": "5aa965671d960e53990ae10252c378d5988f150b",
+                  "fixed_url": "https://github.com/pollen-robotics/microduck/compare/bdad4127d37612ccbbedf1fddcdbf80c4dfdc362...5aa965671d960e53990ae10252c378d5988f150b",
+                  "commits": 30,
+                  "files": 71,
+                  "feature_comparison": "10 of 11 nonblank added/removed file-line lists identical; IPC51 to 52 numbering/comments only. New base189/API51, phaseAPI52."
+                }
+              }
             }
-          ]
+          ],
+          "updated_at_jst": "2026-11-10T15:28:05+09:00"
         },
         {
           "number": 448,
@@ -19655,35 +19727,25 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-10T05:34:09.094567+00:00",
+  "checked_at_utc": "2026-11-10T06:37:23.060236+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-10T04:35:06.349830+00:00",
-    "source_snapshot_utc": "2026-11-10T05:34:09.094567+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
-    "default_branch_changes": true,
+    "previous_substantive_review_utc": "2026-11-10T05:34:09.094567+00:00",
+    "source_snapshot_utc": "2026-11-10T06:37:23.060236+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-10T06:37:53.888023+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.18.8",
     "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        562
-      ]
-    },
+    "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        503,
-        551,
-        558
+        449
       ]
     },
-    "previous_tracked_prs_merged": true,
-    "new_development_releases": [
-      "daemon-dev-home-flashlight-on-release"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-main"
-    ],
+    "previous_tracked_prs_merged": false,
+    "new_development_releases": [],
+    "moved_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -19693,19 +19755,8 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Main dev1673 combines laser tracking and opt-in ROBOTIS guard at API53. Two historical feature tags retired. #562 dev1672 remains separate on API52. #503 closed without merging. Formal 0.18.8 and replica records retain their baselines.",
-    "project_github_latest_target_changed": false,
-    "new_prs_merged_into_default_branch": {},
-    "merged_tracked_prs_into_default_branch": {
-      "pollen-robotics/microduck": [
-        558,
-        551
-      ]
-    },
-    "retired_development_tags": [
-      "daemon-dev-impact-guard-v3",
-      "daemon-dev-laser-track"
-    ]
+    "notes": "Open #449 syncs the reviewed main and renumbers its phase skill extension to API54. The base-relative phase logic is unchanged. Official 0.18.8, main dev1673 and replica baselines are unchanged.",
+    "project_github_latest_target_changed": false
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -21564,6 +21615,57 @@
           561
         ]
       }
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-10T04:35:06.349830+00:00",
+      "source_snapshot_utc": "2026-11-10T05:34:09.094567+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-10T05:34:54.241480+00:00",
+      "default_branch_changes": true,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.18.8",
+      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          562
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          503,
+          551,
+          558
+        ]
+      },
+      "previous_tracked_prs_merged": true,
+      "new_development_releases": [
+        "daemon-dev-home-flashlight-on-release"
+      ],
+      "moved_development_tags": [
+        "daemon-dev-main"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Main dev1673 combines laser tracking and opt-in ROBOTIS guard at API53. Two historical feature tags retired. #562 dev1672 remains separate on API52. #503 closed without merging. Formal 0.18.8 and replica records retain their baselines.",
+      "project_github_latest_target_changed": false,
+      "new_prs_merged_into_default_branch": {},
+      "merged_tracked_prs_into_default_branch": {
+        "pollen-robotics/microduck": [
+          558,
+          551
+        ]
+      },
+      "retired_development_tags": [
+        "daemon-dev-impact-guard-v3",
+        "daemon-dev-laser-track"
+      ]
     }
   ],
   "replica_public_image": {
