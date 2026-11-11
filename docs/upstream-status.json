@@ -5567,133 +5567,295 @@
         {
           "tag": "daemon-dev-nfc-mode-tags",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-mode-tags",
-          "published_at": "2026-11-04T10:28:41Z",
-          "version": "daemon 0.18.3-dev.1558.42afb9d (nfc-mode-tags)",
-          "head_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+          "published_at": "2026-11-11T04:51:19Z",
+          "version": "daemon 0.19.0-dev.1692.f66ed71 (nfc-mode-tags)",
+          "head_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
           "prerelease": true,
-          "source_version": "0.18.3",
-          "development_api_version": 47,
-          "classification": "new separate moving development tag; not default main or formal release",
-          "change": "Separate mode-tag prototype on pairing7ae; walk/roller requests plus three recognized no-op tags.",
-          "review": {
-            "mode_records": "Text or URI value, trimmed, exact case-sensitive match. walk_mode -> walk; roller_skating_mode -> roller. soccer_mode, laser_mode and autonomous_mode only chirp/log NotYet and make no mode request.",
-            "routing": "Pairing record takes precedence if also present; otherwise first recognized mode record wins. Existing per-touch UID suppression is retained. Mode path does not use the connected-pad guard from pairing::on_touch.",
-            "sound_and_result": "Reuses chirp before request; sound transport error is logged but does not stop the mode request. Switched means IntentResult.accepted, not a subsequent state or loaded-policy verification; refusal/transport failure is logged. No new sound asset.",
-            "inheritance": "One commit/four files on existing pairing7ae, retaining its generic pairing token, classified-pad preference and SPI-only Type5 implementation. Does not update or replace daemon-dev-nfc-pairing-tag. New branch diverges from main by ahead5/behind6; it still misses later main517/518/519 changes.",
-            "tests_read": [
-              "each_tag_text_names_its_mode_and_nothing_else_does",
-              "walk_and_roller_skating_switch_the_robot",
-              "soccer_laser_and_autonomous_quack_and_ask_nothing",
-              "a_refusal_says_why"
-            ],
-            "tracker_tests_executed": false,
-            "acceptance": "Four fake-driver definitions read only; no reader/card, mode-transition, policy-load or device test performed. Soccer/laser/autonomous functionality is not implemented."
-          },
-          "fixed_sources": {
-            "mode_contract": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L58",
-            "mode_request": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L97",
-            "routing": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/main.rs#L246",
-            "documentation": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/docs/robot/pair-a-gamepad.md#L76",
-            "source_version": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/Cargo.toml",
-            "api": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/duck-ipc-proto/src/lib.rs"
-          },
-          "priority": "conditional medium with NFC reader; low for current non-NFC delivery",
-          "replica_integration": "Not integrated, installed, built or tested by this monitor.",
-          "impact": "Existing NFC reader can request walk/roller modes and reuse chirp; no new physical skills, models/weights/training, HD-1910 driver, RGB/ToF stream or sound asset.",
+          "source_version": "0.19.0",
+          "development_api_version": 53,
+          "api_version": 53,
+          "published_at_jst": "2026-11-11T13:51:19+09:00",
+          "committed_at": "2026-11-11T04:47:12Z",
+          "committed_at_jst": "2026-11-11T13:47:12+09:00",
+          "previous_head_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+          "head_history": [
+            "42afb9dbac17bd9a0422711c7f00407f8373d99f"
+          ],
+          "source_history": [
+            {
+              "tag": "daemon-dev-nfc-mode-tags",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-mode-tags",
+              "published_at": "2026-11-04T10:28:41Z",
+              "version": "daemon 0.18.3-dev.1558.42afb9d (nfc-mode-tags)",
+              "head_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+              "prerelease": true,
+              "source_version": "0.18.3",
+              "development_api_version": 47,
+              "classification": "new separate moving development tag; not default main or formal release",
+              "change": "Separate mode-tag prototype on pairing7ae; walk/roller requests plus three recognized no-op tags.",
+              "review": {
+                "mode_records": "Text or URI value, trimmed, exact case-sensitive match. walk_mode -> walk; roller_skating_mode -> roller. soccer_mode, laser_mode and autonomous_mode only chirp/log NotYet and make no mode request.",
+                "routing": "Pairing record takes precedence if also present; otherwise first recognized mode record wins. Existing per-touch UID suppression is retained. Mode path does not use the connected-pad guard from pairing::on_touch.",
+                "sound_and_result": "Reuses chirp before request; sound transport error is logged but does not stop the mode request. Switched means IntentResult.accepted, not a subsequent state or loaded-policy verification; refusal/transport failure is logged. No new sound asset.",
+                "inheritance": "One commit/four files on existing pairing7ae, retaining its generic pairing token, classified-pad preference and SPI-only Type5 implementation. Does not update or replace daemon-dev-nfc-pairing-tag. New branch diverges from main by ahead5/behind6; it still misses later main517/518/519 changes.",
+                "tests_read": [
+                  "each_tag_text_names_its_mode_and_nothing_else_does",
+                  "walk_and_roller_skating_switch_the_robot",
+                  "soccer_laser_and_autonomous_quack_and_ask_nothing",
+                  "a_refusal_says_why"
+                ],
+                "tracker_tests_executed": false,
+                "acceptance": "Four fake-driver definitions read only; no reader/card, mode-transition, policy-load or device test performed. Soccer/laser/autonomous functionality is not implemented."
+              },
+              "fixed_sources": {
+                "mode_contract": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L58",
+                "mode_request": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/modes.rs#L97",
+                "routing": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/nfc/src/main.rs#L246",
+                "documentation": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/docs/robot/pair-a-gamepad.md#L76",
+                "source_version": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/Cargo.toml",
+                "api": "https://github.com/pollen-robotics/microduck/blob/42afb9dbac17bd9a0422711c7f00407f8373d99f/duck-ipc-proto/src/lib.rs"
+              },
+              "priority": "conditional medium with NFC reader; low for current non-NFC delivery",
+              "replica_integration": "Not integrated, installed, built or tested by this monitor.",
+              "impact": "Existing NFC reader can request walk/roller modes and reuse chirp; no new physical skills, models/weights/training, HD-1910 driver, RGB/ToF stream or sound asset.",
+              "asset_inventory": [
+                {
+                  "name": "0.18.3-dev.1558.42afb9d.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:cb585f6d86095a20c04627cd8a9d95f888909d49b3dc0e23c9e6fed7d5446f6a"
+                },
+                {
+                  "name": "0.18.3-dev.1558.42afb9d.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:3c35cc1bda68eccd557fdc7a4a34e9970356d3c435786e6639cc7721d779120c"
+                },
+                {
+                  "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst",
+                  "size": 15057536,
+                  "digest": "sha256:2142c25c8828e4a38aa8282c53689cbcb64c1aa5d08d7c41ddbb3dd688b3c31b"
+                },
+                {
+                  "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:25722fb7139f1551a9c9ae97cfe6b40d11b90fabd50687bab89f4c56355dd5c1"
+                },
+                {
+                  "name": "duckctl-0.18.3-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1674180,
+                  "digest": "sha256:ae72aa5463e8fbcad9d98bb4ee8fc2270c29ca08470d3f907321a5186f2d95bb"
+                },
+                {
+                  "name": "duckctl-0.18.3-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1594062,
+                  "digest": "sha256:73b407c202de1d94ede496ae5f62442ddcab86a80a9e3acc14f97a74e8a330f1"
+                },
+                {
+                  "name": "duckctl-0.18.3-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3035214,
+                  "digest": "sha256:291f23f240f1b0033bce101d342d5e836bc1395ff0758942c5ae98012605358e"
+                },
+                {
+                  "name": "duckctl-0.18.3-py3-none-win_amd64.whl",
+                  "size": 1512567,
+                  "digest": "sha256:323d6d80d1cda6cd71b7126f7abb26652e5cb9e54ee5e63e88f10aed3b0d775f"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:581dac79e6632d6a885e37a7b02fec69b570b82df98d7c7050e5de9f0393a1ec"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:c53a1b936a51cb0f0cbbf43eedaf8af22528f51690ae0d84239f5921b05321f6"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1505221,
+                  "digest": "sha256:8eb857b317f4a2b8f496677ba98b306e274a960e168d787b6f7d761437bb6b24"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1601653,
+                  "digest": "sha256:a5ca7b9193c57b4ec2ae5d1691b92b1b3104006a36cd9694542ccce790cdf580"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1384008,
+                  "digest": "sha256:83b492cb565fdc3e9a77a589bc7a824ec9341facefb86a7d02544683a6fd0eaf"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 562,
+                  "digest": "sha256:08d489edc678c6576fa30ba806cef16fef19e410a5161a35ef2859cf4a2653ac"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:3aa7ef0368aec7a84c3081481644e40195b574fb2db02d54a8c0c3e5a402757d"
+                }
+              ],
+              "comparison_to_existing_pairing": {
+                "from_sha": "7ae573569522af9558cc04109ab2edd619592a55",
+                "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+                "status": "ahead",
+                "commit_count": 1,
+                "file_count": 4,
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7ae573569522af9558cc04109ab2edd619592a55...42afb9dbac17bd9a0422711c7f00407f8373d99f"
+              },
+              "comparison_to_recorded_main": {
+                "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+                "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+                "status": "diverged",
+                "ahead_by": 5,
+                "behind_by": 6,
+                "file_count": 15,
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...42afb9dbac17bd9a0422711c7f00407f8373d99f"
+              },
+              "superseded_at_check_utc": "2026-11-11T07:13:21.793259+00:00"
+            }
+          ],
           "asset_inventory": [
             {
-              "name": "0.18.3-dev.1558.42afb9d.manifest.json",
+              "name": "0.19.0-dev.1692.f66ed71.manifest.json",
               "size": 386,
-              "digest": "sha256:cb585f6d86095a20c04627cd8a9d95f888909d49b3dc0e23c9e6fed7d5446f6a"
+              "digest": "sha256:a572ded7b064dfef1267312a5ce571404db6b01d736a663f27374a8b20514c94"
             },
             {
-              "name": "0.18.3-dev.1558.42afb9d.manifest.json.minisig",
+              "name": "0.19.0-dev.1692.f66ed71.manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:3c35cc1bda68eccd557fdc7a4a34e9970356d3c435786e6639cc7721d779120c"
+              "digest": "sha256:65c5e2f962b7efd128b76c148b0ce9bae6871202e0de1fcbebb7930a516fb1f8"
             },
             {
-              "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst",
-              "size": 15057536,
-              "digest": "sha256:2142c25c8828e4a38aa8282c53689cbcb64c1aa5d08d7c41ddbb3dd688b3c31b"
+              "name": "daemon-0.19.0-dev.1692.f66ed71.tar.zst",
+              "size": 17631814,
+              "digest": "sha256:15581e35af05c0cb13a119f1f188e451ce9e248ffd095ae6ebea52c02a6f0202"
             },
             {
-              "name": "daemon-0.18.3-dev.1558.42afb9d.tar.zst.minisig",
+              "name": "daemon-0.19.0-dev.1692.f66ed71.tar.zst.minisig",
               "size": 279,
-              "digest": "sha256:25722fb7139f1551a9c9ae97cfe6b40d11b90fabd50687bab89f4c56355dd5c1"
+              "digest": "sha256:26510b1dcebdcf28fdeaee2c4ef7ac32272e36a0e37ac88a539b0109c42ecf8e"
             },
             {
-              "name": "duckctl-0.18.3-py3-none-macosx_10_12_x86_64.whl",
-              "size": 1674180,
-              "digest": "sha256:ae72aa5463e8fbcad9d98bb4ee8fc2270c29ca08470d3f907321a5186f2d95bb"
+              "name": "duckctl-0.19.0-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674199,
+              "digest": "sha256:f91cf7986e0d4d7e28752c29648bddecbe46eb139a2b803b924b2aca2e8d4318"
             },
             {
-              "name": "duckctl-0.18.3-py3-none-macosx_11_0_arm64.whl",
-              "size": 1594062,
-              "digest": "sha256:73b407c202de1d94ede496ae5f62442ddcab86a80a9e3acc14f97a74e8a330f1"
+              "name": "duckctl-0.19.0-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594100,
+              "digest": "sha256:14497357707c748d29dd9c27ca149d47a2844d38e564b6b4127ed2f3b1739da4"
             },
             {
-              "name": "duckctl-0.18.3-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3035214,
-              "digest": "sha256:291f23f240f1b0033bce101d342d5e836bc1395ff0758942c5ae98012605358e"
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809536,
+              "digest": "sha256:0f1406ad82087b941320b73831c7870ba739ee09516484a2f789e96043b68e4f"
             },
             {
-              "name": "duckctl-0.18.3-py3-none-win_amd64.whl",
-              "size": 1512567,
-              "digest": "sha256:323d6d80d1cda6cd71b7126f7abb26652e5cb9e54ee5e63e88f10aed3b0d775f"
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3037353,
+              "digest": "sha256:6ee78f12d89ecf1c576c9f0e5557263b8616b15ce4d13cf3252b5087771c4312"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-win_amd64.whl",
+              "size": 1513214,
+              "digest": "sha256:2b334e507b595f6a11d9b4633fe1c84d1528a038d0b8fadecba893840f4b8428"
             },
             {
               "name": "duckctl-linux-aarch64.tar.gz",
               "size": 361,
-              "digest": "sha256:581dac79e6632d6a885e37a7b02fec69b570b82df98d7c7050e5de9f0393a1ec"
+              "digest": "sha256:ca084ffdf47cd252c7f5c7fa7dcbad7c6516678dfce23c2e2ccd952dbb712a0d"
             },
             {
               "name": "duckctl-linux-x86_64.tar.gz",
-              "size": 361,
-              "digest": "sha256:c53a1b936a51cb0f0cbbf43eedaf8af22528f51690ae0d84239f5921b05321f6"
+              "size": 360,
+              "digest": "sha256:72ec8ef6c6549b864049af403969672f9137d3d0f79407a47407635b361ef230"
             },
             {
               "name": "duckctl-macos-arm64.tar.gz",
-              "size": 1505221,
-              "digest": "sha256:8eb857b317f4a2b8f496677ba98b306e274a960e168d787b6f7d761437bb6b24"
+              "size": 1505330,
+              "digest": "sha256:080fc772f7fb8645f9d43e436985759cd1662ede8e0617f38739dc7c61a49dea"
             },
             {
               "name": "duckctl-macos-x86_64.tar.gz",
-              "size": 1601653,
-              "digest": "sha256:a5ca7b9193c57b4ec2ae5d1691b92b1b3104006a36cd9694542ccce790cdf580"
+              "size": 1601503,
+              "digest": "sha256:a3a95599e97d75898b93cedeed69df53cd40d02446e633cd74e25a969b1cde98"
             },
             {
               "name": "duckctl-windows-x86_64.zip",
-              "size": 1384008,
-              "digest": "sha256:83b492cb565fdc3e9a77a589bc7a824ec9341facefb86a7d02544683a6fd0eaf"
+              "size": 1384650,
+              "digest": "sha256:cece8272c2ca2ca06071a5537ae1481f0c16064fe87d626ae060915c58dbbc0a"
             },
             {
               "name": "manifest.json",
               "size": 562,
-              "digest": "sha256:08d489edc678c6576fa30ba806cef16fef19e410a5161a35ef2859cf4a2653ac"
+              "digest": "sha256:14870326b805402adbd2ae52f0f4f13f1c2f4f6a75d23f42468088ebab80bddc"
             },
             {
               "name": "manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:3aa7ef0368aec7a84c3081481644e40195b574fb2db02d54a8c0c3e5a402757d"
+              "digest": "sha256:9d65bcef812bc172462e143ae11a4d83bc72ad0c397a595df75fe6001c76ddcd"
             }
           ],
-          "comparison_to_existing_pairing": {
-            "from_sha": "7ae573569522af9558cc04109ab2edd619592a55",
-            "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
-            "status": "ahead",
-            "commit_count": 1,
-            "file_count": 4,
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7ae573569522af9558cc04109ab2edd619592a55...42afb9dbac17bd9a0422711c7f00407f8373d99f"
-          },
+          "assets_checked_at_utc": "2026-11-11T07:13:21.793259+00:00",
+          "classification": "Independent mode-tag development prototype. No matching pull request found.",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/f66ed71637d879288d8a23dbf066ab732be49019",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...f66ed71637d879288d8a23dbf066ab732be49019",
           "comparison_to_recorded_main": {
-            "from_sha": "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
-            "to_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
-            "status": "diverged",
-            "ahead_by": 5,
-            "behind_by": 6,
-            "file_count": 15,
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/d13be2c1a2f4b1e0b0e499b08b92f870518b1384...42afb9dbac17bd9a0422711c7f00407f8373d99f"
-          }
+            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "to_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...f66ed71637d879288d8a23dbf066ab732be49019",
+            "commit_count": 5,
+            "file_count": 10
+          },
+          "comparison_to_previous_head": {
+            "from_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+            "to_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "merge_base_sha": "42afb9dbac17bd9a0422711c7f00407f8373d99f",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/42afb9dbac17bd9a0422711c7f00407f8373d99f...f66ed71637d879288d8a23dbf066ab732be49019",
+            "commit_count": 133,
+            "file_count": 160
+          },
+          "comparison_to_classic_dev1690": {
+            "from_sha": "59e6e31bf771d94cd34274fdf88f5cc493092808",
+            "to_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "merge_base_sha": "59e6e31bf771d94cd34274fdf88f5cc493092808",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/59e6e31bf771d94cd34274fdf88f5cc493092808...f66ed71637d879288d8a23dbf066ab732be49019",
+            "commit_count": 3,
+            "file_count": 4
+          },
+          "review": {
+            "inheritance": "Includes dev1690 as an ancestor. The MIFARE Classic parser and ST25R100 driver blobs match dev1690. The 133 commits from dev1558 include main history.",
+            "mode_records": "Laser tag requests walk, then enables tracking only after walk is accepted. Walk and roller tags first request that tracking be disabled. If disabling fails, the mode request proceeds and the failure is logged.",
+            "partial_result": "A failed tracking-on request leaves the preceding walk selection in place. A successful mode result following a failed tracking-off request does not verify tracking is off. The robotd acknowledgement queues the laser request and does not verify camera or motion.",
+            "routing": "An NDEF pairing record takes precedence over a mode record. Mode tags reuse the chirp. Soccer and autonomous tags only chirp and log.",
+            "validation_boundary": "Upstream tagged daemon build and publish jobs succeeded. The fake-driver definitions cover request ordering and refused walk. Actual card touches, camera target acquisition, motion takeover, physical stops and HD1910 acceptance remain unverified here.",
+            "fixed_sources": {
+              "nfc/src/modes.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/nfc/src/modes.rs",
+              "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/nfc/src/main.rs",
+              "nfc/src/classic.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/nfc/src/classic.rs",
+              "nfc/src/st25r100.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/nfc/src/st25r100.rs",
+              "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/docs/robot/pair-a-gamepad.md",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/robotd/src/main.rs",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/f66ed71637d879288d8a23dbf066ab732be49019/duck-ipc-proto/src/lib.rs"
+            },
+            "upstream_build_publish_urls": {
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/42961494011/job/130328926868",
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42961494011/job/130330139711"
+            }
+          },
+          "impact": {
+            "HD1910": "Low for current delivery. For future NFC mode support, verify controller takeover and stop behavior on HD1910.",
+            "camera": "Reuses the existing laser camera path. Before enabling the NFC entry point, verify calibration, acquisition and loss behavior.",
+            "ToF": "No direct change relative to main.",
+            "model_management": "Selects existing walk or roller mode through robotd. No new policy assets.",
+            "training": "No direct change relative to main.",
+            "motion": "High review priority before adoption. Mode and tracking use separate requests with partial-failure behavior.",
+            "sound": "Reuses the existing chirp. No new assets."
+          },
+          "priority": "Low for current delivery. High priority motion review before adopting NFC-triggered tracking.",
+          "replica_integration": "not_integrated"
         },
         {
           "tag": "daemon-dev-robotd-holds-sit-toggle",
@@ -21146,11 +21308,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-11T04:32:58.608031+00:00",
+  "checked_at_utc": "2026-11-11T05:34:06.933845+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-11T01:36:00.048894+00:00",
-    "source_snapshot_utc": "2026-11-11T04:32:58.608031+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-11T04:35:38.128077+00:00",
+    "previous_substantive_review_utc": "2026-11-11T04:32:58.608031+00:00",
+    "source_snapshot_utc": "2026-11-11T05:34:06.933845+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-11T07:13:21.793259+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.19.0",
@@ -21159,10 +21321,10 @@
     "new_pull_requests": {},
     "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      "daemon-dev-nfc-mifare-classic"
+    "new_development_releases": [],
+    "moved_development_tags": [
+      "daemon-dev-nfc-mode-tags"
     ],
-    "moved_development_tags": [],
     "retired_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
@@ -21174,7 +21336,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "dev1690 adds read-only MIFARE Classic NDEF support on ST25R100. Formal daemon 0.19.0 and main retain their prior revisions."
+    "notes": "dev1692 brings dev1690 card support into the mode-tag prototype and adds laser tracking requests. Formal 0.19.0 and main retain their prior revisions."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -23239,6 +23401,35 @@
       "robot_connected": false,
       "image_built_or_published_by_tracker": false,
       "notes": "Official 0.19.0/API53 includes #556/#563. #567 moves only the CI workflow after the tag. #565 stays open and #545 republishes with identical NFC driver source."
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-11T01:36:00.048894+00:00",
+      "source_snapshot_utc": "2026-11-11T04:32:58.608031+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-11T04:35:38.128077+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.19.0",
+      "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [
+        "daemon-dev-nfc-mifare-classic"
+      ],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "dev1690 adds read-only MIFARE Classic NDEF support on ST25R100. Formal daemon 0.19.0 and main retain their prior revisions."
     }
   ],
   "replica_public_image": {
