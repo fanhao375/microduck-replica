@@ -6845,6 +6845,146 @@
           },
           "priority": "Medium pairing reference where an NFC reader and supported Bluetooth controller are available. Low priority for the current replica image.",
           "replica_integration": "Source and release metadata reviewed. Not integrated into the replica."
+        },
+        {
+          "tag": "daemon-dev-nfc-mifare-classic",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-mifare-classic",
+          "head_sha": "59e6e31bf771d94cd34274fdf88f5cc493092808",
+          "version": "daemon 0.19.0-dev.1690.59e6e31 (nfc-mifare-classic)",
+          "published_at": "2026-11-11T04:30:17Z",
+          "published_at_jst": "2026-11-11T13:30:17+09:00",
+          "committed_at": "2026-11-11T04:25:16Z",
+          "committed_at_jst": "2026-11-11T13:25:16+09:00",
+          "prerelease": true,
+          "source_version": "0.19.0",
+          "version_family": "0.19.0",
+          "api_version": 53,
+          "development_api_version": 53,
+          "asset_inventory": [
+            {
+              "name": "0.19.0-dev.1690.59e6e31.manifest.json",
+              "size": 386,
+              "digest": "sha256:df99a72db456c4b4af3ed28164cc1402fe9202225fac7f295d77c1ae51241167"
+            },
+            {
+              "name": "0.19.0-dev.1690.59e6e31.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:e256a112c0f75c81424fe3c2039da3da809d911c7df3fbf6e5f0fd8ee8f15d30"
+            },
+            {
+              "name": "daemon-0.19.0-dev.1690.59e6e31.tar.zst",
+              "size": 17630068,
+              "digest": "sha256:130d95a9f018e97e0e6fe67aaa074151bdbdb8ed534b5b16cde5268d293ae736"
+            },
+            {
+              "name": "daemon-0.19.0-dev.1690.59e6e31.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:aa8d10dcd08e51ef602b1c7cdd4814febb718b40767d94204a58762b6ec5e004"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674199,
+              "digest": "sha256:f3a078469419b296cf907f4f5eb34a09d9983cc56253e343297ac70f1fa2e0d7"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594100,
+              "digest": "sha256:90a6aac94d223e1f31b385b12f6545d540a9948a08105deeb9e2300656d6f04a"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809536,
+              "digest": "sha256:d39d29d46618033ecbf955ab3832838983f1df1c4cb2318ff1a68cb66e3ec303"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3037354,
+              "digest": "sha256:e6de9847b9b922ed513c744a2ed86abe88d4548d0aedd68cfac7f16930bbec63"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-win_amd64.whl",
+              "size": 1513216,
+              "digest": "sha256:a1335b95d91e7af76bfcc1499c5b60503c9f8c1bd59e241625891fe996d087af"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:b9677c20072be231aa3a974043c8b5e314d64fbe1146f7aca8dd6a1b57874d59"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 362,
+              "digest": "sha256:af3ff1d7fc1db498a6ebeb7780501c033e73a052f9d9d09b3f21dbbfabe59fd3"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505327,
+              "digest": "sha256:86f5033f65866b2d928d4dec05724fc76fbaa2410476f39efdd3f48f29c340e0"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601503,
+              "digest": "sha256:ac0d011d66f44c3409e85bede6ab2e5694b4a000ee2f9a5bac84c3b33baf06ad"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384650,
+              "digest": "sha256:e955c4a544643a0828e6124389c4a65e7d884fca99cfefc8f2341fc065f4e771"
+            },
+            {
+              "name": "manifest.json",
+              "size": 572,
+              "digest": "sha256:fea20f57023556710fff4ca7d5e41cffd087992c5d66ad4eb3b1cb12e7654861"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:6a238b66cdd21e28dd77a015e361c9899090edffc64ff7d02553c569d169d8df"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-11T04:35:38.128077+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/59e6e31bf771d94cd34274fdf88f5cc493092808",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...59e6e31bf771d94cd34274fdf88f5cc493092808",
+          "comparison_to_recorded_main": {
+            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "to_sha": "59e6e31bf771d94cd34274fdf88f5cc493092808",
+            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...59e6e31bf771d94cd34274fdf88f5cc493092808",
+            "commit_count": 2,
+            "file_count": 9
+          },
+          "classification": "Independent development prototype. No matching PR was found in the checked pull request list.",
+          "review": {
+            "change": "The ST25R100 reader identifies MIFARE Classic from its ISO 14443A selection response and reads NDEF sectors from the card directory. The scope is 1K cards and the first 15 data sectors on supported 4K cards. CLRC663 USB reports Classic cards as unreadable.",
+            "pairing": "Read-only card support. Existing NDEF pairing trigger, connected-gamepad check and feedback sounds are reused. A Classic card with an unreadable directory or unsupported reader is reported once per touch on the corresponding Unreadable path.",
+            "followup": "The second commit corrects the on-card byte order of the NDEF application identifier and adds a directory dump fixture.",
+            "validation_boundary": "The author states the first feature commit has not run against the board reader. The second commit records a regression fixture from a real card dump. The daemon build and publish jobs succeeded for the tagged commit. Actual 1K/4K reads, both antennas, end-to-end pairing and replica board acceptance remain unverified by this tracking.",
+            "fixed_sources": {
+              "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/docs/robot/pair-a-gamepad.md",
+              "nfc/src/classic.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/classic.rs",
+              "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/main.rs",
+              "nfc/src/reader.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/reader.rs",
+              "nfc/src/st25r100.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/st25r100.rs",
+              "nfc/src/tag.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/tag.rs",
+              "nfc/src/pairing.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/nfc/src/pairing.rs",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/59e6e31bf771d94cd34274fdf88f5cc493092808/duck-ipc-proto/src/lib.rs"
+            },
+            "upstream_build_publish_urls": {
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/42959127567/job/130321196537",
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42959127567/job/130322843874"
+            }
+          },
+          "impact": {
+            "HD1910": "Low for current delivery. Optional controller-pairing reference if the replica uses an ST25R100 reader.",
+            "camera": "No change.",
+            "ToF": "No change.",
+            "model_management": "No change.",
+            "training": "No change.",
+            "motion": "Existing gamepad pairing is reused. No changes to control or motion policies.",
+            "sound": "Existing pairing feedback is reused. No new sound assets or playback paths."
+          },
+          "priority": "Low for current replica delivery. Medium if evaluating alternative NFC pairing cards with ST25R100.",
+          "replica_integration": "not_integrated"
         }
       ],
       "pending_pull_requests": [
@@ -21006,41 +21146,24 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-11T01:36:00.048894+00:00",
+  "checked_at_utc": "2026-11-11T04:32:58.608031+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-10T11:46:52.461265+00:00",
-    "source_snapshot_utc": "2026-11-11T01:36:00.048894+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-11T01:43:07.842101+00:00",
-    "default_branch_changes": true,
-    "new_stable_release": true,
+    "previous_substantive_review_utc": "2026-11-11T01:36:00.048894+00:00",
+    "source_snapshot_utc": "2026-11-11T04:32:58.608031+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-11T04:35:38.128077+00:00",
+    "default_branch_changes": false,
+    "new_stable_release": false,
     "stable_release_tag": "daemon-v0.19.0",
     "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        564,
-        565,
-        566,
-        567
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        545,
-        556,
-        563
-      ]
-    },
-    "previous_tracked_prs_merged": true,
-    "new_development_releases": [],
-    "moved_development_tags": [
-      "daemon-dev-main",
-      "daemon-dev-nfcd-poll-less"
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
+    "previous_tracked_prs_merged": false,
+    "new_development_releases": [
+      "daemon-dev-nfc-mifare-classic"
     ],
-    "retired_development_tags": [
-      "daemon-dev-codex/secure-media-and-ble-defaults",
-      "daemon-dev-setup-code-from-eeprom"
-    ],
+    "moved_development_tags": [],
+    "retired_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "local_migration_record_changed": false,
@@ -21051,7 +21174,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Official 0.19.0/API53 includes #556/#563. #567 moves only the CI workflow after the tag. #565 stays open and #545 republishes with identical NFC driver source."
+    "notes": "dev1690 adds read-only MIFARE Classic NDEF support on ST25R100. Formal daemon 0.19.0 and main retain their prior revisions."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -23070,6 +23193,52 @@
       "image_built_or_published_by_tracker": false,
       "notes": "Open #563 and dev1677 add EEPROM-backed setup codes to a branch based on #556. The parent draft, main dev1674, official 0.18.8 and replica records retain their baselines.",
       "project_github_latest_target_changed": false
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-10T11:46:52.461265+00:00",
+      "source_snapshot_utc": "2026-11-11T01:36:00.048894+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-11T01:43:07.842101+00:00",
+      "default_branch_changes": true,
+      "new_stable_release": true,
+      "stable_release_tag": "daemon-v0.19.0",
+      "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          564,
+          565,
+          566,
+          567
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          545,
+          556,
+          563
+        ]
+      },
+      "previous_tracked_prs_merged": true,
+      "new_development_releases": [],
+      "moved_development_tags": [
+        "daemon-dev-main",
+        "daemon-dev-nfcd-poll-less"
+      ],
+      "retired_development_tags": [
+        "daemon-dev-codex/secure-media-and-ble-defaults",
+        "daemon-dev-setup-code-from-eeprom"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Official 0.19.0/API53 includes #556/#563. #567 moves only the CI workflow after the tag. #565 stays open and #545 republishes with identical NFC driver source."
     }
   ],
   "replica_public_image": {
