@@ -14201,6 +14201,58 @@
           "replica_integration": "not_integrated",
           "merged_at_jst": "2026-11-10T23:39:28+09:00",
           "priority": "Low, CI only."
+        },
+        {
+          "number": 568,
+          "title": "laser: scan only around the dot while tracking",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-11T07:34:24Z",
+          "updated_at": "2026-11-11T07:34:24Z",
+          "merged_at": null,
+          "merge_commit_sha": "a16c856b11d5cc250edc45c09ebbce565bdee737",
+          "url": "https://github.com/pollen-robotics/microduck/pull/568",
+          "head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+          "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+          "base_branch": "main",
+          "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+          "created_at_jst": "2026-11-11T16:34:24+09:00",
+          "updated_at_jst": "2026-11-11T16:34:24+09:00",
+          "source_version": "0.19.0",
+          "api_version": 53,
+          "commit_count": 1,
+          "changed_file_count": 3,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...6afda03e74e96bdbbef130165117cc83eee88bf2",
+          "classification": "Open PR against main. No matching development package in the checked release list.",
+          "review": {
+            "search": "When a last dot is available and a full scan is not due, the first pass looks for candidates within four configured radii each way around it. At radius 24 this is about 192 by 192 pixels before edge clipping. The second pass measures the candidate in its own neighborhood. A local result counts if within two radii of the last dot. A miss or farther candidate triggers full-frame fallback during the same look.",
+            "rescan_and_peak": "Once a second is due, the next available look scans the full frame. A higher-scoring point elsewhere may wait until that look. A local look reports the redder of its own peak and the cached full-frame peak.",
+            "performance": "Author reports 19.5 microseconds window vs 474 microseconds full-frame scanning on a Mac at 1280×720. The quoted face-board-v1 CPU numbers predate this change. Current whole-frame copy and sampling cadence remain in the source. No board measurement for this revision.",
+            "validation": "Author reports mediad tests, clippy with and without GStreamer, and fmt. GitHub check, coverage and board jobs succeeded for the PR head. Camera, motion and HD1910 acceptance remain separate.",
+            "fixed_sources": {
+              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/laser.rs",
+              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/deploy/robotd.toml",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/docs/robot/cheatsheet.md",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/duck-ipc-proto/src/lib.rs",
+              "mediad/src/frame.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/frame.rs"
+            },
+            "upstream_ci_urls": {
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476446",
+              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476327",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476061"
+            }
+          },
+          "impact": {
+            "HD1910": "Low for current release. Before enabling this camera-driven feature, validate target handoff and stopping on HD1910.",
+            "camera": "Medium for evaluation. Candidate scan cost may drop with a stable dot. Reacquisition, false positives and CPU usage on the target camera board need measurement.",
+            "ToF": "No direct change.",
+            "model_management": "No direct change.",
+            "training": "No direct change.",
+            "motion": "No robotd change. Different visual selection timing can affect following, takeover and stopping.",
+            "sound": "No direct change."
+          },
+          "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
+          "replica_integration": "not_integrated"
         }
       ],
       "previous_stable_releases": [
@@ -21453,22 +21505,24 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-11T07:15:09.459303+00:00",
+  "checked_at_utc": "2026-11-11T08:10:14.695681+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-11T05:34:06.933845+00:00",
-    "source_snapshot_utc": "2026-11-11T07:15:09.459303+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-11T07:17:54.843360+00:00",
+    "previous_substantive_review_utc": "2026-11-11T07:15:09.459303+00:00",
+    "source_snapshot_utc": "2026-11-11T08:10:14.695681+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-11T08:12:14.761162+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.19.0",
     "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        568
+      ]
+    },
     "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [
-      "daemon-dev-ball-mode"
-    ],
+    "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
     "official_blog_new_articles": false,
@@ -21481,7 +21535,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "dev1693 adds manual and autonomous soccer on the NFC mode prototype. Official daemon 0.19.0 and main retain their prior revisions."
+    "notes": "Open #568 proposes a local laser candidate scan with same-look full fallback and periodic rescans. Official daemon 0.19.0 and main retain their recorded revisions."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -23604,6 +23658,35 @@
       "robot_connected": false,
       "image_built_or_published_by_tracker": false,
       "notes": "dev1692 brings dev1690 card support into the mode-tag prototype and adds laser tracking requests. Formal 0.19.0 and main retain their prior revisions."
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-11T05:34:06.933845+00:00",
+      "source_snapshot_utc": "2026-11-11T07:15:09.459303+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-11T07:17:54.843360+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.19.0",
+      "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [
+        "daemon-dev-ball-mode"
+      ],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "dev1693 adds manual and autonomous soccer on the NFC mode prototype. Official daemon 0.19.0 and main retain their prior revisions."
     }
   ],
   "replica_public_image": {
