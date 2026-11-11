@@ -7292,6 +7292,337 @@
           },
           "priority": "Low for current delivery. High safety and compatibility review before experimenting with this motion mode on HD1910.",
           "replica_integration": "not_integrated"
+        },
+        {
+          "tag": "daemon-dev-nfc-photo-tag",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-photo-tag",
+          "head_sha": "42808635e29b06b1b791b75730bdba1d03b8257e",
+          "version": "daemon 0.19.0-dev.1696.4280863 (nfc-photo-tag)",
+          "published_at": "2026-11-11T09:16:21Z",
+          "published_at_jst": "2026-11-11T18:16:21+09:00",
+          "committed_at": "2026-11-11T09:11:08Z",
+          "committed_at_jst": "2026-11-11T18:11:08+09:00",
+          "prerelease": true,
+          "source_version": "0.19.0",
+          "version_family": "0.19.0",
+          "api_version": 54,
+          "development_api_version": 54,
+          "asset_inventory": [
+            {
+              "name": "0.19.0-dev.1696.4280863.manifest.json",
+              "size": 386,
+              "digest": "sha256:dae6716086b4c71ef1b90069e59ac53e6ac45ca77fc48ac9d2b3d5992020c557"
+            },
+            {
+              "name": "0.19.0-dev.1696.4280863.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:b308e7da6d2d7c3e88eaed9ff2e6a2f741398a956525b10a7641f4bd4ba140f6"
+            },
+            {
+              "name": "daemon-0.19.0-dev.1696.4280863.tar.zst",
+              "size": 17685623,
+              "digest": "sha256:1b26fffe32c214467797707540cbce06ba2ef9cd6c9def4e7d1e2674588a77ee"
+            },
+            {
+              "name": "daemon-0.19.0-dev.1696.4280863.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:ed50ee2503dde8dc72b618588aaa89adca1a3c74d89ec69e6bb1d0be6de55ca4"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1674265,
+              "digest": "sha256:a0ea61a37887864dc7cb7c208cb4451d6d7ffa0f0fc488c05694c6ff0d2b5a44"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-macosx_11_0_arm64.whl",
+              "size": 1594188,
+              "digest": "sha256:ddeb85f8b27d599bde14e98adee5fd42f435da9e9f128cad82492878cc817022"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2809233,
+              "digest": "sha256:2e851ab5aabe6596e211ecfd631f38b424994bfb90647edc3df9e733e6ad905a"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3037497,
+              "digest": "sha256:15fba4732e305498f057f60bce10c0739fd680756405586f7343d7250299f9b9"
+            },
+            {
+              "name": "duckctl-0.19.0-py3-none-win_amd64.whl",
+              "size": 1513193,
+              "digest": "sha256:24c0b39ec81a1d718853916431244d454875c2e9fedc157fab175878b28fac2b"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:fbad84f4420ff082a4d62c4fcae652ed756d80f54d888b7c7a1bb56c8f19cebe"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:f2e7b6a8d3f77bee13b271339679d2837a5b630e6339c9f06c89b9038e39ec38"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1505469,
+              "digest": "sha256:e4dc51d0bc2755f74aab93fa18c8a46c652440c7a214c99bf16c6b8855c29168"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1601701,
+              "digest": "sha256:b86753a425cee35393e6dec6c918b533d9bb6a00c44be73819c676c57251884f"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1384476,
+              "digest": "sha256:d4c29f91e25d405f47fbcd6568126e832f7bcb0dfa2e2da94052f0369397867e"
+            },
+            {
+              "name": "manifest.json",
+              "size": 562,
+              "digest": "sha256:664830bf40cdb810006fd8b96db2d68a0aa36381873c61393d83aad49de8d4c2"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:6f6a4159b01fa25a54da5ec95585ea1ea8d579a1ce82e640e6ce1f7335299a75"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-11T09:19:49.066635+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/42808635e29b06b1b791b75730bdba1d03b8257e",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...42808635e29b06b1b791b75730bdba1d03b8257e",
+          "comparison_to_recorded_main": {
+            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "to_sha": "42808635e29b06b1b791b75730bdba1d03b8257e",
+            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...42808635e29b06b1b791b75730bdba1d03b8257e",
+            "status": "ahead",
+            "ahead_by": 8,
+            "behind_by": 0,
+            "file_count": 21
+          },
+          "comparison_to_nfc_mode_tags_dev1692": {
+            "from_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "to_sha": "42808635e29b06b1b791b75730bdba1d03b8257e",
+            "merge_base_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/f66ed71637d879288d8a23dbf066ab732be49019...42808635e29b06b1b791b75730bdba1d03b8257e",
+            "status": "ahead",
+            "ahead_by": 3,
+            "behind_by": 0,
+            "file_count": 14
+          },
+          "comparison_to_ball_dev1693": {
+            "from_sha": "36ed22c0424d2e2b060ea81baaa54fefcc995ca8",
+            "to_sha": "42808635e29b06b1b791b75730bdba1d03b8257e",
+            "merge_base_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/36ed22c0424d2e2b060ea81baaa54fefcc995ca8...42808635e29b06b1b791b75730bdba1d03b8257e",
+            "status": "diverged",
+            "ahead_by": 3,
+            "behind_by": 2,
+            "file_count": 14
+          },
+          "classification": "Independent NFC photo prototype branching from dev1692. No matching PR found in the checked list.",
+          "review": {
+            "action": "Photo tag takes precedence over pairing and mode records. The sequence requests laser off and robot.stop before reading policy. Held or homing triggers robot.enable and polls for walk or stand for up to eight seconds of poll intervals. Busy states end the photo sequence after those initial requests. The sequence raises the head, uses a five-second flashlight countdown and, after attempting capture and save, requests sit and beak open even on capture failure.",
+            "camera_storage": "Reads one frame from the existing local media socket, rotates and encodes a JPEG, and writes to the nfcd state directory /var/lib/robot/photos by default. The implemented path is local capture and storage. E-ink transfer is described as future work.",
+            "validation": "Tagged daemon and publish jobs succeeded. The earlier robot touch report stopped at held. The later heads add startup handling and brightness without a new physical acceptance report.",
+            "fixed_sources": {
+              "nfc/src/photo.rs": "https://github.com/pollen-robotics/microduck/blob/42808635e29b06b1b791b75730bdba1d03b8257e/nfc/src/photo.rs",
+              "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/42808635e29b06b1b791b75730bdba1d03b8257e/nfc/src/main.rs",
+              "nfc/systemd/nfcd.service": "https://github.com/pollen-robotics/microduck/blob/42808635e29b06b1b791b75730bdba1d03b8257e/nfc/systemd/nfcd.service",
+              "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/42808635e29b06b1b791b75730bdba1d03b8257e/docs/robot/pair-a-gamepad.md",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/42808635e29b06b1b791b75730bdba1d03b8257e/duck-ipc-proto/src/lib.rs"
+            },
+            "upstream_build_publish_urls": {
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/42993043648/job/130430291252",
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42993043648/job/130432571475"
+            },
+            "brightness_contract": "API54 adds optional robot.flashlight brightness. Omitted means full and is not serialized. PWM outputs dim relative to maximum; an on/off GPIO LED stays at full for a nonzero representable brightness. This API54 extension is independent of the football and phase-skill prototypes.",
+            "photo_delta": "The five-second countdown blinks at 10 percent, the shutter uses 15 percent and the existing chirp. The look target z rises from 0.35 m to 0.55 m. Local JPEG storage and start sequence are inherited."
+          },
+          "impact": {
+            "HD1910": "Low for current delivery. High priority before adoption for brush-triggered enable, stop, head pose, sit and beak motion.",
+            "camera": "Medium reference. Check local media access, JPEG orientation and storage plus actual PWM capability for the countdown.",
+            "ToF": "No direct change.",
+            "model_management": "Reuses current policies and sit skill.",
+            "training": "No new training or weights.",
+            "motion": "High before adoption. Check unsolicited enable from NFC, prior control state, safety stops and incomplete sequences.",
+            "sound": "Adds the existing chirp at shutter time. No new audio asset."
+          },
+          "priority": "Low for current delivery. High action and storage review before adopting the photo sequence.",
+          "replica_integration": "not_integrated",
+          "previous_head_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+          "source_history": [
+            {
+              "tag": "daemon-dev-nfc-photo-tag",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-nfc-photo-tag",
+              "head_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+              "version": "daemon 0.19.0-dev.1695.f900f34 (nfc-photo-tag)",
+              "published_at": "2026-11-11T08:56:56Z",
+              "published_at_jst": "2026-11-11T17:56:56+09:00",
+              "committed_at": "2026-11-11T08:53:27Z",
+              "committed_at_jst": "2026-11-11T17:53:27+09:00",
+              "prerelease": true,
+              "source_version": "0.19.0",
+              "version_family": "0.19.0",
+              "api_version": 53,
+              "development_api_version": 53,
+              "asset_inventory": [
+                {
+                  "name": "0.19.0-dev.1695.f900f34.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:40c486251100a246661d74af9164964bf4e7c061063d0ca523eba015dcd2a01d"
+                },
+                {
+                  "name": "0.19.0-dev.1695.f900f34.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:6c1574eca4f30f506f50e5329af9b235944cfe93af864fab8fc924bc81a26cb7"
+                },
+                {
+                  "name": "daemon-0.19.0-dev.1695.f900f34.tar.zst",
+                  "size": 17693243,
+                  "digest": "sha256:838ec145e528841308b8cb2a5b29b3bfd24e0d5739b4452102a83db0cbe7dac9"
+                },
+                {
+                  "name": "daemon-0.19.0-dev.1695.f900f34.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:62aab8a1709277753369cd1283ff43cbc9502739b264b1dffe932d5b11c17e1f"
+                },
+                {
+                  "name": "duckctl-0.19.0-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1674199,
+                  "digest": "sha256:1ce1776f682dce37cb5fb2693abb8316d21a2a8bd978cf3f7255af104d263cb5"
+                },
+                {
+                  "name": "duckctl-0.19.0-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1594101,
+                  "digest": "sha256:4a1d81033cc20f9f82e2f285602675fcfa0343a6ac885e5d41f297da2c6e42dd"
+                },
+                {
+                  "name": "duckctl-0.19.0-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 2809536,
+                  "digest": "sha256:5811821ee64a75f4a56ecf989518c43dbbc7b8bc225c03dfc92dc1a1cf234d75"
+                },
+                {
+                  "name": "duckctl-0.19.0-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3037354,
+                  "digest": "sha256:1b69ef855efa95277394eecb547939c99c1317a04fa4b9f1f583ae7279eb4aa5"
+                },
+                {
+                  "name": "duckctl-0.19.0-py3-none-win_amd64.whl",
+                  "size": 1513214,
+                  "digest": "sha256:8b33140d189213cdf69937b3f9b3213ba97a293e3812b9d29bd053f76e71ef47"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:e1705df6e6b01d51e0633f844cd91ac18eb01c19f5a1e0b30e4f2f7765ff751d"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:e86162570f0d619dd617ffa2b39135afd461ac9fc1fa4b66fe9b5a0d7f9dae0f"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1505331,
+                  "digest": "sha256:932c68e09ce7ec85339667f99cb50f12ecd769bf1ceb9a4b3acd4ecfce191fb0"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1601503,
+                  "digest": "sha256:422d8c1cc62f3bc553557cd2fe05d8997078822bceb3493cae7f41d21d2ff260"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1384649,
+                  "digest": "sha256:ef275f8332ad99113e2873bfa56f58dcecd470276d188bb6a9f9266a595a4c8e"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 562,
+                  "digest": "sha256:e68799fa7d465eef4279b4b4028a604484f5cf39adb6c1bd29abe4c4e64c6949"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:36f1aad0dafe314fa6d3238998cb33f012942afe08094b73b7f27bd3da5e5c17"
+                }
+              ],
+              "assets_checked_at_utc": "2026-11-11T09:17:10.665957+00:00",
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/f900f348bbe4e562ace05824d5f19c881b3d873d",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...f900f348bbe4e562ace05824d5f19c881b3d873d",
+              "comparison_to_recorded_main": {
+                "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "to_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "status": "ahead",
+                "ahead_by": 7,
+                "behind_by": 0,
+                "file_count": 14
+              },
+              "comparison_to_nfc_mode_tags_dev1692": {
+                "from_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+                "to_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "merge_base_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/f66ed71637d879288d8a23dbf066ab732be49019...f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "status": "ahead",
+                "ahead_by": 2,
+                "behind_by": 0,
+                "file_count": 7
+              },
+              "comparison_to_ball_dev1693": {
+                "from_sha": "36ed22c0424d2e2b060ea81baaa54fefcc995ca8",
+                "to_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "merge_base_sha": "f66ed71637d879288d8a23dbf066ab732be49019",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/36ed22c0424d2e2b060ea81baaa54fefcc995ca8...f900f348bbe4e562ace05824d5f19c881b3d873d",
+                "status": "diverged",
+                "ahead_by": 2,
+                "behind_by": 2,
+                "file_count": 7
+              },
+              "classification": "Independent NFC photo prototype branching from dev1692. No matching PR found in the checked list.",
+              "review": {
+                "action": "Photo tag takes precedence over pairing and mode records. The sequence requests laser off and robot.stop before reading policy. Held or homing triggers robot.enable and polls for walk or stand for up to eight seconds of poll intervals. Busy states end the photo sequence after those initial requests. The sequence raises the head, uses a five-second flashlight countdown and, after attempting capture and save, requests sit and beak open even on capture failure.",
+                "camera_storage": "Reads one frame from the existing local media socket, rotates and encodes a JPEG, and writes to the nfcd state directory /var/lib/robot/photos by default. The implemented path is local capture and storage. E-ink transfer is described as future work.",
+                "validation": "The author reports a prior robot touch stopped at held; the tagged follow-up adds startup handling. The tagged daemon and publish jobs succeeded. The observed robot attempt does not verify the final startup and photo sequence.",
+                "fixed_sources": {
+                  "nfc/src/photo.rs": "https://github.com/pollen-robotics/microduck/blob/f900f348bbe4e562ace05824d5f19c881b3d873d/nfc/src/photo.rs",
+                  "nfc/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/f900f348bbe4e562ace05824d5f19c881b3d873d/nfc/src/main.rs",
+                  "nfc/systemd/nfcd.service": "https://github.com/pollen-robotics/microduck/blob/f900f348bbe4e562ace05824d5f19c881b3d873d/nfc/systemd/nfcd.service",
+                  "docs/robot/pair-a-gamepad.md": "https://github.com/pollen-robotics/microduck/blob/f900f348bbe4e562ace05824d5f19c881b3d873d/docs/robot/pair-a-gamepad.md",
+                  "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/f900f348bbe4e562ace05824d5f19c881b3d873d/duck-ipc-proto/src/lib.rs"
+                },
+                "upstream_build_publish_urls": {
+                  "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/42990635083/job/130422372506",
+                  "publish": "https://github.com/pollen-robotics/microduck/actions/runs/42990635083/job/130423726655"
+                }
+              },
+              "impact": {
+                "HD1910": "Low for current delivery. High priority before adoption for brush-triggered enable, stop, head pose, sit and beak motion.",
+                "camera": "Medium reference. Review the local media socket, image orientation and photo directory permissions.",
+                "ToF": "No direct change.",
+                "model_management": "Reuses current policies and sit skill.",
+                "training": "No new training or weights.",
+                "motion": "High before adoption. Check unsolicited enable from NFC, prior control state, safety stops and incomplete sequences.",
+                "sound": "Reuses the tag chirp. No new audio assets."
+              },
+              "priority": "Low for current delivery. High action and storage review before adopting the photo sequence.",
+              "replica_integration": "not_integrated"
+            }
+          ],
+          "comparison_to_previous_head": {
+            "from_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+            "to_sha": "42808635e29b06b1b791b75730bdba1d03b8257e",
+            "merge_base_sha": "f900f348bbe4e562ace05824d5f19c881b3d873d",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/f900f348bbe4e562ace05824d5f19c881b3d873d...42808635e29b06b1b791b75730bdba1d03b8257e",
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "file_count": 10
+          }
         }
       ],
       "pending_pull_requests": [
@@ -14124,30 +14455,102 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-10T13:14:36Z",
-          "updated_at": "2026-11-10T13:14:36Z",
+          "updated_at": "2026-11-11T08:41:15Z",
           "merged_at": null,
-          "merge_commit_sha": "656be0220e497e7475f04d9530c560c2179dbe84",
+          "merge_commit_sha": "16b27f6fbd7cae9569e84bcce60e95415dc9d9e5",
           "url": "https://github.com/pollen-robotics/microduck/pull/565",
-          "head_sha": "52fc9445445490ca18030a12d4a801258bb8dcd3",
-          "base_sha": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
+          "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+          "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
           "base_branch": "main",
           "actual_merge_base": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
           "commit_count": 1,
           "changed_file_count": 5,
           "created_at_jst": "2026-11-10T22:14:36+09:00",
-          "updated_at_jst": "2026-11-10T22:14:36+09:00",
+          "updated_at_jst": "2026-11-11T17:41:15+09:00",
           "source_version": "0.18.9",
           "api_version": 53,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/6bb6c67613a35744e3be07a424fa0fd6df00e1be...52fc9445445490ca18030a12d4a801258bb8dcd3",
-          "classification": "Open. For the same component, a later successful move or move to a different Stuck version makes the former Stuck version known bad. Active Stuck remains eligible and a later success clears the prior outcome.",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+          "classification": "Open revision. No matching development package found. Official 0.19.0 retains its recorded source.",
           "replica_integration": "not_integrated",
           "review": {
-            "change": "Open. For the same component, a later successful move or move to a different Stuck version makes the former Stuck version known bad. Active Stuck remains eligible and a later success clears the prior outcome.",
-            "fixed_source_url": "https://github.com/pollen-robotics/microduck/blob/52fc9445445490ca18030a12d4a801258bb8dcd3/updater/src/journal.rs",
-            "author_validation": "Author reports updater tests, clippy and fmt. Three regression definitions cover journal filtering, scheduled reinstallation and rollback selection.",
-            "release_scope": "Open on a 0.18.9/API53 base. Outside formal 0.19.0 and dev1688."
+            "change": "For a Stuck version, count a later Success or Stuck move only when the destination sorts older in SemVer. A move forward leaves the earlier Stuck version eligible under this filter. A later success for the version clears its old outcome.",
+            "pruning": "With keep_previous=1, pruning can leave the reverted version as the sole older release. The proposed filter then causes rollback to refuse it, rather than reinstall it.",
+            "author_validation": "Author reports 430 updater tests, clippy and fmt. Updated regressions cover forward moves, stuck reverts, automatic reinstallation and the keep_previous=1 refusal.",
+            "fixed_sources": {
+              "updater/src/journal.rs": "https://github.com/pollen-robotics/microduck/blob/2b0f49ca9ef7e2366701c4e0b65d488166256bb2/updater/src/journal.rs",
+              "updater/src/engine.rs": "https://github.com/pollen-robotics/microduck/blob/2b0f49ca9ef7e2366701c4e0b65d488166256bb2/updater/src/engine.rs",
+              "docs/design/updater-design.md": "https://github.com/pollen-robotics/microduck/blob/2b0f49ca9ef7e2366701c4e0b65d488166256bb2/docs/design/updater-design.md"
+            },
+            "upstream_ci_urls": {
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42989009131/job/130417003526",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42989009131/job/130417003429",
+              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42989009131/job/130417003088"
+            }
           },
-          "priority": "High before adopting daemon OTA or rollback."
+          "priority": "High before adopting daemon OTA or rollback.",
+          "comparison_to_recorded_main": {
+            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "to_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+            "merge_base_sha": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+            "status": "diverged",
+            "ahead_by": 1,
+            "behind_by": 7,
+            "file_count": 5
+          },
+          "comparison_to_previous_head": {
+            "from_sha": "52fc9445445490ca18030a12d4a801258bb8dcd3",
+            "to_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+            "merge_base_sha": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/52fc9445445490ca18030a12d4a801258bb8dcd3...2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+            "status": "diverged",
+            "ahead_by": 1,
+            "behind_by": 1,
+            "file_count": 5
+          },
+          "previous_head_sha": "52fc9445445490ca18030a12d4a801258bb8dcd3",
+          "history": [
+            {
+              "number": 565,
+              "title": "updater: a stuck release reverted by hand is not put back",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-10T13:14:36Z",
+              "updated_at": "2026-11-10T13:14:36Z",
+              "merged_at": null,
+              "merge_commit_sha": "656be0220e497e7475f04d9530c560c2179dbe84",
+              "url": "https://github.com/pollen-robotics/microduck/pull/565",
+              "head_sha": "52fc9445445490ca18030a12d4a801258bb8dcd3",
+              "base_sha": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
+              "base_branch": "main",
+              "actual_merge_base": "6bb6c67613a35744e3be07a424fa0fd6df00e1be",
+              "commit_count": 1,
+              "changed_file_count": 5,
+              "created_at_jst": "2026-11-10T22:14:36+09:00",
+              "updated_at_jst": "2026-11-10T22:14:36+09:00",
+              "source_version": "0.18.9",
+              "api_version": 53,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/6bb6c67613a35744e3be07a424fa0fd6df00e1be...52fc9445445490ca18030a12d4a801258bb8dcd3",
+              "classification": "Open. For the same component, a later successful move or move to a different Stuck version makes the former Stuck version known bad. Active Stuck remains eligible and a later success clears the prior outcome.",
+              "replica_integration": "not_integrated",
+              "review": {
+                "change": "Open. For the same component, a later successful move or move to a different Stuck version makes the former Stuck version known bad. Active Stuck remains eligible and a later success clears the prior outcome.",
+                "fixed_source_url": "https://github.com/pollen-robotics/microduck/blob/52fc9445445490ca18030a12d4a801258bb8dcd3/updater/src/journal.rs",
+                "author_validation": "Author reports updater tests, clippy and fmt. Three regression definitions cover journal filtering, scheduled reinstallation and rollback selection.",
+                "release_scope": "Open on a 0.18.9/API53 base. Outside formal 0.19.0 and dev1688."
+              },
+              "priority": "High before adopting daemon OTA or rollback."
+            }
+          ],
+          "impact": {
+            "HD1910": "High review priority before any adoption of official OTA or rollback. Current replica migration is independent.",
+            "camera": "No direct change.",
+            "ToF": "No direct change.",
+            "model_management": "No direct change.",
+            "training": "No direct change.",
+            "motion": "No direct change.",
+            "sound": "No direct change."
+          }
         },
         {
           "number": 566,
@@ -14208,38 +14611,35 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-11T07:34:24Z",
-          "updated_at": "2026-11-11T07:34:24Z",
+          "updated_at": "2026-11-11T08:35:57Z",
           "merged_at": null,
-          "merge_commit_sha": "a16c856b11d5cc250edc45c09ebbce565bdee737",
+          "merge_commit_sha": "a68086ca66e355c132dd9a81146734f693dafd7f",
           "url": "https://github.com/pollen-robotics/microduck/pull/568",
-          "head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+          "head_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
           "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
           "base_branch": "main",
           "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
           "created_at_jst": "2026-11-11T16:34:24+09:00",
-          "updated_at_jst": "2026-11-11T16:34:24+09:00",
+          "updated_at_jst": "2026-11-11T17:35:57+09:00",
           "source_version": "0.19.0",
           "api_version": 53,
           "commit_count": 1,
           "changed_file_count": 3,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...6afda03e74e96bdbbef130165117cc83eee88bf2",
-          "classification": "Open PR against main. No matching development package in the checked release list.",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
+          "classification": "Open revision. No matching development package found. Official 0.19.0 retains its recorded source.",
           "review": {
-            "search": "When a last dot is available and a full scan is not due, the first pass looks for candidates within four configured radii each way around it. At radius 24 this is about 192 by 192 pixels before edge clipping. The second pass measures the candidate in its own neighborhood. A local result counts if within two radii of the last dot. A miss or farther candidate triggers full-frame fallback during the same look.",
-            "rescan_and_peak": "Once a second is due, the next available look scans the full frame. A higher-scoring point elsewhere may wait until that look. A local look reports the redder of its own peak and the cached full-frame peak.",
-            "performance": "Author reports 19.5 microseconds window vs 474 microseconds full-frame scanning on a Mac at 1280×720. The quoted face-board-v1 CPU numbers predate this change. Current whole-frame copy and sampling cadence remain in the source. No board measurement for this revision.",
-            "validation": "Author reports mediad tests, clippy with and without GStreamer, and fmt. GitHub check, coverage and board jobs succeeded for the PR head. Camera, motion and HD1910 acceptance remain separate.",
+            "search": "The prior local candidate and same-look full fallback remain. A nearby red distractor can hold until the next full scan. Both passes now stop at the last whole UYVY macropixel for odd widths.",
+            "peak": "The cached full-frame peak now retains its position. When the cached point lies inside the new window, the current local peak replaces it. A cached point outside the window can still compete with the current local peak.",
+            "performance": "Author reports a duck-sim comparison with real daemons and 360p render frames, 0.19 to 0.04 ms median tracking scan, with 807 main and 281 branch samples. Both held 15 Hz in the reported runs. The FaceBoardV1 savings are still projected.",
             "fixed_sources": {
-              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/laser.rs",
-              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/deploy/robotd.toml",
-              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/docs/robot/cheatsheet.md",
-              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/duck-ipc-proto/src/lib.rs",
-              "mediad/src/frame.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/frame.rs"
+              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/mediad/src/laser.rs",
+              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/deploy/robotd.toml",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/docs/robot/cheatsheet.md"
             },
             "upstream_ci_urls": {
-              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476446",
-              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476327",
-              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476061"
+              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734802",
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734789",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734475"
             }
           },
           "impact": {
@@ -14252,7 +14652,82 @@
             "sound": "No direct change."
           },
           "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
-          "replica_integration": "not_integrated"
+          "replica_integration": "not_integrated",
+          "comparison_to_recorded_main": {
+            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
+            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "file_count": 3
+          },
+          "comparison_to_previous_head": {
+            "from_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+            "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
+            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6afda03e74e96bdbbef130165117cc83eee88bf2...a6848d702d0024bae3f46a5123e67af530fd4a04",
+            "status": "diverged",
+            "ahead_by": 1,
+            "behind_by": 1,
+            "file_count": 3
+          },
+          "previous_head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+          "history": [
+            {
+              "number": 568,
+              "title": "laser: scan only around the dot while tracking",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-11T07:34:24Z",
+              "updated_at": "2026-11-11T07:34:24Z",
+              "merged_at": null,
+              "merge_commit_sha": "a16c856b11d5cc250edc45c09ebbce565bdee737",
+              "url": "https://github.com/pollen-robotics/microduck/pull/568",
+              "head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+              "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+              "base_branch": "main",
+              "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+              "created_at_jst": "2026-11-11T16:34:24+09:00",
+              "updated_at_jst": "2026-11-11T16:34:24+09:00",
+              "source_version": "0.19.0",
+              "api_version": 53,
+              "commit_count": 1,
+              "changed_file_count": 3,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...6afda03e74e96bdbbef130165117cc83eee88bf2",
+              "classification": "Open PR against main. No matching development package in the checked release list.",
+              "review": {
+                "search": "When a last dot is available and a full scan is not due, the first pass looks for candidates within four configured radii each way around it. At radius 24 this is about 192 by 192 pixels before edge clipping. The second pass measures the candidate in its own neighborhood. A local result counts if within two radii of the last dot. A miss or farther candidate triggers full-frame fallback during the same look.",
+                "rescan_and_peak": "Once a second is due, the next available look scans the full frame. A higher-scoring point elsewhere may wait until that look. A local look reports the redder of its own peak and the cached full-frame peak.",
+                "performance": "Author reports 19.5 microseconds window vs 474 microseconds full-frame scanning on a Mac at 1280×720. The quoted face-board-v1 CPU numbers predate this change. Current whole-frame copy and sampling cadence remain in the source. No board measurement for this revision.",
+                "validation": "Author reports mediad tests, clippy with and without GStreamer, and fmt. GitHub check, coverage and board jobs succeeded for the PR head. Camera, motion and HD1910 acceptance remain separate.",
+                "fixed_sources": {
+                  "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/laser.rs",
+                  "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/deploy/robotd.toml",
+                  "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/docs/robot/cheatsheet.md",
+                  "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/duck-ipc-proto/src/lib.rs",
+                  "mediad/src/frame.rs": "https://github.com/pollen-robotics/microduck/blob/6afda03e74e96bdbbef130165117cc83eee88bf2/mediad/src/frame.rs"
+                },
+                "upstream_ci_urls": {
+                  "check": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476446",
+                  "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476327",
+                  "board": "https://github.com/pollen-robotics/microduck/actions/runs/42980481017/job/130389476061"
+                }
+              },
+              "impact": {
+                "HD1910": "Low for current release. Before enabling this camera-driven feature, validate target handoff and stopping on HD1910.",
+                "camera": "Medium for evaluation. Candidate scan cost may drop with a stable dot. Reacquisition, false positives and CPU usage on the target camera board need measurement.",
+                "ToF": "No direct change.",
+                "model_management": "No direct change.",
+                "training": "No direct change.",
+                "motion": "No robotd change. Different visual selection timing can affect following, takeover and stopping.",
+                "sound": "No direct change."
+              },
+              "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
+              "replica_integration": "not_integrated"
+            }
+          ]
         }
       ],
       "previous_stable_releases": [
@@ -21505,25 +21980,30 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-11T08:10:14.695681+00:00",
+  "checked_at_utc": "2026-11-11T09:13:19.241293+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-11T07:15:09.459303+00:00",
-    "source_snapshot_utc": "2026-11-11T08:10:14.695681+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-11T08:12:14.761162+00:00",
+    "previous_substantive_review_utc": "2026-11-11T08:10:14.695681+00:00",
+    "source_snapshot_utc": "2026-11-11T09:13:19.241293+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-11T09:19:49.066635+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.19.0",
     "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
     "stable_asset_count": 8,
-    "new_pull_requests": {
+    "new_pull_requests": {},
+    "updated_pull_requests": {
       "pollen-robotics/microduck": [
+        565,
         568
       ]
     },
-    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [],
-    "moved_development_tags": [],
+    "new_development_releases": [
+      "daemon-dev-nfc-photo-tag"
+    ],
+    "moved_development_tags": [
+      "daemon-dev-nfc-photo-tag"
+    ],
     "retired_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
@@ -21535,7 +22015,7 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Open #568 proposes a local laser candidate scan with same-look full fallback and periodic rescans. Official daemon 0.19.0 and main retain their recorded revisions."
+    "notes": "Revised #565 and #568 remain open. The NFC photo branch was published as dev1695 and then moved to dev1696 with an API54 brightness extension."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -23687,6 +24167,37 @@
       "robot_connected": false,
       "image_built_or_published_by_tracker": false,
       "notes": "dev1693 adds manual and autonomous soccer on the NFC mode prototype. Official daemon 0.19.0 and main retain their prior revisions."
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-11T07:15:09.459303+00:00",
+      "source_snapshot_utc": "2026-11-11T08:10:14.695681+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-11T08:12:14.761162+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.19.0",
+      "stable_release_actual_sha": "590e07a6fada481315231671119a1aba10826a09",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          568
+        ]
+      },
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Open #568 proposes a local laser candidate scan with same-look full fallback and periodic rescans. Official daemon 0.19.0 and main retain their recorded revisions."
     }
   ],
   "replica_public_image": {
