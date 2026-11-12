@@ -675,8 +675,11 @@ class StatusPollingTest(unittest.TestCase):
         self.assertTrue(hasattr(rd, "set_telemetry_viewers"), "explicit status viewers control cached polling")
         rd.set_viewers(1)
         self.assertEqual(rd.bus_poll_interval(), 1.)
+        rd._due["bus"] = 1.
         rd.set_telemetry_viewers(1)
         self.assertEqual(rd.bus_poll_interval(), .1)
+        self.assertEqual(rd._due["bus"], 0.)
+        self.assertFalse(rd._wake_poll.is_set(), "viewer demand must not interrupt reconnect backoff")
         rd.set_telemetry_viewers(0)
         self.assertEqual(rd.bus_poll_interval(), 1.)
         rd.bus.set({"mode": "commissioning"})

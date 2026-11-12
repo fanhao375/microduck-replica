@@ -165,8 +165,8 @@ class Robotd:
     def set_telemetry_viewers(self, n):
         n = max(0, n)
         if n and not self.telemetry_viewers:
+            # The connected loop checks due times every 50 ms. Leave reconnect backoff alone.
             self._due["bus"] = 0.
-            self._wake_poll.set()
         self.telemetry_viewers = n
 
     def bus_poll_interval(self):
