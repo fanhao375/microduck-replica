@@ -496,6 +496,7 @@ class Firstboot:
 
     TLS_DIR = "/etc/microduck/tls"
     TLS_SUBJECT = "/CN=Microduck-Local-CA"
+    TLS_SERVER_DAYS = "820"  # Leave margin below Apple's 825-day server certificate limit.
 
     def _openssl(self, args, what):
         result = self._call(["openssl"] + args, timeout=60)
@@ -572,7 +573,7 @@ class Firstboot:
             "subjectAltName=DNS:%s,DNS:%s.local,DNS:localhost,IP:10.42.0.1,IP:127.0.0.1\n"
             % (name, name)).encode("utf-8"), 0o600)
         self._openssl(["x509", "-req", "-in", str(csr), "-CA", str(ca_crt), "-CAkey", str(ca_key),
-                       "-CAcreateserial", "-days", "3650", "-sha256", "-extfile", str(ext),
+                       "-CAcreateserial", "-days", self.TLS_SERVER_DAYS, "-sha256", "-extfile", str(ext),
                        "-out", str(crt)], "签发服务器证书")
         for leftover in (csr, ext, directory / "ca.srl"):
             try:
