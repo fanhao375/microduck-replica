@@ -222,21 +222,18 @@ def head_frame(command, t):
     return None
 
 
-# 置信度门槛。0.75 实测太严：同一句「站起来」有时 1.00、有时 0.54，全被卡掉。
-# 整句精确命中比「句子里有关键词」可靠得多，所以门槛分开定。
-MIN_EXACT = 0.50
-MIN_KEYWORD = 0.50
+# 同一句「站起来」实测有时只有 0.54，动作仍要求整段匹配。
+MIN_CONFIDENCE = 0.50
 
-# 整句命中表（最精确的一档）
 EXACT = {
-    '坐下': 'sit', '坐下来': 'sit',
-    '站起来': 'stand', '站起': 'stand', '起立': 'stand', '起来': 'stand',
-    # 走路只认「走一小步」这类有限步数的话；「别走」「不要走」算否定，按原来的规矩不执行
+    '坐下': 'sit', '坐下来': 'sit', '坐': 'sit',
+    '站起来': 'stand', '站起': 'stand', '起立': 'stand', '起来': 'stand', '站': 'stand',
+    # 识别步进口令，给出换用手机或手柄的提示；板载语音没有方向盘租约。
     '走一小步': 'walk', '走一步': 'walk', '向前走': 'walk', '往前走': 'walk', '走': 'walk',
     '停': 'stop', '停下': 'stop', '停下来': 'stop', '停住': 'stop', '站住': 'stop', '停步': 'stop',
     # 技能：robot.do {skill}。要站好、策略在跑才做（手柄页的规矩），做不成会原样报理由
     '前滚翻': 'roulade', '翻跟头': 'roulade', '翻个跟头': 'roulade', '打个滚': 'roulade',
-    '滚一个': 'roulade', '前翻': 'roulade',
+    '滚一个': 'roulade', '前翻': 'roulade', '滚翻': 'roulade', '翻身': 'roulade', '打滚': 'roulade',
     '低头捡东西': 'ground_pick', '捡东西': 'ground_pick', '低头捡': 'ground_pick',
     '捡个东西': 'ground_pick', '捡一下东西': 'ground_pick', '低头': 'ground_pick',
     # 叫一声：robot.sound {tag}。不动关节，卸力时也能叫（robotd main.rs:4300-4307）
@@ -250,30 +247,12 @@ EXACT = {
     '歪头': 'tilt', '歪歪头': 'tilt', '歪一下头': 'tilt', '歪个头': 'tilt', '歪脑袋': 'tilt',
 }
 
-# 兜底关键词（按顺序试，先具体后笼统）。离线识别是语法约束的，输出只可能是语法表里的
-# 组合，所以「句子里出现关键词」并不像自由听写那样容易误判。
-# 实测的几种坏输出：「起立 起立 起立」「起立 站起来 招 [unk]」「前 捡 前 滚 翻」「翻」。
-KEYWORDS = [
-    ('站住', 'stop'),                       # 必须排在「站」前面
-    ('滚翻', 'roulade'), ('翻身', 'roulade'), ('打滚', 'roulade'),
-    ('翻跟头', 'roulade'), ('翻', 'roulade'),
-    ('捡', 'ground_pick'),
-    ('招呼', 'greet'), ('问好', 'greet'),
-    ('点头', 'nod'), ('摇头', 'shake'), ('歪头', 'tilt'), ('歪脑袋', 'tilt'),
-    ('停', 'stop'),
-    ('起立', 'stand'), ('起来', 'stand'),
-    ('走', 'walk'),
-    ('坐', 'sit'), ('站', 'stand'),
-    ('叫', 'chirp'),
-]
-
-# 单字关键词只有在整句很短时才认（「翻」= 只听到一个字，可以当意图；「走过去再说」不能当走路）
-SINGLE_CHAR_MAX = 4
 NEGATIVE_WORDS = ('不', '别', '甭', '勿')
 # 「复读 坐下」「他说 站起来」是把指令当话转述，不是在命令
-QUOTED_PREFIXES = ('复读', '他说', '她说', '我说', '你说', '我说啊')
-# 「坐下再站起来」是两步指令：语音只能挑一个动作做，干脆不做
+QUOTED_PREFIXES = ('复读', '他说', '她说', '我说', '你说')
 SEQUENCE_WORDS = ('再', '然后', '接着', '之后')
+ADDRESSES = ('小鸭子', '鸭子', '鸭鸭')
+MAX_COMMANDS_PER_UTTERANCE = 3
 
 
 def _squash(text):
@@ -291,93 +270,52 @@ def _squash(text):
     return text
 
 
-def _match(text, confidence):
-    """一段文字 → (动作, 命中的关键词)。认不出返回 (None, None)。"""
-    if not isinstance(confidence, (int, float)) or not math.isfinite(confidence):
-        return None, None
-    text = re.sub(r'\[unk\]|unk', '', text if isinstance(text, str) else '')
-    text = re.sub(r'[\s，。！？、,.!?]', '', text)
-    # 「鸭鸭」是手机中控约定的唤醒词（用户 10-31 定的）：说「鸭鸭站起来」跟说「站起来」一样。
-    # 顺序按长度排：先剥「小鸭子」，再「鸭子」，最后「鸭鸭」——「小鸭子」不会被「鸭子」吃半个字。
-    for address in ('小鸭子', '鸭子', '鸭鸭'):
-        if text.startswith(address):
-            text = text[len(address):]
-            break
-    if text.startswith('请'):
-        text = text[1:]
-    for suffix in ('一下吧', '一下', '吧'):
-        if text.endswith(suffix):
-            text = text[:-len(suffix)]
-            break
-    text = _squash(text)
-    if not text:
-        return None, None
-    # 否定式先判：宁可不动，也不能因为「不要点头」里有「点头」就真去点头
-    if any(word in text for word in NEGATIVE_WORDS):
-        return None, None
+def _match_clause(text):
+    text = text.removeprefix('请').removesuffix('吧')
     if text.startswith(QUOTED_PREFIXES):
-        return None, None
-    if any(word in text for word in SEQUENCE_WORDS):
-        return None, None
-    if text in EXACT and confidence >= MIN_EXACT:
-        return EXACT[text], text
-    # 用户上传的 ONNX 指令：整句命中才做，别拿它去跑下面的关键词兜底
-    if text in custom_skills() and confidence >= MIN_EXACT:
-        return text, text
-    if confidence < MIN_KEYWORD:
-        return None, None
-    hits = [(len(keyword), command, keyword) for keyword, command in KEYWORDS
-            if keyword in text
-            and not (len(keyword) == 1 and len(text) > SINGLE_CHAR_MAX)]
-    if not hits:
-        return None, None
-    # 取最长（最具体）的那个：「翻 要 歪头」里「歪头」比「翻」可信，不能因为出现两个就都不做
-    longest = max(hit[0] for hit in hits)
-    top = {hit[1] for hit in hits if hit[0] == longest}
-    if len(top) != 1:
-        # 同样具体却指向不同动作（「点头再摇头」），说明没听清意图，不做
-        return None, None
-    command = top.pop()
-    keyword = next(hit[2] for hit in hits if hit[0] == longest and hit[1] == command)
-    return command, keyword
+        return None
+    for phrase in (text, text.removesuffix('一下')):
+        phrase = _squash(phrase)
+        # 单独的「鸭」也是称呼。它后面只接受完整的内置口令。
+        command = EXACT.get(phrase) or EXACT.get(phrase.removeprefix('鸭').removeprefix('请'))
+        if command:
+            return command
+        if phrase in custom_skills():
+            return phrase
+    return None
 
 
 def parse_command(text, confidence):
     """一段文字 → 一个动作（认不出返回 None）。"""
-    return _match(text, confidence)[0]
-
-
-# 称呼单独拿出来：它既是唤醒词，也是「一句里并了好几条口令」时的天然分隔符
-ADDRESSES = ('小鸭子', '鸭子', '鸭鸭')
-MAX_COMMANDS_PER_UTTERANCE = 3
+    commands = parse_commands(text, confidence)
+    return commands[0] if len(commands) == 1 else None
 
 
 def parse_commands(text, confidence):
-    """一段识别结果里可能并了好几条口令，逐条认出来，按说的顺序返回。
-
-    上机实测（2026-11-01）：端点检测并不总在停顿处切断，连着说的几句会被并成一段，
-    比如「点头 鸭 鸭 摇头 鸭 鸭 歪头」「鸭 鸭 前 滚 翻 鸭 鸭 低头 捡 东 西」。
-    直接按整段匹配会被「两个动作都有」判成歧义、一条都不做；所以先按称呼切开再逐段认。
-    """
-    if not isinstance(text, str):
+    """允许用称呼分隔完整口令。任何一段未认清，整次不执行。"""
+    if (not isinstance(text, str) or not isinstance(confidence, (int, float))
+            or not math.isfinite(confidence) or confidence < MIN_CONFIDENCE):
         return []
-    # 先去掉空白再切：识别结果里「鸭 鸭」是带空格的（词表按单字），不去空白切不开
-    text = re.sub(r'[\s，。！？、,.!?]', '', text)
-    hits = []
-    for part in re.split('|'.join(ADDRESSES), text):
-        command, keyword = _match(part, confidence)
-        if command is not None:
-            hits.append((command, keyword, len(part)))
-    # 「整段只剩一个孤字」多半是上一句的尾巴：鸭子一动，舵机噪声就把静音判没了，
-    # 端点检测凑不满静音时长，会把前后两句连成一段（比如「翻 鸭 鸭 摇头」里的「翻」）。
-    # 别的段落有更实在的命中时，就把这种孤字结果丢掉；只剩它一个时才认。
-    if len(hits) > 1:
-        hits = [hit for hit in hits if len(hit[1]) > 1 or hit[2] > 2] or hits
+    text = re.sub(r'[\s，。！、,.!]', '', text)
+    if (any(word in text for word in NEGATIVE_WORDS + SEQUENCE_WORDS)
+            or re.search(r'''unk|["'“”‘’「」『』?？]''', text, re.IGNORECASE)):
+        return []
+    clauses = re.split('|'.join(ADDRESSES), text)
+    # 称呼可在开头或结尾出现。两个称呼之间缺少口令则拒绝。
+    if not clauses[0]:
+        clauses = clauses[1:]
+    if clauses and not clauses[-1]:
+        clauses = clauses[:-1]
     commands = []
-    for command, _, _ in hits:
+    for clause in clauses:
+        command = _match_clause(clause)
+        if command is None:
+            return []
         if not commands or commands[-1] != command:
             commands.append(command)
-    return commands[:MAX_COMMANDS_PER_UTTERANCE]
+    if 'stop' in commands:
+        return ['stop']
+    return commands if len(commands) <= MAX_COMMANDS_PER_UTTERANCE else []
 
 
 class RobotClient:
@@ -445,8 +383,6 @@ class PostureCommands:
 
     类名沿用旧名字，避免动 import 和既有测试。
     """
-    STEP_S = 1.0          # 「走一小步」就是走这么久，不放开无人看管的长走
-
     def __init__(self, robot, timeout=5, sleep=time.sleep,guard=updates_allowed,lease=motion_lease,
                  clock=time.monotonic):
         self.robot, self.timeout, self.sleep = robot, timeout, sleep
@@ -546,6 +482,8 @@ class PostureCommands:
                 pass
 
     def execute(self, command, allowed=lambda: True):
+        if command == 'walk':
+            return {'accepted': False, 'reason': '板载语音不能控制步进，请用手机麦克风或手柄。'}
         try:
             if not self.guard():raise UpdateLocked('software update in progress')
             with self.lease():
@@ -597,22 +535,13 @@ class PostureCommands:
                 self._require_driving(policies, bus, request, allowed)
                 return self._play_head(command, allowed)
 
-            # 走 / 停：只在「已经站着、上着劲、回过中」的时候放行。
-            # 走只走 STEP_S 秒就停，不因为一句话把鸭子放出去跑——语音这条路看不见它去哪。
-            if command in ('walk', 'stop'):
+            if command == 'stop':
                 if not torque or not homed:
                     raise RuntimeError('robot must be upright and homed with torque confirmed')
                 if policies['sitting']:
                     raise RuntimeError('robot is sitting; stand up first')
-                if command == 'stop':
-                    request('robot.stop')
-                    return {'accepted': True, 'changed': True, 'sitting': False, 'stopped': True}
-                self._ensure_policy(request, allowed)
-                deadline = self.clock() + max(0.2, float(self.STEP_S))
-                while self.clock() < deadline and allowed():
-                    self.sleep(0.05)
                 request('robot.stop')
-                return {'accepted': True, 'changed': True, 'sitting': False, 'stepped': True}
+                return {'accepted': True, 'changed': True, 'sitting': False, 'stopped': True}
 
             if policies['sitting'] == desired and (desired or (torque and homed)):
                 if command == 'stand':

@@ -41,13 +41,15 @@
 > 已经有鸭子、但证书是旧的（只有一张自签 leaf、没有 `ca.crt`）的，在板子上运行
 > `sudo microduck-firstboot --tls-only` 重新生成，旧证书会自动备份成 `*.bak-<时间戳>`，
 > 然后 `sudo systemctl restart microduck-studio`。Studio 发现 `duck.crt` / `duck.key` 在就会自动用 HTTPS 起。
+> 还没启用 HTTPS 的设备仍可用原来的 HTTP 地址打开控制台。手机麦克风需要先生成并信任证书。
 
 ### 从热点回家里 WiFi
 
 在手机「更多 → 户外」卡片点「关热点，回家里 WiFi」。手机会掉线，这是正常的：
 
-- 鸭子关掉热点后，NetworkManager 会按已保存的配置自动连回家里的 WiFi；
-- 手机也要重新连回家里的 WiFi，再用 `http://duck-xxxx:8000/` 或 `http://duck-xxxx.local:8000/` 打开。
+- 鸭子关掉热点后，NetworkManager 会按已保存的配置自动连回家里的 WiFi。
+- 手机连回同一个 WiFi 后，打开 `https://duck-xxxx.local:8000/m` 或 `https://duck-xxxx:8000/m`。出厂证书覆盖这两个主机名和热点固定地址。
+- 尚未启用 HTTPS 的设备继续用 `http://duck-xxxx.local:8000/` 或 `http://duck-xxxx:8000/`。
 
 如果鸭子没连回家里 WiFi，热点一般会自己回来（马上到 2 分钟左右），连回 `Microduck-xxxx` 看卡片上的红字原因。
 

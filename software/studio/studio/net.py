@@ -91,9 +91,9 @@ def validate_connect(ssid, psk):
 def addresses(host, ip, port=PORT, scheme="http"):
     """「这只鸭子的地址」：现在能用的几个，按设备说该用哪个（10-20 真机：开着 Clash 系统代理的 Windows 打不开 .local——
     走了代理、502；不带点的主机名 Windows 用 LLMNR 问得到，代理按 <local> 绕过；IP 哪儿都能开）。
-    scheme 跟 Studio 实际监听一致：开了 --tls-cert 就是 https，不然页面会把 http 地址给人。"""
+    HTTPS 的出厂证书只覆盖主机名、固定热点地址和回环地址。"""
     out = []
-    if ip:
+    if ip and (scheme != "https" or ip in (HOTSPOT_IP, "127.0.0.1")):
         out.append({"kind": "ip", "url": f"{scheme}://{ip}:{port}/", "note": "IP：哪台设备都能打开（换了路由器、重新分了地址会变）"})
     out.append({"kind": "host", "url": f"{scheme}://{host}:{port}/", "note": "Windows 电脑用这个：开着代理也能打开"})
     out.append({"kind": "local", "url": f"{scheme}://{host}.local:{port}/", "note": "苹果手机、Mac 用这个"})

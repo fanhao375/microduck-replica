@@ -83,6 +83,13 @@ class SpeechTests(unittest.TestCase):
         # 失败原因要带给手机页 / 桌面（robotd 的公开理由，不含识别原话）
         self.assertEqual(view['reason'], 'robot is sitting; stand up first')
 
+    def test_explicit_stop_takes_priority_over_other_commands_in_a_merged_utterance(self):
+        control = self.make(FakeRecognizer('走一步 鸭鸭 停下 鸭鸭 点头', 0.9))
+        control.submit(b'pcm')
+        self.assertTrue(control.idle.wait(1))
+        self.assertEqual(self.executor.commands, ['stop'])
+        self.assertEqual(control.last_view()['command'], 'stop')
+
     def test_ready_exposes_existing_recognizer_for_shared_model_without_new_factory(self):
         recognizer = FakeRecognizer()
         control = self.make(recognizer)

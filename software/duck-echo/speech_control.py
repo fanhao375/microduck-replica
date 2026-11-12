@@ -9,7 +9,7 @@ import sys
 import threading
 import time
 
-from voice_commands import parse_command,parse_commands,updates_allowed
+from voice_commands import parse_commands,updates_allowed
 
 LOG = logging.getLogger('duck-echo')
 
@@ -26,7 +26,7 @@ COMMAND_GRAMMAR = [
     # 「鸭鸭」：手机中控约定的唤醒词。写成「鸭 鸭」是因为词表里是单字「鸭」，
     # 成词的话下面按 model.vosk_model_find_word 过滤时会自己掉出去，不会让整个语法失败
     '鸭 鸭 坐下', '鸭 鸭 站起来', '鸭 鸭 走 一小步', '鸭 鸭 停', '鸭 鸭 停 下',
-    # 走一小步 / 停：只在「站着、上着劲、回过中」的时候才会真执行（见 voice_commands.PostureCommands）
+    # 仍识别「走一小步」以提示改用手机或手柄。明确的停下口令由板载执行。
     '走 一小步', '走 一步', '往 前 走', '往 前 走 一步', '停', '停 下', '停 下来',
     '不要 坐下', '不要 站起来', '不要 起来', '不要 起立',
     '别 坐下', '别 站起来', '别 起来', '别 起立',

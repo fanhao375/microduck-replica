@@ -24,13 +24,10 @@ class ParserTests(unittest.TestCase):
             self.assertIsNone(voice.parse_command('坐下', score))
         self.assertEqual(voice.parse_command('坐下', 0.54), 'sit')
 
-    def test_messy_real_transcripts_still_resolve(self):
-        # 下面这些是 2026-11-01 上机真跑出来的识别结果（含置信度）
+    def test_repeated_and_clear_commands_still_resolve(self):
         cases = [
             ('起立 起立 起立', 0.56, 'stand'),      # 连说几遍被并成一句
-            ('起立 站起来 招 [unk]', 0.75, 'stand'),  # 两句拼在一起 + 未识别标记
-            ('前 捡 前 滚 翻', 0.73, 'roulade'),      # 小模型把「前滚翻」拆碎
-            ('翻', 1.00, 'roulade'),                 # 只听到一个字
+            ('前 滚 翻', 0.73, 'roulade'),
             ('站起来', 0.54, 'stand'),               # 低置信度但确实是这句
         ]
         for text, score, want in cases:
@@ -41,16 +38,24 @@ class ParserTests(unittest.TestCase):
         cases = [
             ('点头 鸭 鸭 摇头 鸭 鸭 歪头', 0.69, ['nod', 'shake', 'tilt']),
             ('鸭 鸭 前 滚 翻 鸭 鸭 低头 捡 东 西', 1.00, ['roulade', 'ground_pick']),
-            ('鸭 鸭 走 一小步 鸭 鸭 停 下', 1.00, ['walk', 'stop']),
+            ('鸭 鸭 走 一小步 鸭 鸭 停 下', 1.00, ['stop']),
             ('鸭 叫 一 声 鸭 鸭 点头 鸭 鸭', 0.80, ['chirp', 'nod']),
             ('鸭 歪头 鸭 鸭 前 滚 翻', 0.73, ['tilt', 'roulade']),
             ('鸭 鸭 叫 一 声', 0.95, ['chirp']),
-            # 鸭子一动，舵机噪声就把静音判没了，上一句的尾字会粘到下一句前面
-            ('翻 鸭 鸭 摇头', 0.61, ['shake']),
-            ('翻 要 歪头', 0.66, ['tilt']),
+            ('站住 鸭 鸭 点头', 0.90, ['stop']),
         ]
         for text, score, want in cases:
             self.assertEqual(voice.parse_commands(text, score), want, text)
+
+    def test_unsafe_or_incomplete_clauses_do_not_dispatch_other_commands(self):
+        for text in ('别让鸭鸭站起来', '他说鸭鸭坐下', '不要鸭鸭前滚翻', '“鸭鸭前滚翻”',
+                     '[unk]前滚翻', '起立 站起来 招 [unk]', '前 捡 前 滚 翻', '翻',
+                     '翻 鸭 鸭 摇头', '翻 要 歪头', '鸭鸭点头鸭鸭什么鸭鸭摇头',
+                     '鸭鸭点头鸭鸭别摇头', '点头鸭鸭鸭鸭歪头', '他会不会做前滚翻',
+                     '它在做前滚翻', '鸭鸭请'):
+            with self.subTest(text=text):
+                self.assertIsNone(voice.parse_command(text, 0.95))
+                self.assertEqual(voice.parse_commands(text, 0.95), [])
 
     def test_utterance_without_command_is_empty(self):
         for text, score in [('鸭 鸭', 0.96), ('', 1.0), ('你好', 1.0),
@@ -59,7 +64,8 @@ class ParserTests(unittest.TestCase):
 
     def test_at_most_three_commands_per_utterance(self):
         text = '鸭 鸭 点头 鸭 鸭 摇头 鸭 鸭 歪头 鸭 鸭 叫 一 声 鸭 鸭 打招呼'
-        self.assertEqual(voice.parse_commands(text, 1.0), ['nod', 'shake', 'tilt'])
+        self.assertEqual(voice.parse_commands(text, 1.0), [])
+        self.assertEqual(voice.parse_commands(text + ' 鸭 鸭 停下', 1.0), ['stop'])
 
     def test_wake_word_duckduck_prefix_is_the_same_as_bare_command(self):
         # 手机中控约定的唤醒词：说「鸭鸭站起来」跟说「站起来」是一个意思
@@ -225,6 +231,22 @@ def fake_clock():
     """假时钟：sleep 把时间往前推，头 / 嘴那类按时序发的通知不用真的等。"""
     now = [0.0]
     return now, lambda seconds: now.__setitem__(0, now[0] + seconds), lambda: now[0]
+
+
+class ShortStepTests(unittest.TestCase):
+    def test_board_walk_reports_unsupported_without_touching_robotd(self):
+        for enabled in (True, False):
+            robot = FakeRobot(enabled=enabled)
+            _, sleep, clock = fake_clock()
+            result = voice.PostureCommands(robot, sleep=sleep, clock=clock).execute('walk')
+            self.assertFalse(result['accepted'], result)
+            self.assertIn('手机', result['reason'])
+            self.assertEqual(robot.calls, [])
+
+    def test_board_stop_still_clears_motion(self):
+        robot = FakeRobot()
+        self.assertTrue(voice.PostureCommands(robot).execute('stop')['accepted'])
+        self.assertEqual(robot.mutations(), [('robot.stop', {})])
 
 
 class SoundSkillTests(unittest.TestCase):

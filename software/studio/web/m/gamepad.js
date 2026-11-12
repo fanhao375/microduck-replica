@@ -114,26 +114,27 @@ export function GamepadPage({ st, live, say }) {
   const [busy, setBusy] = useState(null);
   const left = useRef({ x: 0, y: 0, on: false });
   const right = useRef({ x: 0, y: 0, on: false });
-  const seq = useRef(0);
   const modeRef = useRef(mode);
   modeRef.current = mode;
   const stRef = useRef(st);
   stRef.current = st;
   const poseRef = useRef(null);
-  poseRef.current = st ? st.posture : null;
+  poseRef.current = live ? st?.posture : null;
   const sayRef = useRef(say);
   sayRef.current = say;
   const autoAt = useRef(0);                // 上次替用户补「开始走」的时刻：带冷却，别每帧打后端
   const nagged = useRef(false);            // 坐着 / 卸力时推摇杆：只说一遍，别 10 Hz 刷屏
   // 给 actions.js 用的实时站姿：等策略开起来就按真实状态等，不用瞎猜秒数
   const ctxRef = useRef({ getPosture: () => poseRef.current });
-  ctxRef.current.getPosture = () => poseRef.current;
 
   // 进手柄区：告诉后端「我来了」，离开时「我走了」
   useEffect(() => {
     link.cmd('pad.op', { op: 'drive', open: true }, 8000);
     autoAt.current = 0;
-    return () => { link.cmd('pad.op', { op: 'drive', on: false }, 8000); };
+    return () => {
+      poseRef.current = null;
+      link.cmd('pad.op', { op: 'drive', on: false }, 8000);
+    };
   }, []);
 
   // 摇杆：按住时 10 Hz 发整帧；全都松了就发一次 stop
@@ -161,21 +162,21 @@ export function GamepadPage({ st, live, say }) {
           op: 'sticks', mode: modeRef.current,
           lx: left.current.x, ly: left.current.y,
           rx: right.current.x, ry: right.current.y,
-          seq: ++seq.current,
+          seq: link.nextPadSeq(),
         }, 5000);
       } else if (wasOn) {
         wasOn = false;
-        link.cmd('pad.op', { op: 'stop', seq: ++seq.current }, 5000);
+        link.cmd('pad.op', { op: 'stop', seq: link.nextPadSeq() }, 5000);
       }
     }, SEND_MS);
-    return () => { clearInterval(t); link.cmd('pad.op', { op: 'stop', seq: ++seq.current }, 5000); };
+    return () => { clearInterval(t); link.cmd('pad.op', { op: 'stop', seq: link.nextPadSeq() }, 5000); };
   }, []);
 
   // 头 / 身体模式：每秒续一次命（后端 3 秒没听到就退回走路模式）
   useEffect(() => {
-    link.cmd('pad.op', { op: 'mode', mode, seq: ++seq.current }, 6000);
+    link.cmd('pad.op', { op: 'mode', mode, seq: link.nextPadSeq() }, 6000);
     if (mode === 'drive') return undefined;
-    const t = setInterval(() => { link.cmd('pad.op', { op: 'mode', mode, hb: true, seq: ++seq.current }, 6000); }, MODE_HB_MS);
+    const t = setInterval(() => { link.cmd('pad.op', { op: 'mode', mode, hb: true, seq: link.nextPadSeq() }, 6000); }, MODE_HB_MS);
     return () => clearInterval(t);
   }, [mode]);
 

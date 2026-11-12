@@ -46,11 +46,6 @@ TARGET_PEAK = 20000     # 归一化目标
 MAX_GAIN = 8.0
 CHUNK = 8000            # 0.25 秒一喂
 
-# 每段手机录音顺手落一份到 /tmp（tmpfs，断电就没），排「认不出来」时能回放分析。
-# 只留最近 DEBUG_KEEP 段，几十 KB 一段，不心疼。
-DEBUG_DIR = '/tmp/asr-debug'
-DEBUG_KEEP = 24
-
 # 手机中控认的口令（和 web/m/actions.js 的 RULES 同一批）。duck-echo 的词表只有坐下/站起来，
 # 手机这边还会点头、走一小步、前滚翻……所以这里自己列一份，再和 duck-echo 的合并。
 # 模型是单字词表：词条要按单字用空格隔开，整词会被 vosk_model_find_word 过滤掉。
@@ -152,29 +147,6 @@ def _normalize(pcm):
                                'peak': int(peak), 'rms': int(rms), 'gain': round(gain, 2)}
 
 
-def _save_sample(pcm, info=None):
-    """把这次上传的原始 PCM 存一份，返回文件名（失败就返回 None，绝不影响识别）。"""
-    try:
-        os.makedirs(DEBUG_DIR, exist_ok=True)
-        stem = 'asr-' + time.strftime('%Y%m%d-%H%M%S') + '-%03d' % int(time.time() * 1000 % 1000)
-        path = os.path.join(DEBUG_DIR, stem + '.pcm')
-        with open(path, 'wb') as fh:
-            fh.write(pcm)
-        if info is not None:
-            with open(os.path.join(DEBUG_DIR, stem + '.json'), 'w') as fh:
-                json.dump(info, fh, ensure_ascii=False)
-        old = sorted(p for p in os.listdir(DEBUG_DIR) if p.endswith('.pcm'))
-        for p in old[:-DEBUG_KEEP]:
-            for ext in ('.pcm', '.json'):
-                try:
-                    os.unlink(os.path.join(DEBUG_DIR, p[:-4] + ext))
-                except OSError:
-                    pass
-        return stem
-    except Exception:
-        return None
-
-
 def transcribe_detail(pcm, use_grammar=True):
     """16 kHz / 16 bit / 单声道 / 小端的裸 PCM → {'text', 'error', 'info'}。
 
@@ -185,7 +157,6 @@ def transcribe_detail(pcm, use_grammar=True):
     自检页用它来看「板子到底听到什么」，也用来判断 [unk] 是「没听清」还是「词不在表里」。
     """
     out = {'text': '', 'error': None, 'info': {}}
-    sample = _save_sample(pcm)          # 先留一份原声，后面无论认成什么都能复查
     model, err = _load_model()
     if err:
         out['error'] = err
@@ -193,7 +164,6 @@ def transcribe_detail(pcm, use_grammar=True):
 
     pcm, info = _normalize(pcm)
     out['info'] = info
-    info['sample'] = sample
     if info['peak'] < MIN_PEAK:
         info['reason'] = 'silent'
         return out

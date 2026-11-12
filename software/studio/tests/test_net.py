@@ -136,7 +136,7 @@ class StateFileTest(Base):
     def test_addresses_takes_the_scheme(self):
         """开了 HTTPS 以后，给用户的地址也得是 https，不然手机麦克风那条路还是用不了。"""
         self.assertEqual([u["url"] for u in N.addresses("duck-x", "1.2.3.4", 9000, "https")],
-                         ["https://1.2.3.4:9000/", "https://duck-x:9000/", "https://duck-x.local:9000/"])
+                         ["https://duck-x:9000/", "https://duck-x.local:9000/"])
         self.assertEqual([u["url"] for u in N.addresses("duck-x", None, scheme="https")],
                          ["https://duck-x:8000/", "https://duck-x.local:8000/"])
 
@@ -158,6 +158,18 @@ class StateFileTest(Base):
         self.write_state(mode="wifi")
         net._read_once()
         self.assertEqual(net.view()["url_local"], "http://duck-c51b.local:8000/")
+
+    def test_https_lan_view_preserves_ip_status_but_publishes_only_dns_urls(self):
+        net = N.Net("tcp:127.0.0.1:1", self.state, self.dir / "state", self.log, dev_mode=False,
+                    hostname="duck-c51b", scheme="https")
+        self.write_state(mode="wifi")
+        net._read_once()
+        net.status = {"state": "connected", "ssid": "Home", "ip4": "192.168.1.50"}
+        net.status_at = time.monotonic()
+        view = net.view()
+        self.assertEqual(view["ip_now"], "192.168.1.50")
+        self.assertEqual([u["url"] for u in view["urls"]],
+                         ["https://duck-c51b:8000/", "https://duck-c51b.local:8000/"])
 
     def test_status_fields_and_last_try_text(self):
         self.write_state(mode="wifi")

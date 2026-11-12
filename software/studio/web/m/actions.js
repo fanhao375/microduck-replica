@@ -65,14 +65,16 @@ export function nextAction(st) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** 摇杆一帧。-1..1，y 向上为负 = 前进（pad_drive.sticks_to_intent 的 LY = -ly）。后端 0.5 秒收不到就自己刹车 */
-function pushStick(link, { x = 0, y = 0 } = {}, seq) {
-  return link.cmd('pad.op', { op: 'sticks', mode: 'drive', lx: x, ly: y, rx: 0, ry: 0, seq }, 5000);
+function pushStick(link, { x = 0, y = 0 } = {}, timeout) {
+  return link.cmd('pad.op', {
+    op: 'sticks', mode: 'drive', lx: x, ly: y, rx: 0, ry: 0, seq: link.nextPadSeq(),
+  }, timeout);
 }
 
-const whyOf = (r) => String((r && (r.reason || r.error)) || '');
+const whyOf = (r) => String((r && (r.reason || r.error || r.data?.dropped)) || '');
 const good = (r) => Boolean(r) && r.ok !== false;
 // 后端把「已经在走」也当成失败回话（这时按钮已经换成「停下」了），对调用方来说这是成功
-const isReady = (r) => good(r) || /准备好走|已经在走/.test(whyOf(r));
+const isReady = (r) => !r?.data?.dropped && (good(r) || /准备好走|已经在走/.test(whyOf(r)));
 // 后端一次只发一个独占指令，前一个没回话会把后一个顶回来；站起 / 回中也都要等几拍。
 // robotd 的 home_start_guard 还要「连续几帧 HOME + 直立」才肯启动策略（不能进入保持：…），
 // 刚站起来时会连续拒几次；等一会儿再发就能过，所以这类原因也当成「忙」来重试。
@@ -120,20 +122,50 @@ async function ensurePolicy(link, ctx, tries = 4) {
   return { ok: false, error: '开始走一直没排上队，等一下再点' };
 }
 
-/** 真的走一小步：策略 → 0.85 秒前进 → 停。语音的「走一小步」也是这么做的（duck-echo 里 STEP_S） */
+/** 手机的短步动作沿用 Studio 摇杆通道：策略 → 0.85 秒前进 → 停。 */
 async function stepOnce(link, ctx, power = 0.55) {
-  const p = await ensurePolicy(link, ctx);
-  if (!p.ok) return { ok: false, cn: '走一小步', error: p.error };
-  await waitDriving(ctx, 5000);            // 策略刚开的那几拍，速度还接不上
-  await sleep(p.stood ? 150 : 220);
-  let seq = 0;
-  const t0 = performance.now();
-  while (performance.now() - t0 < 850) {
-    await pushStick(link, { y: -power }, ++seq);
-    await sleep(95);
+  const poseError = '还没确认走路策略在运行，等站稳后再试。';
+  let error = null;
+  let attempted = false;
+  let moved = false;
+  let stood = false;
+  try {
+    if (typeof ctx?.getPosture !== 'function') throw new Error(poseError);
+    const policy = await ensurePolicy(link, ctx);
+    if (!policy.ok) throw new Error(policy.error);
+    stood = policy.stood === true;
+    if (await waitDriving(ctx, 5000) !== true) throw new Error(poseError);
+    await sleep(stood ? 150 : 220);
+    const deadline = performance.now() + 850;
+    while (performance.now() < deadline) {
+      if (!DRIVING.has(ctx.getPosture())) throw new Error(poseError);
+      const remaining = deadline - performance.now();
+      if (remaining <= 0) break;
+      attempted = true;
+      const frame = await pushStick(link, { y: -power }, Math.min(500, Math.ceil(remaining)));
+      if (frame?.ok !== true || frame.data?.dropped || !(frame.data?.sent?.[0] > 0)) {
+        throw new Error(whyOf(frame) || '前进指令没发出去。');
+      }
+      moved = true;
+      const pause = Math.min(95, deadline - performance.now());
+      if (pause > 0) await sleep(pause);
+    }
+    if (!moved) throw new Error('前进指令没发出去。');
+  } catch (err) {
+    error = err?.message || '前进指令没发出去。';
+  } finally {
+    if (attempted) {
+      try {
+        const stop = await link.cmd('pad.op', { op: 'stop', seq: link.nextPadSeq(), owned_only: true }, 5000);
+        if (stop?.ok !== true || stop.data?.dropped || stop.data?.sent !== true) {
+          error ||= whyOf(stop) || '没确认停止指令发出。';
+        }
+      } catch (err) {
+        error ||= err?.message || '没确认停止指令发出。';
+      }
+    }
   }
-  await link.cmd('pad.op', { op: 'stop', seq: ++seq }, 5000);
-  return { ok: true, cn: '走一小步', error: null, note: p.stood ? '先站起来，再走了一步' : null };
+  return { ok: !error, cn: '走一小步', error, note: !error && stood ? '已站起来，并发送短步指令' : null };
 }
 
 /**
@@ -234,22 +266,21 @@ export async function setAudio(link, values, tries = 2) {
 // 免得「鸭鸭站起来」被当成不会做的词。常见的误识别（呀呀、丫丫）也一起收了。
 const ADDRESS = /^(鸭鸭鸭|鸭鸭|呀呀|丫丫|小鸭鸭|鸭子|小鸭子)[，,、。.!！?？\s]*/;
 
-// 顺序有讲究：先判「停」，否则「站住」「别走」会被「站」「走」抢走
+// 每条规则匹配整个口令。明确的「别走」「不要走」只表示停止。
 const RULES = [
-  ['stop', /停|别走|不要走|站住|站好|不走了/],
-  ['stand', /站起|起立|起来|起身|^站$/],
-  ['sit', /坐下|坐下|坐一坐|^坐$|坐着/],
-  ['roulade', /滚|翻跟头|翻身/],
-  ['ground_pick', /捡|低头/],
-  // 「走一小步」要排在「走」前面：不然「走一小步」会被 /走/ 抢走，只开策略不迈步
-  ['step', /走一小步|走一步|走两步|迈一步|走一下/],
-  ['walk', /走|前进|往前|开步/],
-  ['nod', /点头/],
-  ['shake', /摇头/],
-  ['tilt', /歪头|偏头/],
-  ['mouth', /张嘴|张嘴|开口/],
-  ['chirp', /叫一声|叫一下|叫两声|嘎|叫唤/],
-  ['greet', /打招呼|你好|嗨/],
+  ['stop', /^(?:停(?:下(?:来)?|住|步)?|别走|不要走|站住|站好|不走了)$/],
+  ['stand', /^(?:站起(?:来)?|起立|起来|起身|站)$/],
+  ['sit', /^(?:坐下(?:来)?|坐一坐|坐|坐着)$/],
+  ['roulade', /^(?:前?滚翻|翻(?:个)?跟头|翻身|打(?:个)?滚)$/],
+  ['ground_pick', /^(?:低头(?:捡东西)?|捡(?:个|一下)?东西)$/],
+  ['step', /^(?:走一小步|走一步|走两步|迈一步|走一下)$/],
+  ['walk', /^(?:走|前进|往前(?:走)?|开步)$/],
+  ['nod', /^(?:点头|点点头|点一下头|点个头)$/],
+  ['shake', /^(?:摇头|摇摇头|摇一下头|摇个头)$/],
+  ['tilt', /^(?:歪头|歪歪头|歪一下头|歪个头|歪脑袋|偏头)$/],
+  ['mouth', /^(?:张嘴|开口)$/],
+  ['chirp', /^(?:叫一声|叫一下|叫两声|嘎(?:一声|一下)?|叫唤)$/],
+  ['greet', /^(?:打(?:个)?招呼|问好|你好|嗨)$/],
 ];
 
 export const CMD_CN = {
@@ -260,7 +291,7 @@ export const CMD_CN = {
 
 /** 清掉空白和标点，方便匹配 */
 function tidy(text) {
-  return String(text || '').replace(/[\s，。！？、,.!?~～…]/g, '');
+  return String(text || '').replace(/[\s，。！、,.!]/g, '');
 }
 
 /**
@@ -275,10 +306,11 @@ export function parseUtterance(text, { requireWake = false } = {}) {
   const wake = Boolean(m);
   const body = wake ? raw.slice(m[0].length) : raw;
   const said = body || raw;
-  if (!said) return { cmd: null, wake, said };
+  if (!body) return { cmd: null, wake, said };
   if (requireWake && !wake) return { cmd: null, wake, said };
+  const phrase = body.replace(/^请/, '').replace(/吧$/, '');
   for (const [cmd, re] of RULES) {
-    if (re.test(said)) return { cmd, wake, said };
+    if (re.test(phrase)) return { cmd, wake, said };
   }
   return { cmd: null, wake, said };
 }

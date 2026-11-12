@@ -1635,7 +1635,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
 
     # ---- 手机走 https 后必须补的两件事 ----
     # 摄像头：mediad 的信令是明文 ws，https 页面直连会被当混合内容挡掉。
-    # 这里挂一个同域同协议的 /media-ws，由 Studio 转发到本机 8443。
+    # 这里挂一个同域同协议的 /media-ws，由 Studio 转发到本机 mediad 的信令端口。
     async def media_ws_proxy(ws: WebSocket):
         if phone_bridge is None:
             await ws.close(code=1011)
@@ -1650,7 +1650,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             return
         await ws.accept()
         try:
-            await phone_bridge.pump_media(ws)
+            port = getattr(sensors, "camera_signaling_port", None)
+            upstream = phone_bridge.MEDIA_UPSTREAM if port is None else f"ws://127.0.0.1:{port}"
+            await phone_bridge.pump_media(ws, upstream=upstream)
         except Exception as exc:
             log.info(f"摄像头信令转发结束（{_client_desc(ws)}）：{exc}", cat="连接")
 

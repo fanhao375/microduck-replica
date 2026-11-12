@@ -83,7 +83,7 @@ export function Overview({ st, live, age, name }) {
       <ul class="m-log">${st.todo.slice(0, 4).map((t) => html`<li><span class="what">${typeof t === 'string' ? t : t.text || t.why || ''}</span></li>`)}</ul>
     </div>` : null}
 
-    <p class="m-tip">想让它动，去<b>手柄</b>页点「站起来」「开始走」，或用<b>语音</b>页说「<b>走一小步</b>」。
+    <p class="m-tip">想让它动，去<b>手柄</b>页点「站起来」「开始走」，或在<b>语音</b>页用手机麦克风说「<b>走一小步</b>」。
       任何时刻点右上角<b>卸力</b>，舵机会立刻松掉力气（鸭子会趴下去，这是正常的）。</p>
   </div>`;
 }

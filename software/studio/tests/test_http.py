@@ -62,14 +62,14 @@ class WsClient:
         self.accepted = self.rejected = self.close_code = None
         self.pong_mode, self.pings = 'valid', []
 
-    async def open(self):
+    async def open(self, target="/ws"):
         self.r, self.w = await asyncio.open_connection("127.0.0.1", self.port)
         hdrs = []
         if self.origin:
             hdrs.append(("Origin", self.origin))
         if self.cookie:
             hdrs.append(("Cookie", f"{COOKIE}={self.cookie}"))
-        self.w.write(self.ws.send(Request(host=self.host or f"127.0.0.1:{self.port}", target="/ws", extra_headers=hdrs)))
+        self.w.write(self.ws.send(Request(host=self.host or f"127.0.0.1:{self.port}", target=target, extra_headers=hdrs)))
         await self.w.drain()
         await self.pump(until=lambda: self.accepted or self.rejected or self.close_code is not None, timeout=3)
 

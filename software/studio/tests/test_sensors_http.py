@@ -4,15 +4,18 @@ import contextlib
 import io
 import tempfile
 import unittest
+from unittest.mock import AsyncMock, patch
 from pathlib import Path
 
-from tests.test_http import Auth, FakeRobotd, FIXTURE, Log, PW, Robotd, WEB, build_app, uvicorn
+from tests.test_http import Auth, FakeRobotd, FIXTURE, Log, PW, Robotd, WEB, WsClient, build_app, uvicorn
 from tests.test_models_http import request_raw
 
 
 class SensorStub:
+    camera_signaling_port = 9443
+
     async def camera(self):
-        return {'source': 'test', 'source_verified': False, 'signaling_port': 8443,
+        return {'source': 'test', 'source_verified': False, 'signaling_port': self.camera_signaling_port,
                 'service_state': 'online', 'service_reason': None}
 
     async def tof(self):
@@ -83,6 +86,18 @@ class SensorHttp(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['data']['service_state'], 'unknown')
         self.assertTrue(result['data']['service_reason'])
         self.assertFalse(result['data']['source_verified'])
+
+    async def test_media_proxy_uses_configured_camera_signaling_port(self):
+        cookie = (await self.login())['Cookie'].split('=', 1)[1]
+        client = WsClient(self.port, origin=self.origin, cookie=cookie)
+        with patch('studio.app.phone_bridge.pump_media', new_callable=AsyncMock) as pump:
+            await client.open('/media-ws')
+            try:
+                self.assertTrue(client.accepted)
+                self.assertEqual(pump.await_count, 1)
+                self.assertEqual(pump.await_args.kwargs.get('upstream'), 'ws://127.0.0.1:9443')
+            finally:
+                client.close()
 
     async def test_no_password_uses_normal_open_access(self):
         self.auth.clear_password()

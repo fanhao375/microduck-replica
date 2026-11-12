@@ -1102,6 +1102,17 @@ class MoveTest(PadTestBase):
         r = self.ops.handle({"op": "move", "vx": 0.1, "seq": 13})     # 新按下的照常
         self.assertEqual(r["sent"][0], 0.1)
 
+    def test_owner_only_stop_fences_its_own_frames_without_stopping_another_driver(self):
+        self.ops.handle({"op": "move", "vx": 0.2, "seq": 1}, conn="a")
+        before = list(self.robot.sent)
+        result = self.ops.handle({"op": "stop", "seq": 2, "owned_only": True}, conn="b")
+        self.assertIn("dropped", result)
+        self.assertEqual(self.robot.sent, before)
+        self.assertEqual(self.ops._seq_of("b")["stop"], 2)
+        result = self.ops.handle({"op": "stop", "seq": 3, "owned_only": True}, conn="a")
+        self.assertTrue(result["sent"])
+        self.assertEqual(self.robot.sent[-1], ("robot.move", {"vx": 0.0, "vy": 0.0, "vyaw": 0.0}))
+
     def test_refused_cases(self):
         with self.assertRaises(P.Refused):
             self.ops.handle({"op": "move", "vx": float("nan")})

@@ -991,9 +991,11 @@ class DriveMixin:
                 q["hi"] = max(q["hi"], seq)
                 d = self._driver
                 mine = d is None or d["conn"] == conn
+                attached, _ = self._pad_attached(now)
+                if args.get("owned_only") is True and (d is None or not mine or attached or self._mode_of(conn) != "drive"):
+                    return {"dropped": "当前页面没有走路控制权，未发送停止帧"}
                 if d is not None and d["conn"] == conn:
                     d["seen"] = now
-                attached, _ = self._pad_attached(now)
                 send = self._web_driving or not attached
                 center = None
                 mode = self._mode_of(conn)

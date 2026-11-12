@@ -458,7 +458,7 @@ export function WifiSettings({ net, link }) {
 }
 
 // 「更多」页的「这只鸭子的地址」（10-20 真机验收：开着 Clash 的电脑打不开 .local）：后端 net.urls 列出现在能用的
-// IP（configd net.status 的 ip4；热点模式是 10.42.0.1）、duck-xxxx、duck-xxxx.local，每个一个复制按钮
+// HTTP 可列出 DHCP 地址；HTTPS 列出主机名和证书覆盖的固定 IP。
 export function DuckAddresses({ net }) {
   const [copied, setCopied] = useState(null);       // {url, ok}
   useEffect(() => {
@@ -468,6 +468,8 @@ export function DuckAddresses({ net }) {
   }, [copied]);
   if (!net || !net.known) return null;
   const urls = net.urls || [];
+  const hasIp = urls.some((u) => u.kind === 'ip');
+  const https = net.url_local?.startsWith('https:');
   const copy = async (url) => setCopied({ url, ok: await copyText(url) });
   return html`<div class="board wifi-settings duck-addr" aria-label="这只鸭子的地址">
     <h2>这只鸭子的地址</h2>
@@ -478,8 +480,10 @@ export function DuckAddresses({ net }) {
       <button class="wifi-btn duck-addr-copy" type="button" onClick=${() => copy(u.url)}>
         ${copied && copied.url === u.url ? (copied.ok ? '已复制' : '复制不了，长按地址复制') : '复制'}</button>
     </div>`)}
-    ${urls.some((u) => u.kind === 'ip') ? null
+    ${hasIp || https ? null
       : html`<div class="wifi-note">现在不知道 IP（没连上 WiFi，或者读不到配网程序）：去路由器的设备列表找 ${net.hostname || 'duck-xxxx'}。</div>`}
-    <div class="wifi-note">安卓手机打不开带名字的地址就用 IP；电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连。</div>
+    <div class="wifi-note">${https && !hasIp
+      ? 'HTTPS 请使用上方的主机名。手机无法解析主机名时，可以连接鸭子热点，再用热点地址。'
+      : '安卓手机打不开带名字的地址就用 IP。'} 电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连。</div>
   </div>`;
 }

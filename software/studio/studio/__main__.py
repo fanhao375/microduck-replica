@@ -181,9 +181,12 @@ def main(argv=None):
     app = build_app(auth=auth, robotd=rd, log=log, web_dir=a.web_dir, duck=duck, names=names, state_dir=state_dir,
                     dev_autologin=a.dev_autologin, servo=servo, imu=imu, pad=pad, onboard=onboard, battery=battery,
                     tune=tune, net=net, commit=commit, models=models, sensors=sensors, ca_cert=ca_cert)
-    log.info(f"网页地址：{scheme}://{host if host not in ('0.0.0.0', '') else '<鸭子 IP>'}:{port}/", cat="系统", dedup=False)
+    display_host = host
+    if host in ("0.0.0.0", ""):
+        display_host = socket.gethostname() if tls else "<鸭子 IP>"
+    log.info(f"网页地址：{scheme}://{display_host}:{port}/", cat="系统", dedup=False)
     if tls:
-        log.info(f"已启用 https（手机可以在 {scheme}://<鸭子 IP>:{port}/m 用麦克风说话）", cat="系统", dedup=False)
+        log.info(f"已启用 HTTPS（手机可以在 https://{display_host}:{port}/m 用麦克风说话）", cat="系统", dedup=False)
     else:
         log.info("没有 https 证书：现在用 http 起，手机麦克风用不了（想开：sudo microduck-firstboot --tls-only）",
                  cat="系统", dedup=False)

@@ -11,6 +11,7 @@
 export const link = {
   ws: null,
   seq: 0,
+  padSeq: 0,
   pending: new Map(),
   listeners: new Set(),
   status: 'idle',        // idle / connecting / open / closed / auth
@@ -88,6 +89,7 @@ export const link = {
   setPadVisible(v) { this.padVisible = Boolean(v); this.heartbeat(); },
   // 模型改键页面借用 10 Hz 手柄快照来捕获按键，但不改变 padVisible、也不接管遥控。
   setPadCapture(v) { this.padCapture = Boolean(v); this.heartbeat(); },
+  nextPadSeq() { return ++this.padSeq; },
 
   heartbeat() {
     this.send({
