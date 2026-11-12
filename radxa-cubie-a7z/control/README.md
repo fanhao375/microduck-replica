@@ -36,29 +36,32 @@
 - `diagnostics/a7z-read-probe.rs`：以正式 Bus 库做独立只读探测，比较阻塞/非阻塞文件模式。依赖串口排他锁，需通过监督脚本正常停止已确认的只读服务，结束或失败后保证重新启动原只读服务。
 - `install_readonly.py`：校验候选包并备份程序、配置和 unit；仅在旧服务已确认卸力且无运动时替换。新服务固定 `--read-only`，在报文边界拒绝全部舵机写入。清除随包 `motion_enabled`、`imu_mount_verified`，禁用策略，不伪造 `units_verified`。
 
-旧 commissioning 的正常退出会写扭矩关闭。因此安装器在确认原服务扭矩关闭后使用 SIGKILL，避免该停机写入。
-若替换失败，可能留下停止的服务；安装器不会自动启动可能写舵机的旧模式。备份位置会打印为
+旧 commissioning 的正常退出会发送扭矩关闭报文。安装器确认原服务已卸力后，会临时禁止启动并通过 systemd 停止任务发送 SIGKILL，避免停机写入和自动重启。替换后会核对生效的启动命令，并等待运行中的主控确认只读保护。
+若替换失败，先检查停止状态和备份再决定如何恢复。备份位置会打印为
 `/var/lib/robot/cubie-before-sync3-时间/`。**不要未经核对就恢复并启动运动模式。**
 
 自动审批曾拒绝代理直接执行该部署；用户随后按下列命令自行完成替换。
 
 ## 用户手动替换
 
+从 commissioning 切换前，退出 Studio 并停止其他能写入主控的客户端。安装器在停止前复查卸力和空闲状态，预览运行时仍允许其他客户端在复查后发出指令。
+
 在电脑终端从仓库根目录执行；将 `BOARD_IP` 替换为板卡的实际局域网地址：
 
 ```sh
 cd radxa-cubie-a7z/control/artifacts
-scp cubie-a7z-sync3-readonly.tar.gz cubie-a7z-sync3-readonly.tar.gz.sha256 radxa@BOARD_IP:/tmp/
+scp cubie-a7z-sync3-readonly.tar.gz cubie-a7z-sync3-readonly.tar.gz.sha256 ../install_readonly.py radxa@BOARD_IP:/tmp/
 ssh -t radxa@BOARD_IP
 ```
 
-在登录后的 A7Z 终端执行（sudo 交互输入密码，不与脚本共用 stdin）：
+在登录后的 A7Z 终端执行。校验并解包运行时后，使用随当前源码上传的安装器。`runtime-build.json` 中的安装器摘要对应历史归档内的旧脚本。sudo 交互输入密码。
 
 ```sh
 cd /tmp &&
 sha256sum -c cubie-a7z-sync3-readonly.tar.gz.sha256 &&
 mkdir -p cubie-a7z-sync3-readonly &&
 tar -xzf cubie-a7z-sync3-readonly.tar.gz -C cubie-a7z-sync3-readonly &&
+cp /tmp/install_readonly.py /tmp/cubie-a7z-sync3-readonly/install_readonly.py &&
 sudo python3 /tmp/cubie-a7z-sync3-readonly/install_readonly.py /tmp/cubie-a7z-sync3-readonly
 ```
 

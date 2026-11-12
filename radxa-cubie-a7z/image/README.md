@@ -10,7 +10,7 @@ artifacts/cubie-a7z-duck-20261109-preview1.img.xz.manifest.json
 
 镜像下载与校验附件见 [A7Z preview1 Release](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1)，源码维护于 [Liangjin5437/microduck-replica](https://github.com/Liangjin5437/microduck-replica) 的 `radxa-cubie-a7z/`。完整镜像作为 Release 附件分发，不放入 Git 源码。
 
-这是待上板验收的预览版。构建期间原板 `BOARD_IP` 连接超时，尚未验证本镜像的烧录启动、实物联网、动作或声音。
+已发布的 preview1 是修复前构建的历史预览镜像。当前源码中的只读安装器、镜像目录权限和 Wi-Fi 配网修复仍待重新打包和实机验证。构建期间原板 `BOARD_IP` 连接超时，历史镜像的烧录启动、实物联网、动作和声音也仍待验收。
 
 ## 烧录和首次使用
 
@@ -43,7 +43,8 @@ artifacts/cubie-a7z-duck-20261109-preview1.img.xz.manifest.json
 ```sh
 python3 create_image.py \
   --base ../os/radxa-a733_bullseye_kde_r6.output_512.img.xz \
-  --output artifacts/cubie-a7z-duck-20261109-preview1.img.xz
+  --output artifacts/cubie-a7z-duck-local-rebuild.img.xz \
+  --release a7z-duck-local-rebuild
 ```
 
 需要 Python 3.13（本次使用 3.13.6）、`xz`、`debugfs` 和 `e2fsck`；保持足够临时磁盘空间容纳解压镜像、根分区副本和压缩输出。构建在本机文件副本上完成，不连接板卡、不写物理磁盘。
@@ -57,7 +58,7 @@ python3 create_image.py \
 
 `prepare_runtime.py` 生成新装配配置和运行时覆盖层；`prepare_image.py` 加入最新 Studio、首启、配网和服务配置；`build_image.py` 在原系统根分区应用覆盖层。旧 R17 `service.sh` 与通用升级流程不适合作为本镜像的 A7Z 升级入口。分发时保留随包许可、模型来源和第三方声明。
 
-## 验证记录
+## 历史 preview1 验证记录
 
 本机已通过 99 项相关测试：镜像工具 17 项、配网 12 项、温控 9 项、前端安装器 43 项、首次启动契约 18 项。另已静态核对全部动作模型路径、推理库依赖及 Studio 标定构建/校验流程；`units_verified=false` 不阻止正常标定提交，它表示尚未确认电流换算。
 

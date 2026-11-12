@@ -2,9 +2,9 @@
 
 本目录提供 **Radxa Cubie A7Z + 飞特 HD-1910 舵机/总线 IMU 装配** 的配网、控制、Studio、温控与整机镜像准备源码。主仓库默认镜像仍面向 Zero 3W；A7Z 使用独立镜像和硬件适配。
 
-[下载 A7Z preview1 镜像及校验附件](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) · [镜像烧录、首次使用与构建说明](image/README.md) · [维护分支源码](https://github.com/Liangjin5437/microduck-replica/tree/codex/cubie-a7z-preview/radxa-cubie-a7z)
+[下载 A7Z preview1 历史镜像及校验附件](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) · [镜像烧录、首次使用与构建说明](image/README.md) · [维护分支源码](https://github.com/Liangjin5437/microduck-replica/tree/codex/cubie-a7z-preview/radxa-cubie-a7z)
 
-Release 的 `cubie-a7z-duck-20261109-preview1.img.xz` 是待上板验收的预览版。已有文件结构、摘要、文件系统和压缩校验记录，尚未验证该镜像烧录后的实机启动、联网、完整动作或声音；既有总线偶发读取失败的根因也尚未解决。先阅读镜像说明的限制和标定流程，不应将已有源码测试或另一安装的实机反馈视作本镜像验收。
+Release 的 `cubie-a7z-duck-20261109-preview1.img.xz` 是修复前发布的历史预览版。当前源码中的只读安装器、镜像目录权限和 Wi-Fi 配网修复仍待重新打包和实机验证。历史镜像已有文件结构、摘要、文件系统和压缩校验记录，尚未完成烧录后的实机启动、联网、完整动作或声音验收。既有总线偶发读取失败仍待排查。
 
 ## 源码目录
 

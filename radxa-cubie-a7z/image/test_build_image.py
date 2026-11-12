@@ -115,6 +115,25 @@ class ImageBuilderTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "GPT header checksum"):
                 builder.partitions(disk)
 
+    def test_overlay_preserves_existing_directory_metadata(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            _disk, fs, _offset = make_disk(directory)
+            builder.debugfs(fs, ["mkdir /etc", "set_inode_field /etc mode 040755",
+                                 "set_inode_field /etc uid 123", "set_inode_field /etc gid 456"],
+                            directory, write=True)
+            overlay = directory / "overlay"
+            (overlay / "etc").mkdir(parents=True)
+            (overlay / "etc").chmod(0o700)
+            (overlay / "etc/duck.conf").write_text("configuration")
+            entries = builder.apply_overlay(fs, builder.overlay_entries(overlay), [], directory)
+            original = builder.image_stats(fs, ["/etc"], directory)["/etc"]
+            self.assertEqual((original["mode"], original["uid"], original["gid"]),
+                             (0o755, 123, 456))
+            manifest_entry = next(entry for entry in entries if entry["path"] == "/etc")
+            self.assertEqual((manifest_entry["mode"], manifest_entry["uid"], manifest_entry["gid"]),
+                             (0o755, 123, 456))
+
     def test_corrupt_backup_gpt_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)

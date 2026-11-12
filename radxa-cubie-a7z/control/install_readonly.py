@@ -18,15 +18,27 @@ BASE = Path("/opt/robot/feetech-ft5-r5")
 CONFIG = Path("/etc/robot/feetech-ft5/robotd.toml")
 CALIBRATION = CONFIG.with_name("hd1910-calibration.toml")
 UART = Path("/usr/local/sbin/cubie-servo-uart.py")
-DROPIN = Path("/etc/systemd/system/robotd.service.d/zz-cubie-readonly.conf")
+DROPIN = Path("/etc/systemd/system/robotd.service.d/zzzzzzz-cubie-readonly.conf")
+COMMAND = ("/opt/robot/feetech-ft5-r5/robotd --socket /run/robotd.sock "
+           "--params /etc/robot/feetech-ft5/robotd.toml --read-only")
 
-PROFILE = """[Service]
+PROFILE = f"""[Service]
 Environment=CUBIE_A7Z_SYNC_GROUP_SIZE=3
 ExecStartPre=
 ExecStartPre=/usr/bin/python3 /usr/local/sbin/cubie-servo-uart.py
 ExecStart=
-ExecStart=/opt/robot/feetech-ft5-r5/robotd --socket /run/robotd.sock --params /etc/robot/feetech-ft5/robotd.toml --read-only
+ExecStart={COMMAND}
 Restart=no
+"""
+# Block new start jobs while the stop job and file replacement are in progress.
+# Commissioning writes torque-off on normal exit, so use a hard stop after checking it is idle.
+STOP_PROFILE = PROFILE + """KillSignal=SIGKILL
+KillMode=control-group
+ExecStop=
+ExecStopPost=
+
+[Unit]
+ConditionPathExists=!/
 """
 
 
@@ -58,6 +70,73 @@ def replace_file(source, target):
     temp.replace(target)
 
 
+def show(property_name):
+    return run("systemctl", "show", "robotd", "--property=" + property_name, "--value")
+
+
+def load_profile(profile):
+    DROPIN.parent.mkdir(parents=True, exist_ok=True)
+    temporary = DROPIN.with_suffix(".new")
+    temporary.write_text(profile)
+    temporary.chmod(0o644)
+    temporary.replace(DROPIN)
+    run("systemctl", "daemon-reload")
+
+
+def require_start_profile():
+    start = show("ExecStart")
+    command = start.partition("argv[]=")[2].partition(" ; ")[0]
+    if start.count("argv[]=") != 1 or command != COMMAND or show("Restart") != "no":
+        raise ValueError("effective robotd service does not use the expected read-only profile")
+
+
+def require_idle():
+    status = read_status("/run/robotd.sock")
+    if status.get("mode") == "commissioning":
+        if (status.get("phase") != "ready" or status.get("torque_state") != "off"
+                or status.get("policy_motion_enabled") is not False
+                or "motion" not in status or status["motion"] is not None
+                or status.get("hold") is not None or status.get("imu_verification") is not None
+                or "torque_off_pending" not in status or status["torque_off_pending"] is not None
+                or status.get("power_pending") is not False):
+            raise ValueError("existing robotd is not confirmed idle with torque off")
+    elif not (status.get("mode") == "read_only" and status.get("motor_writes_blocked") is True):
+        raise ValueError("refusing to replace a motion-mode or unknown daemon")
+    return status
+
+
+def require_stop_profile():
+    if (show("KillSignal") != str(signal.SIGKILL.value) or show("KillMode") != "control-group"
+            or show("ExecStop") or show("ExecStopPost")):
+        raise ValueError("effective robotd service is missing the guarded stop profile")
+
+
+def stop_robotd():
+    run("systemctl", "stop", "robotd.service")
+    if show("MainPID") != "0":
+        raise ValueError("old robotd did not exit; no replacement started")
+
+
+def verify_read_only():
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        try:
+            status = read_status("/run/robotd.sock")
+        except AttributeError as error:
+            # The archived RPC reader assumes the decoded reply is an object.
+            raise ValueError("live robotd did not confirm its read-only guard") from error
+        except (OSError, ValueError):
+            status = {}
+        mode = status.get("mode")
+        blocked = status.get("motor_writes_blocked")
+        if mode == "read_only" and blocked is True:
+            return
+        if mode not in (None, "read_only") or blocked is False:
+            break
+        time.sleep(0.2)
+    raise ValueError("live robotd did not confirm its read-only guard")
+
+
 def install(bundle):
     if os.geteuid() != 0:
         raise ValueError("run with sudo on the A7Z")
@@ -72,16 +151,12 @@ def install(bundle):
         raise ValueError("bundle does not contain the verified A7Z/IMU runtime")
     run("/usr/bin/python3", str(bundle / "cubie-servo-uart.py"), "--check")
     run(str(bundle / "robotd"), "--help")  # loader/glibc check; no UART is opened
-    status = read_status("/run/robotd.sock")
-    if status.get("mode") == "commissioning":
-        if (status.get("torque_state") != "off" or status.get("motion") is not None
-                or status.get("policy_motion_enabled") is not False):
-            raise ValueError("existing robotd is not confirmed idle with torque off")
-    elif not (status.get("mode") == "read_only" and status.get("motor_writes_blocked") is True):
-        raise ValueError("refusing to replace a motion-mode or unknown daemon")
-    pid = int(run("systemctl", "show", "robotd", "--property=MainPID", "--value"))
+    status = require_idle()
+    pid = int(show("MainPID"))
+    if pid <= 1:
+        raise ValueError("no robotd main process; nothing replaced")
     cmdline = Path("/proc/%d/cmdline" % pid).read_bytes().split(b"\0")
-    if (pid <= 1 or Path(os.fsdecode(cmdline[0])) != BASE / "robotd"
+    if (Path(os.fsdecode(cmdline[0])) != BASE / "robotd"
             or not ({b"--commissioning", b"--read-only"} & set(cmdline))):
         raise ValueError("unexpected robotd process; nothing replaced")
     policy = disable_policy(CONFIG.read_text())
@@ -97,31 +172,45 @@ def install(bundle):
     (backup / "bus-status-before.json").write_text(json.dumps(status, indent=2))
     (backup / "unit-before.txt").write_text(run("systemctl", "cat", "robotd"))
     print("backup=" + str(backup), flush=True)
-    if int(run("systemctl", "show", "robotd", "--property=MainPID", "--value")) != pid:
+    if int(show("MainPID")) != pid:
         raise ValueError("robotd changed during preparation; nothing replaced")
-    # SIGTERM in the existing commissioning code writes torque-off even when idle.
-    # With torque already confirmed OFF, SIGKILL avoids that prohibited shutdown write.
-    # The replacement starts with the packet-level read-only guard, including on reboot.
-    os.kill(pid, signal.SIGKILL)
-    for _ in range(100):
-        if not Path("/proc/%d" % pid).exists():
-            break
-        time.sleep(0.05)
-    else:
-        raise ValueError("old process did not exit; no replacement started")
+    try:
+        load_profile(STOP_PROFILE)
+        require_start_profile()
+        require_stop_profile()
+        require_idle()
+        if int(show("MainPID")) != pid:
+            raise ValueError("robotd changed before stop; nothing replaced")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        previous_profile = backup / str(DROPIN).lstrip("/")
+        if previous_profile.is_file():
+            replace_file(previous_profile, DROPIN)
+        else:
+            DROPIN.unlink(missing_ok=True)
+        run("systemctl", "daemon-reload")
+        raise
+    stop_robotd()
     # If installation fails from here, leave it stopped: never fall back to a mode that writes.
     replace_file(bundle / "robotd", BASE / "robotd")
     replace_file(bundle / "cubie-servo-uart.py", UART)
     CONFIG.write_text(policy)
     CALIBRATION.write_text(calibration)
-    DROPIN.parent.mkdir(parents=True, exist_ok=True)
-    DROPIN.write_text(PROFILE)
     library = Path("/usr/local/lib/cubie-control")
     library.mkdir(parents=True, exist_ok=True)
     replace_file(bundle / "bus_monitor.py", library / "bus_monitor.py")
-    run("systemctl", "daemon-reload")
-    run("systemctl", "reset-failed", "robotd.service")
-    run("systemctl", "start", "robotd.service")
+    try:
+        load_profile(PROFILE)
+        require_start_profile()
+        run("systemctl", "reset-failed", "robotd.service")
+        run("systemctl", "start", "robotd.service")
+        if int(show("MainPID")) <= 1:
+            raise ValueError("no robotd main process after start")
+        verify_read_only()
+    except (OSError, ValueError, subprocess.SubprocessError):
+        load_profile(STOP_PROFILE)
+        require_stop_profile()
+        stop_robotd()
+        raise
     print("started read-only; calibration/policy flags cleared; no HOME or strategy requested", flush=True)
 
 

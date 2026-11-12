@@ -16,7 +16,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 HOTSPOT_CON = "Cubie-Hotspot"
-HOTSPOT_NET = "10.42.0."
+HOTSPOT_ADDRESS = "10.42.0.1"
 GRACE_SEC = 45
 HOLD_SEC = 90
 CONNECT_WAIT_SEC = 25
@@ -107,19 +107,27 @@ def saved_wifi():
     return False
 
 
-def lan_ip(device):
+def active_profile(device):
+    code, profile, _err = run(
+        ["nmcli", "--escape", "no", "--get-values", "GENERAL.CONNECTION", "device", "show", device], 10)
+    return profile.strip() if code == 0 else ""
+
+
+def ipv4_addresses(device):
     code, out, _err = run(["ip", "-4", "-o", "addr", "show", "dev", device], 5)
     if code != 0:
-        return ""
+        return
     for line in out.splitlines():
         parts = line.split()
-        if "inet" not in parts:
-            continue
-        addr = parts[parts.index("inet") + 1].split("/", 1)[0]
-        if addr.startswith(HOTSPOT_NET) or addr.startswith("169.254."):
-            continue
-        return addr
-    return ""
+        if "inet" in parts:
+            yield parts[parts.index("inet") + 1].split("/", 1)[0]
+
+
+def lan_ip(device):
+    if active_profile(device) in ("", "--", HOTSPOT_CON):
+        return ""
+    return next((address for address in ipv4_addresses(device)
+                 if not address.startswith("169.254.")), "")
 
 
 def hold_until():
@@ -163,33 +171,45 @@ def clear_error():
         pass
 
 
-def hotspot_active():
-    code, out, _err = run(["nmcli", "-t", "-f", "NAME", "connection", "show", "--active"], 10)
+def change_hotspot(args, timeout):
+    code, _out, err = run(["nmcli", "connection", *args], timeout)
     if code != 0:
+        print("hotspot %s failed: %s" % (args[0], err.strip()), flush=True)
         return False
-    return HOTSPOT_CON in {line.strip() for line in out.splitlines()}
+    return True
 
 
 def ensure_hotspot(device, ssid):
     code, out, _err = run(["nmcli", "-t", "-f", "NAME", "connection", "show"], 10)
     exists = code == 0 and HOTSPOT_CON in {line.strip() for line in out.splitlines()}
-    if not exists:
-        run([
-            "nmcli", "connection", "add", "type", "wifi",
-            "ifname", device, "con-name", HOTSPOT_CON, "autoconnect", "no", "ssid", ssid,
-        ], 15)
-    run([
-        "nmcli", "connection", "modify", HOTSPOT_CON,
+    if not exists and not change_hotspot([
+        "add", "type", "wifi", "ifname", device, "con-name", HOTSPOT_CON,
+        "autoconnect", "no", "ssid", ssid,
+    ], 15):
+        return False
+    if not change_hotspot([
+        "modify", HOTSPOT_CON,
         "802-11-wireless.ssid", ssid,
         "802-11-wireless.mode", "ap",
         "802-11-wireless.band", "bg",
         "connection.autoconnect", "no",
         "ipv4.method", "shared",
-    ], 15)
+        "ipv4.addresses", HOTSPOT_ADDRESS + "/24",
+    ], 15):
+        return False
     run(["nmcli", "connection", "modify", HOTSPOT_CON, "remove", "wifi-sec"], 15)
-    if not hotspot_active():
-        run(["nmcli", "connection", "up", HOTSPOT_CON], 30)
+    if active_profile(device) == HOTSPOT_CON:
+        if HOTSPOT_ADDRESS in ipv4_addresses(device):
+            return True
+        # Editing a connection profile does not change an address already in use.
+        if not change_hotspot(["down", HOTSPOT_CON], 15):
+            return False
+    if not change_hotspot(["up", HOTSPOT_CON, "ifname", device], 30):
+        return False
+    if HOTSPOT_ADDRESS not in ipv4_addresses(device):
+        return False
     print("hotspot %s on %s" % (ssid, device), flush=True)
+    return True
 
 
 def scan(ssid_self):
@@ -370,7 +390,7 @@ def bind_servers():
         return
     for port in PORTS:
         try:
-            server = ThreadingHTTPServer(("10.42.0.1", port), Handler)
+            server = ThreadingHTTPServer((HOTSPOT_ADDRESS, port), Handler)
         except OSError as exc:
             print("listen %s failed: %s" % (port, exc), flush=True)
             continue
@@ -432,8 +452,8 @@ def main():
         device = wifi_device()
         action = decide(time.time(), boot_at, saved_wifi(), lan_ip(device), hold_until())
         if action == "hotspot":
-            ensure_hotspot(device, hotspot_ssid())
-            bind_servers()
+            if ensure_hotspot(device, hotspot_ssid()):
+                bind_servers()
         elif action == "client":
             stop_servers()
         time.sleep(2)

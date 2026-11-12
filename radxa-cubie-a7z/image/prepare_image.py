@@ -206,7 +206,12 @@ def prepare(args):
         write(root, 'usr/share/cubie-duck/image-release.json', json.dumps(release, ensure_ascii=False, indent=2) + '\n')
         manifest = {}
         for file in sorted(root.rglob('*')):
-            if file.is_file() and not file.is_symlink():
+            if file.is_symlink():
+                continue
+            if file.is_dir():
+                # Image directories have fixed permissions independent of the builder's umask.
+                file.chmod(0o755)
+            elif file.is_file():
                 manifest[str(file.relative_to(root))] = digest(file)
         write(root, 'usr/share/cubie-duck/image-files.json', json.dumps(manifest, indent=2) + '\n')
         os.rename(root, args.output)

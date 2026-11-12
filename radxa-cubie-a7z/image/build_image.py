@@ -152,7 +152,7 @@ def overlay_entries(root):
             info = source.lstat()
             path = "/" + source.relative_to(root).as_posix()
             absolute_path(path)
-            item = {"path": path, "mode": stat.S_IMODE(info.st_mode), "source": source}
+            item = {"path": path, "mode": stat.S_IMODE(info.st_mode), "uid": 0, "gid": 0, "source": source}
             if stat.S_ISLNK(info.st_mode):
                 item.update(kind="symlink", target=os.readlink(source))
                 quote(item["target"])
@@ -196,6 +196,7 @@ def image_stats(rootfs, paths, work):
 
 
 def apply_overlay(rootfs, entries, removals, work):
+    entries = [item.copy() for item in entries]
     # Check every ancestor first: debugfs otherwise follows existing symlink parents.
     ancestors = {str(parent) for item in entries for parent in PurePosixPath(item["path"]).parents
                  if str(parent) != "/"}
@@ -218,8 +219,11 @@ def apply_overlay(rootfs, entries, removals, work):
         if item["kind"] == "directory":
             if existing and existing["kind"] != "directory":
                 raise ValueError("directory conflicts with existing file: " + path)
-            if not existing:
-                commands.append("mkdir " + quote(path))
+            if existing:
+                # A staging parent adds children to this directory, not metadata.
+                item.update(mode=existing["mode"], uid=existing["uid"], gid=existing["gid"])
+                continue
+            commands.append("mkdir " + quote(path))
             mode = stat.S_IFDIR | item["mode"]
         else:
             if existing and path not in removals:
@@ -240,6 +244,7 @@ def apply_overlay(rootfs, entries, removals, work):
     if errors:
         raise ValueError("debugfs overlay command failed: " + "\n".join(errors)[-4000:])
     verify_overlay(rootfs, entries, removals, work)
+    return entries
 
 
 def verify_overlay(rootfs, entries, removals, work):
@@ -255,7 +260,7 @@ def verify_overlay(rootfs, entries, removals, work):
         found = records.get(item["path"])
         expected_kind = "regular" if item["kind"] == "file" else item["kind"]
         if not found or (found["kind"], found["mode"], found["uid"], found["gid"]) != (
-                expected_kind, item["mode"], 0, 0):
+                expected_kind, item["mode"], item["uid"], item["gid"]):
             raise ValueError("image type/mode/owner verification failed: " + item["path"])
         if item["kind"] == "file":
             destination = dumps / str(index)
@@ -309,7 +314,7 @@ def build(base, overlay, output, *, number=None, removals=()):
             source.seek(partition["offset"])
             copy_bytes(source, target, partition["length"])
         print("Applying and verifying %d overlay entries" % len(entries), flush=True)
-        apply_overlay(rootfs, entries, removals, work)
+        entries = apply_overlay(rootfs, entries, removals, work)
         check = subprocess.run([tool("e2fsck"), "-fn", str(rootfs)], capture_output=True, text=True)
         if check.returncode:
             raise ValueError("root filesystem check failed: " + (check.stdout + check.stderr)[-4000:])
