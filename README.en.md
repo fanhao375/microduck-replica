@@ -38,6 +38,7 @@ The GIFs are silent previews; the MP4 files include the complete video and audio
 ### Supported builds
 
 - **Feetech HD-1910 + Radxa Zero 3W**: use this repository's system image and Studio web console.
+- **Feetech HD-1910 + Radxa Cubie A7Z (preview)**: [port sources and notes](radxa-cubie-a7z/README.md) · [separate prerelease image](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1). Image flashing and board boot, complete motion, and audio acceptance remain unverified; use the image for the matching board.
 - **Dynamixel XL330**: matching CAD and assembly resources are available; use compatible runtime software.
 
 [Choose print files and shopping list](#print-files-and-shopping-list) · [Detailed servo comparison](docs/actuator-selection.en.md)

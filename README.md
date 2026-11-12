@@ -38,6 +38,7 @@
 ### 适用版本
 
 - **飞特 HD-1910 + Radxa Zero 3W**：使用本仓复刻镜像和 Studio 网页中控。
+- **飞特 HD-1910 + Radxa Cubie A7Z（预览）**：[适配源码与说明](radxa-cubie-a7z/README.md) · [独立预发布镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1)。尚未完成镜像烧录上板及完整动作/音频验收；请勿与 Zero 3W 镜像混用。
 - **Dynamixel XL330**：提供对应 CAD 与装配资料，需使用匹配的运行软件。
 
 [选择打印件与采购清单](#打印件与采购清单) · [查看舵机详细对比](docs/执行器选型.md)
