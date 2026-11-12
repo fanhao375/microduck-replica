@@ -10,7 +10,7 @@
 
 | 主板 | 镜像下载 | 首次使用 |
 |---|---|---|
-| **Radxa ZERO 3W** | [ZERO 3W 测试镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261110rc1) · [旧版正式镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W 烧录与配网](software/image/烧录和第一次使用.md) |
+| **Radxa ZERO 3W** | [ZERO 3W · 20261112 RC2 测试镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-zero3w-20261112-rc2) · [旧版正式镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W 烧录与配网](software/image/烧录和第一次使用.md) |
 | **Radxa Cubie A7Z** | [Cubie A7Z 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [A7Z 烧录与配网](radxa-cubie-a7z/image/README.md) |
 
 **飞特 HD-1910 版本已完成整机实机验证：站立、行走、前滚翻后起身均已跑通。** 主线使用 **15 颗飞特 HD-1910 舵机**，提供可烧录的**复刻镜像**和 **Microduck Studio 网页中控**，通过手机或电脑浏览器完成配网、标定和遥控。
