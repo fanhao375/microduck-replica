@@ -4,7 +4,14 @@
 
 A third-party full-robot replica project based on [Pollen Robotics' Microduck](https://pollen-robotics.com/microduck/), with resources for sourcing parts, printing, assembly, calibration, control, and training.
 
-**20261104 image release.** It combines HOME IMU recalibration, independent ID 200 orientation checks, hotspot recovery, and previously released features such as gamepad mapping. Booting from a fresh card, hotspot recovery after a Wi-Fi change, walking, and getting up after a fall still require hardware validation. Fixed mounting presets remain future work. [Download image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [Matching prerelease software](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.4) · [Change list (Chinese)](docs/更新说明-20261104.md)
+## Download the image for your board
+
+Check the model printed on the board. **Radxa ZERO 3W** and **Radxa Cubie A7Z** use different images. Match the full board model to the release before flashing.
+
+| Board | Image download | First use |
+|---|---|---|
+| **Radxa ZERO 3W** | [ZERO 3W test image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261110rc1) · [Previous stable image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W flashing and setup](software/image/烧录和第一次使用.md) |
+| **Radxa Cubie A7Z** | [Cubie A7Z preview image](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [A7Z flashing and setup](radxa-cubie-a7z/image/README.md) |
 
 **The Feetech HD-1910 build has passed real hardware validation: standing, walking, a forward roll and standing back up.** Our main build uses **15 Feetech HD-1910 servos**. We provide a **ready-to-flash system image** and the **Microduck Studio web console** for Wi-Fi setup, calibration, and remote control from a phone or computer browser.
 
@@ -31,14 +38,14 @@ A third-party full-robot replica project based on [Pollen Robotics' Microduck](h
 
 The GIFs are silent previews; the MP4 files include the complete video and audio.
 
-**[Download the image](https://github.com/fanhao375/microduck-replica/releases/latest)** · **[First-use guide (PDF / web)](docs/上手指南/README.md)** · **[CAD and print files](https://github.com/fanhao375/microduck-replica-cad)** · **[Assembly tutorials](#-assembly-videos)** · **[BOM shopping list](BOM/README.md)** · **[Hardware projects](hardware/README.md)**
+**[Download the image for your board](#download-the-image-for-your-board)** · **[First-use guide (PDF / web)](docs/上手指南/README.md)** · **[CAD and print files](https://github.com/fanhao375/microduck-replica-cad)** · **[Assembly tutorials](#-assembly-videos)** · **[BOM shopping list](BOM/README.md)** · **[Hardware projects](hardware/README.md)**
 
 ---
 
 ### Supported builds
 
 - **Feetech HD-1910 + Radxa Zero 3W**: use this repository's system image and Studio web console.
-- **Feetech HD-1910 + Radxa Cubie A7Z (preview)**: [port sources and notes](radxa-cubie-a7z/README.md) · [separate prerelease image](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1). Image flashing and board boot, complete motion, and audio acceptance remain unverified; use the image for the matching board.
+- **Feetech HD-1910 + Radxa Cubie A7Z (preview)**: [port sources and notes](radxa-cubie-a7z/README.md) · [download the image for your board](#download-the-image-for-your-board). See the release for the preview's hardware validation status.
 - **Dynamixel XL330**: matching CAD and assembly resources are available; use compatible runtime software.
 
 [Choose print files and shopping list](#print-files-and-shopping-list) · [Detailed servo comparison](docs/actuator-selection.en.md)
@@ -113,7 +120,7 @@ The robot runtime, gait models and bus-ID-200 IMU autodetection are unchanged fr
 
 <p align="center"><a href="software/studio/README.md"><img src="assets/studio-overview-20261025-demo.jpg" alt="Current Microduck Studio interface with simulated device readings" width="920"></a><br><sub>Studio interface demonstration with simulated device readings</sub></p>
 
-**[Download the image](https://github.com/fanhao375/microduck-replica/releases/latest)** · **[First-use guide](docs/上手指南/README.md)** · **[Studio documentation](software/studio/README.md)**
+**[Download the image for your board](#download-the-image-for-your-board)** · **[First-use guide](docs/上手指南/README.md)** · **[Studio documentation](software/studio/README.md)**
 
 The image is free for personal non-commercial builds; see the release for component licences. Camera input defaults to a test source; see the release notes for physical camera and ToF verification limits.
 

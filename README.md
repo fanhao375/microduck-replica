@@ -4,7 +4,14 @@
 
 基于 [Pollen Robotics Microduck](https://pollen-robotics.com/microduck/) 的第三方整机复刻项目，提供从采购、打印、装配到标定、控制和训练的资料。
 
-**20261104 正式镜像**。整合站姿 IMU 重标、ID 200 独立方向核验、热点恢复，以及手柄映射等此前软件功能。新卡启动、真实换网热点、行走和倒地起身待实机验收。固定安装方向预设留待后续。[下载镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [配套测试软件](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.4) · [完整更新清单](docs/更新说明-20261104.md)
+## 按主板下载镜像
+
+先看主板丝印。**Radxa ZERO 3W** 和 **Radxa Cubie A7Z** 用不同的镜像，烧卡前请核对下载页和主板上的完整型号。
+
+| 主板 | 镜像下载 | 首次使用 |
+|---|---|---|
+| **Radxa ZERO 3W** | [ZERO 3W 测试镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261110rc1) · [旧版正式镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W 烧录与配网](software/image/烧录和第一次使用.md) |
+| **Radxa Cubie A7Z** | [Cubie A7Z 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [A7Z 烧录与配网](radxa-cubie-a7z/image/README.md) |
 
 **飞特 HD-1910 版本已完成整机实机验证：站立、行走、前滚翻后起身均已跑通。** 主线使用 **15 颗飞特 HD-1910 舵机**，提供可烧录的**复刻镜像**和 **Microduck Studio 网页中控**，通过手机或电脑浏览器完成配网、标定和遥控。
 
@@ -31,14 +38,14 @@
 
 动图为无声预览，MP4 保留完整画面和声音。
 
-**[下载镜像](https://github.com/fanhao375/microduck-replica/releases/latest)** · **[首次使用指南（PDF / 网页）](docs/上手指南/README.md)** · **[CAD 与打印件](https://github.com/fanhao375/microduck-replica-cad)** · **[装配教程](#-装配视频教程)** · **[BOM 采购清单](BOM/README.md)** · **[硬件工程](hardware/README.md)**
+**[按主板下载镜像](#按主板下载镜像)** · **[首次使用指南（PDF / 网页）](docs/上手指南/README.md)** · **[CAD 与打印件](https://github.com/fanhao375/microduck-replica-cad)** · **[装配教程](#-装配视频教程)** · **[BOM 采购清单](BOM/README.md)** · **[硬件工程](hardware/README.md)**
 
 ---
 
 ### 适用版本
 
 - **飞特 HD-1910 + Radxa Zero 3W**：使用本仓复刻镜像和 Studio 网页中控。
-- **飞特 HD-1910 + Radxa Cubie A7Z（预览）**：[适配源码与说明](radxa-cubie-a7z/README.md) · [独立预发布镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1)。尚未完成镜像烧录上板及完整动作/音频验收；请勿与 Zero 3W 镜像混用。
+- **飞特 HD-1910 + Radxa Cubie A7Z（预览）**：[适配源码与说明](radxa-cubie-a7z/README.md) · [按主板下载镜像](#按主板下载镜像)。预览镜像的实机验收范围见发布页。
 - **Dynamixel XL330**：提供对应 CAD 与装配资料，需使用匹配的运行软件。
 
 [选择打印件与采购清单](#打印件与采购清单) · [查看舵机详细对比](docs/执行器选型.md)
@@ -123,7 +130,7 @@
 
 <p align="center"><a href="software/studio/README.md"><img src="assets/studio-overview-20261025-demo.jpg" alt="Microduck Studio 当前界面演示，设备读数为模拟数据" width="920"></a><br><sub>Studio 界面演示，设备读数为模拟数据</sub></p>
 
-**[下载镜像](https://github.com/fanhao375/microduck-replica/releases/latest)** · **[首次使用指南](docs/上手指南/README.md)** · **[Studio 说明](software/studio/README.md)**
+**[按主板下载镜像](#按主板下载镜像)** · **[首次使用指南](docs/上手指南/README.md)** · **[Studio 说明](software/studio/README.md)**
 
 镜像免费，仅供个人非商业复刻；各部分许可见发布页。摄像头默认测试源，真实摄像头和 ToF 的验证范围见本版说明。
 
