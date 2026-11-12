@@ -1,0 +1,19 @@
+[Unit]
+Description=Microduck voice Studio
+StartLimitIntervalSec=60
+StartLimitBurst=10
+
+[Service]
+WorkingDirectory=%h/.local/share/microduck-voice/current
+ExecStartPre=/usr/bin/test -f %h/.local/state/microduck-voice/password.json
+ExecStart=/usr/bin/python3 -I run.py --listen 127.0.0.1:18081 --state-dir %h/.local/state/microduck-voice --log-dir %h/.local/state/microduck-voice/logs
+Restart=always
+RestartSec=5
+UMask=0077
+Nice=10
+CPUWeight=20
+CPUQuota=60%
+MemoryMax=450M
+
+[Install]
+WantedBy=default.target

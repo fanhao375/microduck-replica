@@ -20,6 +20,10 @@
 
 独立的舵机测试、IMU 检查和步态分析入口见[工具导航](../tools/README.md)；电路板与固件入口见[硬件工程](../hardware/README.md)。
 
+## Orange Pi Zero 3W 移植
+
+A733 主板的热点配网、Studio / 只读控制适配、UART0 HAT 接入和独立配网基础镜像见 [`orangepi-zero3w/`](orangepi-zero3w/)。这是独立板型贡献；与上面的 Radxa Zero 3W 主线镜像不能互刷，运动能力尚未验收。
+
 ## HD1910 仿真训练
 
 **[`training/`](training/)** 包含完整 Python 训练工程：模型、LuwuDynamics 的 1910 M6 参数、

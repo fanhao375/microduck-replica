@@ -1,0 +1,196 @@
+/* IMU 页（web/imu.js）。颜色、圆角都用 styles.css 里的变量；页头、横幅、按钮沿用舵机页的 sv-* 和通用 class。
+   在 index.html 里放在 styles.css 后面引用。 */
+
+.imu-page { display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px; }
+.imu-grid { display: grid; grid-template-columns: minmax(340px, 1fr) minmax(420px, 1fr); gap: 16px; align-items: start; }
+.imu-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* ---- 3D：平时一只；算完「校准前 / 校准后」两只并排 ---- */
+.imu-stage-wrap { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 68px; }   /* 顶栏吸顶了（56 px）：贴在它下面 */
+.imu-stage { position: relative; height: 560px; display: flex; border-radius: var(--radius-stage); overflow: hidden; background: var(--stage-bg); box-shadow: var(--stage-edge); }
+.imu-view { position: relative; flex: 1 1 0; min-width: 0; }
+.imu-stage.duo .imu-view + .imu-view { box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
+.imu-view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.imu-view canvas.stale { filter: grayscale(1); opacity: .5; }
+.imu-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.imu-overlay .plumb { stroke: rgba(255, 255, 255, .75); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.imu-overlay .arc { fill: none; stroke: var(--brand); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
+.imu-overlay .head { fill: var(--brand); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
+.imu-overlay .ghost { stroke: rgba(245, 180, 0, .55); stroke-width: 2; stroke-dasharray: 4 5; }
+.imu-overlay .lbl { fill: #1D1D1F; font-size: 15px; font-weight: 700; text-anchor: middle; font-family: var(--font);
+  paint-order: stroke; stroke: var(--brand); stroke-width: 9px; stroke-linejoin: round; }
+.imu-view .reset-view { position: absolute; z-index: 2; right: 16px; top: 14px; height: 30px; padding: 0 14px; border: 0; border-radius: 999px;
+  background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 13px; }
+.imu-stage-read { position: absolute; z-index: 1; left: 20px; top: 16px; display: flex; flex-direction: column; color: var(--stage-fg); pointer-events: none; }
+.imu-stage-read b { font-size: 34px; line-height: 40px; font-weight: 600; }
+.imu-stage-read span { font-size: 13px; color: var(--stage-fg-2); }
+.imu-stage.duo .imu-stage-read b { font-size: 44px; line-height: 50px; }
+.imu-stage.duo .imu-stage-read span { font-size: 15px; font-weight: 600; color: var(--stage-fg); }
+.imu-stage-read.after b { color: #C9F2D2; }
+.imu-note { position: absolute; left: 16px; bottom: 14px; padding: 4px 12px; border-radius: 999px; background: rgba(0, 0, 0, .35); color: #FFF; font-size: 12px; }
+.imu-cue { position: absolute; z-index: 1; left: 50%; top: 18px; transform: translateX(-50%); padding: 6px 16px; border-radius: 999px;
+  background: rgba(0, 0, 0, .45); color: #FFF; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.imu-diff { margin: 0; padding: 10px 16px; border-radius: 12px; background: var(--board); box-shadow: inset 0 0 0 1px var(--board-edge); font-size: 14px; line-height: 1.6; }
+.imu-diff b { font-size: 17px; }
+
+/* ---- 右边的白板 ---- */
+.imu-card { padding: 14px 18px; }
+.imu-card h3 { margin: 0 0 10px; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.imu-kv { display: grid; grid-template-columns: 44px 1fr; gap: 6px 12px; font-size: 14px; align-items: baseline; }
+.imu-kv > span { color: var(--text-2); font-size: 13px; }
+.imu-kv b { font-weight: 600; }
+.imu-kv small { font-weight: 400; font-size: 12px; color: var(--text-2); }
+.imu-word { display: inline-flex; align-items: center; gap: 6px; font-size: 16px; }
+.imu-word.ok { color: var(--ok); }
+.imu-word.warn { color: var(--warn); }
+.imu-word.bad { color: var(--danger); }
+.imu-dim { color: var(--text-2); }
+.imu-stale .imu-kv b:not(.imu-dim) { color: var(--text-2); }       /* 断线：数值变灰，读数那一行写「X 秒没更新」 */
+.imu-details { margin-top: 10px; font-size: 13px; color: var(--text-2); }
+.imu-details summary { cursor: pointer; }
+.imu-details code { display: block; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: #F5F5F7; color: var(--text); font-size: 12px; word-break: break-all; }
+
+/* ---- 芯片 ---- */
+.imu-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.imu-chip { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: #F5F5F7; cursor: pointer; }
+.imu-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.imu-chip b { font-size: 14px; }
+.imu-chip small { font-size: 12px; line-height: 16px; color: var(--text-2); }
+.imu-chip.on { background: var(--board); box-shadow: inset 0 0 0 2px var(--text); }
+.imu-chip:focus-within { outline: 2px solid var(--blue); outline-offset: 2px; }
+.imu-tag { position: absolute; right: 8px; top: 8px; font-size: 11px; padding: 1px 6px; border-radius: 6px; background: var(--text); color: #FFF; }
+
+/* ---- 站着校准：大按钮、方向盘、静音 ---- */
+.imu-mute { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 400; color: var(--text-2); cursor: pointer; }
+.imu-howto { margin: 0 0 12px; padding-left: 20px; font-size: 14px; line-height: 1.7; }
+.imu-howto li + li { margin-top: 2px; }
+.imu-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-top: 12px; }
+.imu-big { flex: 1 1 260px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 24px; border: 0; border-radius: 999px;
+  background: var(--text); color: #FFF; font-size: 17px; font-weight: 600; }
+.imu-big:disabled { opacity: .45; }
+.imu-big.rec { background: #FFF1F1; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger); }
+.rec-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--danger); animation: imu-blink 1.2s ease-in-out infinite; }
+.imu-live { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.imu-live-txt { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.imu-say { margin: 0; font-size: 15px; line-height: 1.6; }
+.imu-say b { font-size: 18px; font-weight: 600; }
+.imu-tilt { margin: 0; display: flex; align-items: baseline; gap: 8px; }
+.imu-tilt b { font-size: 34px; line-height: 40px; font-weight: 600; }
+.imu-tilt span { font-size: 13px; color: var(--text-2); }
+.imu-bar { position: relative; display: block; height: 6px; border-radius: 3px; background: #E5E5EA; overflow: hidden; }
+.imu-bar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--text); transition: width .1s linear; }
+.imu-bar.small { width: 120px; height: 4px; }
+
+.imu-pad { width: 196px; height: 196px; flex: none; }
+.imu-pad .pad-bg { fill: #F5F5F7; stroke: #E5E5EA; stroke-width: 1; }
+.imu-pad .pad-ring { fill: none; stroke: #D1D1D6; stroke-width: 1; stroke-dasharray: 3 4; }
+.imu-pad .pad-dot circle { fill: #FFFFFF; stroke: #C7C7CC; stroke-width: 2; }
+.imu-pad .pad-dot .pad-lbl { font-size: 13px; font-weight: 600; fill: var(--text-2); text-anchor: middle; font-family: var(--font); }
+.imu-pad .pad-dot.next circle { stroke: var(--brand); stroke-width: 3; animation: imu-pulse 1.1s ease-in-out infinite; }
+.imu-pad .pad-dot.next .pad-lbl { fill: var(--text); }
+.imu-pad .pad-dot.hot circle { stroke: var(--ok); stroke-width: 3; }
+.imu-pad .pad-dot.done circle { fill: var(--ok); stroke: var(--ok); }
+.imu-pad .pad-dot.done .pad-lbl { fill: var(--ok); }
+.imu-pad .tick { fill: none; stroke: #FFF; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.imu-pad .pad-live { fill: var(--blue); stroke: #FFF; stroke-width: 2; }
+.imu-pad .pad-live.on { fill: var(--ok); }
+.imu-pad .pad-live.over { fill: var(--danger); }
+.imu-pad .pad-hold { fill: none; stroke: var(--ok); stroke-width: 3; stroke-linecap: round; }
+@keyframes imu-pulse { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .25; } }
+@keyframes imu-blink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) {
+  .imu-pad .pad-dot.next circle, .rec-dot { animation: none; }
+}
+
+/* ---- 结果 ---- */
+.imu-grade { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: #E5E5EA; color: var(--text); }
+.imu-grade.ok { background: #E6F4EA; color: var(--ok); }
+.imu-grade.warn { background: #FFF7EC; color: var(--warn); }
+.imu-grade.bad { background: #FFF1F1; color: var(--danger); }
+.imu-parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 4px 0 8px; border-radius: 12px; background: #F5F5F7; }
+.imu-parts > div { display: flex; flex-direction: column; padding: 10px 12px; }
+.imu-parts > div + div { box-shadow: inset 1px 0 0 #E5E5EA; }
+.imu-parts span { font-size: 12px; color: var(--text-2); }
+.imu-parts b { font-size: 22px; line-height: 28px; font-weight: 600; }
+.imu-parts small { font-size: 11px; color: var(--text-2); line-height: 14px; }
+.imu-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+.imu-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--text-2); padding: 4px 8px; border-bottom: 1px solid #E5E5EA; }
+.imu-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.imu-table .r { text-align: right; }
+.imu-table tr.bad td { color: var(--danger); }
+.imu-confirm { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0; padding: 8px 12px; border-radius: 10px; background: #FFF7EC; box-shadow: inset 0 0 0 1px #F5DDBF; font-size: 13px; line-height: 1.5; }
+.imu-confirm input { margin-top: 3px; }
+.imu-save { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.imu-save .btn-dark { flex: none; }
+.imu-save-why { flex: 1 1 240px; margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: var(--text-2); }
+
+/* ---- 粗校、后端进度 ---- */
+.imu-coarse { box-shadow: inset 0 0 0 1px #F5DDBF; background: #FFFBF5; }
+.imu-coarse p { line-height: 1.7; }
+.imu-job { align-items: center; }
+.imu-job-tilt { font-size: 22px; font-weight: 600; }
+.imu-job-tilt small { font-size: 13px; font-weight: 400; color: var(--text-2); }
+.imu-job .imu-bar { margin-left: auto; }
+
+@media (max-width: 1100px) {
+  .imu-grid { grid-template-columns: 1fr; }
+  .imu-stage-wrap { position: static; }
+  .imu-stage { height: 420px; }
+}
+@media (max-width: 700px) {
+  .imu-stage { height: 340px; }
+  .imu-stage.duo .imu-stage-read { left: 12px; top: 10px; }
+  .imu-stage.duo .imu-stage-read b { font-size: 30px; line-height: 34px; }
+  .imu-stage.duo .imu-note { left: 10px; right: 10px; bottom: 10px; font-size: 11px; text-align: center; }
+  .imu-cue { font-size: 13px; top: 12px; }
+  .imu-chips { grid-template-columns: 1fr; }
+  .imu-parts { grid-template-columns: 1fr 1fr; }
+  .imu-parts > div:nth-child(3) { box-shadow: inset 0 1px 0 #E5E5EA; }
+  .imu-parts > div:nth-child(4) { box-shadow: inset 1px 0 0 #E5E5EA, inset 0 1px 0 #E5E5EA; }
+  .imu-pad { width: 168px; height: 168px; }
+  .imu-big { flex-basis: 100%; }
+}
+
+/* Console layout only: calibration rules, the original SVG and Three.js views stay unchanged. */
+.console-devices .imu-page{padding:0;min-width:0}
+.console-devices .console-imu-summary{padding:0;margin:0 0 12px}
+.console-devices .console-imu-summary .sv-metrics{font-size:12px;gap:15px;color:#6E6E73}
+.console-devices .console-imu-summary .sv-metrics b{font-weight:500;color:#1D1D1F}
+.console-devices .console-imu-explanation{padding:0 0 16px;font-size:12px}
+.console-devices .console-imu-explanation p{margin-top:10px;font-size:12px;line-height:1.9;color:#6E6E73}
+.console-devices .imu-grid{grid-template-columns:minmax(0,1.06fr) minmax(340px,1fr);gap:20px;align-items:start}
+.console-devices .imu-stage-wrap{top:calc(var(--console-header-height,63px) + 16px + var(--bar-h,0px))}
+.console-devices .imu-stage{height:500px;border:1px solid var(--cd-line);border-radius:11px;overflow:hidden}
+.console-devices .imu-stage-read b{font-weight:500}
+.console-devices .imu-side{gap:16px}
+.console-devices .imu-card{padding:19px 20px}
+.console-devices .imu-card h3{font-size:15px;line-height:1.6;margin:0 0 15px;font-weight:600;color:#1D1D1F}
+.console-devices .imu-card p,.console-devices .imu-card .sv-small{font-size:12px;line-height:1.8;color:#6E6E73}
+.console-devices .imu-card .sv-small{font-weight:400}
+.console-devices .imu-howto{font-size:12px;line-height:1.9;color:#6E6E73;padding-left:18px}
+.console-devices .imu-say{font-size:13px}
+.console-devices .imu-say b{font-size:15px;font-weight:500;color:#1D1D1F}
+.console-devices .imu-live{gap:14px;margin:17px 0}
+.console-devices .imu-live-txt{flex-basis:150px}
+.console-devices .imu-tilt b{font-size:29px;color:#1D1D1F}
+.console-devices .imu-big{font-size:14px;border-radius:8px;min-height:46px;background:var(--cd-accent);color:#fff}
+.console-devices .imu-big.rec{background:#FFF1F1;color:#D70015}
+.console-devices .imu-bar{background:#E5E5EA}
+.console-devices .imu-bar>span{background:var(--cd-accent)}
+.console-devices .imu-form{font-size:12px;line-height:1.8}
+.console-devices .imu-form>span{color:#6E6E73}
+.console-devices .imu-form b{font-size:12px;font-weight:500}
+.console-devices .imu-card details{padding-top:13px;margin-top:15px;border-top:1px solid var(--cd-line)}
+.console-devices .imu-card table{font-size:11px}
+.console-devices .imu-parts{background:#F2F2F7;border-color:var(--cd-line)}
+.console-devices .imu-parts b{font-size:21px;color:#0071E3;font-weight:500}
+.console-devices .console-imu-chip{padding:17px 20px}
+.console-devices .console-imu-chip>.imu-card{padding:18px 0 0;border:0;margin:0;box-shadow:none;background:transparent}
+.console-devices .console-imu-chip>.imu-card>h3{display:none}
+.console-devices .imu-coarse{background:#FFFBF5;border-color:#F5DDBF;box-shadow:none}
+.console-devices .imu-actions{gap:8px;margin-top:15px}
+@media(max-width:1180px){.console-devices .imu-grid{grid-template-columns:minmax(0,1fr) minmax(320px,1fr);gap:17px}.console-devices .imu-card{padding:17px}.console-devices .imu-live{gap:10px}}
+@media(max-width:1050px){.console-devices .imu-grid{grid-template-columns:1fr}.console-devices .imu-stage-wrap{position:static}.console-devices .imu-stage{height:410px}}
+@media(max-width:680px){.console-devices .imu-stage{height:330px}.console-devices .imu-grid{gap:16px}.console-devices .imu-card{padding:17px 16px}.console-devices .imu-card h3{font-size:14px}.console-devices .imu-card p,.console-devices .imu-card .sv-small,.console-devices .imu-howto{font-size:11px}.console-devices .imu-live{gap:12px}.console-devices .imu-live-txt{flex-basis:130px}.console-devices .imu-big{font-size:13px}.console-devices .console-imu-chip{padding:15px 16px}}
+.console-devices .imu-pad{--brand:#F5B400;--ok:#1E7E34;--blue:#0071E3;--danger:#D70015;--text:#1D1D1F;--text-2:#6E6E73;--font:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Noto Sans CJK SC",-apple-system,sans-serif}

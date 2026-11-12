@@ -1,0 +1,14 @@
+[Unit]
+Description=Orange Pi boot Wi-Fi provisioning
+After=NetworkManager.service dnsmasq.service hostapd.service
+Requires=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/orangepi-provision/orangepi_provision.py
+Restart=on-failure
+RestartSec=3
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

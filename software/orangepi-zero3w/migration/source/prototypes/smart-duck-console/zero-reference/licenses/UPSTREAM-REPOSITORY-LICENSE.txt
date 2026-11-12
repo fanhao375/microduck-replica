@@ -1,0 +1,98 @@
+本仓库采用双许可证 / This repository is dual-licensed
+=====================================================
+
+1. Apache License 2.0 —— 本项目原创的代码与工具
+   Apache License 2.0 — original code and tooling by this project
+
+     scripts/              渲染、导出、孔位分析脚本 / rendering, export, hole-analysis scripts
+     tools/                零依赖 STL 查看器 / zero-dependency STL viewer
+     software/studio/      Microduck Studio 网页中控的代码（第三方库和 3D 网格除外，见下）
+                           Microduck Studio web console code (except vendored
+                           third-party libraries and the 3D mesh, see below)
+     software/image/       复刻镜像的构建脚本和开机脚本 / replica image build and boot scripts
+     software/updater/     签名软件包、网页升级协调与引导工具 / signed software update tooling
+     software/duck-echo/   本地语音与音频互动代码 / local voice and audio interaction code
+
+   Apache-2.0 全文 / full text: https://www.apache.org/licenses/LICENSE-2.0
+
+
+2. CC BY-NC-SA 4.0 —— 上游 3D 模型的衍生作品，以及本项目的文档
+   CC BY-NC-SA 4.0 — derivative works of the upstream 3D models, and this
+   project's documentation
+
+     assembly-drawings/    渲染图与爆炸图（由上游 MJCF + STL 生成）
+                           renders and exploded views, generated from upstream MJCF + STL
+     software/training/ 内的 3D 网格 / 3D meshes in software/training/
+                           保留的上游仿真几何 / retained upstream simulation geometry
+     tools/servo-web/model/
+                           网页显示模型 / web visualization geometry
+     software/studio/web/model/
+                           Studio 网页里的 3D 鸭子 / 3D duck in the Studio web console
+     cad/, print/ 的历史 STL / historical STLs in cad/ and print/
+                           旧模型已于 2026-09-28 移除，Git 历史中的衍生作品许可不变
+                           removed on 2026-09-28; their licence in Git history is unchanged
+     docs/hole_analysis.json
+                           由上游 STL 计算得出的孔位数据
+                           hole geometry computed from upstream STLs
+     *.md, docs/*.md       全部文档与逆向分析文本
+                           all documentation and reverse-engineering text
+     build-log/, assets/   实物照片与图片素材，由本项目参与者拍摄并授权
+                           build photos and image assets, shot by and licensed
+                           from project participants
+
+   这些内容中，几何部分是 Pollen Robotics 的 Microduck 3D 模型（CC BY-NC-SA）
+   的衍生作品，依据 ShareAlike 条款必须沿用相同许可证；文档部分由本项目主动
+   采用同一许可证，以保持整体一致。
+
+   The geometry here is derivative of Pollen Robotics' Microduck 3D models
+   (CC BY-NC-SA) and must carry the same licence under ShareAlike. The
+   documentation adopts the same licence by choice, for consistency.
+
+   CC BY-NC-SA 4.0 全文 / full text:
+   https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+
+说明 / Notes
+------------
+
+- assets/hw/ 中的两张官方板卡图片保留原许可，不受上述 CC BY-NC-SA 覆盖：
+  radxa-zero3w-official.webp 为 Radxa 的 CC BY 4.0 图片；
+  rpi-robot-hat-official.png 为 Pollen Robotics 的 Apache-2.0 图片。
+  These two official board images keep their original licences rather than
+  this project's CC BY-NC-SA. Sources and attribution:
+  assets/hw/official-board-images.md; HAT licence: assets/hw/RPI-Robot-HAT-LICENSE.txt.
+
+- software/training/ 保留训练工程自己的许可证边界：代码、配置、参数、上游文档与
+  本目录新增文档采用 Apache-2.0（全文见 software/training/LICENSE），3D 模型和
+  网格保留上游 CC BY-NC-SA 声明。上面的文档 CC 许可不覆盖此目录的 Apache 文档。
+  software/training/ retains its own licensing: code, configuration, parameters,
+  upstream documentation and new documentation in that directory are Apache-2.0
+  (full text in software/training/LICENSE); 3D models and meshes retain the
+  upstream CC BY-NC-SA statement. The documentation licence above does not
+  override Apache-licensed documentation in that directory.
+  Fixed sources and attribution: software/training/UPSTREAM.md.
+
+- software/studio/web/vendor/（Preact、htm、three.js）和 software/studio/deps/（Python 包）
+  是原样收录的第三方软件，保留各自的许可证，许可证文件在原目录里。
+  Vendored third-party code in software/studio/web/vendor/ and software/studio/deps/
+  keeps its own licences; the licence files sit next to the code.
+
+- 复刻镜像里带的走路和动作模型不在本仓库里，适用模型作者的个人非商业许可，见
+  software/image/overlay/usr/share/doc/microduck/模型说明.txt。
+  The walking and skill models shipped in the replica image are not in this
+  repository; they are under their author's personal non-commercial licence.
+
+- 规范名称是 CC BY-NC-SA 4.0。上游 README 写作「BY-SA-NC」，指的是同一个许可证。
+  The canonical name is CC BY-NC-SA 4.0; upstream writes it "BY-SA-NC" — same licence.
+
+- 文档中引用的上游源码片段（注释、常量、寄存器定义）来自
+  pollen-robotics/microduck，遵循其 Apache-2.0 许可证，引用处均标注了文件路径。
+  Source excerpts quoted in the documentation come from pollen-robotics/microduck
+  under Apache-2.0, with file paths cited at each quotation.
+
+- 非商业性使用：CC BY-NC-SA 禁止商业用途。本仓库仅供学习、研究与个人复刻。
+  Non-commercial: CC BY-NC-SA forbids commercial use. This repository is for
+  study, research and personal replication only.
+
+完整署名与合规声明详见 NOTICE.md
+Full attribution and compliance statement: see NOTICE.md

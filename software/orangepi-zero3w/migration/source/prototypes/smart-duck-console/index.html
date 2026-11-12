@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#00877e">
+  <script type="importmap">
+  {"imports":{"@duck-zero/three":"./zero-reference/three.module.js?v=20261108-18","@duck-zero/controls":"./zero-reference/OrbitControls.js?v=20261108-18","@duck-zero/environment":"./zero-reference/RoomEnvironment.js?v=20261108-18","@duck-zero/geometry":"./zero-reference/BufferGeometryUtils.js?v=20261108-18","@duck-zero/renderer":"./zero-reference/duck3d.js?v=20261108-18","@duck-zero/labels":"./zero-reference/labels.js?v=20261108-18"}}
+  </script>
+  <title>智能鸭 · 中控原型</title>
+  <link rel="stylesheet" href="styles.css?v=20261108-18">
+  <link rel="stylesheet" href="overview.css?v=20261108-18">
+  <link rel="stylesheet" href="devices.css?v=20261108-18">
+  <link rel="stylesheet" href="imu.css?v=20261108-18">
+  <link rel="stylesheet" href="zero-reference.css?v=20261108-18">
+  <link rel="stylesheet" href="experience.css?v=20261108-18">
+  <link rel="stylesheet" href="system.css?v=20261108-18">
+  <link rel="stylesheet" href="onboarding.css?v=20261108-18">
+  <script defer src="common.js?v=20261108-18"></script>
+  <script defer src="zero-model-data.js?v=20261108-18"></script>
+  <script defer src="zero-reference-ui.js?v=20261108-18"></script>
+  <script defer src="overview.js?v=20261108-18"></script>
+  <script defer src="devices.js?v=20261108-18"></script>
+  <script defer src="imu.js?v=20261108-18"></script>
+  <script defer src="experience.js?v=20261108-18"></script>
+  <script defer src="system.js?v=20261108-18"></script>
+  <script defer src="onboarding.js?v=20261108-18"></script>
+  <script defer src="app.js?v=20261108-18"></script>
+  <script type="module" src="zero-reference-viewer.js?v=20261108-18"></script>
+  <script type="module" src="overview-viewer.js?v=20261108-18"></script>
+  <script type="module" src="imu-viewer.js?v=20261108-18"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal"><form method="dialog"><div class="modal-title"></div><div class="modal-content"></div><div class="modal-actions"><button class="btn" value="cancel">取消</button><button type="button" class="btn primary" id="modal-confirm">确认</button></div></form></dialog>
+</body>
+</html>

@@ -1,0 +1,174 @@
+--- a/studio/app.py
++++ b/studio/app.py
+@@ -58,7 +58,7 @@
+ MODEL_UPLOAD_LIMIT = 64 * 1024 * 1024
+ MODEL_OP_LIMIT = 32768
+ STATE_HZ = 10
+-COMMANDS = {"relax", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op", "voice.recognize"}
++COMMANDS = {"tracking.op", "relax", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op", "voice.recognize"}
+ HB_QUIET_S = 5.0         # 页面这么久没发心跳：当作看不见（停推状态、可能退订）
+ HB_DEAD_S = 30.0         # 这么久没任何消息：当作半开的连接（手机走出 WiFi），直接关掉
+ MUSIC_PONG_TIMEOUT_S = 5.0
+@@ -156,6 +156,10 @@
+ 
+ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev_autologin=False, servo=None, imu=None, pad=None,
+               onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None):
++    from .leg_tracking import TrackingController
++    tracking = TrackingController(servo, state_dir) if servo is not None else None
++    if servo is not None:
++        servo.tracking = tracking
+     guard = OriginGuard(names=names)
+     ai = AiService(state_dir)
+     updates = updates or Updates()
+@@ -841,6 +845,17 @@
+             except Exception:  # noqa: BLE001
+                 pass
+ 
++        async def run_tracking(cid, args):
++            try:
++                if tracking is None:
++                    raise ValueError('舵机调试不可用')
++                if args.get('op') == 'start' and (me.get('route') != '/servos' or not me['visible']):
++                    raise ValueError('请在舵机页开始测试')
++                data = await asyncio.to_thread(tracking.handle, args, str(id(ws)))
++                await send({'t': 'result', 'id': cid, 'ok': True, 'data': data})
++            except Exception as error:
++                await send({'t': 'result', 'id': cid, 'ok': False, 'reason': str(error)})
++
+         async def run_servo_op(cid, args):  # noqa: C901
+             """舵机页的操作（扭矩、滑块、运动、校准、扫描、寄存器……）：servo_ops.handle 在线程里跑。"""
+             from .servo_ops import Refused
+@@ -1170,7 +1185,7 @@
+                         await send({'t':'result','id':cid,'ok':False,'reason':'软件更新正在进行，请等待完成；急停仍可使用'})
+                         continue
+                     if (imu is not None and getattr(imu, 'blocks_updates', lambda: False)()
+-                            and name in {'pad.op', 'tune.op', 'servo.open', 'servo.op', 'calib.op'}
++                            and name in {'pad.op', 'tune.op', 'servo.open', 'servo.op', 'calib.op', 'tracking.op'}
+                             and not safe_during_update(name, args)):
+                         await send({'t':'result','id':cid,'ok':False,
+                                     'reason':'IMU 标定 / 类型切换会话未结束：先验证完成或取消；卸力仍可使用'})
+@@ -1227,6 +1242,11 @@
+                         task.add_done_callback(update_commands.discard)
+                         task.add_done_callback(cmd_tasks.discard)
+                         continue
++                    if name == 'tracking.op':
++                        task = asyncio.create_task(run_tracking(cid, args))
++                        cmd_tasks.add(task)
++                        task.add_done_callback(cmd_tasks.discard)
++                        continue
+                     if name == "servo.op":
+                         task = asyncio.create_task(run_servo_op(cid, msg.get("args") or {}))
+                         cmd_tasks.add(task)
+@@ -1279,6 +1299,8 @@
+                 t.cancel()
+             log.unsubscribe(logq)
+             clients.pop(ws, None)
++            if tracking is not None:
++                tracking.disconnect(str(id(ws)))
+             if pad is not None:
+                 pad.mark_gone(pad_conn)
+                 asyncio.get_running_loop().run_in_executor(None, pad.drop_client, pad_conn, by)
+@@ -1587,6 +1609,8 @@
+         log.info(f"Studio {VERSION} 启动 · Python {platform.python_version()} · {platform.node()}", cat="系统",
+                  dedup=False)
+         yield
++        if tracking is not None:
++            await asyncio.to_thread(tracking.shutdown)
+         await updates.stop_readiness()
+         voice_task.cancel()
+         restore.cancel()
+@@ -1613,7 +1637,25 @@
+         log.info("Studio 停止", cat="系统", dedup=False)
+         log.flush()
+ 
++    async def api_tracking_export(request):
++        if session_of(request)[1] is None:
++            return Response('请先登录', status_code=401)
++        try:
++            if tracking is None:
++                raise ValueError('关节调试不可用')
++            path = tracking.export_path(request.path_params['run_id'], request.path_params['kind'])
++            from starlette.responses import FileResponse
++            return FileResponse(path, filename=path.name, media_type='application/octet-stream')
++        except (ValueError, OSError, RuntimeError) as error:
++            return Response(str(error), status_code=400)
++        except Exception as error:
++            from .servo import Refused
++            if isinstance(error, Refused):
++                return Response(str(error), status_code=400)
++            raise
++
+     routes = [
++        Route('/api/tracking/{run_id}/{kind}', api_tracking_export),
+         Route("/healthz", healthz),
+         Route("/api/session", api_session),
+         Route("/api/ai", api_ai, methods=["GET", "POST"]),
+--- a/studio/servo.py
++++ b/studio/servo.py
+@@ -53,7 +53,7 @@
+ HANDBACK_WAIT_S = 10.0        # 点「交还主程序」：同上（校准看到 closing 会在下一颗前停）
+ # 这几样在跑 = 「活还没干完」：离开舵机页不交还（第三批代码审查 D3a：一键校准跑着时离开，后面几颗被卸力锁打断）
+ BUSY_OPS = {"calibrate": "正在校准", "undo": "正在撤销校准", "timing": "正在测总线时序", "scan_all": "正在扫全网",
+-            "scan": "正在扫描", "set_id": "正在改 ID", "reboot": "正在重启舵机", "write_reg": "正在写寄存器"}
++            "scan": "正在扫描", "set_id": "正在改 ID", "reboot": "正在重启舵机", "write_reg": "正在写寄存器", "tracking": "正在做关节跟踪测试"}
+ 
+ 
+ class Refused(Exception):
+@@ -97,6 +97,7 @@
+ class ServoSession:
+     def __init__(self, log, port=None, sim=False, directions=None, baud=1_000_000, state_dir="."):
+         self.log, self.port, self.sim, self.baud, self.state_dir = log, port, sim, baud, state_dir
++        self.tracking = None             # Studio-owned leg tracking controller
+         self.ops = None                  # servo_ops.ServoOps：总线开着时才有
+         self.directions = {**DEFAULT_DIRECTIONS, **(directions or {})}    # 键是 int：dict(..., **d) 会因为键不是字符串而崩（10-19 二号鸭存过方向后 Studio 起不来）
+         self.bus = None
+@@ -220,6 +221,8 @@
+         with self._cv:
+             if self.closing:
+                 raise Refused("正在交还主程序：舵机操作不收了")
++            if self.tracking is not None and self.tracking.active:
++                raise Refused("关节跟踪测试进行中：请先停止测试；卸力仍可用")
+             if self.state != "open":
+                 raise Refused("舵机总线没打开：先点「开始调舵机」")
+             self._tok += 1
+@@ -572,7 +575,10 @@
+         """总线上 15 颗全部卸力并回读确认（阻塞，几到十几毫秒）。返回 (全部确认, 原因)。"""
+         if self.state != "open" or self.bus is None:
+             return False, "舵机总线没打开"
+-        self.latched, self.relaxing = True, True
++        with self._cv:
++            self.latched, self.relaxing = True, True
++            if self.tracking is not None:
++                self.tracking.stop_event.set()
+         if self.ops is not None:                 # 正在走的过渡、灵动先停（锁住以后它们也写不进去）
+             self.ops.idle_running = False
+             self.ops._motion_stop.set()
+--- a/studio/updates.py
++++ b/studio/updates.py
+@@ -11,6 +11,8 @@
+ 
+ def safe_during_update(name,args):
+     if name in {'relax','servo.ports'}:return True
++    if name == 'tracking.op' and isinstance(args, dict):
++        return args.get('op') in {'status', 'load', 'stop'}
+     if name!='pad.op' or not isinstance(args,dict):return False
+     if args.get('op') in {'stop','action_stop','walk_stop'}:return True
+     if args.get('op')=='motion' and args.get('action') in {'stop','idle_stop','record_finish'}:return True
+--- a/web/servo.js
++++ b/web/servo.js
+@@ -13,6 +13,7 @@
+ import { TwoStep } from './confirm.js';
+ import { Stepper } from './stepper.js';
+ import { servoReplyStatus } from './startup-status.js';
++import { LegTracking } from './leg-tracking.js';
+ 
+ // 官方参考姿势：microduck_rl scene.xml 的关键帧（servo-web 同一份），弧度、模型约定，按 JOINT_NAMES 顺序。
+ const POSES = {
+@@ -538,6 +539,7 @@
+     ${sv?.marker_error ? html`<div class="banner warn" role="status"><b>会话标记没写进去</b>
+       <span class="more">${sv.marker_error}</span></div>` : null}
+     ${hint ? html`<div class="banner warn" role="status"><span>${hint}</span></div>` : null}
++    <${LegTracking} link=${link} open=${open} />
+     <div class="sv-main">
+       <div class="sv-left">
+         <${ServoStage} sv=${sv} pose=${pose} setPose=${setPose} selected=${selected} onSelect=${onSelect} />
