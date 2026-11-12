@@ -7,6 +7,7 @@ import {ConsoleOverview} from './console-overview.js';
 import {ConsoleDevices} from './console-devices.js?v=20261110-torque';
 import {ConsoleRemote,ConsoleSensing} from './console-experience.js?v=20261110-walk';
 import {ConsoleModels,ConsoleSettings} from './console-system.js';
+import {PasswordSettings} from './console-account.js';
 import {ConsoleLogs} from './console-logs.js';
 import {useStartupFlow} from './console-startup.js?v=20261110-torque';
 import {applyStage,loadStage} from './console-preferences.js';
@@ -344,6 +345,11 @@ function App() {
     return down ? html`<div class="login board"><h1>Microduck Studio</h1><p>连不上鸭子上的 Studio，正在重试…</p></div>` : null;
   }
   if (!sess) return html`<${Login} onDone=${load} duck=${null} noPassword=${noPw} />`;
+  if (noPw) return html`<section class="login" aria-label="首次设置登录密码" style="max-width:480px;margin:8vh auto 0;padding:24px">
+    <h1>Microduck Studio</h1>
+    <p style="margin:0;color:var(--text-2)">首次使用，请先设置网页登录密码，再进入中控。</p>
+    <${PasswordSettings} hasPassword=${false} api=${api} onSaved=${load} />
+  </section>`;
   return html`<${Main} duck=${sess.duck} />`;
 }
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Package an existing ARM64 payload with the reviewed Orange Pi sources.
 
-The input is a prepared payload, not a dump of a running board. Executables and
-ONNX weights retain their original bytes. Training exports are not distributed.
+The input is a prepared payload, not a dump of a running board. ELF diagnostic
+paths are anonymized without changing layout; ONNX weights retain their bytes.
 """
 
 import argparse
+import getpass
 import hashlib
 import importlib.util
 import json
@@ -15,7 +16,7 @@ import shutil
 import tarfile
 
 HERE = Path(__file__).resolve().parent
-RELEASE = "orangepi-quanzhi-20261112"
+RELEASE = "orangepi-quanzhi-20261112-r2"
 EXCLUDED = {
     "__pycache__", ".DS_Store", "export-data.zip", "training-config.json",
     "training-request.json", "upstream-params", "使用说明.md",
@@ -47,7 +48,7 @@ def replace_reviewed(source, destination):
     return shutil.copy2(source, destination)
 
 
-def build(source, output):
+def build(source, output, private_user):
     if output.exists():
         raise ValueError("Output must be a new directory")
     for path in source.rglob("*"):
@@ -91,7 +92,7 @@ def build(source, output):
                           model_notice, flags=re.S)
     model_notice += ("\nOrange Pi 移植补充：本包策略关闭，未校准，仅只读。\n"
                      "ONNX 权重未修改；移除训练导出文件，JSON 中构建路径和内网地址已泛化。\n"
-                     "随包 robotd 保留已验证的编译字节，可能含编译机源码路径字符串；不含设备认证配置。\n")
+                     "随包 robotd 仅将个人编译路径等长泛化；ELF 布局和可执行指令保持不变，修改后须通过 ARM64 运行验证；不含设备认证配置。\n")
     (robot / "MODEL-LICENSE-AND-NOTICE.txt").write_text(model_notice)
 
     records = []
@@ -107,6 +108,10 @@ def build(source, output):
     manifest = {"release": RELEASE, "files": records,
                 "archived_only": ["Cubie-only platform code", "host tools", "offline prototype"]}
     (base / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    sanitizer_spec = importlib.util.spec_from_file_location("runtime_paths", HERE / "image/sanitize_runtime.py")
+    sanitizer = importlib.util.module_from_spec(sanitizer_spec)
+    sanitizer_spec.loader.exec_module(sanitizer)
+    sanitizer.sanitize(base, output / "path-sanitization.json", private_user)
     spec = importlib.util.spec_from_file_location("orangepi_install", base / "install.py")
     installer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(installer)
@@ -130,5 +135,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("payload", type=Path, help="Existing prepared root-layout payload")
     parser.add_argument("output", type=Path, help="New output directory")
+    parser.add_argument("--private-user", default=getpass.getuser())
     args = parser.parse_args()
-    build(args.payload.resolve(), args.output.resolve())
+    build(args.payload.resolve(), args.output.resolve(), args.private_user)

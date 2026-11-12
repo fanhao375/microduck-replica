@@ -266,7 +266,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         token, sess = session_of(request)
         if not sess:
             return JSONResponse({"ok": False, "has_password": auth.has_password()}, status_code=401)
-        return JSONResponse({"ok": True, "csrf": sess["csrf"], "duck": duck, "version": VERSION})
+        return JSONResponse({"ok": True, "has_password": auth.has_password(),
+                             "csrf": sess["csrf"], "duck": duck, "version": VERSION})
 
     async def api_login(request):
         if not origin_ok(request):

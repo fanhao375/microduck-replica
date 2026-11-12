@@ -2,6 +2,7 @@
 import hashlib
 import os
 import shutil
+import stat
 import struct
 import subprocess
 from pathlib import Path
@@ -70,10 +71,36 @@ def children(fs, path):
     if not exists(fs, path):
         return []
     result = []
+    seen = set()
+    valid_types = {stat.S_IFREG, stat.S_IFDIR, stat.S_IFLNK, stat.S_IFIFO,
+                   stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK}
     for line in debug(fs, 'ls -lp ' + quote(path)).decode().splitlines():
+        if not line:
+            continue
         fields = line.split('/')
-        if len(fields) >= 7 and fields[1].isdigit() and fields[5] not in ('.', '..'):
-            result.append((path.rstrip('/') + '/' + fields[5], int(fields[2], 8)))
+        if (len(fields) != 8 or fields[0] or fields[-1]
+                or not fields[1].isascii() or not fields[1].isdigit()):
+            raise ValueError('Malformed debugfs directory listing')
+        # ext4 keeps inode-zero holes after deleting entries. They have no child
+        # path; treating the empty name as a directory would recurse into itself.
+        if int(fields[1]) == 0:
+            continue
+        name = fields[5]
+        if name in ('.', '..'):
+            continue
+        if not name or any(ord(char) < 32 or ord(char) == 127 for char in name):
+            raise ValueError('Unsafe or empty image directory entry name')
+        if (len(fields[2]) != 6 or any(char not in '01234567' for char in fields[2])
+                or any(not value.isascii() or not value.isdigit() for value in fields[3:5])
+                or (fields[6] and (not fields[6].isascii() or not fields[6].isdigit()))):
+            raise ValueError('Malformed image directory entry metadata')
+        mode = int(fields[2], 8)
+        if stat.S_IFMT(mode) not in valid_types or mode & ~0o177777:
+            raise ValueError('Unsupported image directory entry mode')
+        if name in seen:
+            raise ValueError('Duplicate image directory entry name')
+        seen.add(name)
+        result.append((path.rstrip('/') + '/' + name, mode))
     return result
 
 
@@ -122,24 +149,47 @@ def check(fs, logfile):
     Path(logfile).write_bytes(output)
 
 
+def geometry(header, disk_bytes):
+    """Validate the one-partition Orange Pi MBR and return its sector length."""
+    if (len(header) != 512 or header[510:] != b'\x55\xaa'
+            or header[450] != 0x83 or any(header[462:510])):
+        raise ValueError('Expected one Orange Pi MBR Linux partition')
+    start, sectors = struct.unpack('<II', header[454:462])
+    if (start * 512 != OFFSET or sectors == 0
+            or (start + sectors) * 512 != disk_bytes):
+        raise ValueError('Unexpected partition layout or image boundary')
+    return sectors
+
+
 def extract(image, output):
     image = Path(image)
     if not image.is_file() or image.is_symlink():
         raise ValueError('Input must be a regular image file')
     with image.open('rb') as source:
-        header = source.read(512)
-        if header[510:] != b'\x55\xaa' or header[450] != 0x83:
-            raise ValueError('Expected the Orange Pi MBR Linux image')
-        start, sectors = struct.unpack('<II', header[454:462])
-        if start * 512 != OFFSET or (start + sectors) * 512 != image.stat().st_size:
-            raise ValueError('Unexpected partition layout')
+        geometry(source.read(512), image.stat().st_size)
         source.seek(OFFSET)
         with Path(output).open('xb') as target:
             shutil.copyfileobj(source, target, 8 * 1024 * 1024)
 
 
 def assemble(boot_image, fs, output):
-    with Path(output).open('xb') as target, Path(boot_image).open('rb') as boot:
-        target.write(boot.read(OFFSET))
-        with Path(fs).open('rb') as source:
+    """Preserve the board boot area and update MBR length for a resized rootfs."""
+    boot_image, fs = Path(boot_image), Path(fs)
+    if any(not path.is_file() or path.is_symlink() for path in (boot_image, fs)):
+        raise ValueError('Boot image and rootfs must be regular image files')
+    filesystem_bytes = fs.stat().st_size
+    if filesystem_bytes == 0 or filesystem_bytes % 512:
+        raise ValueError('Rootfs size must be a positive whole number of sectors')
+    sectors = filesystem_bytes // 512
+    if sectors > 0xffffffff or OFFSET // 512 + sectors > 0x100000000:
+        raise ValueError('Rootfs exceeds the MBR sector-address boundary')
+    with boot_image.open('rb') as boot:
+        boot_area = bytearray(boot.read(OFFSET))
+    if len(boot_area) != OFFSET:
+        raise ValueError('Boot image is shorter than its first partition offset')
+    geometry(boot_area[:512], boot_image.stat().st_size)
+    struct.pack_into('<I', boot_area, 458, sectors)
+    with Path(output).open('xb') as target:
+        target.write(boot_area)
+        with fs.open('rb') as source:
             shutil.copyfileobj(source, target, 8 * 1024 * 1024)
