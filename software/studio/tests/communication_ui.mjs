@@ -1,0 +1,218 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const [base, cdp] = process.argv.slice(2);
+const target = await (await fetch(`http://127.0.0.1:${cdp}/json/new?about:blank`, {method:'PUT'})).json();
+const ws = new WebSocket(target.webSocketDebuggerUrl);
+await new Promise(resolve => ws.addEventListener('open', resolve, {once:true}));
+let id = 0;
+const pending = new Map(), errors = [];
+ws.addEventListener('message', event => {
+  const m = JSON.parse(event.data);
+  if (pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
+  if (m.method === 'Runtime.exceptionThrown') errors.push(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text);
+});
+const send = (method, params = {}) => new Promise((resolve, reject) => {
+  const key = ++id, timer = setTimeout(() => {pending.delete(key); reject(Error(`CDP timeout: ${method}`));}, 10000);
+  pending.set(key, m => {clearTimeout(timer); m.error ? reject(Error(JSON.stringify(m.error))) : resolve(m.result);});
+  ws.send(JSON.stringify({id:key, method, params}));
+});
+const js = async expression => {
+  const r = await send('Runtime.evaluate', {expression, awaitPromise:true, returnByValue:true});
+  if (r.exceptionDetails) throw Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
+  return r.result?.value;
+};
+const pause = ms => new Promise(r => setTimeout(r, ms));
+const wait = async (expression, label) => {
+  for (let n=0;n<100;n++) {if (await js(expression)) return; await pause(40);}
+  throw Error(label+'\n'+await js('document.body.innerText'));
+};
+const shot = async name => {
+  if (!process.env.BUS_HEALTH_SHOTS) return;
+  await fs.mkdir(process.env.BUS_HEALTH_SHOTS, {recursive:true});
+  const r = await send('Page.captureScreenshot', {format:'png', captureBeyondViewport:true});
+  await fs.writeFile(path.join(process.env.BUS_HEALTH_SHOTS, name+'.png'), Buffer.from(r.data,'base64'));
+};
+try {
+  await send('Runtime.enable');
+  await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await send('Page.navigate', {url:base});
+  await wait('document.readyState==="complete"', 'fixture');
+  await js(`(async()=>{
+    const {h,render}=await import('/vendor/preact-htm.module.js');
+    const {ServoPage}=await import('/servo.js');
+    const {ImuPage}=await import('/imu.js');
+    const {RuntimeDiagnostics}=await import('/runtime-diagnostics.js');
+    document.body.innerHTML='<main id="fixture" style="padding:24px;max-width:1440px;margin:auto"></main>';
+    const root=document.querySelector('#fixture'); window.calls=[];
+    const ids=[20,21,22,23,24,30,31,32,33,34,10,11,12,13,14];
+    window.props={sv:{state:'closed',source:'robotd',online:15,total:15,avg_volts:8,holding:0,
+      communication:{source:'robotd',session:'s1',age_ms:10,sample_hz:50,window_s:60,
+        counters:{bad_checksum:8,failed_reads:97},read_order:{mode:'default',ids,generation:0},
+        read_order_guard:{allowed:true,reason:null}},
+      rows:ids.map(id=>({id,cn:id===13?'右膝':'关节'+id,en:'joint'+id,group:id>=30?'H':id>=20?'L':'R',
+        dir:-1,raw:2049,deg:-0.1,temp:32,volt:8,torque:0,fresh:true,age_ms:10,
+        p:5,d:0,p_run:5,d_run:0,limit:1000,offset:-1387,
+        comm:{asked:1957,ok:id===13?1860:1957,missed:id===13?97:0,streak:0,max_streak:id===13?3:0},
+        health:{asked:1957,ok:id===13?1860:1957,missed:id===13?97:0,rate:id===13?97/1957:0,observed_s:60,window_s:60}}))},
+      st:{servos:{online:15,total:15},imu:{status:'ok'}},active:true,live:true,
+      link:{status:'open',on:()=>()=>{},setDiagnosticsVisible:value=>{window.demand=value;},whenOpen:()=>Promise.resolve(),cmd:async(name,args)=>{
+        calls.push({name,args});
+        if(name==='servo.ports')return {ok:true,data:{sim:true,port:'sim',ports:[]}};
+        if(name==='servo.read_order')return {ok:true,data:{applied:true,saved:true,
+          read_order:{...args,ids:ids.filter(x=>x!==args.last_id).concat(args.mode==='id_last'?[args.last_id]:[]),generation:1}}};
+        return {ok:true,data:{poses:[]}};
+      }},leaveGuards:new Set()};
+    window.draw=()=>render(h(RuntimeDiagnostics,props),root);
+    window.drawImu=()=>render(h(RuntimeDiagnostics,{...props,imu:window.imuProps.imu,live:window.imuProps.live}),root);
+    window.drawCalibration=()=>render(h(ServoPage,props),root);
+    window.drawImuCalibration=()=>render(h(ImuPage,window.imuProps),root);
+    window.clickText=text=>{const b=[...root.querySelectorAll('button')].find(b=>b.textContent.trim()===text);
+      if(!b||b.disabled)throw Error('Missing enabled button: '+text);b.click();};
+    draw();
+  })()`);
+  await pause(250);
+  assert.equal(await js(`calls.some(c=>c.name==='servo.open')`), false, 'viewing status must not take UART ownership');
+  await wait(`document.querySelector('.runtime-diagnostics')`, 'inline overview diagnostics');
+  assert.equal(await js(`!!document.querySelector('.sv-monitor')`),false,'overview card starts compact');
+  await js(`props.st={...props.st,robotd_ok:false};props.summaryLive=false;draw()`);
+  await wait(`document.querySelector('.runtime-diag-summary').classList.contains('stale')`, 'collapsed summary does not trust cached robot status');
+  assert.doesNotMatch(await js(`document.querySelector('.runtime-diag-summary').innerText`), /正常|15 \/ 15/);
+  await js(`props.st={...props.st,robotd_ok:true};props.summaryLive=true;draw()`);
+  await js(`document.querySelector('[data-diagnostics-toggle]').click()`);
+  await wait(`document.querySelector('.sv-monitor')`, 'readonly monitor');
+  await wait(`window.demand===true`, 'visible inline diagnostic demand');
+  assert.equal(await js(`document.querySelectorAll('.sv-monitor-row').length`),15);
+  await js(`window.knownServoView=props.sv;props.sv={...props.sv,online:null,
+    communication:{...props.sv.communication,read_order:null},
+    rows:props.sv.rows.map(({id,cn,group})=>({id,cn,group,fresh:false}))};draw()`);
+  await wait(`document.querySelector('.comm-summary b').textContent.includes('—')`, 'unknown feedback is not zero online');
+  assert.equal(await js(`document.querySelectorAll('.comm-attention,.comm-advanced').length`),0,
+    'unknown feedback does not flag a bus fault or expose unsupported read order');
+  await js(`props.sv=window.knownServoView;draw()`);
+  await wait(`document.querySelector('.comm-advanced')`, 'supported read order is available');
+  const compact=await js(`(()=>{const cards=[...document.querySelectorAll('.sv-monitor-row')];return {columns:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().left))).size,rows:new Set(cards.map(e=>Math.round(e.getBoundingClientRect().top))).size,height:document.querySelector('.sv-monitor').getBoundingClientRect().height}})()`);
+  assert.equal(compact.rows,1,'all fifteen servos stay in one horizontal row');
+  await send('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false});
+  await js(`document.querySelector('#fixture').style.maxWidth='none'`);
+  await wait(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().top))).size===2`, 'wide screen shows two rows');
+  assert.equal(await js(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().left))).size`),8,'wide layout has eight columns');
+  assert.ok(await js(`(()=>{const s=document.querySelector('.comm-servo-strip'),r=s.getBoundingClientRect();return s.scrollWidth<=s.clientWidth+2&&[...s.children].every(e=>{const c=e.getBoundingClientRect();return c.left>=r.left&&c.right<=r.right+2})})()`),'all fifteen servos are visible without horizontal scrolling');
+  await wait(`!document.querySelector('[data-servo-next]')`, 'wide layout hides unnecessary arrows');
+  await shot('servo-cards-fullscreen');
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await wait(`!!document.querySelector('[data-servo-next]')`, 'narrow window restores scrolling arrows');
+  assert.ok(await js(`document.querySelector('.comm-servo-strip').scrollWidth>document.querySelector('.comm-servo-strip').clientWidth`),'only the card strip scrolls sideways');
+  await js(`document.querySelector('[data-servo-next]').click()`);
+  await wait(`document.querySelector('.comm-servo-strip').scrollLeft>100`, 'next arrow scrolls cards');
+  await js(`document.querySelector('.comm-servo-strip').scrollLeft=99999`);
+  await wait(`document.querySelector('[data-servo-next]').disabled`, 'last card reached');
+  assert.ok(await js(`(()=>{const s=document.querySelector('.comm-servo-strip').getBoundingClientRect(),e=document.querySelector('.comm-servo-card[data-id="34"]').getBoundingClientRect();return e.left>=s.left&&e.right<=s.right+2})()`),'last servo is reachable');
+  await js(`document.querySelector('.comm-servo-strip').scrollLeft=0`);
+  await shot('servo-cards-compact');
+  assert.ok(compact.height<500,'single-row monitor must remain short: '+JSON.stringify(compact));
+  assert.match(await js(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText`), /32.*8\.0.*5\.0%/s);
+  await js(`document.querySelector('.sv-monitor-row[data-id="13"]').click()`);
+  await wait(`document.querySelector('.sv-monitor-detail[data-id="13"]')`, 'detail expanded');
+  assert.ok(await js(`!!document.querySelector('.comm-strip-detail .sv-monitor-detail[data-id="13"]')`),'details expand beneath the card strip');
+  assert.match(await js(`document.querySelector('.sv-monitor-detail[data-id="13"]').innerText`), /1957/);
+  await wait(`(()=>{const box=document.querySelector('.comm-servo-strip').getBoundingClientRect(),
+    card=document.querySelector('.comm-servo-card[data-id="13"]').getBoundingClientRect();
+    return card.left>=box.left&&card.right<=box.right;})()`, 'selected card scroll completes');
+  await js(`document.querySelector('.comm-servo-strip').scrollLeft=320;window.keepScroll=document.querySelector('.comm-servo-strip').scrollLeft;props.sv={...props.sv,rows:props.sv.rows.map(r=>r.id===13?{...r,temp:38,volt:7.6,comm:{...r.comm,asked:2057,ok:1956,missed:101},health:{...r.health,asked:100,ok:96,missed:4,rate:.04}}:r)};draw()`);
+  await wait(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText.includes('38')`, 'live row');
+  assert.match(await js(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText`), /7\.6.*4\.0%/s);
+  assert.match(await js(`document.querySelector('.sv-monitor-detail[data-id="13"]').innerText`), /2057/);
+  assert.ok(await js(`Math.abs(document.querySelector('.comm-servo-strip').scrollLeft-window.keepScroll)<2`),'live values preserve the chosen scroll position');
+  await js(`props.sv={...props.sv,rows:props.sv.rows.map(r=>r.id===12?{...r,health:{asked:null,ok:null,missed:null,rate:null,observed_s:0},comm:{asked:null,ok:null,missed:4}}:r)};draw()`);
+  await wait(`document.querySelector('.sv-monitor-row[data-id="12"]').innerText.includes('—')`, 'unknown denominator');
+  assert.doesNotMatch(await js(`document.querySelector('.sv-monitor-row[data-id="12"]').innerText`), /0\.0%/);
+  await js(`props.sv={...props.sv,rows:props.sv.rows.map(r=>r.id===13?{...r,p_run:null,d_run:null,p:null,d:null,
+    speed_raw:42,velocity_rad_s:.12,
+    parameters:{source:'robotd_before_arm_cache',age_ms:null,runtime:{pdi:[3,0,0],observed:false},eeprom:{pdi:[32,40,0]},before_arm:{acceleration_raw:12},configured:{kp:5,kd:0,torque_limit:900}}}:r)};draw()`);
+  await js(`document.querySelector('.sv-monitor-detail details.comm-parameters').open=true`);
+  await wait(`document.querySelector('.sv-monitor-detail').innerText.includes('32 / 40 / 0')`, 'parameter cache values');
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').innerText`), /上力前|缓存/);
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').textContent`), /配置限力900/);
+  assert.match(await js(`document.querySelector('.sv-monitor-detail').textContent`), /速度原始值42/);
+  assert.equal(await js(`document.querySelectorAll('.runtime-diagnostics canvas').length`),0,'reuse the overview 3D instead of duplicating it');
+  assert.equal(await js(`document.querySelector('details.comm-advanced').open`),false,'advanced configuration starts folded');
+  await shot('servos-desktop');
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await pause(100);
+  assert.ok(await js(`document.documentElement.scrollWidth<=document.documentElement.clientWidth+2`),'mobile must not overflow');
+  assert.equal(await js(`new Set([...document.querySelectorAll('.comm-servo-card')].map(e=>Math.round(e.getBoundingClientRect().top))).size`),1,'phone keeps a single swipeable row');
+  assert.ok(await js(`[...document.querySelectorAll('.comm-servo-card')].every(e=>e.scrollWidth<=e.clientWidth+2)`),'card contents must fit on phones');
+  await js(`document.querySelector('.comm-servo-strip').scrollLeft=0`);
+  const swipe=await js(`(()=>{const r=document.querySelector('.comm-servo-strip').getBoundingClientRect();return {x:r.left+r.width*.8,y:r.top+55,end:r.left+r.width*.2,scrollY}})()`);
+  await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:swipe.x,y:swipe.y,id:1}]});
+  for(let i=1;i<=4;i++){await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:swipe.x+(swipe.end-swipe.x)*i/4,y:swipe.y,id:1}]});await pause(20);}
+  await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await wait(`document.querySelector('.comm-servo-strip').scrollLeft>60`, 'phone swipe browses the strip');
+  assert.ok(await js(`!!document.querySelector('.sv-monitor-detail[data-id="13"]')`),'swiping must not select a different servo');
+  assert.ok(Math.abs(await js(`scrollY`)-swipe.scrollY)<2,'horizontal swipe does not drag the whole page');
+  await shot('servos-mobile');
+  await js(`scrollTo(0,0)`);
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  // Local drafts are not applied configuration. Require actual readback on acknowledgement.
+  await js(`document.querySelector('details.comm-advanced').open=true`);
+  await js(`const s=document.querySelector('select[aria-label="通信读取方案"]');s.value='id_last';s.dispatchEvent(new Event('change',{bubbles:true}));`);
+  await pause(80);
+  await js(`clickText('应用读取顺序')`);
+  await wait(`calls.some(c=>c.name==='servo.read_order')`, 'read order command');
+  assert.deepEqual(await js(`calls.find(c=>c.name==='servo.read_order').args`),{mode:'id_last',last_id:13});
+  await js(`props.sv={...props.sv,communication:{...props.sv.communication,read_order_guard:{allowed:false,reason:'先停止模型并卸力'}}};draw()`);
+  await wait(`document.querySelector('[data-read-order-apply]').disabled`, 'enabled-model guard');
+  await shot('read-order-desktop');
+  await js(`props.sv={...props.sv,communication:{...props.sv.communication,age_ms:4000},rows:props.sv.rows.map(r=>({...r,fresh:false,age_ms:4000}))};draw()`);
+  await wait(`document.querySelector('.sv-monitor-row[data-id="13"]').classList.contains('stale')`, 'stale samples');
+  assert.match(await js(`document.querySelector('.sv-monitor-row[data-id="13"]').innerText`), /过期|未更新/);
+  await js(`window.imuProps={live:true,link:props.link,st:{mode:'motion',posture:'holding',gravity:[0,0,-1],joints_age_ms:10,imu:{status:'ok'}},
+    imu:{source:'bus',mode:'motion',mount:{quat:[1,0,0,0],verified:true},redo:{},
+      imu_bus:{board:'imu_to_dxl',protocol:'feetech',identity:[1,1,77,68,200]},
+      metadata:{chip:'LSM6DSV16X',board:'imu_to_dxl',protocol:'feetech',firmware:'1.1'},
+      health:{source:'bus',session:'imu1',ready:true,fresh:true,age_ms:7,update_hz:100,observed_s:20,reason:null,last_error:'test checksum diagnostic',rate_basis:'accepted_snapshot_timestamp',counters:{invalid:2}},
+      gyro:[.1,.2,.3],quaternion_wxyz:[1,0,0,0],accel_m_s2:null,temperature_c:null,values_age_ms:10}};drawImu()`);
+  await js(`clickText('IMU 诊断')`);
+  await wait(`document.querySelector('.imu-health')`, 'IMU health card');
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /100.*Hz/s);
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /1\.0000/);
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /未提供/);
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /test checksum diagnostic/);
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /有效快照更新/);
+  await shot('imu-desktop');
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await pause(100);
+  assert.ok(await js(`document.documentElement.scrollWidth<=document.documentElement.clientWidth+2`),'IMU mobile must not overflow');
+  await shot('imu-mobile');
+  await js(`imuProps.imu={...imuProps.imu,values_age_ms:4000};drawImu()`);
+  await wait(`document.querySelector('.imu-health .comm-sensor-values').classList.contains('stale')`, 'fresh source cannot disguise stale vectors');
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /数值.*过期/);
+  await js(`imuProps.live=false;drawImu()`);
+  await wait(`document.querySelector('.imu-health').classList.contains('stale')`, 'IMU disconnected');
+  assert.match(await js(`document.querySelector('.imu-health').innerText`), /断开|过期|未更新/);
+  assert.equal(await js(`calls.filter(c=>c.name==='servo.open').length`),0);
+  await js(`document.querySelector('[data-diagnostics-toggle]').click()`);
+  await wait(`window.demand===false`, 'collapse ends fast snapshot demand');
+  await js(`document.querySelector('[data-diagnostics-toggle]').click();props.active=false;draw()`);
+  await wait(`window.demand===false`, 'leaving overview ends demand');
+  await js(`props.active=true;draw()`);
+  await wait(`window.demand===true`, 'return to visible expanded diagnostics');
+  await js(`document.querySelector('#fixture').style.marginTop='2000px';scrollTo(0,0)`);
+  await wait(`window.demand===false`, 'scrolling past diagnostics ends fast demand');
+  await js(`document.querySelector('#fixture').style.marginTop='0';scrollTo(0,0)`);
+  await wait(`window.demand===true`, 'scrolling back resumes diagnostics');
+  await js(`drawCalibration()`);
+  await pause(100);
+  assert.equal(await js(`!!document.querySelector('.sv-monitor')`),false,'servo page remains calibration only');
+  assert.equal(await js(`!!document.querySelector('.comm-view-tabs')`),false,'servo page needs no diagnostics tab');
+  assert.equal(await js(`calls.filter(c=>c.name==='servo.open').length`),0,'debug tab still needs explicit takeover');
+  await js(`clickText('开始调舵机')`);
+  await wait(`calls.some(c=>c.name==='servo.open')`, 'explicit debug takeover');
+  await js(`drawImuCalibration()`);
+  await pause(100);
+  assert.equal(await js(`!!document.querySelector('.imu-health')`),false,'IMU page remains calibration only');
+  assert.deepEqual(errors,[]);
+  console.log(JSON.stringify({ok:true,checks:['readonly','15 rows','live detail','unknown rate','order guard','mobile width','stale','IMU metadata'],errors}));
+} finally {ws.close();}

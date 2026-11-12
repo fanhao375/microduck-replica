@@ -189,7 +189,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint }) {
 // 舵机数据每秒推 10 次：这一行显示的东西没变就不重画（15 行带滑块，整页重画会让 3D 转起来卡）
 const rowSig = (p) => { const r = p.r, c = r.comm || {};
   return [r.raw, r.deg, r.volt, r.temp, r.load, r.current_ma, r.current_raw, r.speed_raw, r.responding, r.torque, r.fresh, r.dir, r.offset, r.p, r.d, r.status,
-    r.p_run, r.d_run, r.limit, r.gains_ok, c.missed, c.streak, p.open, p.selected, p.follow].join('|'); };
+    r.p_run, r.d_run, r.limit, r.gains_ok, c.asked, c.ok, c.missed, c.streak, c.max_streak, c.alarm, r.age_ms, p.open, p.selected, p.follow].join('|'); };
 class RowPure extends Component {
   shouldComponentUpdate(next) { return rowSig(next) !== rowSig(this.props) || next.op !== this.props.op; }
   render(props) { return html`<${Row} ...${props} />`; }
@@ -439,6 +439,7 @@ export function HandBackButton({ link }) {
 }
 
 export function ServoPage({ sv, link, leaveGuards }) {
+  const acquired = useRef(false);
   const [pose, setPose] = useState('live');
   const [selected, setSelected] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -467,12 +468,11 @@ export function ServoPage({ sv, link, leaveGuards }) {
   const run = async (name, args = {}) => {
     setBusy(true); setMsg(null);
     const r = await link.cmd(name, args, 15000);
+    if (name === 'servo.open' && r.ok) acquired.current = true;
     setBusy(false);
     if (!r.ok) setMsg(r.reason || r.error || '没成功');
   };
-  // 用户 10-18：「点开舵机页自然就接进来了」——进来自动接管。离开：后来又定了「舵机这个页面出去的时候应该保持住使能，
-  // 不应该泄力」——有舵机保持着就不交还（fork 的 robotd 一起来就先全部卸力：duck-control feetech.rs:1495），会话留着、
-  // 每一页顶上有提示条；没有舵机保持着才自动交还。要交还点「交还主程序」（两步确认）
+  // 本页只做调试/校准：明确点击后才接管；离开不关闭其他入口已打开的会话。
   const [ports, setPorts] = useState(null);       // {ports, port, sim}：电脑上插 USB 转 TTL 时选串口（跟 servo-web 一样）
   const [pick, setPick] = useState('');
   const loadPorts = async () => {
@@ -481,11 +481,11 @@ export function ServoPage({ sv, link, leaveGuards }) {
     return r.ok ? r.data : null;
   };
   useEffect(() => {
-    // 配好了串口（鸭子上是 /dev/ttyS2）或者模拟：进来直接接管；电脑上没配：等人选好串口点「连接」
+    // 先读取端口选项，等待明确点击「开始调舵机」。
     let alive = true;
-    link.whenOpen().then(() => loadPorts()).then((d) => { if (alive && d && (d.port || d.sim)) run('servo.open'); });
+    link.whenOpen().then(() => { if (alive) return loadPorts(); });
     // 离开：后端看现在有没有舵机保持着（页面上的数可能旧了），有就不交还，没有才交还。不再弹「确定离开？」
-    return () => { alive = false; link.cmd('servo.close', { if_idle: true }, 15000); };
+    return () => { alive = false; if (acquired.current) link.cmd('servo.close', { if_idle: true }, 15000); };
   }, []);
   calibHandler = useCallback(async (ids) => {
     const text = Array.isArray(ids) ? ids.join(',') : String(ids);
@@ -523,7 +523,7 @@ export function ServoPage({ sv, link, leaveGuards }) {
             <option value="sim">演示（没接舵机，先看看页面）</option>
           </select>
           <button class="btn-light" disabled=${open || busy || !pick} onClick=${() => run('servo.open', { port: pick })}
-            title=${open ? '调舵机中不能换串口：先交还主程序' : ''}>${open ? '换这个' : '连接'}</button>
+            title=${open ? '调舵机中不能换串口：先交还主程序' : '由 Studio 接管总线，主程序会停止'}>${open ? '换这个' : '开始调舵机'}</button>
         </span></div>
         ${open && sv.gains ? html`<${GainsLine} g=${sv.gains} />` : null}
       </div>

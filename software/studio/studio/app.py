@@ -62,7 +62,7 @@ except (OSError,ValueError,KeyError):
 MODEL_UPLOAD_LIMIT = 64 * 1024 * 1024
 MODEL_OP_LIMIT = 32768
 STATE_HZ = 10
-COMMANDS = {"relax", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
+COMMANDS = {"relax", "servo.open", "servo.close", "servo.op", "servo.ports", "servo.read_order", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
 HB_QUIET_S = 5.0         # 页面这么久没发心跳：当作看不见（停推状态、可能退订）
 HB_DEAD_S = 30.0         # 这么久没任何消息：当作半开的连接（手机走出 WiFi），直接关掉
 MUSIC_PONG_TIMEOUT_S = 5.0
@@ -73,6 +73,12 @@ ROBOTD_PROBE_S = 5.0     # 舵机会话期间多久看一眼 robotd 起没起来
 # 手柄快照里带说明文字的长列表：没变就不每帧推（总览重排审查 O12：一帧 4.8 KB，WiFi 跟蓝牙是同一颗芯片）。
 # 每 1 秒还是整份推一次，页面按缺了哪个就沿用上一份
 PAD_HEAVY = ("skills", "actions", "combos", "sounds")
+
+
+def overview_diagnostics_active(client, now=None):
+    quiet = (time.monotonic() if now is None else now)-client.get("hb_at", 0.)
+    return (client.get("visible") is True and client.get("diagnostics_visible") is True
+            and client.get("route") in ("/", "/pad") and 0. <= quiet <= HB_QUIET_S)
 
 
 class HostGuard:
@@ -199,6 +205,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
     clients = {}           # websocket -> {"visible": bool, "by": str, "hb_at": monotonic}
     login_gate = asyncio.Semaphore(1)
     servo_gate = asyncio.Lock()         # 开 / 关舵机总线一次一个
+    from .servo_read_order import ReadOrderControl
+    read_order = ReadOrderControl(robotd, servo) if servo is not None else None
     model_upload_gate = asyncio.Lock()
     def mapping_readiness():
         # Called in a pad worker: cached flags only. Robot poll latency must
@@ -652,6 +660,11 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
 
     def update_viewers():
         robotd.set_viewers(sum(1 for c in clients.values() if c["visible"]))
+        if hasattr(robotd, "set_telemetry_viewers"):
+            now = time.monotonic()
+            robotd.set_telemetry_viewers(sum(1 for c in clients.values()
+                if (c["visible"] and c.get("route") in ("/servos", "/imu"))
+                or overview_diagnostics_active(c, now)))
 
     tune_err = {"logged": False}
 
@@ -684,7 +697,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         await ws.accept()
         by = _client_desc(ws)
         pad_conn = pad.new_conn() if pad is not None else None
-        me = {"visible": True, "by": by, "hb_at": time.monotonic(), "route": None, "pad_visible": None}
+        me = {"visible": True, "by": by, "hb_at": time.monotonic(), "route": None,
+              "pad_visible": None, "diagnostics_visible": False}
         clients[ws] = me
         update_viewers()
         log.info(f"页面连上（{by}，现在 {len(clients)} 个）", cat="连接", dedup=False)
@@ -737,14 +751,16 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     else:
                         onb_sent = onb
                     await send(st)
-                    # 舵机表一帧 5.6 KB，只有舵机页用：只在舵机页、或者总线接管着的时候推（总览重排审查 O12）
-                    if servo is not None and (me.get("route") == "/servos" or servo.state in ("open", "opening")):
+                    diagnostics_active = overview_diagnostics_active(me)
+                    if servo is not None and (me.get("route") == "/servos" or diagnostics_active
+                            or (servo.state in ("open", "opening") and me.get("route") not in ("/", "/pad"))):
                         # 接管了总线：推总线上读到的整张表；没接管：用主程序的数据拼一张只读的表
                         await send(servo.snapshot() if servo.state == "open"
                                    else view_from_robotd(robotd, servo.directions, servo.state,
                                                          servo.error, servo.sim))
-                    if imu is not None and time.monotonic() - last_imu >= 0.5:
-                        last_imu = time.monotonic()        # IMU 页要的芯片、安装方向、读数状态：半秒一次够了
+                    imu_live = me.get("route") == "/imu" or diagnostics_active
+                    if imu is not None and (imu_live or time.monotonic() - last_imu >= .5):
+                        last_imu = time.monotonic()        # Live views share the state tick and use only the owner cache.
                         await send(imu.view())
                     if (tune is not None and time.monotonic() - last_tune >= 1.0
                             and me.get("route") in ("/", "/pad", "/settings")):     # 还没收到心跳（不知道在哪页）先不推
@@ -820,7 +836,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 return
             async with servo_gate:
                 if name == "servo.open":
-                    # 用户 10-18：点进舵机页就自动接管。鸭子在走 / 策略在跑 / 正在站起来时不接管：关节会冻在半步
+                    # Only the explicit takeover command opens the UART owner.
+                    read_order.prepare_open()
                     pose = summarize(robotd, duck, net=net, auth=auth)["posture"] if servo.state != "open" else None
                     if pose in ("walking", "policy", "homing"):
                         ok, why = False, "鸭子在走或者策略在跑：先停下或坐下，再进舵机页（现在只读）"
@@ -868,6 +885,20 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 await send({"t": "result", "id": cid, "ok": ok, "reason": why})
             except Exception:  # noqa: BLE001
                 pass
+
+        async def run_read_order(cid, args):
+            from .servo import Refused
+            try:
+                if read_order is None:
+                    raise Refused("这只鸭子没配舵机总线")
+                async with servo_gate:
+                    data = await read_order.change(args)
+                await send({"t": "result", "id": cid, "ok": True, "data": data})
+            except Refused as err:
+                await send({"t": "result", "id": cid, "ok": False, "reason": str(err)})
+            except Exception as err:  # noqa: BLE001
+                log.error("读取顺序操作未确认", cat="总线", raw=f"{type(err).__name__}: {err}", exc=True)
+                await send({"t": "result", "id": cid, "ok": False, "reason": f"读取顺序操作未确认：{err}"})
 
         async def run_servo_op(cid, args):  # noqa: C901
             """舵机页的操作（扭矩、滑块、运动、校准、扫描、寄存器……）：servo_ops.handle 在线程里跑。"""
@@ -1177,12 +1208,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 t = msg.get("t")
                 if t == "hb":
                     me["route"] = msg.get("route")
+                    me["diagnostics_visible"] = msg.get("diagnostics_visible") is True
                     if isinstance(msg.get("pad_visible"), bool):
                         me["pad_visible"] = msg["pad_visible"]
                     vis = bool(msg.get("visible", True))
                     if vis != me["visible"]:
                         me["visible"] = vis
-                        update_viewers()
+                    update_viewers()
                 elif t == "cmd":
                     name, cid = msg.get("name"), msg.get("id")
                     args = msg.get('args') or {}
@@ -1190,13 +1222,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         await send({'t':'result','id':cid,'ok':False,'reason':'软件更新正在进行，请等待完成；急停仍可使用'})
                         continue
                     if (imu is not None and getattr(imu, 'blocks_updates', lambda: False)()
-                            and name in {'pad.op', 'tune.op', 'servo.open', 'servo.op', 'calib.op'}
+                            and name in {'pad.op', 'tune.op', 'servo.open', 'servo.op', 'servo.read_order', 'calib.op'}
                             and not safe_during_update(name, args)):
                         await send({'t':'result','id':cid,'ok':False,
                                     'reason':'IMU 标定 / 类型切换会话未结束：先验证完成或取消；卸力仍可使用'})
                         continue
                     if ((mapping_requests or (pad is not None and getattr(getattr(pad, 'mapping', None), 'blocked', False)))
-                            and name in {'tune.op', 'servo.open', 'servo.op', 'calib.op', 'imu.op'}
+                            and name in {'tune.op', 'servo.open', 'servo.op', 'servo.read_order', 'calib.op', 'imu.op'}
                             and not safe_during_update(name, args)):
                         await send({'t':'result','id':cid,'ok':False,
                                     'reason':'请先完成或取消手柄映射并回中；网页卸力仍可使用'})
@@ -1248,6 +1280,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     if name == "net.op":
                         # 扫 WiFi 最坏约 10 秒、连 WiFi 在后台跑：都不挡住同一页面的卸力
                         task = asyncio.create_task(run_net_op(cid, msg.get("args") or {}))
+                        cmd_tasks.add(task)
+                        update_commands.add(task)
+                        task.add_done_callback(update_commands.discard)
+                        task.add_done_callback(cmd_tasks.discard)
+                        continue
+                    if name == "servo.read_order":
+                        task = asyncio.create_task(run_read_order(cid, args))
                         cmd_tasks.add(task)
                         update_commands.add(task)
                         task.add_done_callback(update_commands.discard)
@@ -1322,7 +1361,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         if marker is None:
             return True
         data = {"v": 1, "port": servo.port, "sim": bool(servo.sim), "at": time.time(), "by": by,
-                "boot_id": boot_id()}
+                "boot_id": boot_id(), **servo.session_metadata()}
         try:
             marker.parent.mkdir(parents=True, exist_ok=True)
             tmp = marker.with_name(marker.name + ".tmp")
@@ -1483,6 +1522,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         port = "sim" if data.get("sim") is True else (data.get("port") if isinstance(data.get("port"), str) else None)
         async with servo_gate:
             if servo.state == "open":
+                return
+            from .servo import Refused
+            try:
+                servo.restore_metadata(data)
+            except Refused as err:
+                servo.orphan = {"why": str(err), "at": time.monotonic()}
+                log.error("原舵机会话读取顺序不能确认：没有接管", cat="总线", raw=str(err), dedup=False)
                 return
             robotd.set_paused(True, "调舵机（接着上次的会话）")
             # 恢复会话跟网页进舵机页一个样：先 bus_take 立旗（robotd 起不来、管理锁在、确认串口空），再开串口。

@@ -25,10 +25,12 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 
 from .bus import feetech
+from .communication import ServoHealth, accepted_snapshot_age_ms, number
 from .startup_status import servo_observations
 
 IDS = [20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 10, 11, 12, 13, 14]     # 跟 robotd 的 JOINT_NAMES 同一个顺序
@@ -68,6 +70,75 @@ def battery_percent(volts):
     if not volts or volts <= 0:
         return None
     return max(0.0, min(1.0, (volts - BATTERY_EMPTY_V) / (BATTERY_FULL_V - BATTERY_EMPTY_V))) * 100
+
+
+def validate_read_order(args):
+    if not isinstance(args, dict) or set(args)-{"mode", "last_id"}:
+        raise Refused("读取顺序只接受 mode 和 last_id，不能改变舵机集合")
+    mode, last = args.get("mode"), args.get("last_id")
+    if mode not in ("default", "id_ascending", "id_last"):
+        raise Refused("不认识的读取顺序")
+    if mode == "id_last":
+        last = 13 if last is None else last
+        if type(last) is not int or last not in IDS:
+            raise Refused("最后读取的 ID 必须是现有 15 颗之一")
+        ids = [sid for sid in IDS if sid != last]+[last]
+    else:
+        if last is not None:
+            raise Refused("只有指定 ID 最后读取时才能填写 last_id")
+        ids = sorted(IDS) if mode == "id_ascending" else list(IDS)
+    return mode, last, ids
+
+
+def load_read_order(path, *, required=False):
+    if path is None:
+        return validate_read_order({"mode": "default"})
+    def strict_pairs(items):
+        out = {}
+        for key, value in items:
+            if key in out:
+                raise Refused("读取顺序配置有重复字段")
+            out[key] = value
+        return out
+    try:
+        with open(path, encoding="utf-8") as stream:
+            value = json.load(stream, object_pairs_hook=strict_pairs)
+    except FileNotFoundError:
+        if required:
+            raise
+        value = {"mode": "default"}
+    return validate_read_order(value)
+
+
+def save_read_order(path, mode, last):
+    if not path:
+        raise OSError("尚未读回主程序配置文件的位置")
+    directory = os.path.dirname(os.path.abspath(path))
+    value = {"mode": mode, **({"last_id": last} if last is not None else {})}
+    name = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=directory,
+                                         prefix=".servo-read-order-", suffix=".tmp", delete=False) as stream:
+            name = stream.name
+            json.dump(value, stream)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        # Re-read the complete strict schema before publishing it to both owners.
+        if load_read_order(name) != validate_read_order(value):
+            raise OSError("读取顺序保存后校验不一致")
+        os.replace(name, path)
+        name = None
+        if os.name == "posix":
+            fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+    finally:
+        if name is not None:
+            with contextlib.suppress(OSError):
+                os.unlink(name)
 
 
 def robotd_active():
@@ -132,8 +203,61 @@ class ServoSession:
         self.giveback_error = None       # 交还后主程序没起来的原因（提示条变红）
         self.giveback_hint = None        # 主程序没起来时怎么恢复（旗在 / 不在两种）
         self.marker_error = None         # 会话标记没写进去：Studio 重启后会不知道这里还开着
+        self._health = ServoHealth()
+        self._read_order_changing = False
+        self.read_order_path = None
+        self.read_order = {"mode": "default", "last_id": None, "ids": list(IDS), "generation": 0,
+                           "session": None, "configuration_path": None}
+        self._gain_baseline = {}
+        self._sample_sequence = 0
+        self._last_poll_at = None
+        self.gains_restored_before_takeover = None
+        self._restore_read_order = None
 
     # ---- 打开 / 关闭 ----
+
+    def session_metadata(self):
+        """Local recovery evidence written by the owner, never supplied by a page."""
+        return {"read_order_configuration_path": self.read_order.get("configuration_path"),
+                "read_order_configuration": {"mode": self.read_order["mode"],
+                    **({"last_id": self.read_order["last_id"]} if self.read_order.get("last_id") is not None else {})},
+                "gains_restored_before_takeover": self.gains_restored_before_takeover,
+                "gain_baseline": {str(sid): list(values) for sid, values in self._gain_baseline.items()}}
+
+    def restore_metadata(self, data):
+        self._restore_read_order = None
+        simulated = data.get("sim") is True or data.get("sim") is not False and self.sim
+        path = data.get("read_order_configuration_path") if not simulated else None
+        if not simulated:
+            if path is None:
+                raise Refused("原会话的读取顺序配置位置未保存：没有接管，也没有重启主程序")
+            if (not isinstance(path, str) or not os.path.isabs(path)
+                    or os.path.basename(path) != "servo-read-order.json"):
+                raise Refused("原会话的读取顺序配置位置无效：没有按默认顺序接管")
+            try:
+                try:
+                    restored_order = load_read_order(path, required=True)
+                except FileNotFoundError:
+                    # Native's absent-file default is trusted only when the
+                    # previous owner recorded that exact configuration.
+                    restored_order = validate_read_order(data.get("read_order_configuration"))
+                    if restored_order[0] != "default":
+                        raise Refused("原非默认读取顺序配置文件已丢失")
+            except (OSError, ValueError, Refused) as err:
+                raise Refused(f"原会话的读取顺序配置不能确认：{err}；没有接管，也没有重启主程序") from err
+            self.read_order_path = path
+            self._restore_read_order = restored_order
+        self.gains_restored_before_takeover = data.get("gains_restored_before_takeover") is True
+        self._gain_baseline = {}
+        stored = data.get("gain_baseline")
+        if isinstance(stored, dict):
+            for sid in IDS:
+                values = stored.get(str(sid))
+                if (isinstance(values, list) and len(values) == 3 and all(type(v) is int for v in values)
+                        and all(0 <= v <= 255 for v in values[:2]) and 0 <= values[2] <= 65535):
+                    self._gain_baseline[sid] = tuple(values)
+        if len(self._gain_baseline) != len(IDS):
+            self.gains_restored_before_takeover = False
 
     def open(self, by=None, port=None, restored=False):
         """打开总线（阻塞，调用方放到线程里）。返回 (ok, 原因)。
@@ -141,6 +265,8 @@ class ServoSession:
         已经打开时不能换串口（换口会先关真总线，舵机保持着急停却卸不到）：必须交还以后再换。
         restored：Studio 重启后接着上次的会话（审查 D1）——跟 state="open" 一起定，
         别人看到「开了」的那一刻就看得到它是接着管的（以前在线程外面后设，中间有个窗口）。"""
+        if self._read_order_changing:
+            return False, "正在修改读取顺序：等读回确认后再打开舵机总线"
         if port:
             want_sim = port == "sim"
             if self.state == "open" and (want_sim != self.sim or (not want_sim and port != self.port)):
@@ -156,7 +282,20 @@ class ServoSession:
             return False, "先选一个串口（电脑上插 USB 转 TTL）或者「演示（没接舵机）」"
         self.state, self.error, self.by = "opening", None, by
         try:
+            path = os.path.join(self.state_dir, "servo-read-order-sim.json") if self.sim else self.read_order_path
+            if restored and not self.sim:
+                if self._restore_read_order is None:
+                    raise Refused("原会话的读取顺序未在接管前核验：没有打开总线")
+                mode, last, restored_ids = self._restore_read_order
+                ids = list(restored_ids)
+            else:
+                mode, last, ids = load_read_order(path)
+            self.read_order = {"mode": mode, "last_id": last, "ids": ids, "generation": 0,
+                               "session": f"studio-{time.monotonic_ns()}", "configuration_path": path}
+            self._health = ServoHealth()
+            self._sample_sequence, self._last_poll_at = 0, None
             if self.sim:
+                self.gains_restored_before_takeover = True
                 from .bus.sim_bus import SimSerial
                 self.sim_serial = SimSerial(IDS, phys=_sim_home())
                 self.bus = feetech.FeetechBus(None, ser=self.sim_serial)
@@ -173,6 +312,9 @@ class ServoSession:
             found = [i for i in IDS if self.bus.ping(i) is not None]
             missing = [i for i in IDS if i not in found]
             self._read_static(found)
+            if not restored or self.sim:
+                self._gain_baseline = {sid: (s.get("p_run"), s.get("d_run"), s.get("torque_limit"))
+                                       for sid, s in self.static.items() if sid in found}
             self._record_baseline(found)
             self._read_torque()
             self.restored = bool(restored)
@@ -218,6 +360,8 @@ class ServoSession:
     def op_begin(self, name):
         """记上一个舵机操作（app 在事件循环里、线程起来之前就调）。正在交还 / 总线没开：抛 Refused。回 token 给 op_end。"""
         with self._cv:
+            if self._read_order_changing:
+                raise Refused("正在修改读取顺序：等保存和读回确认后再操作舵机")
             if self.closing:
                 raise Refused("正在交还主程序：舵机操作不收了")
             if self.state != "open":
@@ -389,6 +533,7 @@ class ServoSession:
             except feetech.BusError:
                 d.setdefault("offset", None)
             self.static[sid] = d
+            d["_at"] = time.monotonic()
 
     def _baseline_path(self, bid):
         return os.path.join(self.state_dir, f"{BASELINE_PREFIX}{bid}.json")
@@ -514,7 +659,7 @@ class ServoSession:
             self._read_static([i for i in ids if i in IDS])
 
     def _read_torque(self):
-        got = self.bus.sync_read(IDS, 40, 1)
+        got = self.bus.sync_read(self.read_order["ids"], 40, 1)
         self.torque = {sid: (v[1][0] if v else None) for sid, v in got.items()}
         self.torque_at = time.monotonic()
         return got
@@ -530,8 +675,10 @@ class ServoSession:
                 self._stop.wait(0.02)
                 continue
             try:
-                states = self.bus.states(IDS)
+                states = self.bus.states(self.read_order["ids"])
                 now = time.monotonic()
+                self._last_poll_at = now
+                self._sample_sequence += 1
                 for sid, s in states.items():
                     if s is not None:
                         s["at"] = now
@@ -636,7 +783,7 @@ class ServoSession:
         torque_fresh = self.torque_at is not None and now - self.torque_at < 2.5
         all_off = torque_fresh and all(self.torque.get(i) == 0 for i in IDS)
         dr = self.drop_rate()
-        return {
+        result = {
             "t": "servo", "state": self.state, "error": self.error, "sim": self.sim, "source": "bus",
             "port": "演示（没接舵机）" if self.sim else self.port,
             "marker_error": self.marker_error,
@@ -651,6 +798,71 @@ class ServoSession:
             # 页头「软硬：P5 · D0 · 限力 1000（跟主程序一样）」；顺手给每行补运行中的 P/D/限力（servo_ops.gains_view）
             "gains": ops.gains_view(rows) if (ops := self.ops) is not None else None,
         }
+        order = {**self.read_order, "ids": list(self.read_order["ids"])}
+        for row in rows:
+            inspected_at = self.static.get(row["id"], {}).get("_at")
+            row["parameters"] = {"source": "studio_cached_inspection",
+                                 "age_ms": round(max(0., now-inspected_at)*1000) if inspected_at is not None else None,
+                                 "runtime": {"p": self.static.get(row["id"], {}).get("p_run"),
+                                             "d": self.static.get(row["id"], {}).get("d_run"),
+                                             "torque_limit": self.static.get(row["id"], {}).get("torque_limit")},
+                                 "eeprom": {"p": row["p"], "d": row["d"], "mode": row["mode"], "offset": row["offset"]}}
+        return self._health.apply(result, identity=("bus", order["session"], order["generation"]),
+            receipt=now, token=self._sample_sequence, row_tokens={i: self.rows.get(i, {}).get("at") for i in IDS},
+            counters=dict(self.bus.stats) if self.bus else {}, read_order=order, guard=self.read_order_guard(),
+            source_age_ms=None if self._last_poll_at is None else max(0., now-self._last_poll_at)*1000,
+            available=self.state == "open", sequence=self._sample_sequence, now=now)
+
+    def read_order_guard(self):
+        reason = None
+        with self._cv:
+            if self.state != "open" or self.bus is None:
+                reason = "舵机总线没有打开"
+            elif self.closing or self._read_order_changing:
+                reason = "舵机会话正在切换"
+            elif self._inflight or self._busy_locked():
+                reason = "先结束校准、运动和其他舵机操作"
+        if reason is None and (self.torque_at is None or time.monotonic()-self.torque_at >= 2.5
+                               or any(self.torque.get(i) != 0 for i in IDS)):
+            reason = "15 颗舵机尚未全部确认卸力"
+        if reason is None and self.gains_restored_before_takeover is not True:
+            reason = "接管前主程序的临时增益尚未确认恢复"
+        if reason is None and any(self._gain_baseline.get(i) is None
+                or None in self._gain_baseline[i]
+                or self._gain_baseline[i] != tuple(self.static.get(i, {}).get(k) for k in ("p_run", "d_run", "torque_limit"))
+                for i in IDS):
+            reason = "临时增益尚未确认恢复到接管前的读回值"
+        if reason is None and not self.read_order.get("configuration_path"):
+            reason = "尚未读回主程序共用的读取顺序配置位置"
+        return {"allowed": reason is None, "reason": reason}
+
+    def set_read_order(self, args):
+        mode, last, ids = validate_read_order(args)
+        with self._cv:
+            guard = self.read_order_guard()
+            if not guard["allowed"]:
+                raise Refused(guard["reason"])
+            self._read_order_changing = True
+        try:
+            if any(value != 0 for value in self.read_torque_now().values()):
+                raise Refused("15 颗舵机尚未全部确认卸力：没有修改读取顺序")
+            if self.ops is None:
+                raise Refused("无法确认原始增益是否已经恢复")
+            gains = self.ops._read_gains(IDS)
+            if any(gains.get(i) is None or len(gains[i]) != 4 or self._gain_baseline.get(i) !=
+                   (gains[i][2], gains[i][3], gains[i][0] | gains[i][1] << 8) for i in IDS):
+                raise Refused("临时增益尚未确认恢复：没有修改读取顺序")
+            try:
+                save_read_order(self.read_order["configuration_path"], mode, last)
+            except (OSError, ValueError) as err:
+                raise Refused(f"读取顺序未保存：{err}；没有应用") from err
+            self.read_order = {**self.read_order, "mode": mode, "last_id": last, "ids": ids,
+                               "generation": self.read_order["generation"]+1}
+            return {"applied": True, "saved": True, "read_order": dict(self.read_order)}
+        finally:
+            with self._cv:
+                self._read_order_changing = False
+                self._cv.notify_all()
 
     def estop_status(self):
         """给顶栏卸力按钮：舵机会话期间以总线回读为准。"""
@@ -677,9 +889,38 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
                                       bus_age_s=rd.bus.age() if rd is not None else None,
                                       bus_error=getattr(rd.bus, "error", None) if rd is not None else None)
     if observations is not None:
-        return _view_startup_observations(observations, directions, state, error, sim)
+        view = _view_startup_observations(observations, directions, state, error, sim)
+        native = (bus or {}).get("native") or {}
+        observed = (native.get("servo_observations") or {}).get("rows") or []
+        by_id = {r.get("id"): r for r in observed if isinstance(r, dict)}
+        for row in view["rows"]:
+            comm = by_id.get(row["id"], {}).get("communication")
+            if isinstance(comm, dict):
+                row["comm"] = dict(comm)
+        return _robotd_health(view, rd, bus)
     native = (bus or {}).get("native") if isinstance(bus, dict) and isinstance(bus.get("native"), dict) else {}
     joints = {j.get("id"): j for j in (native.get("joints") or []) if isinstance(j, dict)}
+    if (bus or {}).get("mode") == "commissioning":
+        last_sample = bus.get("last_sample") if isinstance(bus.get("last_sample"), dict) else {}
+        sampled = {r.get("id"): r for r in (last_sample.get("servos") or []) if isinstance(r, dict)}
+        observed = native.get("servo_observations") or {}
+        observed_rows = {r.get("id"): r for r in observed.get("rows", []) if isinstance(r, dict)}
+        sample_age = accepted_snapshot_age_ms(bus)
+        for sid in IDS:
+            feedback = sampled.get(sid, {})
+            check = observed_rows.get(sid, {})
+            age = sample_age
+            if number(observed.get("age_ms")) and number(check.get("feedback_age_ms")):
+                age = observed["age_ms"]+check["feedback_age_ms"]
+            joints[sid] = {"position_raw": check.get("position_raw", feedback.get("position_raw")),
+                "volts": check.get("volts", feedback.get("voltage_v")),
+                "temperature_c": check.get("temperature_c", feedback.get("temperature_c")),
+                "load_raw": check.get("load_raw", feedback.get("load_raw")),
+                "speed_raw": check.get("speed_raw", feedback.get("speed_raw")),
+                "current_raw": check.get("current_raw", feedback.get("current_raw")),
+                "sample_age_ms": age, "feedback_fresh": age is not None and age < 500.
+                    and check.get("responding", bool(feedback)) is True,
+                "communication": check.get("communication")}
     torque_on = native.get("torque_enabled")
     rows, volts = [], []
     for sid in IDS:
@@ -695,19 +936,84 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
             "raw": raw, "deg": round(angle_deg(raw, d), 1) if isinstance(raw, int) else None,
             "volt": j.get("volts"), "temp": j.get("temperature_c"), "temp_limit": None,
             "load": j.get("load_raw"), "current_ma": j.get("current_ma"), "status": None, "moving": None,
+            "speed_raw": j.get("speed_raw"), "current_raw": j.get("current_raw"),
+            "velocity_rad_s": j.get("velocity_rad_s"),
             "torque": None if torque_on is None else int(bool(torque_on)), "fresh": fresh,
             "age_ms": j.get("sample_age_ms"), "p": None, "d": None, "mode": None, "offset": None,
-            "comm": {"asked": None, "ok": None, "missed": j.get("missing_total", 0) or 0, "alarm": 0,
-                     "streak": j.get("consecutive_missing", 0) or 0, "max_streak": None},
+            "comm": dict(j["communication"]) if isinstance(j.get("communication"), dict) else
+                    {"asked": None, "ok": None, "missed": j.get("missing_total"), "alarm": None,
+                     "streak": j.get("consecutive_missing"), "max_streak": None},
         })
     avg_v = round(sum(volts) / len(volts), 2) if volts else None
-    return {
+    return _robotd_health({
         "t": "servo", "state": state, "error": error, "sim": sim, "source": "robotd",
         "port": "主程序", "online": sum(1 for r in rows if r["fresh"]), "total": len(IDS),
         "hz": None, "avg_volts": avg_v, "battery_pct": battery_percent(avg_v), "drop_rate": None, "bus": None,
         "holding": sum(1 for r in rows if r["torque"] == 1), "all_off": False, "latched": False,
         "relaxing": False, "last_relax": None, "rows": rows,
-    }
+    }, rd, bus)
+
+
+def _robotd_health(view, rd, bus):
+    bus = bus if isinstance(bus, dict) else {}
+    native = bus.get("native") or {}
+    telemetry = native.get("telemetry") or {}
+    order = native.get("read_order") if isinstance(native.get("read_order"), dict) else None
+    hd = native.get("hd1910") or {}
+    inspection = {item.get("id"): item for item in hd.get("registers_before_arm", []) if isinstance(item, dict)}
+    for row in view["rows"]:
+        cached = inspection.get(row["id"], {})
+        row["parameters"] = {"source": "robotd_before_arm_cache", "age_ms": None,
+            "runtime": {"pdi": cached.get("temporary_pdi"), "observed": False,
+                        "temporary_gains_applied": hd.get("temporary_gains_applied"),
+                        "restore_pending": hd.get("restore_pending")},
+            "eeprom": {"pdi": cached.get("eeprom_pdi"), "mode": cached.get("mode")},
+            "before_arm": {key: cached.get(key) for key in ("acceleration_raw", "goal_current_raw", "goal_speed_raw")},
+            "configured": hd.get("servo_parameters")}
+    session = telemetry.get("session", (order or {}).get("session", bus.get("session")))
+    identity = ("robotd", session, getattr(getattr(rd, "hello", None), "at", None),
+                (order or {}).get("generation"), tuple((order or {}).get("ids", (order or {}).get("servo_ids", []))))
+    tracker = getattr(rd, "_servo_health", None) if rd is not None else None
+    if tracker is None:
+        tracker = ServoHealth()
+        if rd is not None:
+            rd._servo_health = tracker
+    receipt = getattr(getattr(rd, "bus", None), "at", None)
+    if rd is None:
+        receipt = time.monotonic()
+    token = (bus.get("cycle", bus.get("total_cycles")), native.get("sample_sequence"),
+             tuple((r["id"], r["comm"].get("asked"), r.get("raw")) for r in view["rows"]))
+    if view.get("diagnostic") and receipt is not None:
+        receipt_age = max(0., time.monotonic()-receipt)*1000
+        for row in view["rows"]:
+            if row["age_ms"] is not None:
+                row["age_ms"] = max(0., row["age_ms"]-receipt_age)
+    counters = {"bad_checksum": telemetry.get("bad_checksums"), "timeout": telemetry.get("timeouts"),
+                "failed_reads": telemetry.get("failed_reads")}
+    return tracker.apply(view, identity=identity, receipt=receipt, token=token, counters=counters,
+                         read_order=order, guard=robotd_read_order_guard(rd, bus),
+                         source_age_ms=native.get("sample_age_ms", (native.get("servo_observations") or {}).get("age_ms", 0)),
+                         available=rd is None or (getattr(rd, "present", None) is not False and not rd.bus.error),
+                         sequence=bus.get("cycle", bus.get("total_cycles")), require_age=rd is not None)
+
+
+def robotd_read_order_guard(rd, bus):
+    native = bus.get("native") or {}
+    hd = native.get("hd1910") or {}
+    reason = None
+    if rd is not None and (getattr(rd, "present", None) is not True or rd.bus.error
+                           or rd.bus.age() is None or rd.bus.age() > 1.5):
+        reason = "主程序状态未新鲜读回"
+    elif not isinstance(native.get("read_order"), dict):
+        reason = "当前主程序不支持读取顺序配置"
+    elif not (bus.get("policy_enabled") is False or
+              bus.get("mode") == "commissioning" and bus.get("policy_motion_enabled") is False):
+        reason = "先停止模型策略"
+    elif native.get("torque_state_confirmed") is not False:
+        reason = "15 颗舵机尚未全部确认卸力"
+    elif hd.get("temporary_gains_applied") is not False or hd.get("restore_pending") is not False:
+        reason = "临时增益尚未确认恢复"
+    return {"allowed": reason is None, "reason": reason}
 
 
 def _view_startup_observations(observations, directions, state, error, sim):

@@ -23,11 +23,13 @@ from .log import log_cmd
 from .rpc import Conn, RpcError, Timeout, Unreachable, call_once, encode, open_conn, read_message
 from .startup import StartupTrack, startup_loop
 
-API_VERSION = 44                     # duck-ipc-proto；不一致只记日志，不拒绝
+API_VERSION = 44                     # Current duck-ipc-proto hello contract.
+SUPPORTED_API_VERSIONS = frozenset((42, 43, 44))  # Additive observation/verification/read-order contracts.
 KNOWN_BUILDS = ("1fa8438-feetech-ft6-control.43", "4734cbb-feetech-imu-auto-control.44",
                 "0791fcd-feetech-qinmo-control.45", "0791fcd-feetech-qinmo-control.46",
                 "0791fcd-feetech-qinmo-control.47", "replica-imu-verify-control.48",
-                "replica-imu-home-control.49", "replica-imu-home-control.50")
+                "replica-imu-home-control.49", "replica-imu-home-control.50",
+                "replica-bus-health-control.49", "replica-bus-health-control.51")
 BACKOFF = (0.5, 1.0, 2.0, 5.0)
 STREAM_HZ = 10
 STREAM_LINGER_S = 10.0
@@ -65,6 +67,7 @@ class Robotd:
         self.absent_since = None
         self.estop = EStop()
         self.viewers = 0             # 可见的页面数
+        self.telemetry_viewers = 0   # 舵机/IMU 状态页需要 10 Hz IPC 缓存快照；不增加 UART 读取
         self.force_subscribe = False
         self.background_music = False  # 内部动作消费者；不伪装成可见页面
         self.stream_open = False
@@ -158,6 +161,16 @@ class Robotd:
         if self.viewers and not n:
             self._last_viewer_at = time.monotonic()
         self.viewers = n
+
+    def set_telemetry_viewers(self, n):
+        n = max(0, n)
+        if n and not self.telemetry_viewers:
+            self._due["bus"] = 0.
+            self._wake_poll.set()
+        self.telemetry_viewers = n
+
+    def bus_poll_interval(self):
+        return .1 if self.telemetry_viewers or (self.bus.value or {}).get("mode") == "commissioning" else 1.
 
     def set_background_music(self, on):
         on = bool(on)
@@ -298,15 +311,13 @@ class Robotd:
                     hello_link = self.poll.reconnects
                     self._ask_calib(again=True)
                     v = r.get("api_version") if isinstance(r, dict) else None
-                    if v != API_VERSION:
-                        self.log.warn(f"主程序的接口版本是 {v}，Studio 按 {API_VERSION} 写的", cat="robotd",
-                                      hint="一般能用；哪个功能出错，会在那个功能上报出来")
+                    self._check_api(v)
                     ver = r.get("daemon_version") if isinstance(r, dict) else None
                     self.log.info(f"连上主程序（接口 v{v}，版本 {ver}）", cat="robotd")
                 now = time.monotonic()
                 if now >= due["bus"]:
                     # 标定模式 10 Hz：IMU 页的实时读数、站着校准都从 last_sample 拿（标定模式没有 robot.state）
-                    every = 0.1 if (self.bus.value or {}).get("mode") == "commissioning" else 1.0
+                    every = self.bus_poll_interval()
                     bus, asked = await self._ask("bus", "robot.busStatus", every=every)
                     if bus is not None:
                         self.bus.set(bus)
@@ -407,6 +418,11 @@ class Robotd:
             self.present, self.absent_since = False, time.monotonic()
             self.log.warn("连不上主程序 robotd", cat="robotd", raw=str(why),
                           hint="鸭子主程序没在跑，或者正在重启（重启约 2 秒）。注意：停掉 robotd 不会卸力，舵机可能还顶着")
+
+    def _check_api(self, version):
+        if version not in SUPPORTED_API_VERSIONS:
+            self.log.warn(f"主程序的接口版本是 {version}，Studio 已核对接口 42–44", cat="robotd",
+                          hint="一般能用；具体功能仍按回读字段和能力确认")
 
     def _check_build(self, bus):
         build = (bus or {}).get("build")
