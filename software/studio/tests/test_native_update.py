@@ -29,7 +29,7 @@ def elf(tail):
 OLD, PREVIOUS, STARTUP, PUBLISHED, NEW = (elf(b'old'), elf(b'previous-reviewed'),
                               elf(b'startup-status-reviewed'), elf(b'published47'), elf(b'new'))
 SHA = lambda data: hashlib.sha256(data).hexdigest()
-APPROVED_SHA256 = 'f8c720a3acf2eb5e6c844ba041d79d7312f49a50e99c04182c5ec0dc4bb9ac9e'
+APPROVED_SHA256 = 'cbda6305061ce6506ab116532d16c9903c6ebb1af866f15c61ac712ce537bcb1'
 PREDECESSOR_SHA256 = ('edf182edb7bf11aeeeedfdab98170ab2ec48a9ec18417f9b68c744b0a60c6d16',
                       'febf44e2e5d4e573f4513f25a1ae6480b976c3988dd3d5e7cdfcf84d2a2d5063',
                       '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422',
@@ -44,7 +44,7 @@ FILES = (H.IMU_CONFIG, H.IMU_CONFIG_SAVED, H.CALIB, H.CALIB_SAVED)
 
 class NativeReleaseTest(unittest.TestCase):
     def artifact(self):
-        relative = 'chengshenzhilu/Robot/Microduck/artifacts/image-rc-20261110/robotd-control50-aarch64'
+        relative = 'chengshenzhilu/Robot/Microduck/artifacts/dual-images-20261112/zero3w-rc3/native/robotd-control51-aarch64'
         for root in ('F:/', '/mnt/f/'):
             path = Path(root + relative)
             if path.exists(): return path.read_bytes()
@@ -52,9 +52,9 @@ class NativeReleaseTest(unittest.TestCase):
 
     def test_reviewed_identity_and_supported_predecessors_are_exact(self):
         self.assertEqual(N.REVIEWED_SHA256, APPROVED_SHA256)
-        self.assertEqual(N.REVIEWED_SIZE, 7065952)
-        self.assertEqual(N.SOURCE, '56046c5aa10be4de12d4389ae0463e4f129df940')
-        self.assertEqual(N.BUILD, 'replica-imu-home-control.50')
+        self.assertEqual(N.REVIEWED_SIZE, 7160816)
+        self.assertEqual(N.SOURCE, '0a492d14457d4bc8f4940d941959c05ca1101140')
+        self.assertEqual(N.BUILD, 'replica-bus-health-control.51')
         self.assertEqual(N.IPC_API, 44)
         self.assertEqual(N.SUPPORTED_SHA256, PREDECESSOR_SHA256)
         self.assertEqual((N.LEGACY_OLD_SHA256, N.LEGACY_TARGET_SHA256), PREDECESSOR_SHA256[:2])
@@ -75,14 +75,14 @@ class NativeReleaseTest(unittest.TestCase):
     def test_actual_approved_artifact_matches_exact_manifest(self):
         data = self.artifact()
         self.assertTrue(N.is_aarch64(data))
-        self.assertEqual(len(data), 7065952)
+        self.assertEqual(len(data), 7160816)
         self.assertEqual(SHA(data), APPROVED_SHA256)
         self.assertEqual(N.native_manifest('2026.10.30', data), {
             'schema': 'microduck-native-payload/1', 'architecture': 'aarch64',
             'software_version': '2026.10.30',
-            'source_revision': '56046c5aa10be4de12d4389ae0463e4f129df940',
-            'build': 'replica-imu-home-control.50', 'official_version': '0.15.1',
-            'model_api': 2, 'ipc_api': 44, 'size': 7065952, 'sha256': APPROVED_SHA256,
+            'source_revision': '0a492d14457d4bc8f4940d941959c05ca1101140',
+            'build': 'replica-bus-health-control.51', 'official_version': '0.15.1',
+            'model_api': 2, 'ipc_api': 44, 'size': 7160816, 'sha256': APPROVED_SHA256,
             'supported_installed_sha256': list(PREDECESSOR_SHA256)})
 
     def test_actual_approved_payload_is_accepted(self):
@@ -195,7 +195,7 @@ class NativeWorld(RedoWorld):
             return 0, '', ''
         if argv == [TARGET, 'deployment-info']:
             data=self.path(TARGET).read_bytes()
-            build = ('replica-imu-home-control.50' if data==NEW else
+            build = ('replica-bus-health-control.51' if data==NEW else
                      '0791fcd-feetech-qinmo-control'+{OLD: '.44', PREVIOUS: '.45', STARTUP: '.46', PUBLISHED: '.47'}[data])
             return 0, json.dumps({'build': build, 'model_api': 2, 'official_version': '0.15.1'}), ''
         return super().run(argv)
@@ -236,7 +236,7 @@ class NativeTest(unittest.TestCase):
         self.ctx = NativeCtx(self.w, b'{}')
         self.op = H.Op(self.ctx, 'robotd-update')
         self.pins = mock.patch.multiple(N, REVIEWED_SHA256=SHA(NEW), REVIEWED_SIZE=len(NEW),
-            BUILD='replica-imu-home-control.50', IPC_API=44,
+            BUILD='replica-bus-health-control.51', IPC_API=44,
             SUPPORTED_SHA256=(SHA(OLD), SHA(PREVIOUS), SHA(STARTUP), SHA(PUBLISHED)),
             LEGACY_OLD_SHA256=SHA(OLD), LEGACY_TARGET_SHA256=SHA(PREVIOUS), LEGACY_STARTUP_SHA256=SHA(STARTUP),
             PREDECESSOR_IPC_API={SHA(OLD): 40, SHA(PREVIOUS): 40, SHA(STARTUP): 41, SHA(PUBLISHED):42},

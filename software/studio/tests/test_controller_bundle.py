@@ -232,7 +232,7 @@ class BundleTransaction(unittest.TestCase):
         self.assertIsNotNone(C)
         with mock.patch.object(legacy,'NativeWorld',BundleWorld):legacy.NativeTest.setUp(self)
         patch=mock.patch.multiple(C,ROBOTD_SHA256=SHA(legacy.NEW),ROBOTD_SIZE=len(legacy.NEW),
-            ROBOTD_BUILD='replica-imu-home-control.50',
+            ROBOTD_BUILD='replica-bus-health-control.51',
             PADD_SHA256=SHA(NEW_PAD),PADD_SIZE=len(NEW_PAD),PADD_SOURCE='a'*40,SUPPORTED_PADD_SHA256=(SHA(OLD_PAD),),MEDIAD_SHA256=SHA(MEDIA))
         patch.start();self.addCleanup(patch.stop)
         predecessor=mock.patch.object(C,'LEGACY_ROBOTD_SHA256',SHA(legacy.PUBLISHED),create=True)

@@ -17,8 +17,8 @@ import uuid
 
 SCHEMA = 'microduck-native-update/1'
 PAYLOAD_SCHEMA = 'microduck-native-payload/1'
-REVIEWED_SHA256 = 'f8c720a3acf2eb5e6c844ba041d79d7312f49a50e99c04182c5ec0dc4bb9ac9e'
-REVIEWED_SIZE = 7065952
+REVIEWED_SHA256 = 'cbda6305061ce6506ab116532d16c9903c6ebb1af866f15c61ac712ce537bcb1'
+REVIEWED_SIZE = 7160816
 LEGACY_OLD_SHA256 = 'edf182edb7bf11aeeeedfdab98170ab2ec48a9ec18417f9b68c744b0a60c6d16'
 LEGACY_TARGET_SHA256 = 'febf44e2e5d4e573f4513f25a1ae6480b976c3988dd3d5e7cdfcf84d2a2d5063'
 LEGACY_STARTUP_SHA256 = '3dbbf1723c0315afc15fd9f28787c0cfc194622a67802adcd1f5aa397ea47422'
@@ -34,8 +34,8 @@ LEGACY_TRANSACTIONS = {(LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256): '.45',
                        **{(old, LEGACY_PUBLISHED_SHA256): '.47' for old in
                           (LEGACY_OLD_SHA256, LEGACY_TARGET_SHA256, LEGACY_STARTUP_SHA256)},
                        **{(old, LEGACY_VERIFY_SHA256): '.48' for old in SUPPORTED_SHA256[:-1]}}
-SOURCE = '56046c5aa10be4de12d4389ae0463e4f129df940'
-BUILD = 'replica-imu-home-control.50'
+SOURCE = '0a492d14457d4bc8f4940d941959c05ca1101140'
+BUILD = 'replica-bus-health-control.51'
 IPC_API = 44
 TARGET = '/opt/robot/feetech-ft5-r5/robotd'
 CONFIG = '/etc/robot/feetech-ft5/robotd.toml'
