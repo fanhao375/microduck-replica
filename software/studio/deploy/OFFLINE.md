@@ -30,6 +30,7 @@
    - 第一次会提示证书不受信任，这是正常的：接着做第 4 步。
 4. **下载并信任鸭子自己的 CA**：
    - 在「更多 → 手机麦克风证书」点「下载证书」，得到 `Microduck-Local-CA.crt`。
+   - 只信任从自己的鸭子热点或可信连接下载的 CA。有疑问时，在鸭子上运行 `openssl x509 -in /etc/microduck/tls/ca.crt -noout -fingerprint -sha256`，与下载的证书核对 SHA-256 指纹。
    - **iPhone**：点下载 → 设置 → 已下载描述文件 → 安装；
      再到 设置 → 通用 → 关于本机 → **证书信任设置**，把 `Microduck Local CA` 打开。
    - **Android**：设置 → 安全 → 加密与凭据 → 安装证书 → **CA 证书**，选刚下载的文件。

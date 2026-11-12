@@ -86,11 +86,12 @@ const DRIVING = new Set(['policy', 'walking']);
  * 等「策略跑起来」。给了 ctx.getPosture 就盯着状态；没给（比如总览页拿不到实时状态）就干等一小会儿。
  * robot.enable 发出去到 posture 变 policy 之间有一两秒，这时候推摇杆 / 点坐下都会被顶回来。
  */
-async function waitDriving(ctx, ms) {
+async function waitDriving(ctx, ms, check) {
   const get = ctx && ctx.getPosture;
   if (typeof get !== 'function') { await sleep(Math.min(ms, 1800)); return null; }
   const t0 = performance.now();
   while (performance.now() - t0 < ms) {
+    check?.();
     if (DRIVING.has(get())) return true;
     await sleep(150);
   }
@@ -102,9 +103,11 @@ async function waitDriving(ctx, ms) {
  * 官方规矩：站姿分两种——holding（站着但策略没跑，摇杆推了也不动）和 policy（准备好走了）。
  * 所以「坐下」「走一小步」「推摇杆」之前都得先过这一关，否则用户只会看到「没反应」。
  */
-async function ensurePolicy(link, ctx, tries = 4) {
+async function ensurePolicy(link, ctx, tries = 4, check) {
   for (let i = 0; i < tries; i++) {
+    check?.();
     const r = await link.cmd('pad.op', { op: 'walk' }, 20000);
+    check?.();
     if (isReady(r)) return { ok: true, already: !good(r) };
     const why = whyOf(r);
     if (BUSY_WHY.test(why)) { await sleep(900); continue; }
@@ -112,9 +115,10 @@ async function ensurePolicy(link, ctx, tries = 4) {
       // 坐着：先站起来（走 sit_toggle），站稳了再开策略。后端坐着又不给站时（策略没跑且卸了力）
       // 会把「先把它扶起来放平」那句原话抛回来，这里照原话报给用户，别替它瞎指挥。
       const s = await link.cmd('pad.op', { op: 'stand' }, 25000);
+      check?.();
       if (!good(s) && !/已经站着/.test(whyOf(s))) return { ok: false, error: whyOf(s) || '站不起来' };
-      await waitDriving(ctx, 15000);
-      const p = await ensurePolicy(link, ctx, 3);
+      await waitDriving(ctx, 15000, check);
+      const p = await ensurePolicy(link, ctx, tries - i - 1, check);
       return p.ok ? { ...p, stood: true } : p;
     }
     return { ok: false, error: why || '开始走没成功' };
@@ -122,27 +126,67 @@ async function ensurePolicy(link, ctx, tries = 4) {
   return { ok: false, error: '开始走一直没排上队，等一下再点' };
 }
 
+const activeSteps = new WeakMap();
+
+function forgetStep(link, step) {
+  if (activeSteps.get(link) === step) activeSteps.delete(link);
+}
+
+function startStep(link, ctx) {
+  const previous = activeSteps.get(link);
+  if (previous) previous.cancelled = 'replaced';
+  const step = { cancelled: null };
+  activeSteps.set(link, step);
+  const run = async () => {
+    // 旧步进先归零，新步进再拿方向盘，避免旧停止帧打断新动作。
+    if (previous) await previous.done;
+    return stepOnce(link, ctx, step);
+  };
+  step.done = run().finally(() => forgetStep(link, step));
+  return step.done;
+}
+
+function stopAction(link, op) {
+  const previous = activeSteps.get(link);
+  if (previous) previous.cancelled = 'stop';
+  const result = Promise.resolve().then(() => link.cmd('pad.op', op, 20000));
+  const stop = { done: Promise.allSettled([previous?.done, result]) };
+  activeSteps.set(link, stop);
+  stop.done.then(() => forgetStep(link, stop));
+  return result;
+}
+
 /** 手机的短步动作沿用 Studio 摇杆通道：策略 → 0.85 秒前进 → 停。 */
-async function stepOnce(link, ctx, power = 0.55) {
+async function stepOnce(link, ctx, step, power = 0.55) {
   const poseError = '还没确认走路策略在运行，等站稳后再试。';
+  const cancelled = '短步已取消。';
+  const check = () => {
+    if (step.cancelled) throw new Error(cancelled);
+    if (ctx?.getPosture?.() == null) throw new Error(poseError);
+  };
   let error = null;
   let attempted = false;
   let moved = false;
   let stood = false;
   try {
-    if (typeof ctx?.getPosture !== 'function') throw new Error(poseError);
-    const policy = await ensurePolicy(link, ctx);
+    check();
+    const policy = await ensurePolicy(link, ctx, 4, check);
+    check();
     if (!policy.ok) throw new Error(policy.error);
     stood = policy.stood === true;
-    if (await waitDriving(ctx, 5000) !== true) throw new Error(poseError);
+    if (await waitDriving(ctx, 5000, check) !== true) throw new Error(poseError);
+    check();
     await sleep(stood ? 150 : 220);
+    check();
     const deadline = performance.now() + 850;
     while (performance.now() < deadline) {
+      check();
       if (!DRIVING.has(ctx.getPosture())) throw new Error(poseError);
       const remaining = deadline - performance.now();
       if (remaining <= 0) break;
       attempted = true;
       const frame = await pushStick(link, { y: -power }, Math.min(500, Math.ceil(remaining)));
+      check();
       if (frame?.ok !== true || frame.data?.dropped || !(frame.data?.sent?.[0] > 0)) {
         throw new Error(whyOf(frame) || '前进指令没发出去。');
       }
@@ -150,11 +194,12 @@ async function stepOnce(link, ctx, power = 0.55) {
       const pause = Math.min(95, deadline - performance.now());
       if (pause > 0) await sleep(pause);
     }
+    check();
     if (!moved) throw new Error('前进指令没发出去。');
   } catch (err) {
     error = err?.message || '前进指令没发出去。';
   } finally {
-    if (attempted) {
+    if (attempted && step.cancelled !== 'stop') {
       try {
         const stop = await link.cmd('pad.op', { op: 'stop', seq: link.nextPadSeq(), owned_only: true }, 5000);
         if (stop?.ok !== true || stop.data?.dropped || stop.data?.sent !== true) {
@@ -165,6 +210,7 @@ async function stepOnce(link, ctx, power = 0.55) {
       }
     }
   }
+  if (step.cancelled) error ||= cancelled;
   return { ok: !error, cn: '走一小步', error, note: !error && stood ? '已站起来，并发送短步指令' : null };
 }
 
@@ -197,7 +243,7 @@ let press = 0;
 export async function runAction(link, key, ctx) {
   const hit = ACTIONS[key];
   if (hit) {
-    if (hit.special === 'step') return stepOnce(link, ctx);
+    if (hit.special === 'step') return startStep(link, ctx);
     if (key === 'sit') return sitSmart(link, ctx);
     if (key === 'walk') {
       const p = await ensurePolicy(link, ctx);
@@ -205,8 +251,9 @@ export async function runAction(link, key, ctx) {
       return { ok: true, cn: '开始走', error: null,
         note: p.already ? '已经在走着了，推左摇杆就会动' : (p.stood ? '先站起来，现在开始走：推左摇杆' : '开始走了：推左摇杆就会动') };
     }
-    const r = await link.cmd('pad.op', hit.op, 20000);
-    return { ok: r.ok !== false, cn: hit.cn, error: r.ok === false ? (r.reason || r.error) : null };
+    const r = key === 'stop' ? await stopAction(link, hit.op) : await link.cmd('pad.op', hit.op, 20000);
+    const ok = good(r) && !r.data?.dropped;
+    return { ok, cn: hit.cn, error: ok ? null : whyOf(r) };
   }
   const held = HELD[key];
   if (!held) return { ok: false, cn: key, error: '不认识这个动作' };

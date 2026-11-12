@@ -37,7 +37,13 @@ function stepFixture(t, getPosture = () => 'policy', respond = () => undefined) 
       return respond(args) ?? { ok: true, data: { sent: args.op === 'sticks' ? [0.16, 0, 0] : true } };
     },
   };
-  return { calls, step: () => runAction(link, 'step', { getPosture }) };
+  return { calls, step: () => runAction(link, 'step', { getPosture }), stop: () => runAction(link, 'stop') };
+}
+
+function deferred() {
+  let resolve;
+  const promise = new Promise((done) => { resolve = done; });
+  return { promise, resolve };
 }
 
 test('phone step sends no movement before driving is confirmed', async (t) => {
@@ -85,4 +91,59 @@ test('phone step succeeds after sent movement and accepted neutral cleanup', asy
   assert.ok(calls.slice(1, -1).length > 1);
   assert.ok(calls.slice(1, -1).every(({ op, ly }) => op === 'sticks' && ly < 0));
   assert.deepEqual(calls.at(-1), { op: 'stop', seq: calls.at(-2).seq + 1, owned_only: true });
+});
+
+test('explicit stop cancels a step waiting for its movement acknowledgement', async (t) => {
+  const inFlight = deferred();
+  const seen = deferred();
+  let held = false;
+  const { calls, step, stop } = stepFixture(t, undefined, ({ op }) => {
+    if (op !== 'sticks' || held) return undefined;
+    held = true;
+    seen.resolve();
+    return inFlight.promise;
+  });
+  const moving = step();
+  await seen.promise;
+  const stopping = stop();
+  inFlight.resolve({ ok: true, data: { sent: [0.16, 0, 0] } });
+  assert.equal((await stopping).ok, true);
+  assert.equal((await moving).ok, false);
+  assert.deepEqual(calls.map(({ op }) => op), ['walk', 'sticks', 'walk_stop']);
+});
+
+test('replacement waits for the old step neutral before sending its own frames', async (t) => {
+  const inFlight = deferred();
+  const seen = deferred();
+  let held = false;
+  const { calls, step } = stepFixture(t, undefined, ({ op }) => {
+    if (op !== 'sticks' || held) return undefined;
+    held = true;
+    seen.resolve();
+    return inFlight.promise;
+  });
+  const old = step();
+  await seen.promise;
+  const newer = step();
+  inFlight.resolve({ ok: true, data: { sent: [0.16, 0, 0] } });
+  assert.equal((await old).ok, false);
+  assert.equal((await newer).ok, true);
+  assert.deepEqual(calls.slice(0, 5).map(({ op }) => op), ['walk', 'sticks', 'stop', 'walk', 'sticks']);
+  assert.ok(calls[2].seq < calls[4].seq);
+});
+
+test('leaving the page during policy setup cancels before another motion request', async (t) => {
+  let posture = 'sitting';
+  const setup = deferred();
+  let held = false;
+  const { calls, step } = stepFixture(t, () => posture, ({ op }) => {
+    if (op !== 'walk' || held) return undefined;
+    held = true;
+    return setup.promise;
+  });
+  const moving = step();
+  posture = null;
+  setup.resolve({ ok: false, reason: '现在坐着' });
+  assert.equal((await moving).ok, false);
+  assert.deepEqual(calls.map(({ op }) => op), ['walk']);
 });
