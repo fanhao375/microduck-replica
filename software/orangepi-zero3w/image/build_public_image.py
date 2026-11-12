@@ -99,15 +99,26 @@ def rebuild_journal(fs):
 
 
 def scan_removed_credentials(image, needles):
-    pattern = re.compile(b'|'.join(re.escape(n) for n in needles))
-    overlap = max(map(len, needles)) - 1
-    tail = b''
-    with image.open('rb') as stream:
-        for block in iter(lambda: stream.read(8 * 1024 * 1024), b''):
-            content = tail + block
-            if pattern.search(content):
-                raise RuntimeError('Original credential material survives in output bytes')
-            tail = content[-overlap:]
+    scanner = shutil.which('rg')
+    if scanner:
+        # Fixed-string multi-pattern matching is exact and avoids expensive
+        # backtracking across large disk images. Sensitive needles stay in RAM.
+        result = subprocess.run(
+            [scanner, '--text', '--quiet', '--fixed-strings', '--file', '-', str(image)],
+            input=b'\n'.join(sorted(needles)) + b'\n', capture_output=True,
+        )
+        if result.returncode != 1:
+            raise RuntimeError('Credential scan matched material or failed')
+    else:
+        pattern = re.compile(b'|'.join(re.escape(n) for n in needles))
+        overlap = max(map(len, needles)) - 1
+        tail = b''
+        with image.open('rb') as stream:
+            for block in iter(lambda: stream.read(8 * 1024 * 1024), b''):
+                content = tail + block
+                if pattern.search(content):
+                    raise RuntimeError('Original credential material survives in output bytes')
+                tail = content[-overlap:]
     return {'original_key_payloads_and_password_hashes_absent': True,
             'credential_needle_count': len(needles), 'full_disk_bytes_scanned': image.stat().st_size}
 
