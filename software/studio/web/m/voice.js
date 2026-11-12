@@ -217,6 +217,7 @@ async function openRecorder(onStage) {
     const tapKind = kind === 'worklet' ? 'AudioWorklet' : 'ScriptProcessor';
     stage('');
     return {
+      cancel: teardown,
       /* 已经采到的秒数（按设备采样率算），用来给用户报「只录到 0.1 秒」 */
       seconds: () => total / (inRate || RATE),
       /* 采不到声音时报给用户看的两条线索，省得只说「一个音都没采到」 */
@@ -248,11 +249,12 @@ async function openRecorder(onStage) {
 }
 
 /** 把一段 PCM 交给板子认。返回识别出的文字 */
-async function asrOnBoard(pcm) {
+async function asrOnBoard(pcm, signal) {
   const res = await fetch('/api/asr', {
     method: 'POST',
     headers: { 'Content-Type': 'application/octet-stream' },
     body: pcm,
+    signal,
   });
   if (res.status === 401) throw Error('登录过期了，回上一页重新登录。');
   if (res.status === 413) throw Error('这段太长了，说短一点。');
@@ -260,6 +262,14 @@ async function asrOnBoard(pcm) {
   try { body = await res.json(); } catch { throw Error(`板子没认出来（HTTP ${res.status}）`); }
   if (!body || body.ok !== true) throw Error((body && body.error) || '板子没认出来，再说一次？');
   return (body.data && body.data.text) || '';
+}
+
+export async function recognizePhoneRecording(pcm, signal, transcribe, onText) {
+  if (signal.aborted) return false;
+  const text = await transcribe(pcm, signal);
+  if (signal.aborted || !text) return false;
+  await onText(text);
+  return true;
 }
 
 const micWhy = (e) => {
@@ -289,7 +299,8 @@ function MicIcon() {
   </svg>`;
 }
 
-const KNOWN_WORDS = '站起来 · 坐下 · 走一小步 · 停下 · 前滚翻 · 低头捡东西 · 叫一声 · 打招呼 · 点头 · 摇头 · 歪头';
+const BOARD_WORDS = '站起来 · 坐下 · 停下 · 前滚翻 · 低头捡东西 · 叫一声 · 打招呼 · 点头 · 摇头 · 歪头';
+const KNOWN_WORDS = `走一小步 · ${BOARD_WORDS}`;
 
 export function VoicePage({ st, pad, live, name, say }) {
   const [mode, setMode] = useState(modeOf());      // board | phone
@@ -305,7 +316,10 @@ export function VoicePage({ st, pad, live, name, say }) {
   const [perm, setPerm] = useState('unknown');     // 麦克风权限：granted / prompt / denied
   const [asrSec, setAsrSec] = useState(0);         // 板子正在认的第几秒（让人知道在跑）
   const [stage, setStage] = useState('');          // 开麦克风走到哪一步了（打开麦克风…/加载录音脚本…）
-  const holdRef = useRef(false);
+  const pointerRef = useRef(null);
+  const postureRef = useRef(null);
+  postureRef.current = live ? st?.posture : null;
+  useEffect(() => () => { postureRef.current = null; }, []);
 
   const audio = pad?.audio || {};
   const boardOk = audio.available === true;
@@ -358,14 +372,14 @@ export function VoicePage({ st, pad, live, name, say }) {
     setIsInterim(false);
     setAsk(null);
     // ctx：把实时站姿递进去，「走一小步」「坐下」会自己先开策略，不用先喊一句「开始走」
-    const out = await runAction(link, cmd, { getPosture: () => st?.posture });
+    const out = await runAction(link, cmd, { getPosture: () => postureRef.current });
     const cn = CMD_CN[cmd] || out.cn;
     setSent({ cn, ok: out.ok, why: out.ok ? null : (out.error || null) });
     remember(cn, out.ok);
     if (!out.ok) { setErr(out.error || '发指令没成功'); return; }
     setErr(null);
     if (out.note) say(out.note);
-  }, [remember, st, say]);
+  }, [remember, say]);
 
   /**
    * 一句话 → 动作。两条路一视同仁：说什么就是什么，**不用喊「鸭鸭」**。
@@ -383,52 +397,72 @@ export function VoicePage({ st, pad, live, name, say }) {
 
   // ---- 手机麦克风：按下开始录，松开传回板子认 ----
   const recRef = useRef(null);
+  const turnRef = useRef(null);
+  const discardPhone = useCallback(() => {
+    pointerRef.current = null;
+    turnRef.current?.abort();
+    turnRef.current = null;
+    recRef.current?.cancel();
+    recRef.current = null;
+  }, []);
+  useEffect(() => discardPhone, [discardPhone]);
 
-  const startPhone = useCallback(async () => {
-    if (!phoneOk) { setErr(`${phoneWhy}用输入法上的话筒键听写，或者开板载麦克风。`); return; }
-    if (recRef.current) return;                 // 已经在录了（连点两下）
+  const cancelPhone = useCallback(() => {
+    discardPhone();
+    setListening(false);
+    setStage('');
+    setIsInterim(false);
+  }, [discardPhone]);
+
+  const startPhone = useCallback(async (turn) => {
     setErr(null); setHeard(''); setIsInterim(false); setSent(null); setAsk(null);
     setListening(true);
     setStage('打开麦克风…');
-    const p = openRecorder(setStage);
-    // **必须在这个 .then 里挂上 recRef**：它注册得比下面的 await 早，openRecorder 一成功
-    // 它就先跑；要是等 await 之后再赋值，这里会以为「没人在等这段录音」，立刻 stop 掉，
-    // 松手时一个样本都没有（「一个音都没采到」，但引擎其实是 running）。
-    p.then((r) => {
-      if (!holdRef.current) { try { r.stop(); } catch { /* 已经关了 */ } return; }  // 已经松手了，别占着麦克风
-      recRef.current = r;
+    let timeout;
+    const opening = openRecorder((message) => {
+      if (!turn.signal.aborted) setStage(message);
+    }).then((rec) => {
+      if (turn.signal.aborted) { rec.cancel(); return; }
+      recRef.current = rec;
       setStage('');
-    }, () => { /* 错误由下面的 await 统一处理 */ });
+    });
     try {
       // 每一步自己都有超时（错误里会写清卡在哪一步），
       // 这条 18 秒的只是最后兜底，防某一步的 promise 整体不 settle。
       await Promise.race([
-        p,
+        opening,
         new Promise((_, rej) => {
           const e = Error('麦克风一直没起来（18 秒）。先点上面的「允许麦克风」再长按；'
             + '还是不行就打开 /diag 做一次自检。');
           e.friendly = true;
-          setTimeout(() => rej(e), 18000);
+          timeout = setTimeout(() => rej(e), 18000);
         }),
       ]);
     } catch (e) {
-      setListening(false);
-      setStage('');
-      if (recRef.current) { try { recRef.current.stop(); } catch { /* 已经关了 */ } }
-      recRef.current = null;
+      if (turn.signal.aborted) return;
+      cancelPhone();
       setErr(micWhy(e));
+    } finally {
+      clearTimeout(timeout);
     }
-  }, [phoneOk, phoneWhy]);
+  }, [cancelPhone]);
 
-  const stopPhone = useCallback(async () => {
+  const stopPhone = useCallback(async (turn) => {
     const rec = recRef.current;
     recRef.current = null;
     setListening(false);
     setStage('');
-    if (!rec) return;                            // 按下就松开了，录音还没起来
+    if (!rec) {
+      turn.abort();                              // 松手时录音还没起来
+      return;
+    }
     let pcm = null;
     try { pcm = await rec.stop(); }
-    catch (e) { setErr(`录音收尾失败：${(e && e.message) || e}`); return; }
+    catch (e) {
+      if (!turn.signal.aborted) setErr(`录音收尾失败：${(e && e.message) || e}`);
+      return;
+    }
+    if (turn.signal.aborted) return;
     if (!pcm || pcm.byteLength < MIN_BYTES) {
       const s = typeof rec.seconds === 'function' ? rec.seconds() : 0;
       // 把到底卡在哪带上：音频引擎是不是没跑、用的哪种采集方式，一眼就能看出来
@@ -447,16 +481,19 @@ export function VoicePage({ st, pad, live, name, say }) {
     // 板子上识别要几秒（第一句还得先加载模型），这期间页面必须「动」，否则看着就是「没反应」
     setHeard('正在认…'); setIsInterim(true);
     setAsrSec(0);
-    const tick = setInterval(() => setAsrSec((n) => n + 1), 1000);
+    const tick = setInterval(() => {
+      if (!turn.signal.aborted) setAsrSec((n) => n + 1);
+    }, 1000);
     try {
-      const text = await asrOnBoard(pcm);
-      if (!text) {
+      const recognized = await recognizePhoneRecording(pcm, turn.signal, asrOnBoard, handleText);
+      if (!recognized && !turn.signal.aborted) {
+        setIsInterim(false);
         setErr(`传回去了 ${(pcm.byteLength / 32000).toFixed(1)} 秒声音，板子没认出词。`
           + '离手机近一点、说慢一点，一次只说一个口令（比如「点头」）。');
         return;
       }
-      handleText(text);
     } catch (e) {
+      if (turn.signal.aborted) return;
       setHeard(''); setIsInterim(false);
       setErr((e && e.message) || '没认出来，再说一次？');
     } finally {
@@ -464,16 +501,32 @@ export function VoicePage({ st, pad, live, name, say }) {
     }
   }, [handleText]);
 
-  const onDown = useCallback((e) => {
-    e.preventDefault();
+  const onDown = useCallback((event) => {
+    if (!event.isPrimary || event.button !== 0 || pointerRef.current !== null) return;
+    event.preventDefault();
     if (!phoneOk) { setErr(`${phoneWhy}用输入法上的话筒键听写，或者开板载麦克风。`); return; }
-    holdRef.current = true;
-    startPhone();
-  }, [phoneOk, phoneWhy, startPhone]);
+    discardPhone();
+    pointerRef.current = event.pointerId;
+    const turn = new AbortController();
+    turnRef.current = turn;
+    startPhone(turn);
+  }, [discardPhone, phoneOk, phoneWhy, startPhone]);
 
-  const onUp = useCallback(() => {
-    if (holdRef.current) { holdRef.current = false; stopPhone(); }
-  }, [stopPhone]);
+  const onUp = useCallback((event) => {
+    if (pointerRef.current !== event.pointerId) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right
+        || event.clientY < bounds.top || event.clientY > bounds.bottom) {
+      cancelPhone();
+      return;
+    }
+    pointerRef.current = null;
+    stopPhone(turnRef.current);
+  }, [cancelPhone, stopPhone]);
+
+  const onCancel = useCallback((event) => {
+    if (pointerRef.current === event.pointerId) cancelPhone();
+  }, [cancelPhone]);
 
   // ---- 板载麦克风：开关 duck-echo 的聆听 ----
   const toggleBoard = useCallback(async (on) => {
@@ -507,6 +560,7 @@ export function VoicePage({ st, pad, live, name, say }) {
     const v = typed.trim();
     if (!v) return;
     setTyped('');
+    cancelPhone();
     handleText(v);
   };
 
@@ -517,7 +571,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       : html`按住对着手机说话，她说完松手就发过去。跟板载一样，直接说口令就行。`}</p>
 
     <div class="m-seg" role="group" aria-label="语音通道" style="margin:14px 0 0">
-      <button aria-pressed=${mode === 'board' ? 'true' : 'false'} onClick=${() => { setMode('board'); setErr(null); setAsk(null); }}>
+      <button aria-pressed=${mode === 'board' ? 'true' : 'false'} onClick=${() => { if (mode !== 'board') cancelPhone(); setMode('board'); setErr(null); setAsk(null); }}>
         板载麦克风${boardOn ? ' · 听' : ''}
       </button>
       <button aria-pressed=${mode === 'phone' ? 'true' : 'false'} onClick=${() => { setMode('phone'); setErr(null); setAsk(null); }}>
@@ -538,7 +592,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       </div>
       <p class="m-tip">
         ${boardOn
-          ? html`它在听：<b>直接说</b>「站起来」「点头」「走一小步」。说完点一下关掉，省电。`
+          ? html`它在听：<b>直接说</b>「站起来」「点头」「停下」。说完点一下关掉，省电。`
           : html`用的是鸭子身上的麦克风。安静的时候最准，吵起来就换「手机说话」。`}
       </p>
       ${!boardOk ? html`<div class="m-banner bad" style="text-align:left">
@@ -552,7 +606,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       <div class=${'m-mic-wrap' + (listening ? ' live' : '')}>
         <span class="m-halo" aria-hidden="true"></span>
         <button class=${'m-mic m-mic-talk' + (listening ? ' live' : '')}
-          onPointerDown=${onDown} onPointerUp=${onUp} onPointerCancel=${onUp} onPointerLeave=${onUp}
+          onPointerDown=${onDown} onPointerUp=${onUp} onPointerCancel=${onCancel} onPointerLeave=${onCancel} onLostPointerCapture=${onCancel}
           onContextMenu=${(e) => e.preventDefault()}
           aria-label="按住说话，松开发送">
           <${MicIcon} />
@@ -605,7 +659,7 @@ export function VoicePage({ st, pad, live, name, say }) {
 
     <h2 class="m-h2" style="text-align:left">它认这些</h2>
     <div class="m-card m-pad" style="text-align:left">
-      <div class="m-sub">${KNOWN_WORDS}</div>
+      <div class="m-sub">${mode === 'board' ? BOARD_WORDS : KNOWN_WORDS}</div>
       <div class="m-tip" style="margin-bottom:0">
         ${mode === 'board'
           ? html`板载识别只认这几个口令，说话时离鸭子近一点、慢一点；它动着的时候噪声大，先让它站好再说。`
