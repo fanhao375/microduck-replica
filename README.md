@@ -217,6 +217,8 @@
 |---|---|
 | [@yoyojacky](https://github.com/yoyojacky) | **Rust 版飞特舵机测试工具**（[PR #27](https://github.com/fanhao375/microduck-replica/pull/27)，已合并）。自己实现的最小 STS/SCS 协议（帧打包、校验和、ping、读写寄存器、状态解析），命令行可以扫描总线（带进度条）、读状态、转到指定位置、单颗测试和批量测试，输出位置偏差、峰值电流、峰值负载、电压温度并判定 PASS/FAIL。台架验收一条命令出汇总表 → [`tools/sts3215Servo_testtool/`](tools/sts3215Servo_testtool/) |
 | [@Abo1ish](https://github.com/Abo1ish) | **IMU 小板固件 + 调试台姿态显示**（[PR #32](https://github.com/fanhao375/microduck-replica/pull/32)，已合并）。给官方没开源的那块 imu_to_dxl 写了 STM32G031 固件底子，在实板上验证过，带主机端测试和一份写清楚边界的 [`VALIDATION.md`](hardware/imu_to_dxl/firmware/VALIDATION.md) → [`hardware/imu_to_dxl/firmware/`](hardware/imu_to_dxl/firmware/)；再用 J-Link 把 IMU 姿态实时读出来并进了网页调试台，3D 鸭子的躯干跟着真板子转（`--imu-jlink`，没板子也能用 `--imu-demo` 先看效果）→ [`tools/servo-web/`](tools/servo-web/) |
+| [@yansis2026](https://github.com/yansis2026) | **手机版中控与离线语音**（[PR #52](https://github.com/fanhao375/microduck-replica/pull/52)，已合并）。在 `/m` 提供手机手柄、模型管理和摄像头画面。手机麦克风通过 HTTPS 把语音送到鸭子，由板载 Vosk 识别，连鸭子热点就能离线使用。贡献者在自己的鸭子上跑通了这套流程，合并版已通过软件回归，待实机复测。见[手机与离线使用指南](software/studio/deploy/OFFLINE.md)。 |
+| [@Liangjin5437](https://github.com/Liangjin5437) | **Radxa Cubie A7Z 适配与预览镜像**（[PR #54](https://github.com/fanhao375/microduck-replica/pull/54)，已合并）。为飞特 HD-1910 舵机和总线 IMU 提供 A7Z 的热点配网、UART 总线与分组读取、Studio 适配、温控和镜像构建工具。贡献者已在自己的 A7Z 鸭子上验证适配。现有预览镜像早于合并修复，更新版待重新打包和上板验收。见 [A7Z 适配与下载说明](radxa-cubie-a7z/README.md)。 |
 | 微信群的鸭友 | **Radxa Zero 3W V1.12J 的启动方案**。这批板子（WiFi 换成 AIC8800DS2）光换瑞莎引导还是起不来，他实测出设备树也得换成瑞莎 B1 的：**B1 引导 + B1 DTB + Armbian 6.1.115 内核 + Trixie 系统**，跑通了 → 写进了[踩坑记录](踩坑记录.md#软件)和[镜像使用说明](tools/radxa/镜像使用说明.md#6-如果你的板子不是这一批) |
 
 ---
