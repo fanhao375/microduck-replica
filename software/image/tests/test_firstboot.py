@@ -528,6 +528,15 @@ class TlsTests(unittest.TestCase):
                     and "-x509" in a][0]
             self.assertIn(fb.TLS_SUBJECT, argv)
 
+    def test_server_certificate_lifetime_fits_apple_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, fb, _ = self.tls(tmp)
+            fb.setup_tls("duck-c51b")
+            ca = next(argv for argv, _ in fb.run_cmd.calls if argv[1] == "req" and "-x509" in argv)
+            server = next(argv for argv, _ in fb.run_cmd.calls if argv[1] == "x509")
+            self.assertEqual(ca[ca.index("-days") + 1], "3650")
+            self.assertEqual(server[server.index("-days") + 1], "820")
+
     def test_existing_certs_are_not_overwritten(self):
         with tempfile.TemporaryDirectory() as tmp:
             _, fb, log = self.tls(tmp)
