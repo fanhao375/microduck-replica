@@ -96,9 +96,10 @@ function minutesSince(at) {
 // 不带点的 duck-xxxx Windows 用 LLMNR 问得到，代理按 <local> 绕过；IP 哪儿都能开）
 export function openLines(net) {
   const host = net.hostname || 'duck-xxxx';
+  const proto = typeof location !== 'undefined' && location.protocol === 'https:' ? 'https' : 'http';
   return [
-    `Windows 电脑：${net.url_host || `http://${host}:8000/`}（开着代理也能打开）`,
-    `苹果手机、Mac：${net.url_local || `http://${host}.local:8000/`}`,
+    `Windows 电脑：${net.url_host || `${proto}://${host}:8000/`}（开着代理也能打开）`,
+    `苹果手机、Mac：${net.url_local || `${proto}://${host}.local:8000/`}`,
     `安卓手机，或者上面都打不开：去路由器的设备列表找 ${host}，用它的 IP 打开`,
     '电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连',
   ];
@@ -110,10 +111,12 @@ export const FIND_GIVEUP_MS = 3 * 60 * 1000; // 最多找 3 分钟
 export const FIND_PROBE_MS = 6000;           // 一次探测最多等这么久（连不上的地址可能挂几十秒才报错）
 export const FIND_SILENT_MS = 5000;          // 这么久没收到 Studio 的任何消息也算断了（WebSocket 有时不马上报断）
 
-/** 要找的地址：http://<hostname>:<端口>/ 和 http://<hostname>.local:<端口>/（net.json 的 hostname，端口跟 --listen 一致）。 */
+/** 要找的地址：<proto>://<hostname>:<端口>/ 和 <proto>://<hostname>.local:<端口>/（net.json 的 hostname，端口跟 --listen 一致）。
+ *  proto 跟当前页面一致：Studio 开了 https 就不要再探 http（80/8000 上没人应答）。 */
 export function findUrls(net) {
   const host = (net && net.hostname) || 'duck-xxxx';
-  const urls = [(net && net.url_host) || `http://${host}:8000/`, (net && net.url_local) || `http://${host}.local:8000/`];
+  const proto = typeof location !== 'undefined' && location.protocol === 'https:' ? 'https' : 'http';
+  const urls = [(net && net.url_host) || `${proto}://${host}:8000/`, (net && net.url_local) || `${proto}://${host}.local:8000/`];
   return urls.filter((u, i) => urls.indexOf(u) === i);
 }
 
@@ -455,7 +458,7 @@ export function WifiSettings({ net, link }) {
 }
 
 // 「更多」页的「这只鸭子的地址」（10-20 真机验收：开着 Clash 的电脑打不开 .local）：后端 net.urls 列出现在能用的
-// IP（configd net.status 的 ip4；热点模式是 10.42.0.1）、duck-xxxx、duck-xxxx.local，每个一个复制按钮
+// HTTP 可列出 DHCP 地址；HTTPS 列出主机名和证书覆盖的固定 IP。
 export function DuckAddresses({ net }) {
   const [copied, setCopied] = useState(null);       // {url, ok}
   useEffect(() => {
@@ -465,6 +468,8 @@ export function DuckAddresses({ net }) {
   }, [copied]);
   if (!net || !net.known) return null;
   const urls = net.urls || [];
+  const hasIp = urls.some((u) => u.kind === 'ip');
+  const https = net.url_local?.startsWith('https:');
   const copy = async (url) => setCopied({ url, ok: await copyText(url) });
   return html`<div class="board wifi-settings duck-addr" aria-label="这只鸭子的地址">
     <h2>这只鸭子的地址</h2>
@@ -475,8 +480,10 @@ export function DuckAddresses({ net }) {
       <button class="wifi-btn duck-addr-copy" type="button" onClick=${() => copy(u.url)}>
         ${copied && copied.url === u.url ? (copied.ok ? '已复制' : '复制不了，长按地址复制') : '复制'}</button>
     </div>`)}
-    ${urls.some((u) => u.kind === 'ip') ? null
+    ${hasIp || https ? null
       : html`<div class="wifi-note">现在不知道 IP（没连上 WiFi，或者读不到配网程序）：去路由器的设备列表找 ${net.hostname || 'duck-xxxx'}。</div>`}
-    <div class="wifi-note">安卓手机打不开带名字的地址就用 IP；电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连。</div>
+    <div class="wifi-note">${https && !hasIp
+      ? 'HTTPS 请使用上方的主机名。手机无法解析主机名时，可以连接鸭子热点，再用热点地址。'
+      : '安卓手机打不开带名字的地址就用 IP。'} 电脑开着 Clash 的 TUN 模式还打不开：在 Clash 里把局域网（192.168.0.0/16）设成直连。</div>
   </div>`;
 }

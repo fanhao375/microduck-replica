@@ -28,9 +28,30 @@ class ProtocolTests(unittest.TestCase):
 
     def test_starts_off_and_only_reports_bounded_public_state(self):
         status = self.hub.request({'method': 'status'})
-        self.assertEqual(set(status['status']), {'listening', 'music', 'rhythm', 'error','runtime_root','voice_ready'})
+        self.assertEqual(set(status['status']),
+                         {'listening', 'music', 'rhythm', 'error', 'runtime_root', 'voice_ready', 'last'})
         self.assertFalse(status['status']['listening'])
         self.assertFalse(status['status']['voice_ready'])
+        # 还没听过任何话：last 是空的，而不是一个空壳对象
+        self.assertIsNone(status['status']['last'])
+
+    def test_last_command_is_reported_from_voice_without_transcript(self):
+        class Voice:
+            ready = SimpleNamespace(is_set=lambda: True)
+            recognizer = object()
+            def last_view(self): return {'command': 'stand', 'accepted': True, 'age': 0.4, 'seq': 3}
+        self.audio.voice = Voice()
+        status = self.hub.status()
+        self.assertEqual(status['last'], {'command': 'stand', 'accepted': True, 'age': 0.4, 'seq': 3})
+        self.assertNotIn('text', status['last'])          # 原话不外泄
+
+    def test_stale_last_command_drops_out(self):
+        class Voice:
+            ready = SimpleNamespace(is_set=lambda: True)
+            recognizer = object()
+            def last_view(self): return {'command': 'sit', 'accepted': True, 'age': 31, 'seq': 1}
+        self.audio.voice = Voice()
+        self.assertIsNone(self.hub.status()['last'])
 
     def test_voice_health_requires_loaded_recognizer(self):
         self.audio.voice=SimpleNamespace(ready=SimpleNamespace(is_set=lambda:True),recognizer=None)

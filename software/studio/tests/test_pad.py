@@ -33,7 +33,8 @@ PRO_LE = "98:B6:ED:28:06:09"     # 同一个手柄的 LE 那张脸
 XBOX = "78:86:2E:BB:13:28"
 FAST = {"poll": 0.01, "status_watch": 0.05, "status_job": 0.02, "padd": 0.6, "connect": 0.3, "readback": 0.3,
         "torque": 0.5, "press": 0.5, "lease": 5.0, "scan_tick": 0.02, "pair_window": 1, "scan_min": 0.1,
-        "probe": 0.02, "shutdown_hold": 0.4, "select_long": 0.2, "relax_guard": 0.3}
+        "probe": 0.02, "shutdown_hold": 0.4, "select_long": 0.2, "relax_guard": 0.3,
+        "walk_verify": 0.2, "walk_verify_poll": 0.02}
 # 真机录的 robot.policies（tests/fixtures/now-20261018.jsonl:5），路径缩短
 POLICIES = {"enabled": True, "homed": True, "mode": "walk", "sitting": False,
             "skills": ["roulade", "kick_left", "kick_right", "roller_stand"],
@@ -286,7 +287,13 @@ class FakeRobot:
             return r(params)
         if r is not None:
             return copy.deepcopy(r)
-        if method in ("robot.init", "robot.enable", "robot.do", "robot.sound", "robot.stop"):
+        if method == "robot.enable":
+            # 真的开/关策略：Studio 的「开始走」回读 busStatus 看 policy_enabled，假的也要跟着变
+            on = bool((params or {}).get("on"))
+            with self.lk:
+                self.bus["policy_enabled"] = on
+            return {"accepted": True}
+        if method in ("robot.init", "robot.do", "robot.sound", "robot.stop"):
             return {"accepted": True}
         raise RpcError(method, -32601, "nope")
 
@@ -1095,6 +1102,17 @@ class MoveTest(PadTestBase):
         r = self.ops.handle({"op": "move", "vx": 0.1, "seq": 13})     # 新按下的照常
         self.assertEqual(r["sent"][0], 0.1)
 
+    def test_owner_only_stop_fences_its_own_frames_without_stopping_another_driver(self):
+        self.ops.handle({"op": "move", "vx": 0.2, "seq": 1}, conn="a")
+        before = list(self.robot.sent)
+        result = self.ops.handle({"op": "stop", "seq": 2, "owned_only": True}, conn="b")
+        self.assertIn("dropped", result)
+        self.assertEqual(self.robot.sent, before)
+        self.assertEqual(self.ops._seq_of("b")["stop"], 2)
+        result = self.ops.handle({"op": "stop", "seq": 3, "owned_only": True}, conn="a")
+        self.assertTrue(result["sent"])
+        self.assertEqual(self.robot.sent[-1], ("robot.move", {"vx": 0.0, "vy": 0.0, "vyaw": 0.0}))
+
     def test_refused_cases(self):
         with self.assertRaises(P.Refused):
             self.ops.handle({"op": "move", "vx": float("nan")})
@@ -1219,7 +1237,9 @@ class MotionTest(PadTestBase):
         with self.assertRaises(P.Refused):
             self.ops.handle({"op": "sit"})
         self.ops.handle({"op": "walk"})
-        self.assertEqual(self.robot.calls[-1], ("robot.enable", {"on": True, "toggle": False}))   # 不用 toggle
+        # 「开始走」回执之后还会回读 busStatus 确认策略真的起来了，所以不能用 calls[-1]
+        self.assertIn(("robot.enable", {"on": True, "toggle": False}),
+                      [c for c in self.robot.calls if c[0] != "robot.busStatus"])   # 不用 toggle
         # 策略在跑：按钮变成「停下」；坐下 = sit_toggle
         self.pose("policy")
         b = self.buttons()
@@ -1235,6 +1255,28 @@ class MotionTest(PadTestBase):
         self.assertEqual(self.robot.calls[-1], ("robot.do", {"skill": "sit_toggle"}))
         log = self.log.recent(50, cats=["命令"])
         self.assertTrue(any("站起来" in e["msg"] and "成功" in e["msg"] for e in log))
+
+    def test_walk_reports_the_real_reason_when_policy_is_refused(self):
+        """robot.enable 只是收下请求：home_start_guard 拒了策略启动时，不能写「开始走 成功」。"""
+        self.pose("holding")
+        self.robot.replies["robot.enable"] = {"accepted": True}      # 回执说收下，策略并没启动
+        self.robot.bus["last_enable_refusal"] = (
+            "不能进入保持：正在确认实际 HOME 和直立姿态（连续 3 帧）；请回 HOME、扶正后重新按键")
+        with self.assertRaises(P.Refused) as cm:
+            self.ops.handle({"op": "walk"})
+        self.assertIn("不能进入保持", str(cm.exception))
+        log = [e["msg"] for e in self.log.recent(50, cats=["命令"])]
+        self.assertTrue(any("开始走" in m and "没成功" in m for m in log), log)
+        self.assertFalse(any("开始走" in m and "成功" in m and "没成功" not in m for m in log), log)
+
+    def test_walk_falls_back_to_home_start_guard_reason(self):
+        self.pose("holding")
+        self.robot.replies["robot.enable"] = {"accepted": True}
+        self.robot.bus.pop("last_enable_refusal", None)
+        self.robot.bus["home_start_guard"] = {"ready": False, "reason": "不能进入保持：舵机反馈不完整或不新鲜"}
+        with self.assertRaises(P.Refused) as cm:
+            self.ops.handle({"op": "walk"})
+        self.assertIn("舵机反馈不完整", str(cm.exception))
 
     def test_walk_stop_zeros_speed_then_disables(self):
         """审查二 I5：真要等到速度归零才发 enable off（把等的那段删掉这条就过不了）。"""
@@ -1910,7 +1952,8 @@ class VpadTest(PadTestBase):
                 self.assertEqual(self.ops.snapshot()["motion"]["start"]["op"], expect)
                 r = self.ops.handle({"op": "start", "expect": expect, "src": "svg"}, by="电脑", conn="a")
                 self.assertEqual(r["did"], expect)
-                self.assertEqual(self.robot.calls[-1], call)
+                # walk 会多回读几次 busStatus 确认策略启动，别用 calls[-1]
+                self.assertIn(call, [c for c in self.robot.calls if c[0] != "robot.busStatus"])
         self.feed("policy")
         self.ops.handle({"op": "start", "expect": "walk_stop"}, conn="a")
         self.assertEqual(self.robot.methods()[-2:], ["robot.stop", "robot.enable"])

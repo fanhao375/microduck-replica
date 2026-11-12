@@ -62,14 +62,14 @@ class WsClient:
         self.accepted = self.rejected = self.close_code = None
         self.pong_mode, self.pings = 'valid', []
 
-    async def open(self):
+    async def open(self, target="/ws"):
         self.r, self.w = await asyncio.open_connection("127.0.0.1", self.port)
         hdrs = []
         if self.origin:
             hdrs.append(("Origin", self.origin))
         if self.cookie:
             hdrs.append(("Cookie", f"{COOKIE}={self.cookie}"))
-        self.w.write(self.ws.send(Request(host=self.host or f"127.0.0.1:{self.port}", target="/ws", extra_headers=hdrs)))
+        self.w.write(self.ws.send(Request(host=self.host or f"127.0.0.1:{self.port}", target=target, extra_headers=hdrs)))
         await self.w.drain()
         await self.pump(until=lambda: self.accepted or self.rejected or self.close_code is not None, timeout=3)
 
@@ -124,9 +124,12 @@ class HttpTest(unittest.IsolatedAsyncioTestCase):
         self.servo = ServoSession(log, sim=True)
         self.pad = self.make_pad(log, p1, p2)
         self.onboard = Onboarding(str(Path(self.tmp.name) / "state"), log)
+        self.ca_path = Path(self.tmp.name) / "ca.crt"
+        self.ca_path.write_bytes(b"-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----\n")
         app = build_app(auth=self.auth, robotd=self.rd, log=log, web_dir=WEB, duck={"label": "测试鸭"},
                         names=["microduck-2"], servo=self.servo, imu=ImuBackend(self.rd, log, self.tmp.name),
-                        pad=self.pad, onboard=self.onboard, ssh_home=str(Path(self.tmp.name) / "home"))
+                        pad=self.pad, onboard=self.onboard, ssh_home=str(Path(self.tmp.name) / "home"),
+                        ca_cert=str(self.ca_path))
         cfg = uvicorn.Config(app, host="127.0.0.1", port=0, ws=MusicWebSocketProtocol, http="h11", lifespan="on",
                              log_level="critical")
         self.server = uvicorn.Server(cfg)
@@ -189,6 +192,25 @@ class HttpTest(unittest.IsolatedAsyncioTestCase):
             self.assertLess(len(body), 1024)                     # 很小：每 2 秒探一次也不费事
         st, _, _ = await self.call("GET", "/probe.svg", headers={"Host": "evil.example.com"})
         self.assertEqual(st, 421)                                 # Host 校验照旧
+
+    async def test_ca_cert_is_downloadable_before_login(self):
+        """手机装证书要在登录之前完成：不登录也能下载，是 CA 证书 + 附件下载，且不缓存。"""
+        body_want = self.ca_path.read_bytes()
+        st, h, body = await self.call("GET", "/ca.crt")
+        self.assertEqual(st, 200)
+        self.assertEqual(h["content-type"], "application/x-x509-ca-cert")
+        self.assertIn("attachment", h["content-disposition"])
+        self.assertIn("Microduck-Local-CA.crt", h["content-disposition"])
+        self.assertEqual(h["cache-control"], "no-store")
+        self.assertEqual(body, body_want)
+        st, _, _ = await self.call("GET", "/ca.crt", headers={"Host": "evil.example.com"})
+        self.assertEqual(st, 421)                                # Host 校验照旧
+
+    async def test_ca_cert_missing_is_404(self):
+        import os
+        os.remove(self.ca_path)
+        st, _, _ = await self.call("GET", "/ca.crt")
+        self.assertEqual(st, 404)
 
     async def test_login_origin_matrix_and_cookie(self):
         bad = [None, "http://evil.example.com", f"http://127.0.0.1:{self.port + 1}", "null"]
