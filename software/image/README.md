@@ -87,7 +87,7 @@ scp radxa@<鸭子 IP>:/tmp/microduck-payload.tgz .
 `payload.json` 里 robotd 那一条的 sha256 跟着改；换完的 payload sha256 `26252fbc…`。
 以后的 robotd 都从提交编，对得上源码。
 
-20261023c 的 robotd 来自 [runtime fork 的 `hd1910-v167-imu-dxl2` 分支](https://github.com/fanhao375/Microduck-kissqy/tree/hd1910-v167-imu-dxl2)，
+[20261023c 镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261023c)的 robotd 来自 `hd1910-v167-imu-dxl2` 分支，
 提交 `0791fcd44f71c705dc8bb0fbcde405593b52d19b`，构建标识 `4734cbb-feetech-imu-auto-control.44`。
 使用 Rust 1.99.0、`cargo zigbuild --locked --release --target aarch64-unknown-linux-gnu.2.31 -p robotd --bin robotd`，
 `CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1`；robotd sha256 为

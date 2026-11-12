@@ -12,7 +12,7 @@
 | **Microduck Studio** | 装在鸭子上的网页中控：状态、卸力、舵机零位、IMU 方向、写进主程序、手柄、遥控、日志 | [`studio/`](studio/)。用复刻镜像的不用另装 | 代码 Apache-2.0 |
 | **网页软件更新** | 签名组件包、独立更新服务、离线上传、安装与回退 | [`updater/`](updater/)，20261027镜像预装；旧卡先一次性SSH引导，[操作说明](../docs/软件更新与语音使用说明-20261027.md) | Apache-2.0 |
 | **本地坐站语音** | R3单击监听开关、中文坐下/站起来、鸭叫提示 | [`duck-echo/`](duck-echo/)，20261027镜像附中文模型与ARM64依赖；无需云端Key | 代码Apache-2.0，模型与依赖按各自许可 |
-| **主程序 robotd / padd / mediad** | 在官方 0.15.1 上加了飞特 HD-1910 舵机总线、I²C IMU 模块、陀螺融合、UDP 手柄 | 源码在 [fanhao375/Microduck-kissqy](https://github.com/fanhao375/Microduck-kissqy)，具体镜像使用的分支和提交见 [image/README.md](image/README.md)。复刻镜像里已经装好 | Apache-2.0 |
+| **主程序 robotd / padd / mediad** | 在官方 0.15.1 上加了飞特 HD-1910 舵机总线、I²C IMU 模块、陀螺融合、UDP 手柄 | 复刻镜像里已经装好。各版本构建、提交号和下载见 [镜像说明](image/README.md)及[公开发布页](https://github.com/fanhao375/microduck-replica/releases) | Apache-2.0 |
 | **走路和动作模型** | 走路、坐下 / 站起、低头捡、前滚翻、左右踢、轮滑 4 个 | 复刻镜像里带着。每个模型干什么、对应哪个手柄键、谁训练的，见[模型说明](image/overlay/usr/share/doc/microduck/模型说明.txt) | 作者的个人非商业许可，**不是开源许可**：不得随收费产品分发 |
 | **训练工程** | HD-1910 仿真训练 | [`training/`](training/) | 代码 Apache-2.0，3D 网格 CC BY-NC-SA |
 | **Microduck Training Studio** | 电脑上的网页训练工作台：实验管理、曲线、评估与模型导出 | [`training-studio/`](training-studio/README.md)，与鸭子上的 Studio 分开运行 | 代码 Apache-2.0；依赖与素材许可见该目录说明 |

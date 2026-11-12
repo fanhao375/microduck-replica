@@ -162,7 +162,7 @@ change the Studio, voice or updater trees.
 - The actual original 27 client anonymously discovered 31 from the public catalog,
   downloaded the software package and verified both minisign signatures with its
   original public key. The 27 image remains GitHub Latest.
-- [Public native source export](https://github.com/fanhao375/Microduck-kissqy/tree/27d7921dbcb280bd7d6ba3e9937624f1e2e61d23)
+- Native source export `27d7921dbcb280bd7d6ba3e9937624f1e2e61d23`, identified in the [release provenance](https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.10.31/runtime-provenance.json),
   has program/build-input blobs and modes identical to the original frozen 665 source.
   Its sole parent is the existing public baseline. Protected local console changes
   and history were excluded; the unchanged pre-push hook passed normally. The new
