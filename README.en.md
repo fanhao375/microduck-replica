@@ -56,12 +56,12 @@ The GIFs are silent previews; the MP4 files include the complete video and audio
 
 A WeChat group for people working on the same thing — build progress, pitfalls, sourcing.
 
-The code below is for **Duck Replica Group 15** (WeChat disables QR joins once a group reaches 200 members).
+The code below is for **Duck Replica Group 16** (WeChat disables QR joins once a group reaches 200 members).
 
 <div align="center">
-  <img src="assets/wechat-group-15.png" alt="Duck Replica Group 15 WeChat QR code" width="280">
+  <img src="assets/wechat-group-16.png" alt="Duck Replica Group 16 WeChat QR code" width="280">
   <br>
-  <sub><b>Duck Replica Group 15 · QR code valid before 2026-11-12</b> — WeChat group codes are valid for 7 days<br>
+  <sub><b>Duck Replica Group 16 · QR code valid before 2026-11-20</b> — WeChat group codes are valid for 7 days<br>
   If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
 </div>
 
