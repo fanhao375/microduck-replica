@@ -1,0 +1,32 @@
+[Unit]
+Description=Robot media and WebRTC gateway (A7Z bundled GStreamer)
+After=network.target robotd.service local-fs.target
+# After, not Requires: mediad must not restart robotd.
+
+[Service]
+Type=exec
+User=mediad
+Group=mediad
+SupplementaryGroups=video robot
+ExecStart=/usr/local/sbin/mediad-run
+Restart=always
+RestartSec=5s
+Nice=10
+CPUWeight=20
+CPUQuota=80%
+MemoryMax=400M
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+Environment=RUST_LOG=info
+StandardOutput=journal
+StandardError=journal
+RuntimeDirectory=mediad
+StateDirectory=mediad
+# Bundled loader and plugins live under /opt.
+
+[Install]
+WantedBy=multi-user.target
