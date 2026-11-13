@@ -7,9 +7,9 @@
     "pollen-robotics/microduck": {
       "default_branch": "main",
       "head": {
-        "sha": "86b222a598efeeb258fdd94473bad924fd872785",
-        "committed_at": "2026-11-13T03:38:05Z",
-        "subject": "Merge pull request #584 from pollen-robotics/revert-dpad-remap"
+        "sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+        "committed_at": "2026-11-13T04:11:29Z",
+        "subject": "Merge pull request #585 from pollen-robotics/pad-head-expo-speed"
       },
       "latest_stable_release": {
         "tag_name": "daemon-v0.20.1",
@@ -2663,15 +2663,15 @@
         {
           "tag": "daemon-dev-main",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
-          "release_id": 443788474,
-          "head_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-          "version": "daemon 0.20.1-dev.1774.86b222a (main)",
-          "published_at": "2026-11-13T03:42:17Z",
-          "published_at_jst": "2026-11-13T12:42:17+09:00",
-          "committed_at": "2026-11-13T03:38:05Z",
-          "committed_at_jst": "2026-11-13T12:38:05+09:00",
-          "source_author_at_utc": "2026-11-13T03:38:05Z",
-          "source_committed_at_utc": "2026-11-13T03:38:05Z",
+          "release_id": 443807887,
+          "head_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+          "version": "daemon 0.20.1-dev.1780.886b62d (main)",
+          "published_at": "2026-11-13T04:15:22Z",
+          "published_at_jst": "2026-11-13T13:15:22+09:00",
+          "committed_at": "2026-11-13T04:11:29Z",
+          "committed_at_jst": "2026-11-13T13:11:29+09:00",
+          "source_author_at_utc": "2026-11-13T04:11:29Z",
+          "source_committed_at_utc": "2026-11-13T04:11:29Z",
           "prerelease": true,
           "source_version": "0.20.1",
           "version_family": "0.20.1",
@@ -2679,161 +2679,236 @@
           "development_api_version": 57,
           "asset_inventory": [
             {
-              "name": "0.20.1-dev.1774.86b222a.manifest.json",
+              "name": "0.20.1-dev.1780.886b62d.manifest.json",
               "size": 386,
-              "digest": "sha256:25409997166ef5df67e09c4ed80d72760fe769d5a104dc064f47645e092c3343"
+              "digest": "sha256:d292612992e39d7f2d85bc3d6f9c7b0d81cfa710f1f3ae9b58954bd7a167b405"
             },
             {
-              "name": "0.20.1-dev.1774.86b222a.manifest.json.minisig",
+              "name": "0.20.1-dev.1780.886b62d.manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:275ce62090ffe213dd5bd78d4e9779dd06bd198ab4a0dba29f3e05080277926e"
+              "digest": "sha256:41607e77f30f596bc17f29f735d31189cdbcc5779df04bb7050dfa7d92948f80"
             },
             {
-              "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst",
-              "size": 17641864,
-              "digest": "sha256:3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+              "name": "daemon-0.20.1-dev.1780.886b62d.tar.zst",
+              "size": 17633276,
+              "digest": "sha256:9963b1667c4ae91a4ec24894b7bb02cc788b1cfa14cfa093619eafd77167dc04"
             },
             {
-              "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst.minisig",
+              "name": "daemon-0.20.1-dev.1780.886b62d.tar.zst.minisig",
               "size": 279,
-              "digest": "sha256:0754034e64970a28a5ac7d88dd5cd61507a129c82ce55ebb9b8265af166599ce"
+              "digest": "sha256:d82dfc65f90f4f51ef6abb5e81e2bd29230b58f3471a4244f472b3d7e47caefa"
             },
             {
               "name": "duckctl-0.20.1-py3-none-macosx_10_12_x86_64.whl",
-              "size": 1971337,
-              "digest": "sha256:323ffa63c74f399a11442f3f2c1cdfec5cff31573bb4d8ef73441283aa066460"
+              "size": 1971357,
+              "digest": "sha256:6ad9f14a2cb7259397b643d33496ffe450d86f4501c9fb0d3a9b71504d0c1c82"
             },
             {
               "name": "duckctl-0.20.1-py3-none-macosx_11_0_arm64.whl",
-              "size": 1865772,
-              "digest": "sha256:8ce1279031f136459c1cb1e45f7b99238acbf6d4f48173a9724aa116eaedd47c"
+              "size": 1865750,
+              "digest": "sha256:fed53ccd864dbada63d7e1b341ed0b5dfd478d66c4fda1db6b10e360d2991110"
             },
             {
               "name": "duckctl-0.20.1-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 3183375,
-              "digest": "sha256:9414391613db04b30e0b51dad25bd5ed4d3af735e4f3757cfc65010bc605f60b"
+              "size": 3183437,
+              "digest": "sha256:38a096c98b71866b14b6171528516e7e3dee4c873e915d2136b0bc411cd74d00"
             },
             {
               "name": "duckctl-0.20.1-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3449934,
-              "digest": "sha256:26a9502311425ed091455c7de2fb953c8824a840fa7b5bbda2085ccb547dcd1b"
+              "size": 3449900,
+              "digest": "sha256:87ef63a6f8e40328d7c643a7187d0e4587fee76e0787c771f99d37b5820b49d6"
             },
             {
               "name": "duckctl-0.20.1-py3-none-win_amd64.whl",
-              "size": 1843511,
-              "digest": "sha256:9c98b12513da9afb6e97e8d8402e5f9ead1e5e3d5bea24486479345c79fc9cf7"
+              "size": 1843483,
+              "digest": "sha256:63f2cfe7438a40d6ac7aa987a68a2f8f8f97ca962991fab18f27a7f4c806c38c"
             },
             {
               "name": "duckctl-linux-aarch64.tar.gz",
-              "size": 359,
-              "digest": "sha256:f17cd27228e9daebb5067ccaa0792d1539ed2a0ac5fb32d8aebe9e76868c3fef"
+              "size": 360,
+              "digest": "sha256:a6661637e4255c51068198e94996f55b8c0fa76142e208ebc1b8cf99d626a755"
             },
             {
               "name": "duckctl-linux-x86_64.tar.gz",
-              "size": 361,
-              "digest": "sha256:a7c31fcda6f024d8868c9ec378346333d041b5f4afaba7ff975b1d4a75ef82f6"
+              "size": 359,
+              "digest": "sha256:809a0a0e48b91bb5b54be89683eeb270e3daf313b9d15450b2bd02634dc64f42"
             },
             {
               "name": "duckctl-macos-arm64.tar.gz",
-              "size": 1761152,
-              "digest": "sha256:f9616bd3fbe207946e86845752598536daf596879dc1f000f1db2a1f2c006de0"
+              "size": 1761132,
+              "digest": "sha256:c065fb16ccdc322aea9f5c0659b1faa84b3527508a2cfd22c0f138454602d098"
             },
             {
               "name": "duckctl-macos-x86_64.tar.gz",
-              "size": 1887132,
-              "digest": "sha256:093e33d62ab3ff7618b9b694a99e184cd9c39c210d710afcc14512e137fe8a29"
+              "size": 1887154,
+              "digest": "sha256:4edd122b890de67f4550230eb1d0156f03ba6ad5f8bf19d125c9c74df8db568c"
             },
             {
               "name": "duckctl-windows-x86_64.zip",
-              "size": 1685606,
-              "digest": "sha256:6a9a40a2e22bf36112c238ac29142e77d23b01b81d236aba27a88de7ad3237a6"
+              "size": 1685532,
+              "digest": "sha256:0d75beced0ae391b8b9831162d05eff7ce261201471b5091af27bd4af708627a"
             },
             {
               "name": "manifest.json",
               "size": 544,
-              "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0"
+              "digest": "sha256:32bed867494a4bd510a1c6dc3b6432c608f8cce9d1e3c776495cc3345b7203df"
             },
             {
               "name": "manifest.json.minisig",
               "size": 279,
-              "digest": "sha256:ba46ee63e5486cff8a18ceacb12467e97f5b198fa27464f055eaefc98a22a0a2"
+              "digest": "sha256:085c5c2e37d6c8d51fb72fa9cd22125cc9ada3918cd49b3a950bff1aa0bffd51"
             }
           ],
-          "assets_checked_at_utc": "2026-11-13T03:48:07.439330+00:00",
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/86b222a598efeeb258fdd94473bad924fd872785",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+          "assets_checked_at_utc": "2026-11-13T04:48:34.342363+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
           "classification": "Main development prerelease.",
           "review": {
-            "change": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
-            "delta_from_previous_main": {
-              "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-              "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-              "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
-              "status": "ahead",
-              "ahead_by": 6,
-              "behind_by": 0,
-              "file_count": 2,
-              "commit_count": 6
-            },
+            "change": "Merges #586 network LED semantics and #585 head stick shaping plus shared head/body pose smoothing. Main retains API57 and the restored D-pad mapping.",
             "files": [
+              {
+                "filename": "configd/src/indicator.rs",
+                "status": "modified",
+                "additions": 31,
+                "deletions": 64
+              },
+              {
+                "filename": "configd/src/main.rs",
+                "status": "modified",
+                "additions": 1,
+                "deletions": 1
+              },
+              {
+                "filename": "deploy/robotd.toml",
+                "status": "modified",
+                "additions": 7,
+                "deletions": 1
+              },
               {
                 "filename": "docs/design/architecture.md",
                 "status": "modified",
-                "additions": 3,
+                "additions": 1,
+                "deletions": 5
+              },
+              {
+                "filename": "docs/design/robotd-design.md",
+                "status": "modified",
+                "additions": 5,
+                "deletions": 1
+              },
+              {
+                "filename": "pad-map/src/bindings.rs",
+                "status": "modified",
+                "additions": 7,
+                "deletions": 1
+              },
+              {
+                "filename": "pad-map/src/mapper.rs",
+                "status": "modified",
+                "additions": 252,
+                "deletions": 11
+              },
+              {
+                "filename": "padd/src/main.rs",
+                "status": "modified",
+                "additions": 5,
                 "deletions": 2
               },
               {
-                "filename": "duck-ipc-proto/src/led.rs",
+                "filename": "robotd-params/src/lib.rs",
                 "status": "modified",
-                "additions": 54,
-                "deletions": 12
+                "additions": 8,
+                "deletions": 2
+              },
+              {
+                "filename": "robotd-params/src/pad_axes.rs",
+                "status": "modified",
+                "additions": 27,
+                "deletions": 4
+              },
+              {
+                "filename": "robotd-params/src/registry.rs",
+                "status": "modified",
+                "additions": 10,
+                "deletions": 0
+              }
+            ],
+            "delta_from_previous_main": {
+              "from_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+              "merge_base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+              "status": "ahead",
+              "ahead_by": 7,
+              "behind_by": 0,
+              "file_count": 11,
+              "commit_count": 7
+            },
+            "merge_comparisons": [
+              {
+                "from_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "to_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+                "merge_base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...11cdfb44517631680cbef39250456ed517aebd8a",
+                "status": "ahead",
+                "ahead_by": 2,
+                "behind_by": 0,
+                "file_count": 3,
+                "commit_count": 2
+              },
+              {
+                "from_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+                "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+                "merge_base_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/11cdfb44517631680cbef39250456ed517aebd8a...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+                "status": "ahead",
+                "ahead_by": 5,
+                "behind_by": 0,
+                "file_count": 8,
+                "commit_count": 5
               }
             ],
             "upstream_successful_jobs": {
-              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131673239316",
-              "check": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864917",
-              "board": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864896",
-              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864697",
-              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131671864495"
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43363883481/job/131684895288",
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43363883481/job/131683704917",
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690737",
+              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690681",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690348"
             },
-            "dpad_revert_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-            "led_merge_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8",
-            "transient_main_release_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
-            "impact": {
-              "HD1910": "Indicator hardware only; no servo driver or gait change.",
-              "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
-              "ToF": "No direct change.",
-              "model_management": "No direct change.",
-              "training": "No direct change.",
-              "motion": "No direct change.",
-              "sound": "No direct change."
-            },
-            "priority": "Low for current replica delivery; review hand-controller mapping and indicator visibility if adopting.",
             "manifest_review": {
               "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-main/manifest.json",
               "bytes_and_metadata_verified": true,
               "signature_verified": false,
-              "source_revision": "86b222a598efeeb258fdd94473bad924fd872785",
-              "version": "0.20.1-dev.1774.86b222a",
+              "source_revision": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+              "version": "0.20.1-dev.1780.886b62d",
               "size": 544,
-              "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0",
-              "archive_size": 17641864,
-              "archive_sha256": "3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
-            }
+              "digest": "sha256:32bed867494a4bd510a1c6dc3b6432c608f8cce9d1e3c776495cc3345b7203df",
+              "archive_size": 17633276,
+              "archive_sha256": "9963b1667c4ae91a4ec24894b7bb02cc788b1cfa14cfa093619eafd77167dc04"
+            },
+            "impact": {
+              "HD1910": "Medium priority before adopting. Validate head limits, shared smoothing and actual response.",
+              "camera": "Manual aiming feel and indication only; no capture pipeline change.",
+              "ToF": "No direct change.",
+              "model_management": "No direct change.",
+              "training": "No direct change.",
+              "motion": "Head stick shaping, target slew and shared head/body smoothing. Original D-pad mapping retained.",
+              "sound": "No new sound or audio change."
+            },
+            "priority": "Medium for HD-1910 head control, including shared smoothing and travel validation."
           },
           "impact": {
-            "HD1910": "Indicator hardware only; no servo driver or gait change.",
-            "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+            "HD1910": "Medium priority before adopting. Validate head limits, shared smoothing and actual response.",
+            "camera": "Manual aiming feel and indication only; no capture pipeline change.",
             "ToF": "No direct change.",
             "model_management": "No direct change.",
             "training": "No direct change.",
-            "motion": "No direct change.",
-            "sound": "No direct change."
+            "motion": "Head stick shaping, target slew and shared head/body smoothing. Original D-pad mapping retained.",
+            "sound": "No new sound or audio change."
           },
-          "priority": "Low for current delivery.",
+          "priority": "Medium for HD-1910 head control, including shared smoothing and travel validation.",
           "replica_integration": "not_integrated",
-          "previous_head_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+          "previous_head_sha": "86b222a598efeeb258fdd94473bad924fd872785",
           "source_history": [
             {
               "tag": "daemon-dev-main",
@@ -5520,18 +5595,259 @@
               ],
               "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/69f828fa8e7ae2ee3f27ed203d204077d70d327e",
               "classification": "Intermediate development release observed during the scan."
+            },
+            {
+              "tag": "daemon-dev-main",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
+              "release_id": 443788474,
+              "head_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "version": "daemon 0.20.1-dev.1774.86b222a (main)",
+              "published_at": "2026-11-13T03:42:17Z",
+              "published_at_jst": "2026-11-13T12:42:17+09:00",
+              "committed_at": "2026-11-13T03:38:05Z",
+              "committed_at_jst": "2026-11-13T12:38:05+09:00",
+              "source_author_at_utc": "2026-11-13T03:38:05Z",
+              "source_committed_at_utc": "2026-11-13T03:38:05Z",
+              "prerelease": true,
+              "source_version": "0.20.1",
+              "version_family": "0.20.1",
+              "api_version": 57,
+              "development_api_version": 57,
+              "asset_inventory": [
+                {
+                  "name": "0.20.1-dev.1774.86b222a.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:25409997166ef5df67e09c4ed80d72760fe769d5a104dc064f47645e092c3343"
+                },
+                {
+                  "name": "0.20.1-dev.1774.86b222a.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:275ce62090ffe213dd5bd78d4e9779dd06bd198ab4a0dba29f3e05080277926e"
+                },
+                {
+                  "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst",
+                  "size": 17641864,
+                  "digest": "sha256:3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+                },
+                {
+                  "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:0754034e64970a28a5ac7d88dd5cd61507a129c82ce55ebb9b8265af166599ce"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1971337,
+                  "digest": "sha256:323ffa63c74f399a11442f3f2c1cdfec5cff31573bb4d8ef73441283aa066460"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1865772,
+                  "digest": "sha256:8ce1279031f136459c1cb1e45f7b99238acbf6d4f48173a9724aa116eaedd47c"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 3183375,
+                  "digest": "sha256:9414391613db04b30e0b51dad25bd5ed4d3af735e4f3757cfc65010bc605f60b"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3449934,
+                  "digest": "sha256:26a9502311425ed091455c7de2fb953c8824a840fa7b5bbda2085ccb547dcd1b"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-win_amd64.whl",
+                  "size": 1843511,
+                  "digest": "sha256:9c98b12513da9afb6e97e8d8402e5f9ead1e5e3d5bea24486479345c79fc9cf7"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 359,
+                  "digest": "sha256:f17cd27228e9daebb5067ccaa0792d1539ed2a0ac5fb32d8aebe9e76868c3fef"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:a7c31fcda6f024d8868c9ec378346333d041b5f4afaba7ff975b1d4a75ef82f6"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1761152,
+                  "digest": "sha256:f9616bd3fbe207946e86845752598536daf596879dc1f000f1db2a1f2c006de0"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1887132,
+                  "digest": "sha256:093e33d62ab3ff7618b9b694a99e184cd9c39c210d710afcc14512e137fe8a29"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1685606,
+                  "digest": "sha256:6a9a40a2e22bf36112c238ac29142e77d23b01b81d236aba27a88de7ad3237a6"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 544,
+                  "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:ba46ee63e5486cff8a18ceacb12467e97f5b198fa27464f055eaefc98a22a0a2"
+                }
+              ],
+              "assets_checked_at_utc": "2026-11-13T03:48:07.439330+00:00",
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/86b222a598efeeb258fdd94473bad924fd872785",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+              "classification": "Main development prerelease.",
+              "review": {
+                "change": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+                "delta_from_previous_main": {
+                  "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                  "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                  "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                  "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+                  "status": "ahead",
+                  "ahead_by": 6,
+                  "behind_by": 0,
+                  "file_count": 2,
+                  "commit_count": 6
+                },
+                "files": [
+                  {
+                    "filename": "docs/design/architecture.md",
+                    "status": "modified",
+                    "additions": 3,
+                    "deletions": 2
+                  },
+                  {
+                    "filename": "duck-ipc-proto/src/led.rs",
+                    "status": "modified",
+                    "additions": 54,
+                    "deletions": 12
+                  }
+                ],
+                "upstream_successful_jobs": {
+                  "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131673239316",
+                  "check": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864917",
+                  "board": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864896",
+                  "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864697",
+                  "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131671864495"
+                },
+                "dpad_revert_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "led_merge_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8",
+                "transient_main_release_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+                "impact": {
+                  "HD1910": "Indicator hardware only; no servo driver or gait change.",
+                  "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+                  "ToF": "No direct change.",
+                  "model_management": "No direct change.",
+                  "training": "No direct change.",
+                  "motion": "No direct change.",
+                  "sound": "No direct change."
+                },
+                "priority": "Low for current replica delivery; review hand-controller mapping and indicator visibility if adopting.",
+                "manifest_review": {
+                  "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-main/manifest.json",
+                  "bytes_and_metadata_verified": true,
+                  "signature_verified": false,
+                  "source_revision": "86b222a598efeeb258fdd94473bad924fd872785",
+                  "version": "0.20.1-dev.1774.86b222a",
+                  "size": 544,
+                  "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0",
+                  "archive_size": 17641864,
+                  "archive_sha256": "3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+                }
+              },
+              "impact": {
+                "HD1910": "Indicator hardware only; no servo driver or gait change.",
+                "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+                "ToF": "No direct change.",
+                "model_management": "No direct change.",
+                "training": "No direct change.",
+                "motion": "No direct change.",
+                "sound": "No direct change."
+              },
+              "priority": "Low for current delivery.",
+              "replica_integration": "not_integrated",
+              "previous_head_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+              "comparison_to_previous_head": {
+                "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+                "status": "ahead",
+                "ahead_by": 6,
+                "behind_by": 0,
+                "file_count": 2,
+                "commit_count": 6
+              },
+              "head_history": [
+                "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
+                "2091d42286fa29a1e24ea4f072191a4836fd1a6e",
+                "5def2f3e66501f0f365d4fb1183020b8ee875443",
+                "6cdfdaad21bed25e01b450c0dd4e0aee0ae19fde",
+                "52a8e2377aa2ef1ce9d6ae3fdc062d1cc3ab7b36",
+                "a360b3843bb49fd48a635b39eabcb835d9fffecb",
+                "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
+                "b2b0d213a402caeac492dd662ea891faa17f67c0",
+                "2573246f44cb5dab426714a1b45ae34746d7f1a2",
+                "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+                "c15c2377d8a80662405bb5e773351c984ad6cffc",
+                "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+                "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "9259844672fcb92477509a6e3fe240f53109db17",
+                "967461b210b511837b808743eb93146bb0485dc9",
+                "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "e0c7369d5ac60f3548f957861c355d140e735e21",
+                "e7c1cab77bf6bb9d13fc575b6552aa5c3fc4eaf1",
+                "649dfdd30c05625690e0a6f290def9a2e7d7c5f6",
+                "039a1a845ddb365a458428dae234366cf1b7673a",
+                "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "a2d9f1cdb1a2ee2ae07f4c2f53254bf26b78b274",
+                "15dae7f1df8182584f432361fbbb4af0e8bfb1c7",
+                "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f"
+              ],
+              "comparison_to_formal_release": {
+                "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+                "status": "ahead",
+                "ahead_by": 18,
+                "behind_by": 0,
+                "file_count": 33,
+                "commit_count": 18,
+                "version_family": "0.20.1",
+                "main_api_version": 57,
+                "classification": "Unreleased main since formal daemon-v0.20.1.",
+                "merged_pull_requests": [
+                  575,
+                  576,
+                  578,
+                  579,
+                  581,
+                  583,
+                  584
+                ],
+                "reverted_pull_requests": [
+                  583
+                ],
+                "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+                "replica_integration": "not_integrated"
+              },
+              "superseded_at_check_utc": "2026-11-13T04:48:34.342363+00:00"
             }
           ],
           "comparison_to_previous_head": {
-            "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-            "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-            "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+            "from_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+            "merge_base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
             "status": "ahead",
-            "ahead_by": 6,
+            "ahead_by": 7,
             "behind_by": 0,
-            "file_count": 2,
-            "commit_count": 6
+            "file_count": 11,
+            "commit_count": 7
           },
           "history": [
             {
@@ -7369,6 +7685,247 @@
                 "replica_integration": "not_integrated"
               },
               "superseded_at_check_utc": "2026-11-13T03:48:07.439330+00:00"
+            },
+            {
+              "tag": "daemon-dev-main",
+              "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
+              "release_id": 443788474,
+              "head_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "version": "daemon 0.20.1-dev.1774.86b222a (main)",
+              "published_at": "2026-11-13T03:42:17Z",
+              "published_at_jst": "2026-11-13T12:42:17+09:00",
+              "committed_at": "2026-11-13T03:38:05Z",
+              "committed_at_jst": "2026-11-13T12:38:05+09:00",
+              "source_author_at_utc": "2026-11-13T03:38:05Z",
+              "source_committed_at_utc": "2026-11-13T03:38:05Z",
+              "prerelease": true,
+              "source_version": "0.20.1",
+              "version_family": "0.20.1",
+              "api_version": 57,
+              "development_api_version": 57,
+              "asset_inventory": [
+                {
+                  "name": "0.20.1-dev.1774.86b222a.manifest.json",
+                  "size": 386,
+                  "digest": "sha256:25409997166ef5df67e09c4ed80d72760fe769d5a104dc064f47645e092c3343"
+                },
+                {
+                  "name": "0.20.1-dev.1774.86b222a.manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:275ce62090ffe213dd5bd78d4e9779dd06bd198ab4a0dba29f3e05080277926e"
+                },
+                {
+                  "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst",
+                  "size": 17641864,
+                  "digest": "sha256:3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+                },
+                {
+                  "name": "daemon-0.20.1-dev.1774.86b222a.tar.zst.minisig",
+                  "size": 279,
+                  "digest": "sha256:0754034e64970a28a5ac7d88dd5cd61507a129c82ce55ebb9b8265af166599ce"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-macosx_10_12_x86_64.whl",
+                  "size": 1971337,
+                  "digest": "sha256:323ffa63c74f399a11442f3f2c1cdfec5cff31573bb4d8ef73441283aa066460"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-macosx_11_0_arm64.whl",
+                  "size": 1865772,
+                  "digest": "sha256:8ce1279031f136459c1cb1e45f7b99238acbf6d4f48173a9724aa116eaedd47c"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-manylinux_2_28_aarch64.whl",
+                  "size": 3183375,
+                  "digest": "sha256:9414391613db04b30e0b51dad25bd5ed4d3af735e4f3757cfc65010bc605f60b"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-manylinux_2_28_x86_64.whl",
+                  "size": 3449934,
+                  "digest": "sha256:26a9502311425ed091455c7de2fb953c8824a840fa7b5bbda2085ccb547dcd1b"
+                },
+                {
+                  "name": "duckctl-0.20.1-py3-none-win_amd64.whl",
+                  "size": 1843511,
+                  "digest": "sha256:9c98b12513da9afb6e97e8d8402e5f9ead1e5e3d5bea24486479345c79fc9cf7"
+                },
+                {
+                  "name": "duckctl-linux-aarch64.tar.gz",
+                  "size": 359,
+                  "digest": "sha256:f17cd27228e9daebb5067ccaa0792d1539ed2a0ac5fb32d8aebe9e76868c3fef"
+                },
+                {
+                  "name": "duckctl-linux-x86_64.tar.gz",
+                  "size": 361,
+                  "digest": "sha256:a7c31fcda6f024d8868c9ec378346333d041b5f4afaba7ff975b1d4a75ef82f6"
+                },
+                {
+                  "name": "duckctl-macos-arm64.tar.gz",
+                  "size": 1761152,
+                  "digest": "sha256:f9616bd3fbe207946e86845752598536daf596879dc1f000f1db2a1f2c006de0"
+                },
+                {
+                  "name": "duckctl-macos-x86_64.tar.gz",
+                  "size": 1887132,
+                  "digest": "sha256:093e33d62ab3ff7618b9b694a99e184cd9c39c210d710afcc14512e137fe8a29"
+                },
+                {
+                  "name": "duckctl-windows-x86_64.zip",
+                  "size": 1685606,
+                  "digest": "sha256:6a9a40a2e22bf36112c238ac29142e77d23b01b81d236aba27a88de7ad3237a6"
+                },
+                {
+                  "name": "manifest.json",
+                  "size": 544,
+                  "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0"
+                },
+                {
+                  "name": "manifest.json.minisig",
+                  "size": 279,
+                  "digest": "sha256:ba46ee63e5486cff8a18ceacb12467e97f5b198fa27464f055eaefc98a22a0a2"
+                }
+              ],
+              "assets_checked_at_utc": "2026-11-13T03:48:07.439330+00:00",
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/86b222a598efeeb258fdd94473bad924fd872785",
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+              "classification": "Main development prerelease.",
+              "review": {
+                "change": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+                "delta_from_previous_main": {
+                  "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                  "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                  "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                  "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+                  "status": "ahead",
+                  "ahead_by": 6,
+                  "behind_by": 0,
+                  "file_count": 2,
+                  "commit_count": 6
+                },
+                "files": [
+                  {
+                    "filename": "docs/design/architecture.md",
+                    "status": "modified",
+                    "additions": 3,
+                    "deletions": 2
+                  },
+                  {
+                    "filename": "duck-ipc-proto/src/led.rs",
+                    "status": "modified",
+                    "additions": 54,
+                    "deletions": 12
+                  }
+                ],
+                "upstream_successful_jobs": {
+                  "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131673239316",
+                  "check": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864917",
+                  "board": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864896",
+                  "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864697",
+                  "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131671864495"
+                },
+                "dpad_revert_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "led_merge_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8",
+                "transient_main_release_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+                "impact": {
+                  "HD1910": "Indicator hardware only; no servo driver or gait change.",
+                  "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+                  "ToF": "No direct change.",
+                  "model_management": "No direct change.",
+                  "training": "No direct change.",
+                  "motion": "No direct change.",
+                  "sound": "No direct change."
+                },
+                "priority": "Low for current replica delivery; review hand-controller mapping and indicator visibility if adopting.",
+                "manifest_review": {
+                  "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-main/manifest.json",
+                  "bytes_and_metadata_verified": true,
+                  "signature_verified": false,
+                  "source_revision": "86b222a598efeeb258fdd94473bad924fd872785",
+                  "version": "0.20.1-dev.1774.86b222a",
+                  "size": 544,
+                  "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0",
+                  "archive_size": 17641864,
+                  "archive_sha256": "3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+                }
+              },
+              "impact": {
+                "HD1910": "Indicator hardware only; no servo driver or gait change.",
+                "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+                "ToF": "No direct change.",
+                "model_management": "No direct change.",
+                "training": "No direct change.",
+                "motion": "No direct change.",
+                "sound": "No direct change."
+              },
+              "priority": "Low for current delivery.",
+              "replica_integration": "not_integrated",
+              "previous_head_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+              "comparison_to_previous_head": {
+                "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+                "status": "ahead",
+                "ahead_by": 6,
+                "behind_by": 0,
+                "file_count": 2,
+                "commit_count": 6
+              },
+              "head_history": [
+                "96b89d8613f06722c1d64ce75ab0d7124fed9d8f",
+                "2091d42286fa29a1e24ea4f072191a4836fd1a6e",
+                "5def2f3e66501f0f365d4fb1183020b8ee875443",
+                "6cdfdaad21bed25e01b450c0dd4e0aee0ae19fde",
+                "52a8e2377aa2ef1ce9d6ae3fdc062d1cc3ab7b36",
+                "a360b3843bb49fd48a635b39eabcb835d9fffecb",
+                "7d866d0f864c9b6f19ec6b7762ec2341520db3cc",
+                "b2b0d213a402caeac492dd662ea891faa17f67c0",
+                "2573246f44cb5dab426714a1b45ae34746d7f1a2",
+                "d13be2c1a2f4b1e0b0e499b08b92f870518b1384",
+                "c15c2377d8a80662405bb5e773351c984ad6cffc",
+                "da34a2212ae12eddfd73d0dfbf924f291aaf1dc9",
+                "7a5e193abd3464ea2d8f6ba184ad5d7fac3dd460",
+                "9259844672fcb92477509a6e3fe240f53109db17",
+                "967461b210b511837b808743eb93146bb0485dc9",
+                "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "e0c7369d5ac60f3548f957861c355d140e735e21",
+                "e7c1cab77bf6bb9d13fc575b6552aa5c3fc4eaf1",
+                "649dfdd30c05625690e0a6f290def9a2e7d7c5f6",
+                "039a1a845ddb365a458428dae234366cf1b7673a",
+                "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "a2d9f1cdb1a2ee2ae07f4c2f53254bf26b78b274",
+                "15dae7f1df8182584f432361fbbb4af0e8bfb1c7",
+                "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f"
+              ],
+              "comparison_to_formal_release": {
+                "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+                "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+                "status": "ahead",
+                "ahead_by": 18,
+                "behind_by": 0,
+                "file_count": 33,
+                "commit_count": 18,
+                "version_family": "0.20.1",
+                "main_api_version": 57,
+                "classification": "Unreleased main since formal daemon-v0.20.1.",
+                "merged_pull_requests": [
+                  575,
+                  576,
+                  578,
+                  579,
+                  581,
+                  583,
+                  584
+                ],
+                "reverted_pull_requests": [
+                  583
+                ],
+                "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+                "replica_integration": "not_integrated"
+              },
+              "superseded_at_check_utc": "2026-11-13T04:48:34.342363+00:00"
             }
           ],
           "head_history": [
@@ -7395,18 +7952,19 @@
             "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
             "a2d9f1cdb1a2ee2ae07f4c2f53254bf26b78b274",
             "15dae7f1df8182584f432361fbbb4af0e8bfb1c7",
-            "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f"
+            "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+            "86b222a598efeeb258fdd94473bad924fd872785"
           ],
           "comparison_to_formal_release": {
             "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-            "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
             "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
             "status": "ahead",
-            "ahead_by": 18,
+            "ahead_by": 25,
             "behind_by": 0,
-            "file_count": 33,
-            "commit_count": 18,
+            "file_count": 40,
+            "commit_count": 25,
             "version_family": "0.20.1",
             "main_api_version": 57,
             "classification": "Unreleased main since formal daemon-v0.20.1.",
@@ -7417,12 +7975,14 @@
               579,
               581,
               583,
-              584
+              584,
+              586,
+              585
             ],
             "reverted_pull_requests": [
               583
             ],
-            "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+            "scope_note": "Merges #586 network LED semantics and #585 head stick shaping plus shared head/body pose smoothing. Main retains API57 and the restored D-pad mapping.",
             "replica_integration": "not_integrated"
           }
         },
@@ -16326,187 +16886,6 @@
             "behind_by": 0,
             "file_count": 3,
             "commit_count": 3
-          }
-        },
-        {
-          "tag": "daemon-dev-pad-head-expo-speed",
-          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-pad-head-expo-speed",
-          "release_id": 443787610,
-          "head_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-          "version": "daemon 0.20.1-dev.1772.5aedd7f (pad-head-expo-speed)",
-          "published_at": "2026-11-13T03:40:40Z",
-          "published_at_jst": "2026-11-13T12:40:40+09:00",
-          "committed_at": "2026-11-13T10:34:39Z",
-          "committed_at_jst": "2026-11-13T19:34:39+09:00",
-          "source_author_at_utc": "2026-11-13T10:34:39Z",
-          "source_committed_at_utc": "2026-11-13T10:34:39Z",
-          "prerelease": true,
-          "source_version": "0.20.1",
-          "version_family": "0.20.1",
-          "api_version": 57,
-          "development_api_version": 57,
-          "asset_inventory": [
-            {
-              "name": "0.20.1-dev.1772.5aedd7f.manifest.json",
-              "size": 386,
-              "digest": "sha256:a57176db92b5d496cf3dc737b18bd22a105010321e3ef4a325703e9968a5a2cf"
-            },
-            {
-              "name": "0.20.1-dev.1772.5aedd7f.manifest.json.minisig",
-              "size": 279,
-              "digest": "sha256:0de04d5855fb9f8139589c40075978c72624a3b8fe3022963a2fee9deed35cff"
-            },
-            {
-              "name": "daemon-0.20.1-dev.1772.5aedd7f.tar.zst",
-              "size": 17644508,
-              "digest": "sha256:d7416907f70150e5fbbb7bf254c7a8a637285466ec9d1a859a9ee4ce1c06fffb"
-            },
-            {
-              "name": "daemon-0.20.1-dev.1772.5aedd7f.tar.zst.minisig",
-              "size": 279,
-              "digest": "sha256:966a5352bbd47d14d967ef2a9b0399fe54d6c4b722df1f279e05e41d64deb134"
-            },
-            {
-              "name": "duckctl-0.20.1-py3-none-macosx_10_12_x86_64.whl",
-              "size": 1971357,
-              "digest": "sha256:b2368660d88aaca59adfed1f1c1b540ecacceb27a6360e77ffeb103ece0b0c01"
-            },
-            {
-              "name": "duckctl-0.20.1-py3-none-macosx_11_0_arm64.whl",
-              "size": 1865746,
-              "digest": "sha256:9772472c211ec904858d1a6d32849205736c8c0bb456a9cd093b8bd5eae90eed"
-            },
-            {
-              "name": "duckctl-0.20.1-py3-none-manylinux_2_28_aarch64.whl",
-              "size": 3183438,
-              "digest": "sha256:9840ce6953234fb7f702a1dd2dc9acd7ce53985b4d47548de6e469dd0e5277b0"
-            },
-            {
-              "name": "duckctl-0.20.1-py3-none-manylinux_2_28_x86_64.whl",
-              "size": 3449894,
-              "digest": "sha256:f538d3ddfc88a2f8e54d05089bdecbe421a3179459558a24f110d3694b49ca18"
-            },
-            {
-              "name": "duckctl-0.20.1-py3-none-win_amd64.whl",
-              "size": 1843480,
-              "digest": "sha256:0a07d99dd56a4d3b174541c3a8fe47c836a4b4dacbb698628d5699100a7cc6ab"
-            },
-            {
-              "name": "duckctl-linux-aarch64.tar.gz",
-              "size": 360,
-              "digest": "sha256:35dabe97661bf66610e382e768d4f95e3adb1879cc7fd27b46c6b2f6d89cc0e7"
-            },
-            {
-              "name": "duckctl-linux-x86_64.tar.gz",
-              "size": 359,
-              "digest": "sha256:8eebd4e60869987b58f5ce0ba8508d672083da216395169571b21e1a551a1c93"
-            },
-            {
-              "name": "duckctl-macos-arm64.tar.gz",
-              "size": 1761131,
-              "digest": "sha256:fa1b67a6c346e0abde9590d0737e17e6de6d27f493d5b3610ba2b22d0aade198"
-            },
-            {
-              "name": "duckctl-macos-x86_64.tar.gz",
-              "size": 1887154,
-              "digest": "sha256:a4083bb21b2a4a91c3c9573182bd0d14434cd0d9ddcec6bae3f2167f01dbf98b"
-            },
-            {
-              "name": "duckctl-windows-x86_64.zip",
-              "size": 1685531,
-              "digest": "sha256:7f7b46f395ddbc6de312cf52b7d873048647f60dee22289344e40dd9db504d6a"
-            },
-            {
-              "name": "manifest.json",
-              "size": 574,
-              "digest": "sha256:d9316e22427e89b02f02b814083118ea89a35ac411c72db5e92287fc10c2146a"
-            },
-            {
-              "name": "manifest.json.minisig",
-              "size": 279,
-              "digest": "sha256:f28112f8fe55d26c432722b1365fc3443089eb735aa80a4ebbcae098fbbd556d"
-            }
-          ],
-          "assets_checked_at_utc": "2026-11-13T03:48:07.439330+00:00",
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-          "classification": "Independent development prerelease.",
-          "review": {
-            "change": "Adds pad-only expo and target rate cap shared by padd and netpadd. Defaults are 0.6 and 3 rad/s. Preserves IMU head behavior and app/tracker behavior; max-head override now changes travel only. Based on the transient D-pad remap.",
-            "files": [
-              {
-                "filename": "deploy/robotd.toml",
-                "status": "modified",
-                "additions": 6,
-                "deletions": 0
-              },
-              {
-                "filename": "docs/design/robotd-design.md",
-                "status": "modified",
-                "additions": 5,
-                "deletions": 1
-              },
-              {
-                "filename": "pad-map/src/bindings.rs",
-                "status": "modified",
-                "additions": 7,
-                "deletions": 1
-              },
-              {
-                "filename": "pad-map/src/mapper.rs",
-                "status": "modified",
-                "additions": 236,
-                "deletions": 4
-              },
-              {
-                "filename": "padd/src/main.rs",
-                "status": "modified",
-                "additions": 5,
-                "deletions": 2
-              },
-              {
-                "filename": "robotd-params/src/lib.rs",
-                "status": "modified",
-                "additions": 6,
-                "deletions": 0
-              },
-              {
-                "filename": "robotd-params/src/pad_axes.rs",
-                "status": "modified",
-                "additions": 27,
-                "deletions": 4
-              },
-              {
-                "filename": "robotd-params/src/registry.rs",
-                "status": "modified",
-                "additions": 10,
-                "deletions": 0
-              }
-            ],
-            "validation": "Source patch and release metadata reviewed. Hardware behavior is not verified by this tracker.",
-            "source_timestamp_note": "Commit timestamp is later than GitHub publication timestamp. Original UTC values retained."
-          },
-          "impact": {
-            "HD1910": "Validate head limits and rate.",
-            "motion": "Pad stick head target only.",
-            "camera": "Capture unchanged; manual aiming feel changes.",
-            "ToF": "No direct change.",
-            "model_management": "No direct change.",
-            "training": "No direct change.",
-            "sound": "No direct change."
-          },
-          "priority": "Medium for HD-1910 head tuning.",
-          "replica_integration": "not_integrated",
-          "comparison_to_recorded_main": {
-            "from_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
-            "to_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-            "merge_base_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-            "status": "ahead",
-            "ahead_by": 1,
-            "behind_by": 0,
-            "file_count": 8,
-            "commit_count": 1
           }
         },
         {
@@ -25896,38 +26275,40 @@
         {
           "number": 585,
           "title": "pad: expo curve and speed cap on the head sticks",
-          "state": "open",
+          "state": "closed",
           "draft": false,
           "created_at": "2026-11-13T03:35:41Z",
-          "updated_at": "2026-11-13T03:39:24Z",
-          "merged_at": null,
-          "closed_at": null,
+          "updated_at": "2026-11-13T04:11:32Z",
+          "merged_at": "2026-11-13T04:11:30Z",
+          "closed_at": "2026-11-13T04:11:30Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/585",
-          "head_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
-          "base_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+          "head_sha": "85d34540eac55c98b91b10529dafa2d96220cfcf",
+          "base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
           "base_branch": "main",
-          "actual_merge_base": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
-          "commit_count": 1,
+          "actual_merge_base": "11cdfb44517631680cbef39250456ed517aebd8a",
+          "commit_count": 4,
           "changed_file_count": 8,
           "created_at_jst": "2026-11-13T12:35:41+09:00",
-          "updated_at_jst": "2026-11-13T12:39:24+09:00",
-          "merged_at_jst": null,
-          "closed_at_jst": null,
+          "updated_at_jst": "2026-11-13T13:11:32+09:00",
+          "merged_at_jst": "2026-11-13T13:11:30+09:00",
+          "closed_at_jst": "2026-11-13T13:11:30+09:00",
           "source_version": "0.20.1",
           "api_version": 57,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/11cdfb44517631680cbef39250456ed517aebd8a...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
           "included_in_formal_release": false,
           "replica_integration": "not_integrated",
-          "source_committed_at_utc": "2026-11-13T10:34:39Z",
-          "classification": "Open with development dev1772.",
+          "source_committed_at_utc": "2026-11-13T11:03:50Z",
+          "classification": "Merged to main and included in dev1780; earlier dev1772 is archived.",
           "review": {
-            "change": "Adds pad-only expo and target rate cap shared by padd and netpadd. Defaults are 0.6 and 3 rad/s. Preserves IMU head behavior and app/tracker behavior; max-head override now changes travel only. Based on the transient D-pad remap.",
+            "change": "Both local and network pad sticks get expo 0.6 and a target slew cap of 10 rad/s. The preview used 3 rad/s. Shared robotd head and body pose smoothing defaults to head_alpha 0.1 instead of 0.2, so other clients are affected by the shared smoothing. Pad tilt bypasses stick shaping. One D-pad table keeps the restored original mapping.",
+            "validation": "Author reports on-robot tuning. No evidence of Feetech HD-1910 validation at the final source. Main CI is recorded separately.",
+            "merged_patch_matches_pr": true,
             "files": [
               {
                 "filename": "deploy/robotd.toml",
                 "status": "modified",
-                "additions": 6,
-                "deletions": 0
+                "additions": 7,
+                "deletions": 1
               },
               {
                 "filename": "docs/design/robotd-design.md",
@@ -25944,8 +26325,8 @@
               {
                 "filename": "pad-map/src/mapper.rs",
                 "status": "modified",
-                "additions": 236,
-                "deletions": 4
+                "additions": 252,
+                "deletions": 11
               },
               {
                 "filename": "padd/src/main.rs",
@@ -25956,8 +26337,8 @@
               {
                 "filename": "robotd-params/src/lib.rs",
                 "status": "modified",
-                "additions": 6,
-                "deletions": 0
+                "additions": 8,
+                "deletions": 2
               },
               {
                 "filename": "robotd-params/src/pad_axes.rs",
@@ -25971,9 +26352,173 @@
                 "additions": 10,
                 "deletions": 0
               }
-            ]
+            ],
+            "delta_from_dev1772": {
+              "from_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+              "to_sha": "85d34540eac55c98b91b10529dafa2d96220cfcf",
+              "merge_base_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/5aedd7f79cbb453c1347188ce7e0ca0689065b4b...85d34540eac55c98b91b10529dafa2d96220cfcf",
+              "status": "ahead",
+              "ahead_by": 5,
+              "behind_by": 0,
+              "file_count": 8,
+              "commit_count": 5
+            },
+            "fixed_sources": {
+              "pad-map/src/mapper.rs": "https://github.com/pollen-robotics/microduck/blob/886b62dd792a3e9e958507cd5d9dd5a984f1aa20/pad-map/src/mapper.rs",
+              "robotd-params/src/pad_axes.rs": "https://github.com/pollen-robotics/microduck/blob/886b62dd792a3e9e958507cd5d9dd5a984f1aa20/robotd-params/src/pad_axes.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/886b62dd792a3e9e958507cd5d9dd5a984f1aa20/robotd-params/src/lib.rs",
+              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/886b62dd792a3e9e958507cd5d9dd5a984f1aa20/deploy/robotd.toml"
+            }
           },
-          "priority": "Medium for HD-1910 head tuning; confirm limits and mapping before adoption."
+          "priority": "Medium for HD-1910 head control, including shared smoothing and travel validation.",
+          "history": [
+            {
+              "number": 585,
+              "title": "pad: expo curve and speed cap on the head sticks",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-13T03:35:41Z",
+              "updated_at": "2026-11-13T03:39:24Z",
+              "merged_at": null,
+              "closed_at": null,
+              "url": "https://github.com/pollen-robotics/microduck/pull/585",
+              "head_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+              "base_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+              "base_branch": "main",
+              "actual_merge_base": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+              "commit_count": 1,
+              "changed_file_count": 8,
+              "created_at_jst": "2026-11-13T12:35:41+09:00",
+              "updated_at_jst": "2026-11-13T12:39:24+09:00",
+              "merged_at_jst": null,
+              "closed_at_jst": null,
+              "source_version": "0.20.1",
+              "api_version": 57,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+              "included_in_formal_release": false,
+              "replica_integration": "not_integrated",
+              "source_committed_at_utc": "2026-11-13T10:34:39Z",
+              "classification": "Open with development dev1772.",
+              "review": {
+                "change": "Adds pad-only expo and target rate cap shared by padd and netpadd. Defaults are 0.6 and 3 rad/s. Preserves IMU head behavior and app/tracker behavior; max-head override now changes travel only. Based on the transient D-pad remap.",
+                "files": [
+                  {
+                    "filename": "deploy/robotd.toml",
+                    "status": "modified",
+                    "additions": 6,
+                    "deletions": 0
+                  },
+                  {
+                    "filename": "docs/design/robotd-design.md",
+                    "status": "modified",
+                    "additions": 5,
+                    "deletions": 1
+                  },
+                  {
+                    "filename": "pad-map/src/bindings.rs",
+                    "status": "modified",
+                    "additions": 7,
+                    "deletions": 1
+                  },
+                  {
+                    "filename": "pad-map/src/mapper.rs",
+                    "status": "modified",
+                    "additions": 236,
+                    "deletions": 4
+                  },
+                  {
+                    "filename": "padd/src/main.rs",
+                    "status": "modified",
+                    "additions": 5,
+                    "deletions": 2
+                  },
+                  {
+                    "filename": "robotd-params/src/lib.rs",
+                    "status": "modified",
+                    "additions": 6,
+                    "deletions": 0
+                  },
+                  {
+                    "filename": "robotd-params/src/pad_axes.rs",
+                    "status": "modified",
+                    "additions": 27,
+                    "deletions": 4
+                  },
+                  {
+                    "filename": "robotd-params/src/registry.rs",
+                    "status": "modified",
+                    "additions": 10,
+                    "deletions": 0
+                  }
+                ]
+              },
+              "priority": "Medium for HD-1910 head tuning; confirm limits and mapping before adoption."
+            }
+          ],
+          "merge_commit_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+          "source_committed_at_jst": "2026-11-13T20:03:50+09:00",
+          "previous_head_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b"
+        },
+        {
+          "number": 586,
+          "title": "Network LED: green on wifi, blue for a connected gamepad without wifi",
+          "state": "closed",
+          "draft": false,
+          "created_at": "2026-11-13T03:58:13Z",
+          "updated_at": "2026-11-13T04:09:56Z",
+          "merged_at": "2026-11-13T04:09:54Z",
+          "closed_at": "2026-11-13T04:09:54Z",
+          "merge_commit_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+          "url": "https://github.com/pollen-robotics/microduck/pull/586",
+          "head_sha": "df01ab69a32528341b5068b0ae598569e0dcfb31",
+          "base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+          "base_branch": "main",
+          "actual_merge_base": "86b222a598efeeb258fdd94473bad924fd872785",
+          "commit_count": 1,
+          "changed_file_count": 3,
+          "created_at_jst": "2026-11-13T12:58:13+09:00",
+          "updated_at_jst": "2026-11-13T13:09:56+09:00",
+          "merged_at_jst": "2026-11-13T13:09:54+09:00",
+          "closed_at_jst": "2026-11-13T13:09:54+09:00",
+          "source_committed_at_utc": "2026-11-13T10:57:56Z",
+          "source_committed_at_jst": "2026-11-13T19:57:56+09:00",
+          "source_version": "0.20.1",
+          "api_version": 57,
+          "included_in_formal_release": false,
+          "replica_integration": "not_integrated",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...11cdfb44517631680cbef39250456ed517aebd8a",
+          "classification": "Merged to main; first observed in dev1780.",
+          "review": {
+            "change": "Configd uses NetworkManager and the bonded-pad status from BlueZ. Connected Wi-Fi is green, joining blinks green, connected pad without Wi-Fi is blue, and neither is off. Blue is a connection indicator independent of whether the pad drives. The media health file remains published.",
+            "validation": "Author reports configd unit checks. No physical LED check reported.",
+            "merged_patch_matches_pr": true,
+            "files": [
+              {
+                "filename": "configd/src/indicator.rs",
+                "status": "modified",
+                "additions": 31,
+                "deletions": 64
+              },
+              {
+                "filename": "configd/src/main.rs",
+                "status": "modified",
+                "additions": 1,
+                "deletions": 1
+              },
+              {
+                "filename": "docs/design/architecture.md",
+                "status": "modified",
+                "additions": 1,
+                "deletions": 5
+              }
+            ],
+            "fixed_sources": {
+              "configd/src/indicator.rs": "https://github.com/pollen-robotics/microduck/blob/11cdfb44517631680cbef39250456ed517aebd8a/configd/src/indicator.rs",
+              "docs/design/architecture.md": "https://github.com/pollen-robotics/microduck/blob/11cdfb44517631680cbef39250456ed517aebd8a/docs/design/architecture.md"
+            }
+          },
+          "priority": "Low for current replica delivery; check LED and operator semantics on boards that expose the indicator."
         }
       ],
       "previous_stable_releases": [
@@ -26806,14 +27351,14 @@
       },
       "main_since_latest_stable": {
         "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-        "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+        "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
         "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
         "status": "ahead",
-        "ahead_by": 18,
+        "ahead_by": 25,
         "behind_by": 0,
-        "file_count": 33,
-        "commit_count": 18,
+        "file_count": 40,
+        "commit_count": 25,
         "version_family": "0.20.1",
         "main_api_version": 57,
         "classification": "Unreleased main since formal daemon-v0.20.1.",
@@ -26824,12 +27369,14 @@
           579,
           581,
           583,
-          584
+          584,
+          586,
+          585
         ],
         "reverted_pull_requests": [
           583
         ],
-        "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+        "scope_note": "Merges #586 network LED semantics and #585 head stick shaping plus shared head/body pose smoothing. Main retains API57 and the restored D-pad mapping.",
         "replica_integration": "not_integrated"
       },
       "retired_development_releases": [
@@ -32730,12 +33277,200 @@
           "last_checked_at_jst": "2026-11-13T12:48:07.439330+09:00",
           "last_known_source_verified": true,
           "superseding_source_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8"
+        },
+        {
+          "tag": "daemon-dev-pad-head-expo-speed",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-pad-head-expo-speed",
+          "release_id": 443787610,
+          "head_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+          "version": "daemon 0.20.1-dev.1772.5aedd7f (pad-head-expo-speed)",
+          "published_at": "2026-11-13T03:40:40Z",
+          "published_at_jst": "2026-11-13T12:40:40+09:00",
+          "committed_at": "2026-11-13T10:34:39Z",
+          "committed_at_jst": "2026-11-13T19:34:39+09:00",
+          "source_author_at_utc": "2026-11-13T10:34:39Z",
+          "source_committed_at_utc": "2026-11-13T10:34:39Z",
+          "prerelease": true,
+          "source_version": "0.20.1",
+          "version_family": "0.20.1",
+          "api_version": 57,
+          "development_api_version": 57,
+          "asset_inventory": [
+            {
+              "name": "0.20.1-dev.1772.5aedd7f.manifest.json",
+              "size": 386,
+              "digest": "sha256:a57176db92b5d496cf3dc737b18bd22a105010321e3ef4a325703e9968a5a2cf"
+            },
+            {
+              "name": "0.20.1-dev.1772.5aedd7f.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:0de04d5855fb9f8139589c40075978c72624a3b8fe3022963a2fee9deed35cff"
+            },
+            {
+              "name": "daemon-0.20.1-dev.1772.5aedd7f.tar.zst",
+              "size": 17644508,
+              "digest": "sha256:d7416907f70150e5fbbb7bf254c7a8a637285466ec9d1a859a9ee4ce1c06fffb"
+            },
+            {
+              "name": "daemon-0.20.1-dev.1772.5aedd7f.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:966a5352bbd47d14d967ef2a9b0399fe54d6c4b722df1f279e05e41d64deb134"
+            },
+            {
+              "name": "duckctl-0.20.1-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1971357,
+              "digest": "sha256:b2368660d88aaca59adfed1f1c1b540ecacceb27a6360e77ffeb103ece0b0c01"
+            },
+            {
+              "name": "duckctl-0.20.1-py3-none-macosx_11_0_arm64.whl",
+              "size": 1865746,
+              "digest": "sha256:9772472c211ec904858d1a6d32849205736c8c0bb456a9cd093b8bd5eae90eed"
+            },
+            {
+              "name": "duckctl-0.20.1-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 3183438,
+              "digest": "sha256:9840ce6953234fb7f702a1dd2dc9acd7ce53985b4d47548de6e469dd0e5277b0"
+            },
+            {
+              "name": "duckctl-0.20.1-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3449894,
+              "digest": "sha256:f538d3ddfc88a2f8e54d05089bdecbe421a3179459558a24f110d3694b49ca18"
+            },
+            {
+              "name": "duckctl-0.20.1-py3-none-win_amd64.whl",
+              "size": 1843480,
+              "digest": "sha256:0a07d99dd56a4d3b174541c3a8fe47c836a4b4dacbb698628d5699100a7cc6ab"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:35dabe97661bf66610e382e768d4f95e3adb1879cc7fd27b46c6b2f6d89cc0e7"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 359,
+              "digest": "sha256:8eebd4e60869987b58f5ce0ba8508d672083da216395169571b21e1a551a1c93"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1761131,
+              "digest": "sha256:fa1b67a6c346e0abde9590d0737e17e6de6d27f493d5b3610ba2b22d0aade198"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1887154,
+              "digest": "sha256:a4083bb21b2a4a91c3c9573182bd0d14434cd0d9ddcec6bae3f2167f01dbf98b"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1685531,
+              "digest": "sha256:7f7b46f395ddbc6de312cf52b7d873048647f60dee22289344e40dd9db504d6a"
+            },
+            {
+              "name": "manifest.json",
+              "size": 574,
+              "digest": "sha256:d9316e22427e89b02f02b814083118ea89a35ac411c72db5e92287fc10c2146a"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:f28112f8fe55d26c432722b1365fc3443089eb735aa80a4ebbcae098fbbd556d"
+            }
+          ],
+          "assets_checked_at_utc": "2026-11-13T03:48:07.439330+00:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+          "classification": "Independent development prerelease.",
+          "review": {
+            "change": "Adds pad-only expo and target rate cap shared by padd and netpadd. Defaults are 0.6 and 3 rad/s. Preserves IMU head behavior and app/tracker behavior; max-head override now changes travel only. Based on the transient D-pad remap.",
+            "files": [
+              {
+                "filename": "deploy/robotd.toml",
+                "status": "modified",
+                "additions": 6,
+                "deletions": 0
+              },
+              {
+                "filename": "docs/design/robotd-design.md",
+                "status": "modified",
+                "additions": 5,
+                "deletions": 1
+              },
+              {
+                "filename": "pad-map/src/bindings.rs",
+                "status": "modified",
+                "additions": 7,
+                "deletions": 1
+              },
+              {
+                "filename": "pad-map/src/mapper.rs",
+                "status": "modified",
+                "additions": 236,
+                "deletions": 4
+              },
+              {
+                "filename": "padd/src/main.rs",
+                "status": "modified",
+                "additions": 5,
+                "deletions": 2
+              },
+              {
+                "filename": "robotd-params/src/lib.rs",
+                "status": "modified",
+                "additions": 6,
+                "deletions": 0
+              },
+              {
+                "filename": "robotd-params/src/pad_axes.rs",
+                "status": "modified",
+                "additions": 27,
+                "deletions": 4
+              },
+              {
+                "filename": "robotd-params/src/registry.rs",
+                "status": "modified",
+                "additions": 10,
+                "deletions": 0
+              }
+            ],
+            "validation": "Source patch and release metadata reviewed. Hardware behavior is not verified by this tracker.",
+            "source_timestamp_note": "Commit timestamp is later than GitHub publication timestamp. Original UTC values retained."
+          },
+          "impact": {
+            "HD1910": "Validate head limits and rate.",
+            "motion": "Pad stick head target only.",
+            "camera": "Capture unchanged; manual aiming feel changes.",
+            "ToF": "No direct change.",
+            "model_management": "No direct change.",
+            "training": "No direct change.",
+            "sound": "No direct change."
+          },
+          "priority": "Medium for HD-1910 head tuning.",
+          "replica_integration": "not_integrated",
+          "comparison_to_recorded_main": {
+            "from_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+            "to_sha": "5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+            "merge_base_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/69f828fa8e7ae2ee3f27ed203d204077d70d327e...5aedd7f79cbb453c1347188ce7e0ca0689065b4b",
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "file_count": 8,
+            "commit_count": 1
+          },
+          "tracking_status": "retired_tag_and_release_not_found",
+          "tag_ref_http_status": 404,
+          "release_http_status": 404,
+          "last_checked_at_utc": "2026-11-13T04:48:34.342363+00:00",
+          "last_checked_at_jst": "2026-11-13T13:48:34.342363+09:00",
+          "last_known_source_verified": true,
+          "superseding_source_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20"
         }
       ],
       "previous_head": {
-        "sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-        "committed_at": "2026-11-12T16:49:14Z",
-        "subject": "Merge pull request #579 from pollen-robotics/net-join-progress"
+        "sha": "86b222a598efeeb258fdd94473bad924fd872785",
+        "committed_at": "2026-11-13T03:38:05Z",
+        "subject": "Merge pull request #584 from pollen-robotics/revert-dpad-remap"
       },
       "tracked_model_metadata": [
         {
@@ -32922,6 +33657,11 @@
           "sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
           "committed_at": "2026-11-12T16:49:14Z",
           "subject": "Merge pull request #579 from pollen-robotics/net-join-progress"
+        },
+        {
+          "sha": "86b222a598efeeb258fdd94473bad924fd872785",
+          "committed_at": "2026-11-13T03:38:05Z",
+          "subject": "Merge pull request #584 from pollen-robotics/revert-dpad-remap"
         }
       ],
       "main_since_latest_stable_history": [
@@ -33371,18 +34111,46 @@
           ],
           "scope_note": "Main combines #578 Type 5 write through the beta ST25R100 reader and #579 Wi-Fi joining progress. The Type 5 merge stays API56. Wi-Fi progress raises main to API57. Earlier Type 2 writing and roller v10 remain included.",
           "replica_integration": "not_integrated"
+        },
+        {
+          "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+          "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+          "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+          "status": "ahead",
+          "ahead_by": 18,
+          "behind_by": 0,
+          "file_count": 33,
+          "commit_count": 18,
+          "version_family": "0.20.1",
+          "main_api_version": 57,
+          "classification": "Unreleased main since formal daemon-v0.20.1.",
+          "merged_pull_requests": [
+            575,
+            576,
+            578,
+            579,
+            581,
+            583,
+            584
+          ],
+          "reverted_pull_requests": [
+            583
+          ],
+          "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+          "replica_integration": "not_integrated"
         }
       ],
       "latest_main_change": {
         "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-        "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+        "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
         "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
-        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+        "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
         "status": "ahead",
-        "ahead_by": 18,
+        "ahead_by": 25,
         "behind_by": 0,
-        "file_count": 33,
-        "commit_count": 18,
+        "file_count": 40,
+        "commit_count": 25,
         "version_family": "0.20.1",
         "main_api_version": 57,
         "classification": "Unreleased main since formal daemon-v0.20.1.",
@@ -33393,71 +34161,148 @@
           579,
           581,
           583,
-          584
+          584,
+          586,
+          585
         ],
         "reverted_pull_requests": [
           583
         ],
-        "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+        "scope_note": "Merges #586 network LED semantics and #585 head stick shaping plus shared head/body pose smoothing. Main retains API57 and the restored D-pad mapping.",
         "replica_integration": "not_integrated",
         "review": {
-          "change": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
-          "delta_from_previous_main": {
-            "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-            "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-            "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
-            "status": "ahead",
-            "ahead_by": 6,
-            "behind_by": 0,
-            "file_count": 2,
-            "commit_count": 6
-          },
+          "change": "Merges #586 network LED semantics and #585 head stick shaping plus shared head/body pose smoothing. Main retains API57 and the restored D-pad mapping.",
           "files": [
+            {
+              "filename": "configd/src/indicator.rs",
+              "status": "modified",
+              "additions": 31,
+              "deletions": 64
+            },
+            {
+              "filename": "configd/src/main.rs",
+              "status": "modified",
+              "additions": 1,
+              "deletions": 1
+            },
+            {
+              "filename": "deploy/robotd.toml",
+              "status": "modified",
+              "additions": 7,
+              "deletions": 1
+            },
             {
               "filename": "docs/design/architecture.md",
               "status": "modified",
-              "additions": 3,
+              "additions": 1,
+              "deletions": 5
+            },
+            {
+              "filename": "docs/design/robotd-design.md",
+              "status": "modified",
+              "additions": 5,
+              "deletions": 1
+            },
+            {
+              "filename": "pad-map/src/bindings.rs",
+              "status": "modified",
+              "additions": 7,
+              "deletions": 1
+            },
+            {
+              "filename": "pad-map/src/mapper.rs",
+              "status": "modified",
+              "additions": 252,
+              "deletions": 11
+            },
+            {
+              "filename": "padd/src/main.rs",
+              "status": "modified",
+              "additions": 5,
               "deletions": 2
             },
             {
-              "filename": "duck-ipc-proto/src/led.rs",
+              "filename": "robotd-params/src/lib.rs",
               "status": "modified",
-              "additions": 54,
-              "deletions": 12
+              "additions": 8,
+              "deletions": 2
+            },
+            {
+              "filename": "robotd-params/src/pad_axes.rs",
+              "status": "modified",
+              "additions": 27,
+              "deletions": 4
+            },
+            {
+              "filename": "robotd-params/src/registry.rs",
+              "status": "modified",
+              "additions": 10,
+              "deletions": 0
+            }
+          ],
+          "delta_from_previous_main": {
+            "from_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+            "merge_base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+            "status": "ahead",
+            "ahead_by": 7,
+            "behind_by": 0,
+            "file_count": 11,
+            "commit_count": 7
+          },
+          "merge_comparisons": [
+            {
+              "from_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "to_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+              "merge_base_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/86b222a598efeeb258fdd94473bad924fd872785...11cdfb44517631680cbef39250456ed517aebd8a",
+              "status": "ahead",
+              "ahead_by": 2,
+              "behind_by": 0,
+              "file_count": 3,
+              "commit_count": 2
+            },
+            {
+              "from_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+              "to_sha": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+              "merge_base_sha": "11cdfb44517631680cbef39250456ed517aebd8a",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/11cdfb44517631680cbef39250456ed517aebd8a...886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+              "status": "ahead",
+              "ahead_by": 5,
+              "behind_by": 0,
+              "file_count": 8,
+              "commit_count": 5
             }
           ],
           "upstream_successful_jobs": {
-            "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131673239316",
-            "check": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864917",
-            "board": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864896",
-            "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864697",
-            "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131671864495"
+            "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43363883481/job/131684895288",
+            "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43363883481/job/131683704917",
+            "check": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690737",
+            "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690681",
+            "board": "https://github.com/pollen-robotics/microduck/actions/runs/43363883502/job/131683690348"
           },
-          "dpad_revert_sha": "86b222a598efeeb258fdd94473bad924fd872785",
-          "led_merge_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8",
-          "transient_main_release_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
-          "impact": {
-            "HD1910": "Indicator hardware only; no servo driver or gait change.",
-            "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
-            "ToF": "No direct change.",
-            "model_management": "No direct change.",
-            "training": "No direct change.",
-            "motion": "No direct change.",
-            "sound": "No direct change."
-          },
-          "priority": "Low for current replica delivery; review hand-controller mapping and indicator visibility if adopting.",
           "manifest_review": {
             "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-main/manifest.json",
             "bytes_and_metadata_verified": true,
             "signature_verified": false,
-            "source_revision": "86b222a598efeeb258fdd94473bad924fd872785",
-            "version": "0.20.1-dev.1774.86b222a",
+            "source_revision": "886b62dd792a3e9e958507cd5d9dd5a984f1aa20",
+            "version": "0.20.1-dev.1780.886b62d",
             "size": 544,
-            "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0",
-            "archive_size": 17641864,
-            "archive_sha256": "3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
-          }
+            "digest": "sha256:32bed867494a4bd510a1c6dc3b6432c608f8cce9d1e3c776495cc3345b7203df",
+            "archive_size": 17633276,
+            "archive_sha256": "9963b1667c4ae91a4ec24894b7bb02cc788b1cfa14cfa093619eafd77167dc04"
+          },
+          "impact": {
+            "HD1910": "Medium priority before adopting. Validate head limits, shared smoothing and actual response.",
+            "camera": "Manual aiming feel and indication only; no capture pipeline change.",
+            "ToF": "No direct change.",
+            "model_management": "No direct change.",
+            "training": "No direct change.",
+            "motion": "Head stick shaping, target slew and shared head/body smoothing. Original D-pad mapping retained.",
+            "sound": "No new sound or audio change."
+          },
+          "priority": "Medium for HD-1910 head control, including shared smoothing and travel validation."
         }
       },
       "release_preparation": {
@@ -34357,6 +35202,93 @@
               "sound": "Reuses the NFC prompt and confirmation, no new asset."
             },
             "priority": "Medium for provisioning; low for current runtime delivery."
+          }
+        },
+        {
+          "from_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+          "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+          "merge_base_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+          "fixed_url": "https://github.com/pollen-robotics/microduck/compare/7fba12ed048d0d3a1c306ba8a2787a1a407b9974...86b222a598efeeb258fdd94473bad924fd872785",
+          "status": "ahead",
+          "ahead_by": 18,
+          "behind_by": 0,
+          "file_count": 33,
+          "commit_count": 18,
+          "version_family": "0.20.1",
+          "main_api_version": 57,
+          "classification": "Unreleased main since formal daemon-v0.20.1.",
+          "merged_pull_requests": [
+            575,
+            576,
+            578,
+            579,
+            581,
+            583,
+            584
+          ],
+          "reverted_pull_requests": [
+            583
+          ],
+          "scope_note": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+          "replica_integration": "not_integrated",
+          "review": {
+            "change": "Retains Face Board v1 LED dimming. The temporary D-pad remap was merged and then reverted; current input mapping is restored.",
+            "delta_from_previous_main": {
+              "from_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+              "to_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+              "merge_base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f...86b222a598efeeb258fdd94473bad924fd872785",
+              "status": "ahead",
+              "ahead_by": 6,
+              "behind_by": 0,
+              "file_count": 2,
+              "commit_count": 6
+            },
+            "files": [
+              {
+                "filename": "docs/design/architecture.md",
+                "status": "modified",
+                "additions": 3,
+                "deletions": 2
+              },
+              {
+                "filename": "duck-ipc-proto/src/led.rs",
+                "status": "modified",
+                "additions": 54,
+                "deletions": 12
+              }
+            ],
+            "upstream_successful_jobs": {
+              "publish": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131673239316",
+              "check": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864917",
+              "board": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864896",
+              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43360278500/job/131671864697",
+              "daemon": "https://github.com/pollen-robotics/microduck/actions/runs/43360278514/job/131671864495"
+            },
+            "dpad_revert_sha": "86b222a598efeeb258fdd94473bad924fd872785",
+            "led_merge_sha": "5e55038f1ee4f2c2401f0e06b0cc2e69402d82e8",
+            "transient_main_release_sha": "69f828fa8e7ae2ee3f27ed203d204077d70d327e",
+            "impact": {
+              "HD1910": "Indicator hardware only; no servo driver or gait change.",
+              "camera": "Changes the Face Board v1 camera indicator PWM level. Capture, exposure, flashlight level and LED ownership are unchanged.",
+              "ToF": "No direct change.",
+              "model_management": "No direct change.",
+              "training": "No direct change.",
+              "motion": "No direct change.",
+              "sound": "No direct change."
+            },
+            "priority": "Low for current replica delivery; review hand-controller mapping and indicator visibility if adopting.",
+            "manifest_review": {
+              "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-main/manifest.json",
+              "bytes_and_metadata_verified": true,
+              "signature_verified": false,
+              "source_revision": "86b222a598efeeb258fdd94473bad924fd872785",
+              "version": "0.20.1-dev.1774.86b222a",
+              "size": 544,
+              "digest": "sha256:c0e9ea41171c50adcff1fbf62c5d8d35dbc4ecfc78dda77952e6ea811fdb97c0",
+              "archive_size": 17641864,
+              "archive_sha256": "3cd7bc43110d8a73ab29229c9f009ced48449d32acaa2fc5bcd1a6232d1a1075"
+            }
           }
         }
       ],
@@ -36493,11 +37425,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-13T03:49:22.635105+00:00",
+  "checked_at_utc": "2026-11-13T04:48:34.342363+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-13T02:47:38.108142+00:00",
-    "source_snapshot_utc": "2026-11-13T03:42:14.706255+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-13T03:49:22.635105+00:00",
+    "previous_substantive_review_utc": "2026-11-13T03:49:22.635105+00:00",
+    "source_snapshot_utc": "2026-11-13T04:44:44.910154+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-13T04:48:34.342363+00:00",
     "default_branch_changes": true,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.20.1",
@@ -36505,35 +37437,21 @@
     "stable_asset_count": 5,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
-        582,
-        583,
-        584,
-        585
-      ],
-      "pollen-robotics/microduck_yocto": [
-        132,
-        133
+        586
       ]
     },
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        571,
-        581
+        585
       ]
     },
     "previous_tracked_prs_merged": true,
-    "new_development_releases": [
-      "daemon-dev-golden-factory-reset",
-      "daemon-dev-pad-head-expo-speed"
-    ],
+    "new_development_releases": [],
     "moved_development_tags": [
-      "daemon-dev-main",
-      "daemon-dev-autonomous-revive",
-      "daemon-dev-nfc-mode-tags",
-      "daemon-dev-roller-pad-lost-crouch"
+      "daemon-dev-main"
     ],
     "retired_development_tags": [
-      "daemon-dev-face-led-brightness"
+      "daemon-dev-pad-head-expo-speed"
     ],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
@@ -36545,21 +37463,15 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Main dev1774 retains LED dimming after the D-pad remap was reverted. #571 and #582 closed without merge. API60 autonomous and NFC builds, roller recovery, head stick shaping and golden design previews tracked. Formal daemon, OS and replica releases unchanged.",
+    "notes": "Main dev1780 merges head stick tuning and network LED status. The head preview tag retired; fixed source retained. Daemon stable, OS and replica releases unchanged.",
     "newly_discovered_merged_pull_requests": {
       "pollen-robotics/microduck": [
-        583,
-        584
+        586
       ]
     },
     "development_release_inventory_changes": [
       "daemon-dev-main",
-      "daemon-dev-autonomous-revive",
-      "daemon-dev-nfc-mode-tags",
-      "daemon-dev-roller-pad-lost-crouch",
-      "daemon-dev-golden-factory-reset",
-      "daemon-dev-pad-head-expo-speed",
-      "daemon-dev-face-led-brightness"
+      "daemon-dev-pad-head-expo-speed"
     ],
     "related_dependency_records_added": {},
     "project_main_integration_records_added": [],
@@ -39465,6 +40377,78 @@
       "notes": "Open #581 and matching dev1760 lower Face Board v1 PWM indicators and preserve flashlight maximum. Main, formal release, official OS and replica release unchanged.",
       "newly_discovered_merged_pull_requests": {},
       "development_release_inventory_changes": [
+        "daemon-dev-face-led-brightness"
+      ],
+      "related_dependency_records_added": {},
+      "project_main_integration_records_added": [],
+      "project_public_image_prerelease_records_added": [],
+      "official_os_release_changed": false
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-13T02:47:38.108142+00:00",
+      "source_snapshot_utc": "2026-11-13T03:42:14.706255+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-13T03:49:22.635105+00:00",
+      "default_branch_changes": true,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.20.1",
+      "stable_release_actual_sha": "7fba12ed048d0d3a1c306ba8a2787a1a407b9974",
+      "stable_asset_count": 5,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          582,
+          583,
+          584,
+          585
+        ],
+        "pollen-robotics/microduck_yocto": [
+          132,
+          133
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          571,
+          581
+        ]
+      },
+      "previous_tracked_prs_merged": true,
+      "new_development_releases": [
+        "daemon-dev-golden-factory-reset",
+        "daemon-dev-pad-head-expo-speed"
+      ],
+      "moved_development_tags": [
+        "daemon-dev-main",
+        "daemon-dev-autonomous-revive",
+        "daemon-dev-nfc-mode-tags",
+        "daemon-dev-roller-pad-lost-crouch"
+      ],
+      "retired_development_tags": [
+        "daemon-dev-face-led-brightness"
+      ],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Main dev1774 retains LED dimming after the D-pad remap was reverted. #571 and #582 closed without merge. API60 autonomous and NFC builds, roller recovery, head stick shaping and golden design previews tracked. Formal daemon, OS and replica releases unchanged.",
+      "newly_discovered_merged_pull_requests": {
+        "pollen-robotics/microduck": [
+          583,
+          584
+        ]
+      },
+      "development_release_inventory_changes": [
+        "daemon-dev-main",
+        "daemon-dev-autonomous-revive",
+        "daemon-dev-nfc-mode-tags",
+        "daemon-dev-roller-pad-lost-crouch",
+        "daemon-dev-golden-factory-reset",
+        "daemon-dev-pad-head-expo-speed",
         "daemon-dev-face-led-brightness"
       ],
       "related_dependency_records_added": {},
