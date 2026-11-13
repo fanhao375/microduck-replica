@@ -47,6 +47,8 @@ def main():
             raise SystemExit('unexpected A7Z baseline: ' + relative)
     hashes = {str(p.relative_to(args.output)): digest(p) for p in (args.output / 'web').rglob('*') if p.is_file()}
     (args.output.parent / 'baseline-web.json').write_text(json.dumps(hashes, indent=2) + '\n')
+    subprocess.run(['patch', '--batch', '--forward', '-p1', '-i', str(HERE / 'camera-aspect.patch')],
+                   cwd=args.output, check=True)
     if (HERE / 'web').exists():
         shutil.copytree(HERE / 'web', args.output / 'web', dirs_exist_ok=True)
     print(args.output)

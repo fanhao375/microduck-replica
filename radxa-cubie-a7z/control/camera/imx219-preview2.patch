@@ -1,0 +1,1359 @@
+diff --git a/microduck-hd1910/firmware/mediad/src/config.rs b/microduck-hd1910/firmware/mediad/src/config.rs
+index a029a11..9cae564 100644
+--- a/microduck-hd1910/firmware/mediad/src/config.rs
++++ b/microduck-hd1910/firmware/mediad/src/config.rs
+@@ -69,6 +69,20 @@ mod tests {
+         );
+     }
+ 
++    /// The A7Z's 4:3 mode must survive config loading instead of falling back to padded 720p.
++    #[test]
++    fn vin_four_three_quality_in_the_file_preserves_the_full_image() {
++        let dir = tempfile::tempdir().unwrap();
++        let path = write(
++            dir.path(),
++            "[media]\nquality = \"720p15-4x3\"\nbitrate = 3000000\n",
++        );
++        let media = load(&path, true).media;
++        assert_eq!(media.geometry(), (960, 720, 15));
++        assert_eq!(media.bitrate_resolved(), 3_000_000);
++        assert_eq!(media.source, MediaSource::Camera);
++    }
++
+     /// A robot with no file at the default path streams its camera, and says nothing about it.
+     #[test]
+     fn a_missing_file_streams_the_defaults() {
+diff --git a/microduck-hd1910/firmware/mediad/src/exposure.rs b/microduck-hd1910/firmware/mediad/src/exposure.rs
+index 0a0b7f4..f6bb13f 100644
+--- a/microduck-hd1910/firmware/mediad/src/exposure.rs
++++ b/microduck-hd1910/firmware/mediad/src/exposure.rs
+@@ -183,18 +183,35 @@ impl Ae {
+ /// figures. `None` for any other format rather than a wrong answer — a mean computed over the wrong
+ /// byte layout would still look like a plausible brightness, and the loop would chase it.
+ pub fn mean_luma(frame: &Frame) -> Option<f64> {
+-    if frame.format != CAPTURE_FORMAT {
+-        return None;
+-    }
+-    let mut sum = 0u64;
+-    let mut count = 0u64;
+-    let mut index = 1; // U Y V Y: the first luma byte
+-    while index < frame.data.len() {
+-        sum += frame.data[index] as u64;
+-        count += 1;
+-        index += 16; // every 8th pixel
++    match frame.format {
++        "UYVY" => {
++            let mut sum = 0u64;
++            let mut count = 0u64;
++            let mut index = 1; // U Y V Y: the first luma byte
++            while index < frame.data.len() {
++                sum += frame.data[index] as u64;
++                count += 1;
++                index += 16; // every 8th pixel
++            }
++            (count > 0).then(|| sum as f64 / count as f64)
++        }
++        "NV12" | "I420" => {
++            let y_len = (frame.width as usize).saturating_mul(frame.height as usize);
++            if y_len == 0 || frame.data.len() < y_len {
++                return None;
++            }
++            let mut sum = 0u64;
++            let mut count = 0u64;
++            let mut index = 0;
++            while index < y_len {
++                sum += frame.data[index] as u64;
++                count += 1;
++                index += 8; // every 8th luma sample, same density as the UYVY walk
++            }
++            (count > 0).then(|| sum as f64 / count as f64)
++        }
++        _ => None,
+     }
+-    (count > 0).then(|| sum as f64 / count as f64)
+ }
+ 
+ /// Set when the daemon is going away, so the thread does not outlive the pipeline it steers.
+diff --git a/microduck-hd1910/firmware/mediad/src/lib.rs b/microduck-hd1910/firmware/mediad/src/lib.rs
+index 42fe28b..1e88e16 100644
+--- a/microduck-hd1910/firmware/mediad/src/lib.rs
++++ b/microduck-hd1910/firmware/mediad/src/lib.rs
+@@ -17,6 +17,9 @@
+ //! signalling server in this process, `mpph264enc` in front of it, and a `control` datachannel per
+ //! peer wired to [`session::run`].
+ 
++/// Default capture layout on RK. Portable so CLI parsing does not require GStreamer.
++pub const CAPTURE_FORMAT: &str = "UYVY";
++
+ /// What the camera's geometry is — the intrinsics a consumer needs to turn pixels into
+ /// directions, and which sensor mode they belong to.
+ pub mod camera;
+@@ -36,6 +39,10 @@ pub mod turn;
+ pub mod upstream;
+ pub mod web;
+ 
++// The process supervisor is portable Unix code so its cancellation/retry tests run on a Mac.
++#[cfg(all(unix, any(target_os = "linux", test)))]
++mod vin;
++
+ /// The GStreamer pipeline and the datachannel.
+ ///
+ /// Assumed on Linux, which is the robot's OS. Elsewhere it is `--features gstreamer` and a
+diff --git a/microduck-hd1910/firmware/mediad/src/main.rs b/microduck-hd1910/firmware/mediad/src/main.rs
+index 2f2c478..cf9ed6c 100644
+--- a/microduck-hd1910/firmware/mediad/src/main.rs
++++ b/microduck-hd1910/firmware/mediad/src/main.rs
+@@ -106,6 +106,10 @@ struct Args {
+     #[arg(long, default_value_t = 1024)]
+     analogue_gain: u32,
+ 
++    /// Capture pixel format on the v4l2 caps. `UYVY` is rkisp; Allwinner VIN wants `I420`.
++    #[arg(long, default_value = mediad::CAPTURE_FORMAT)]
++    capture_format: String,
++
+     /// How far the camera is mounted from upright, clockwise: 0, 90, 180 or 270.
+     ///
+     /// **90 by default, because the head camera is mounted a quarter turn off**, and this is the one
+@@ -414,6 +418,13 @@ fn main() -> ExitCode {
+         // the source changed. What changed is only where the numbers come from: one named quality
+         // in the config file rather than three flags nobody could set. `robotd_params::Quality`
+         // says why the three move together.
++        let capture_format = match mediad::pipeline::parse_capture_format(&args.capture_format) {
++            Ok(format) => format,
++            Err(e) => {
++                tracing::error!(error = %e, "mediad cannot start");
++                return ExitCode::FAILURE;
++            }
++        };
+         let settings = mediad::pipeline::Settings {
+             host: args.host.clone(),
+             port: args.port,
+@@ -423,6 +434,7 @@ fn main() -> ExitCode {
+             height,
+             fps,
+             rotation,
++            capture_format,
+         };
+ 
+         // `frames` is the raw tap off the tee: the auto-exposure loop meters it, and the
+@@ -477,14 +489,19 @@ fn main() -> ExitCode {
+         // V4L2 controls through `ioctl`, so it exists only where a real camera can. Nothing else
+         // in this function cares: the other two sources have no sensor to meter.
+         #[cfg(target_os = "linux")]
+-        let _exposure = match (&source, args.no_auto_exposure) {
+-            (mediad::pipeline::Source::Camera(camera), false) => Some(mediad::exposure::spawn(
++        let _exposure = match (&source, args.no_auto_exposure, capture_format) {
++            // Allwinner's ISP owns exposure. RK capture-node controls conflict with its 3A.
++            (mediad::pipeline::Source::Camera(_), _, "I420") => {
++                tracing::info!("VIN ISP owns auto-exposure; RK software exposure is disabled");
++                None
++            }
++            (mediad::pipeline::Source::Camera(camera), false, _) => Some(mediad::exposure::spawn(
+                 camera.device.clone(),
+                 frames.clone(),
+                 camera.exposure,
+                 camera.analogue_gain,
+             )),
+-            (mediad::pipeline::Source::Camera(_), true) => {
++            (mediad::pipeline::Source::Camera(_), true, _) => {
+                 tracing::info!(
+                     exposure = args.exposure,
+                     analogue_gain = args.analogue_gain,
+@@ -492,9 +509,9 @@ fn main() -> ExitCode {
+                 );
+                 None
+             }
+-            (mediad::pipeline::Source::Test, _) => None,
++            (mediad::pipeline::Source::Test, _, _) => None,
+             // A simulated camera has no sensor to write, and its brightness is the renderer's.
+-            (mediad::pipeline::Source::Sim(_), _) => None,
++            (mediad::pipeline::Source::Sim(_), _, _) => None,
+         };
+ 
+         // **The duck detector, from the same config file as everything else.** `[duck_detector]` lives in
+diff --git a/microduck-hd1910/firmware/mediad/src/pipeline.rs b/microduck-hd1910/firmware/mediad/src/pipeline.rs
+index 7dfa1da..8f30bc4 100644
+--- a/microduck-hd1910/firmware/mediad/src/pipeline.rs
++++ b/microduck-hd1910/firmware/mediad/src/pipeline.rs
+@@ -194,6 +194,9 @@ pub struct Settings {
+     /// How far the *pipeline* turns the picture; see [`Rotation`]. Almost always `None` — the
+     /// capture geometry above is then also what leaves the tee.
+     pub rotation: Rotation,
++    /// GStreamer raw format on the capture caps. [`CAPTURE_FORMAT`] on rkisp; `NV12` on
++    /// Allwinner VIN, which has no UYVY.
++    pub capture_format: &'static str,
+ }
+ 
+ /// Where the video comes from.
+@@ -408,6 +411,7 @@ pub fn start(
+         height,
+         fps,
+         rotation,
++        capture_format,
+         ..
+     } = settings;
+ 
+@@ -448,7 +452,7 @@ pub fn start(
+             src
+         }
+         #[cfg(target_os = "linux")]
+-        Source::Camera(camera) => camera_source(camera, fps)?,
++        Source::Camera(camera) => camera_source(camera, width, height, fps, capture_format)?,
+         // Not "unsupported": `[media] camera = true` off a robot is a config file copied from one,
+         // and the fix is to name whichever of the other two sources was meant.
+         #[cfg(not(target_os = "linux"))]
+@@ -483,11 +487,19 @@ pub fn start(
+     // `mpph264enc` lists `UYVY` on its sink pad and converts on the SoC's 2D accelerator, so the
+     // 4:2:2 to 4:2:0 step costs no CPU — the RGA was already doing one operation per frame.
+     let caps = gst::Caps::builder("video/x-raw")
+-        .field("format", CAPTURE_FORMAT)
++        .field("format", capture_format)
+         .field("width", width as i32)
+         .field("height", height as i32)
+-        .field("framerate", gst::Fraction::new(fps as i32, 1))
+-        .build();
++        .field("framerate", gst::Fraction::new(fps as i32, 1));
++    // Raw fd transport carries no caps. Match the VIN bridge explicitly even for SD output.
++    let caps = if capture_format == "I420" {
++        caps.field("colorimetry", "bt709")
++            .field("chroma-site", "mpeg2")
++            .field("pixel-aspect-ratio", gst::Fraction::new(1, 1))
++    } else {
++        caps
++    }
++    .build();
+     let capsfilter = gst::ElementFactory::make("capsfilter")
+         .property("caps", &caps)
+         .build()
+@@ -632,11 +644,19 @@ pub fn start(
+     // would fail negotiation on a quarter turn, and silently describe the wrong shape on a half
+     // one.
+     let out_caps = gst::Caps::builder("video/x-raw")
+-        .field("format", CAPTURE_FORMAT)
++        .field("format", capture_format)
+         .field("width", out_width as i32)
+         .field("height", out_height as i32)
+-        .field("framerate", gst::Fraction::new(fps as i32, 1))
+-        .build();
++        .field("framerate", gst::Fraction::new(fps as i32, 1));
++    let out_caps = if capture_format == "I420" {
++        out_caps
++            .field("colorimetry", "bt709")
++            .field("chroma-site", "mpeg2")
++            .field("pixel-aspect-ratio", gst::Fraction::new(1, 1))
++    } else {
++        out_caps
++    }
++    .build();
+ 
+     let frames = Frames::default();
+     let appsink = gst_app::AppSink::builder()
+@@ -648,7 +668,13 @@ pub fn start(
+         .max_buffers(1)
+         .drop(true)
+         .build();
+-    wire_frames(&appsink, frames.clone(), out_width, out_height);
++    wire_frames(
++        &appsink,
++        frames.clone(),
++        out_width,
++        out_height,
++        capture_format,
++    );
+ 
+     // ── the H.264 branch, for a Space this robot streams to ─────────────────
+     //
+@@ -695,6 +721,7 @@ pub fn start(
+         width,
+         height,
+         fps,
++        capture_format,
+         consumers.clone(),
+     )?;
+ 
+@@ -1133,7 +1160,13 @@ fn link_tee_branch(tee: &gst::Element, branch: &gst::Element) -> Result<()> {
+ }
+ 
+ /// Answer a reader's request for a frame out of the raw branch, and drop every other buffer.
+-fn wire_frames(appsink: &gst_app::AppSink, frames: Frames, width: u32, height: u32) {
++fn wire_frames(
++    appsink: &gst_app::AppSink,
++    frames: Frames,
++    width: u32,
++    height: u32,
++    format: &'static str,
++) {
+     appsink.set_callbacks(
+         gst_app::AppSinkCallbacks::builder()
+             .new_sample(move |sink| {
+@@ -1165,7 +1198,7 @@ fn wire_frames(appsink: &gst_app::AppSink, frames: Frames, width: u32, height: u
+                 frames.deliver(Frame {
+                     width,
+                     height,
+-                    format: CAPTURE_FORMAT,
++                    format,
+                     // Taken here rather than at delivery: this is the moment the buffer existed,
+                     // and it costs one clock read on a frame someone already asked for.
+                     captured_at: SystemTime::now(),
+@@ -1346,7 +1379,21 @@ fn make(name: &str) -> Result<gst::Element> {
+ /// belong to the *subprocess* shape: `v4l2src` attaches a `GstVideoMeta` describing the real
+ /// layout, and the frame loss has a cause with a small fix — see [`raise_capture_buffers`].
+ #[cfg(target_os = "linux")]
+-fn camera_source(camera: &Camera, fps: u32) -> Result<gst::Element> {
++fn camera_source(
++    camera: &Camera,
++    width: u32,
++    height: u32,
++    fps: u32,
++    capture_format: &str,
++) -> Result<gst::Element> {
++    // GStreamer 1.26's v4l2src maps I420/NV12 to YM12/NM12 on Allwinner VIN and either
++    // rejects S_FMT or STREAMONs with no buffers. Debian 11's 1.18 v4l2src can capture
++    // I420 here; feed that into this process as live appsrc frames.
++    if capture_format == "I420" {
++        // The measured VIN mode is 1280x960, not the RK 1080p calibration.
++        let _ = SENSOR_MODE.set(None);
++        return crate::vin::source(&camera.device, width, height, fps);
++    }
+     pin_sensor_mode(fps)?;
+ 
+     // Exposure and gain go through `extra-controls` rather than a `v4l2-ctl` call, so they are
+@@ -1356,26 +1403,61 @@ fn camera_source(camera: &Camera, fps: u32) -> Result<gst::Element> {
+         .field("analogue_gain", camera.analogue_gain as i32)
+         .build();
+ 
+-    let src = gst::ElementFactory::make("v4l2src")
+-        .property("device", &camera.device)
+-        .property("extra-controls", &controls)
+-        .build()
+-        .map_err(|_| {
+-            anyhow!(
+-                "no v4l2src element; it comes from gstreamer1.0-plugins-good, which \
++    let mut builder = gst::ElementFactory::make("v4l2src").property("device", &camera.device);
++    // rkisp proxies exposure/gain on the capture node. VIN does not: extra-controls
++    // here make STREAMON hang with no buffers.
++    if capture_format == "UYVY" {
++        builder = builder.property("extra-controls", &controls);
++    }
++    // Allwinner VIN is multiplanar; mmap is the path that can take NV12. rkisp stays on
++    // v4l2src's default (auto) when the format is still UYVY.
++    if capture_format == "NV12" {
++        builder = builder.property_from_str("io-mode", "mmap");
++    }
++    let src = builder.build().map_err(|_| {
++        anyhow!(
++            "no v4l2src element; it comes from gstreamer1.0-plugins-good, which \
+                  setup-gstreamer.sh installs"
+-            )
+-        })?;
++        )
++    })?;
+ 
+     raise_capture_buffers(&src)?;
+ 
+     tracing::info!(
+         device = %camera.device,
++        capture_format,
+         exposure = camera.exposure,
+         analogue_gain = camera.analogue_gain,
+         "head camera"
+     );
+-    Ok(src)
++
++    if capture_format != "NV12" {
++        return Ok(src);
++    }
++
++    // `input-selector` unifies pad caps with the discovery pattern, which is NV12. Asking
++    // v4l2src for GStreamer NV12 on a multiplanar VIN node S_FMTs `NM12` and fails. Convert
++    // inside the source bin so the driver can pick a listed fourcc and the selector still
++    // sees contiguous NV12.
++    let convert = make("videoconvert")?;
++    let bin = gst::Bin::new();
++    bin.add_many([&src, &convert])
++        .context("could not build VIN convert bin")?;
++    src.link(&convert)
++        .context("could not link v4l2src to videoconvert")?;
++    let src_pad = convert
++        .static_pad("src")
++        .context("videoconvert has no src pad")?;
++    let ghost = gst::GhostPad::builder_with_target(&src_pad)
++        .context("VIN convert ghost pad")?
++        .name("src")
++        .build();
++    ghost
++        .set_active(true)
++        .context("could not activate VIN convert ghost pad")?;
++    bin.add_pad(&ghost)
++        .context("could not expose VIN convert src pad")?;
++    Ok(bin.upcast())
+ }
+ 
+ /// A simulated camera as an `appsrc`, fed by a thread reading frames off a socket.
+@@ -1478,7 +1560,18 @@ fn read_frames(addr: &str, expected: usize, src: &gst_app::AppSrc) -> std::io::R
+ ///
+ /// Single-plane on purpose: `v4l2src` cannot drive rkisp's two-plane `NM12` at full rate, and
+ /// asking for GStreamer `NV12` is what selects it. The table in [`start`] has the numbers.
+-pub const CAPTURE_FORMAT: &str = "UYVY";
++pub use crate::CAPTURE_FORMAT;
++
++/// Accepts `UYVY` or `NV12` (any case). Other names fail rather than being passed through to
++/// caps, where a typo would only show up as a negotiation error on the board.
++pub fn parse_capture_format(s: &str) -> Result<&'static str> {
++    match s {
++        "UYVY" | "uyvy" => Ok("UYVY"),
++        "NV12" | "nv12" => Ok("NV12"),
++        "I420" | "i420" | "YU12" | "yu12" => Ok("I420"),
++        other => Err(anyhow!("capture format {other} is not UYVY, NV12 or I420")),
++    }
++}
+ 
+ /// How many capture buffers to ask for. Three is the cliff; four leaves one spare.
+ ///
+@@ -1821,6 +1914,14 @@ fn wire_encoder_setup(sink: &gst::Element) -> Result<()> {
+             if !discovering {
+                 tracing::info!(encoder = %name, %consumer, "hardware H.264, configured for WebRTC");
+             }
++        } else if name == "x264enc" {
++            encoder.set_property_from_str("tune", "zerolatency");
++            encoder.set_property_from_str("speed-preset", "ultrafast");
++            encoder.set_property("bframes", 0u32);
++            encoder.set_property("key-int-max", 15u32);
++            if !discovering {
++                tracing::info!(encoder = %name, %consumer, "software H.264, zerolatency");
++            }
+         } else if !discovering {
+             // Only meaningful for a real consumer. During discovery this fires once per codec —
+             // including `mppvp8enc` and `mpph265enc`, which are *hardware* — so warning there
+@@ -1865,6 +1966,7 @@ fn meter_capture_rate(
+     width: u32,
+     height: u32,
+     fps: u32,
++    capture_format: &'static str,
+     consumers: Consumers,
+ ) -> Result<()> {
+     let target = fps as f64;
+@@ -1919,7 +2021,7 @@ fn meter_capture_rate(
+                     target_fps: fps,
+                     width,
+                     height,
+-                    format: CAPTURE_FORMAT.to_owned(),
++                    format: capture_format.to_owned(),
+                     frames: meter.frames,
+                     dropped: meter.dropped,
+                     consumers: consumers.load(std::sync::atomic::Ordering::Relaxed),
+@@ -2534,6 +2636,7 @@ mod tests {
+             height: 240,
+             fps: 15,
+             rotation: Rotation::None,
++            capture_format: CAPTURE_FORMAT,
+         };
+         let (pipeline, _channels, frames, _stream) = start(
+             Source::Test,
+diff --git a/microduck-hd1910/firmware/mediad/src/vin.rs b/microduck-hd1910/firmware/mediad/src/vin.rs
+new file mode 100644
+index 0000000..d587652
+--- /dev/null
++++ b/microduck-hd1910/firmware/mediad/src/vin.rs
+@@ -0,0 +1,678 @@
++//! Allwinner capture through the board's GStreamer 1.18, behind the existing demand owner.
++//!
++//! The source stays NULL until Capture activates it. A weak reference and bounded poll keep
++//! the helper tied to that lifetime, including a camera which never delivers its first frame.
++use std::ffi::OsString;
++use std::io::{self, Read};
++use std::os::fd::AsRawFd;
++use std::path::{Path, PathBuf};
++use std::process::{Child, Command, Stdio};
++use std::sync::Arc;
++use std::sync::atomic::{AtomicBool, Ordering};
++use std::time::{Duration, Instant};
++
++#[path = "vin_white_balance.rs"]
++mod white_balance;
++use white_balance::WhiteMap;
++
++const POLL_INTERVAL: Duration = Duration::from_millis(50);
++
++#[derive(Clone, Copy)]
++struct Timing {
++    first_frame: Duration,
++    next_frame: Duration,
++    retry: Duration,
++}
++
++impl Default for Timing {
++    fn default() -> Self {
++        Self {
++            first_frame: Duration::from_secs(5),
++            next_frame: Duration::from_secs(2),
++            retry: Duration::from_secs(1),
++        }
++    }
++}
++
++trait Consumer {
++    /// None means the owning source was destroyed; false means demand is asleep.
++    fn active(&self) -> Option<bool>;
++    fn push(&self, frame: Vec<u8>) -> bool;
++}
++
++#[cfg(target_os = "linux")]
++pub(crate) fn source(
++    device: &str,
++    width: u32,
++    height: u32,
++    fps: u32,
++) -> anyhow::Result<gstreamer::Element> {
++    use anyhow::{Context, ensure};
++    use gst::prelude::*;
++    use gstreamer as gst;
++    use gstreamer_app as gst_app;
++
++    ensure!(
++        width > 0 && height > 0 && width % 2 == 0 && height % 2 == 0 && fps > 0,
++        "VIN requires even, nonzero I420 dimensions and a nonzero frame rate"
++    );
++    let frame_len = (width as usize)
++        .checked_mul(height as usize)
++        .and_then(|n| n.checked_mul(3))
++        .map(|n| n / 2)
++        .context("VIN frame size overflow")?;
++    let profile = isp_profile(std::env::var_os("MEDIAD_VIN_ISP_PROFILE"))?;
++    let white_map = std::env::var_os("MEDIAD_VIN_WHITE_MAP")
++        .map(|path| WhiteMap::load(Path::new(&path), width, height))
++        .transpose()?;
++    tracing::info!(isp_profile = profile.is_some(), "VIN ISP profile selection");
++    tracing::info!(
++        white_map = white_map.is_some(),
++        "VIN white balance map selection"
++    );
++    let caps = gst::Caps::builder("video/x-raw")
++        .field("format", "I420")
++        .field("width", width as i32)
++        .field("height", height as i32)
++        .field("framerate", gst::Fraction::new(fps as i32, 1))
++        .field("pixel-aspect-ratio", gst::Fraction::new(1, 1))
++        .field("colorimetry", "bt709")
++        .field("chroma-site", "mpeg2")
++        .build();
++    let source = gst_app::AppSrc::builder()
++        .caps(&caps)
++        .is_live(true)
++        .do_timestamp(true)
++        .format(gst::Format::Time)
++        // Demand transitions can race the final frame; keep that race bounded to two frames.
++        .max_buffers(2)
++        .max_bytes((frame_len * 2) as u64)
++        .leaky_type(gst_app::AppLeakyType::Downstream)
++        .build();
++    struct AppConsumer(glib::WeakRef<gst_app::AppSrc>, Option<WhiteMap>);
++    impl Consumer for AppConsumer {
++        fn active(&self) -> Option<bool> {
++            self.0.upgrade().map(|source| {
++                matches!(
++                    source.current_state(),
++                    gst::State::Paused | gst::State::Playing
++                )
++            })
++        }
++        fn push(&self, mut frame: Vec<u8>) -> bool {
++            let Some(source) = self.0.upgrade() else {
++                return false;
++            };
++            if let Some(map) = &self.1 {
++                map.apply(&mut frame);
++            }
++            match source.push_buffer(gst::Buffer::from_mut_slice(frame)) {
++                Ok(_) => true,
++                Err(gst::FlowError::Flushing) => false,
++                Err(error) => {
++                    tracing::warn!(%error, "VIN frame delivery stopped; capture will retry");
++                    false
++                }
++            }
++        }
++    }
++    let consumer = AppConsumer(source.downgrade(), white_map);
++    let device = device.to_owned();
++    std::thread::Builder::new()
++        .name("vin-gst18".into())
++        .spawn(move || {
++            supervise(
++                consumer,
++                || capture_command(&device, width, height, fps, profile.as_deref()),
++                frame_len,
++                Timing::default(),
++            )
++        })
++        .context("could not start VIN capture owner")?;
++    Ok(source.upcast())
++}
++
++fn isp_profile(value: Option<OsString>) -> anyhow::Result<Option<PathBuf>> {
++    use anyhow::{Context, ensure};
++    use std::os::unix::ffi::OsStrExt;
++    let Some(value) = value else {
++        return Ok(None);
++    };
++    let path = PathBuf::from(value);
++    ensure!(
++        path.is_absolute(),
++        "MEDIAD_VIN_ISP_PROFILE must be an absolute file path"
++    );
++    // LD_PRELOAD treats whitespace and ':' as a library-list separator, even inside quotes.
++    ensure!(
++        !path
++            .as_os_str()
++            .as_bytes()
++            .iter()
++            .any(|byte| byte.is_ascii_whitespace() || *byte == b':'),
++        "MEDIAD_VIN_ISP_PROFILE must not contain whitespace or ':'"
++    );
++    ensure!(
++        std::fs::metadata(&path)
++            .context("cannot inspect MEDIAD_VIN_ISP_PROFILE")?
++            .is_file(),
++        "MEDIAD_VIN_ISP_PROFILE must refer to an existing regular file"
++    );
++    std::fs::File::open(&path).context("cannot read MEDIAD_VIN_ISP_PROFILE")?;
++    Ok(Some(path))
++}
++
++fn capture_command(
++    device: &str,
++    width: u32,
++    height: u32,
++    fps: u32,
++    profile: Option<&Path>,
++) -> Command {
++    let mut command = frame_command("/usr/bin/gst-launch-1.0", profile);
++    command.args([
++        "-q", "v4l2src", &format!("device={device}"), "io-mode=mmap",
++        "en-awisp=1", "en-largemode=0", "do-timestamp=true", "!",
++        // VIN reports RGB24 but delivers BGR bytes; its NV12 output has displaced chroma.
++        // Rebuild buffers and VideoMeta as BGR: capssetter alone leaves conflicting RGB meta.
++        "video/x-raw,format=RGB,width=1280,height=960,framerate=30/1,pixel-aspect-ratio=1/1",
++        "!", "rawvideoparse", "format=bgr", "width=1280", "height=960",
++        "framerate=30/1", "use-sink-caps=false", "disable-passthrough=true", "colorimetry=sRGB",
++        // Drop before the CPU conversion/scaling when the requested output is 15 fps.
++        "!", "videorate", "drop-only=true", "!",
++        &format!("video/x-raw,format=BGR,framerate={fps}/1"),
++        "!", "videoconvert", "!", "videoscale", "add-borders=true", "!",
++        &format!("video/x-raw,format=I420,width={width},height={height},framerate={fps}/1,pixel-aspect-ratio=1/1,colorimetry=bt709,chroma-site=mpeg2"),
++        "!", "fdsink", "fd=3", "sync=false",
++    ])
++    .env_remove("LD_LIBRARY_PATH").env_remove("GST_PLUGIN_PATH")
++    .env_remove("GST_PLUGIN_PATH_1_0").env_remove("GST_DEBUG")
++    .env("GST_PLUGIN_SYSTEM_PATH_1_0", "/usr/lib/aarch64-linux-gnu/gstreamer-1.0")
++    .env("GST_PLUGIN_SCANNER_1_0", "/usr/lib/aarch64-linux-gnu/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner")
++    .env("GST_PLUGIN_SCANNER", "/usr/lib/aarch64-linux-gnu/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner")
++    .env("GST_REGISTRY_1_0", "/var/lib/mediad/gst18-vin-registry.bin")
++    .env("XDG_RUNTIME_DIR", "/run/mediad");
++    command
++}
++
++fn frame_command(program: &str, profile: Option<&Path>) -> Command {
++    // The vendor ISP uses printf(stdout), including while streaming. Reserve fd 3 for
++    // fdsink before moving ordinary stdout to stderr; exec preserves the helper's PID.
++    // All dynamic values stay separate argv entries, never interpolated shell source.
++    let mut command = Command::new("/bin/sh");
++    command.args([
++        "-c",
++        "exec 3>&1; exec 1>&2; profile=$1; shift; if [ -n \"$profile\" ]; then export LD_PRELOAD=\"$profile\"; fi; exec \"$@\"",
++        "vin-capture",
++    ]);
++    // Assign inside the already-running shell: the profile loads only in gst-launch,
++    // never into mediad or the shell used to isolate the vendor's stdout.
++    command
++        .arg(profile.map(Path::as_os_str).unwrap_or_default())
++        .arg(program);
++    command
++}
++
++fn supervise(
++    consumer: impl Consumer,
++    command: impl Fn() -> Command,
++    frame_len: usize,
++    timing: Timing,
++) {
++    loop {
++        match consumer.active() {
++            None => return,
++            Some(false) => {
++                std::thread::sleep(POLL_INTERVAL);
++                continue;
++            }
++            Some(true) => {}
++        }
++        if let Err(error) = capture(&consumer, command(), frame_len, timing) {
++            // Keep argv out of logs; the bounded stderr reader records pipeline diagnostics.
++            tracing::warn!(%error, "VIN capture stopped; retrying while requested");
++        }
++        let until = Instant::now() + timing.retry;
++        while Instant::now() < until {
++            if consumer.active() != Some(true) {
++                break;
++            }
++            std::thread::sleep(POLL_INTERVAL);
++        }
++    }
++}
++
++/// Own the child and its stderr reader together: every exit path kills, reaps, and joins.
++struct Session {
++    child: Child,
++    stop: Arc<AtomicBool>,
++    stderr: Option<std::thread::JoinHandle<()>>,
++}
++
++impl Drop for Session {
++    fn drop(&mut self) {
++        // Let gst-launch set its pipeline NULL and release the vendor ISP before SIGKILL.
++        // A stalled driver still cannot hold the demand owner indefinitely.
++        let _ = unsafe { libc::kill(self.child.id() as libc::pid_t, libc::SIGINT) };
++        let until = Instant::now() + Duration::from_millis(400);
++        while Instant::now() < until {
++            match self.child.try_wait() {
++                Ok(Some(_)) => break,
++                Ok(None) => std::thread::sleep(Duration::from_millis(10)),
++                Err(_) => break,
++            }
++        }
++        let _ = self.child.kill();
++        match self.child.wait() {
++            Ok(status) => tracing::debug!(%status, "VIN helper reaped"),
++            Err(error) => tracing::warn!(%error, "VIN helper wait failed"),
++        }
++        self.stop.store(true, Ordering::Relaxed);
++        if let Some(reader) = self.stderr.take() {
++            let _ = reader.join();
++        }
++    }
++}
++
++fn capture(
++    consumer: &impl Consumer,
++    mut command: Command,
++    frame_len: usize,
++    timing: Timing,
++) -> io::Result<()> {
++    let child = command
++        .stdout(Stdio::piped())
++        .stderr(Stdio::piped())
++        .spawn()?;
++    let mut session = Session {
++        child,
++        stop: Arc::new(AtomicBool::new(false)),
++        stderr: None,
++    };
++    let mut stdout = session
++        .child
++        .stdout
++        .take()
++        .ok_or_else(|| io::Error::other("VIN helper has no stdout"))?;
++    nonblocking(&stdout)?;
++    if let Some(mut stderr) = session.child.stderr.take() {
++        nonblocking(&stderr)?;
++        let stop = session.stop.clone();
++        session.stderr = Some(
++            std::thread::Builder::new()
++                .name("vin-stderr".into())
++                .spawn(move || drain_stderr(&mut stderr, &stop))?,
++        );
++    }
++    tracing::info!("VIN capture helper started");
++    let result = (|| {
++        let mut timeout = timing.first_frame;
++        while consumer.active() == Some(true) {
++            let mut frame = vec![0; frame_len];
++            if !read_frame(&mut stdout, &mut frame, timeout, || {
++                consumer.active() == Some(true)
++            })? {
++                break;
++            }
++            if !consumer.push(frame) {
++                break;
++            }
++            timeout = timing.next_frame;
++        }
++        Ok(())
++    })();
++    // Keep stdout open until the helper has stopped, so cancellation is SIGINT rather than EPIPE.
++    drop(session);
++    result
++}
++
++fn nonblocking(pipe: &impl AsRawFd) -> io::Result<()> {
++    // The descriptors are owned pipes. Preserve existing flags, then poll before every read.
++    let flags = unsafe { libc::fcntl(pipe.as_raw_fd(), libc::F_GETFL) };
++    if flags < 0
++        || unsafe { libc::fcntl(pipe.as_raw_fd(), libc::F_SETFL, flags | libc::O_NONBLOCK) } < 0
++    {
++        return Err(io::Error::last_os_error());
++    }
++    Ok(())
++}
++
++fn poll(pipe: &impl AsRawFd) -> io::Result<()> {
++    let mut fd = libc::pollfd {
++        fd: pipe.as_raw_fd(),
++        events: libc::POLLIN,
++        revents: 0,
++    };
++    if unsafe { libc::poll(&mut fd, 1, POLL_INTERVAL.as_millis() as i32) } < 0 {
++        let error = io::Error::last_os_error();
++        if error.kind() != io::ErrorKind::Interrupted {
++            return Err(error);
++        }
++    }
++    Ok(())
++}
++
++fn read_frame(
++    pipe: &mut (impl Read + AsRawFd),
++    frame: &mut [u8],
++    timeout: Duration,
++    active: impl Fn() -> bool,
++) -> io::Result<bool> {
++    let deadline = Instant::now() + timeout;
++    let mut read = 0;
++    while read < frame.len() {
++        if !active() {
++            return Ok(false);
++        }
++        if Instant::now() >= deadline {
++            return Err(io::Error::new(io::ErrorKind::TimedOut, "VIN frame timeout"));
++        }
++        match pipe.read(&mut frame[read..]) {
++            Ok(0) => {
++                return Err(io::Error::new(
++                    io::ErrorKind::UnexpectedEof,
++                    "VIN helper closed its frame pipe",
++                ));
++            }
++            Ok(bytes) => read += bytes,
++            Err(error) if error.kind() == io::ErrorKind::WouldBlock => poll(pipe)?,
++            Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
++            Err(error) => return Err(error),
++        }
++    }
++    Ok(true)
++}
++
++fn drain_stderr(pipe: &mut (impl Read + AsRawFd), stop: &AtomicBool) {
++    let mut buffer = [0u8; 512];
++    let mut line = Vec::with_capacity(512);
++    let mut errors = 0;
++    let mut banners = 0;
++    while !stop.load(Ordering::Relaxed) {
++        match pipe.read(&mut buffer) {
++            Ok(0) => {
++                log_stderr(&line, &mut errors, &mut banners);
++                return;
++            }
++            Ok(bytes) => {
++                for byte in &buffer[..bytes] {
++                    if *byte == b'\n' {
++                        log_stderr(&line, &mut errors, &mut banners);
++                        line.clear();
++                    } else if line.len() < 512 {
++                        line.push(*byte);
++                    }
++                }
++            }
++            Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
++                if poll(pipe).is_err() {
++                    return;
++                }
++            }
++            Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
++            Err(_) => return,
++        }
++    }
++}
++
++fn log_stderr(line: &[u8], errors: &mut usize, banners: &mut usize) {
++    let detail = String::from_utf8_lossy(line);
++    let detail = detail.trim();
++    if detail.is_empty() {
++        return;
++    }
++    let lower = detail.to_ascii_lowercase();
++    // The helper has no credentials in its argv; still do not forward credential-like output.
++    let detail = if ["password", "token", "secret", "authorization", "credential"]
++        .iter()
++        .any(|word| lower.contains(word))
++    {
++        "[credential-like diagnostic redacted]"
++    } else {
++        detail
++    };
++    if ["error", "isp_err", "failed", "warning"]
++        .iter()
++        .any(|word| lower.contains(word))
++    {
++        if *errors < 8 {
++            tracing::warn!(detail, "VIN helper diagnostic");
++            *errors += 1;
++        }
++    } else if *banners < 4 {
++        tracing::debug!(detail, "VIN helper initialization");
++        *banners += 1;
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use std::sync::atomic::AtomicUsize;
++
++    #[test]
++    fn an_explicit_profile_must_be_an_absolute_readable_file() {
++        assert_eq!(isp_profile(None).unwrap(), None);
++        let error = isp_profile(Some("profile.so".into())).unwrap_err();
++        assert!(error.to_string().contains("MEDIAD_VIN_ISP_PROFILE"));
++        let directory = tempfile::tempdir().unwrap();
++        assert!(isp_profile(Some(directory.path().as_os_str().to_owned())).is_err());
++        assert!(isp_profile(Some(directory.path().join("missing.so").into_os_string())).is_err());
++        let profile = tempfile::NamedTempFile::new().unwrap();
++        assert_eq!(
++            isp_profile(Some(profile.path().as_os_str().to_owned())).unwrap(),
++            Some(profile.path().to_owned())
++        );
++        let spaced = directory.path().join("split profile.so");
++        std::fs::write(&spaced, b"fixture").unwrap();
++        assert!(isp_profile(Some(spaced.into_os_string())).is_err());
++    }
++
++    #[test]
++    fn profile_selection_is_literal_child_argv_and_never_a_process_environment_edit() {
++        let parent = std::env::var_os("LD_PRELOAD");
++        let directory = tempfile::tempdir().unwrap();
++        let profile = directory.path().join("$(touch-unwanted).so");
++        std::fs::write(&profile, b"fixture").unwrap();
++        let selected = isp_profile(Some(profile.as_os_str().to_owned())).unwrap();
++        let command = capture_command("/dev/video0", 1280, 720, 15, selected.as_deref());
++        let arguments: Vec<_> = command.get_args().collect();
++        assert_eq!(command.get_program(), "/bin/sh");
++        assert_eq!(arguments[3], profile.as_os_str());
++        assert_eq!(arguments[4], "/usr/bin/gst-launch-1.0");
++        assert!(!arguments[1].to_string_lossy().contains("touch-unwanted"));
++        assert!(command.get_envs().all(|(key, _)| key != "LD_PRELOAD"));
++        assert_eq!(std::env::var_os("LD_PRELOAD"), parent);
++        let without = capture_command("/dev/video0", 640, 360, 30, None);
++        assert!(without.get_args().nth(3).unwrap().is_empty());
++    }
++
++    #[test]
++    fn lower_output_rate_drops_before_conversion_and_keeps_the_measured_sensor_mode() {
++        let command = capture_command("/dev/video0", 1280, 720, 15, None);
++        let arguments: Vec<_> = command
++            .get_args()
++            .map(|arg| arg.to_string_lossy().into_owned())
++            .collect();
++        let index = |value| arguments.iter().position(|arg| arg == value).unwrap();
++        assert!(index("rawvideoparse") < index("videorate"));
++        assert!(index("videorate") < index("videoconvert"));
++        assert!(arguments.iter().any(|arg| arg == "video/x-raw,format=RGB,width=1280,height=960,framerate=30/1,pixel-aspect-ratio=1/1"));
++        for required in [
++            "format=bgr",
++            "use-sink-caps=false",
++            "disable-passthrough=true",
++            "colorimetry=sRGB",
++        ] {
++            assert!(arguments.iter().any(|arg| arg == required));
++        }
++        assert!(
++            arguments
++                .iter()
++                .any(|arg| arg == "video/x-raw,format=BGR,framerate=15/1")
++        );
++        assert!(arguments.iter().any(|arg| arg == "video/x-raw,format=I420,width=1280,height=720,framerate=15/1,pixel-aspect-ratio=1/1,colorimetry=bt709,chroma-site=mpeg2"));
++        assert!(arguments.iter().any(|arg| arg == "fd=3"));
++    }
++
++    struct State {
++        alive: AtomicBool,
++        active: AtomicBool,
++        frames: AtomicUsize,
++        launches: AtomicUsize,
++    }
++    struct FakeConsumer(Arc<State>);
++    impl Consumer for FakeConsumer {
++        fn active(&self) -> Option<bool> {
++            self.0
++                .alive
++                .load(Ordering::SeqCst)
++                .then(|| self.0.active.load(Ordering::SeqCst))
++        }
++        fn push(&self, frame: Vec<u8>) -> bool {
++            assert_eq!(frame, b"abcdefghijkl");
++            if self.active() != Some(true) {
++                return false;
++            }
++            self.0.frames.fetch_add(1, Ordering::SeqCst);
++            true
++        }
++    }
++
++    struct Rig {
++        state: Arc<State>,
++        owner: Option<std::thread::JoinHandle<()>>,
++    }
++    const WRITER: &str = "while True:\n sys.stdout.buffer.write(b'abcdefghijkl'); sys.stdout.buffer.flush(); time.sleep(.02)\n";
++    impl Rig {
++        fn new(first: &'static str) -> Self {
++            Self::with_frame_pipe(first, false)
++        }
++        fn with_frame_pipe(first: &'static str, dedicated: bool) -> Self {
++            let state = Arc::new(State {
++                alive: AtomicBool::new(true),
++                active: AtomicBool::new(false),
++                frames: AtomicUsize::new(0),
++                launches: AtomicUsize::new(0),
++            });
++            let owner_state = state.clone();
++            let consumer = FakeConsumer(state.clone());
++            let owner = std::thread::spawn(move || {
++                supervise(
++                    consumer,
++                    || {
++                        let attempt = owner_state.launches.fetch_add(1, Ordering::SeqCst);
++                        let mut command = if dedicated {
++                            frame_command("python3", None)
++                        } else {
++                            Command::new("python3")
++                        };
++                        let script = format!(
++                            "import os,sys,time\n{}",
++                            if attempt == 0 { first } else { WRITER }
++                        );
++                        command.args(["-u", "-c", &script]);
++                        command
++                    },
++                    12,
++                    Timing {
++                        first_frame: Duration::from_millis(600),
++                        next_frame: Duration::from_millis(200),
++                        retry: Duration::from_millis(50),
++                    },
++                )
++            });
++            Self {
++                state,
++                owner: Some(owner),
++            }
++        }
++        fn wait(&self, condition: impl Fn() -> bool) {
++            let until = Instant::now() + Duration::from_secs(4);
++            while !condition() && Instant::now() < until {
++                std::thread::sleep(Duration::from_millis(10));
++            }
++            assert!(
++                condition(),
++                "VIN supervisor did not reach the expected state"
++            );
++        }
++        fn frames(&self) -> usize {
++            self.state.frames.load(Ordering::SeqCst)
++        }
++        fn launches(&self) -> usize {
++            self.state.launches.load(Ordering::SeqCst)
++        }
++    }
++    impl Drop for Rig {
++        fn drop(&mut self) {
++            self.state.alive.store(false, Ordering::SeqCst);
++            self.state.active.store(false, Ordering::SeqCst);
++            self.owner.take().unwrap().join().unwrap();
++        }
++    }
++
++    #[test]
++    fn no_demand_stays_asleep_and_three_rejoins_deliver_new_frames() {
++        let rig = Rig::new(WRITER);
++        std::thread::sleep(Duration::from_millis(150));
++        assert_eq!(rig.launches(), 0);
++        assert_eq!(rig.frames(), 0);
++        for round in 1..=3 {
++            let before = rig.frames();
++            rig.state.active.store(true, Ordering::SeqCst);
++            rig.wait(|| rig.frames() >= before + 2);
++            assert_eq!(rig.launches(), round);
++            rig.state.active.store(false, Ordering::SeqCst);
++            std::thread::sleep(Duration::from_millis(150));
++            let asleep = rig.frames();
++            std::thread::sleep(Duration::from_millis(100));
++            assert_eq!(rig.frames(), asleep);
++        }
++    }
++
++    #[test]
++    fn partial_frame_eof_restarts_without_delivering_corrupt_pixels() {
++        let rig = Rig::new("sys.stdout.buffer.write(b'abcdef'); sys.stdout.buffer.flush()\n");
++        rig.state.active.store(true, Ordering::SeqCst);
++        rig.wait(|| rig.frames() >= 2);
++        assert!(rig.launches() >= 2);
++    }
++
++    #[test]
++    fn first_frame_and_interframe_timeouts_restart_the_helper() {
++        for first in [
++            "time.sleep(60)\n",
++            "sys.stdout.buffer.write(b'abcdefghijkl'); sys.stdout.buffer.flush(); time.sleep(60)\n",
++        ] {
++            let rig = Rig::new(first);
++            rig.state.active.store(true, Ordering::SeqCst);
++            rig.wait(|| rig.launches() >= 2 && rig.frames() >= 3);
++        }
++    }
++
++    #[test]
++    fn a_full_stderr_pipe_cannot_block_video_or_cancellation() {
++        let rig = Rig::new(
++            "sys.stderr.buffer.write(b'x' * 1000000); sys.stderr.buffer.flush()\nwhile True:\n sys.stdout.buffer.write(b'abcdefghijkl'); sys.stdout.buffer.flush(); time.sleep(.02)\n",
++        );
++        rig.state.active.store(true, Ordering::SeqCst);
++        rig.wait(|| rig.frames() >= 2);
++        assert_eq!(rig.launches(), 1);
++        let start = Instant::now();
++        drop(rig);
++        assert!(start.elapsed() < Duration::from_secs(1));
++    }
++
++    #[test]
++    fn vendor_stdout_between_pixel_writes_cannot_pollute_the_frame_pipe() {
++        let rig = Rig::with_frame_pipe(
++            "sys.stdout.write('[ISP] startup banner\\n'); sys.stdout.flush()\nwhile True:\n os.write(3,b'abcdef'); os.write(1,b'[ISP] diagnostic between pixels\\n'); os.write(3,b'ghijkl'); time.sleep(.02)\n",
++            true,
++        );
++        rig.state.active.store(true, Ordering::SeqCst);
++        // FakeConsumer checks every exact 12-byte frame, including both halves around printf.
++        rig.wait(|| rig.frames() >= 4);
++        assert_eq!(rig.launches(), 1);
++    }
++}
+diff --git a/microduck-hd1910/firmware/mediad/src/vin_white_balance.rs b/microduck-hd1910/firmware/mediad/src/vin_white_balance.rs
+new file mode 100644
+index 0000000..04cffdd
+--- /dev/null
++++ b/microduck-hd1910/firmware/mediad/src/vin_white_balance.rs
+@@ -0,0 +1,86 @@
++//! Per-board flat-field chroma correction for the I420 VIN output.
++
++use anyhow::{Context, Result, ensure};
++use std::path::Path;
++
++const MAGIC: &[u8; 8] = b"MVIDWB01";
++const HEADER_LEN: usize = 16;
++const MAX_OFFSET: i16 = 8;
++
++pub(super) struct WhiteMap {
++    offsets: Vec<u8>,
++    chroma_len: usize,
++}
++
++impl WhiteMap {
++    pub(super) fn load(path: &Path, width: u32, height: u32) -> Result<Self> {
++        ensure!(
++            path.is_absolute(),
++            "MEDIAD_VIN_WHITE_MAP must be an absolute file path"
++        );
++        let chroma_len = (width as usize)
++            .checked_mul(height as usize)
++            .map(|pixels| pixels / 4)
++            .context("VIN white map dimensions overflow")?;
++        let expected_len = HEADER_LEN + chroma_len * 2;
++        let metadata = std::fs::metadata(path).context("cannot inspect MEDIAD_VIN_WHITE_MAP")?;
++        ensure!(
++            metadata.is_file(),
++            "MEDIAD_VIN_WHITE_MAP must be a regular file"
++        );
++        ensure!(
++            metadata.len() == expected_len as u64,
++            "MEDIAD_VIN_WHITE_MAP size mismatch"
++        );
++        let data = std::fs::read(path).context("cannot read MEDIAD_VIN_WHITE_MAP")?;
++        ensure!(&data[..8] == MAGIC, "MEDIAD_VIN_WHITE_MAP magic mismatch");
++        ensure!(
++            u32::from_le_bytes(data[8..12].try_into()?) == width,
++            "MEDIAD_VIN_WHITE_MAP width mismatch"
++        );
++        ensure!(
++            u32::from_le_bytes(data[12..16].try_into()?) == height,
++            "MEDIAD_VIN_WHITE_MAP height mismatch"
++        );
++        let offsets = data[HEADER_LEN..].to_vec();
++        ensure!(
++            offsets
++                .iter()
++                .all(|value| (*value as i8 as i16).abs() <= MAX_OFFSET),
++            "MEDIAD_VIN_WHITE_MAP correction exceeds safe limit"
++        );
++        Ok(Self {
++            offsets,
++            chroma_len,
++        })
++    }
++
++    pub(super) fn apply(&self, frame: &mut [u8]) {
++        let luma_len = self.chroma_len * 4;
++        let (u, v) = frame[luma_len..].split_at_mut(self.chroma_len);
++        for (&pair, pixel) in self.offsets.iter().step_by(2).zip(u) {
++            *pixel = pixel.saturating_add_signed(pair as i8);
++        }
++        for (&pair, pixel) in self.offsets.iter().skip(1).step_by(2).zip(v) {
++            *pixel = pixel.saturating_add_signed(pair as i8);
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn corrects_only_chroma_and_clamps_overflow() {
++        let map = WhiteMap {
++            offsets: vec![2, 253, 1, 255],
++            chroma_len: 2,
++        };
++        let mut frame = vec![80; 8];
++        frame.extend([127, 255, 129, 0]);
++        map.apply(&mut frame);
++        assert_eq!(&frame[..8], &[80; 8]);
++        assert_eq!(&frame[8..], &[129, 255, 126, 0]);
++    }
++}
+diff --git a/microduck-hd1910/firmware/robotd-params/src/lib.rs b/microduck-hd1910/firmware/robotd-params/src/lib.rs
+index 02e9db6..fe723c6 100644
+--- a/microduck-hd1910/firmware/robotd-params/src/lib.rs
++++ b/microduck-hd1910/firmware/robotd-params/src/lib.rs
+@@ -243,9 +243,8 @@ impl PadParams {
+ /// path cannot produce at all, and a pipeline that will not start costs the WebRTC *control*
+ /// channel along with the video, because the two are bundled (`remote-webrtc.md`).
+ ///
+-/// So the ladder is fixed, and every rung is 16:9 — the sensor's own aspect. A mode that changed
+-/// the shape of the picture would be cropping or squashing rather than lowering quality, which is
+-/// not what anybody picking "smaller" is asking for.
++/// The ladder keeps the RK camera's 16:9 modes and a 4:3 mode for the A7Z VIN camera.
++/// The latter preserves its full frame without padding it into a 16:9 stream.
+ #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+ pub enum Quality {
+     /// The sensor's full frame. The most detail, and the rung least likely to hold 30 fps on
+@@ -259,6 +258,9 @@ pub enum Quality {
+     /// Same picture, half the frames: the rung for a link that cannot carry 30.
+     #[serde(rename = "720p15")]
+     Q720p15,
++    /// The A7Z VIN camera's full 4:3 image, scaled to 960x720 at 15 fps without padding.
++    #[serde(rename = "720p15-4x3")]
++    Q720p15FourThree,
+     /// Small and cheap, for a bad link or a busy CPU.
+     #[serde(rename = "360p30")]
+     Q360p30,
+@@ -268,14 +270,15 @@ pub enum Quality {
+ ///
+ /// One list, so the registry's choices, the file's values and [`Quality`] itself cannot disagree;
+ /// [`tests::every_quality_label_round_trips`] pins it to the enum in both directions.
+-pub const QUALITY_LABELS: &[&str] = &["1080p30", "720p30", "720p15", "360p30"];
++pub const QUALITY_LABELS: &[&str] = &["1080p30", "720p30", "720p15", "720p15-4x3", "360p30"];
+ 
+ impl Quality {
+     /// The modes, in [`QUALITY_LABELS`] order.
+-    pub const ALL: [Quality; 4] = [
++    pub const ALL: [Quality; 5] = [
+         Quality::Q1080p30,
+         Quality::Q720p30,
+         Quality::Q720p15,
++        Quality::Q720p15FourThree,
+         Quality::Q360p30,
+     ];
+ 
+@@ -285,16 +288,18 @@ impl Quality {
+             Quality::Q1080p30 => "1080p30",
+             Quality::Q720p30 => "720p30",
+             Quality::Q720p15 => "720p15",
++            Quality::Q720p15FourThree => "720p15-4x3",
+             Quality::Q360p30 => "360p30",
+         }
+     }
+ 
+-    /// Frame size in pixels. Every rung is 16:9 and every dimension is a multiple of 8, which
+-    /// is what the ISP's scaler and the encoder's macroblocks both want.
++    /// Frame size in pixels. Each mode preserves its camera's aspect ratio, and every dimension
++    /// is a multiple of 8 for the ISP's scaler and the encoder's macroblocks.
+     pub fn size(self) -> (u32, u32) {
+         match self {
+             Quality::Q1080p30 => (1920, 1080),
+             Quality::Q720p30 | Quality::Q720p15 => (1280, 720),
++            Quality::Q720p15FourThree => (960, 720),
+             Quality::Q360p30 => (640, 360),
+         }
+     }
+@@ -309,7 +314,7 @@ impl Quality {
+ 
+     pub fn fps(self) -> u32 {
+         match self {
+-            Quality::Q720p15 => 15,
++            Quality::Q720p15 | Quality::Q720p15FourThree => 15,
+             _ => 30,
+         }
+     }
+@@ -318,13 +323,13 @@ impl Quality {
+     ///
+     /// Scaled with the pixel rate rather than picked per rung: 720p30 is the measured 2 Mb/s
+     /// `mediad` has always used, and the others are that number times their share of the pixels
+-    /// per second, rounded to something a human can read. Congestion control moves from here, so
+-    /// this is a starting point rather than a cap.
++    /// per second, rounded to something a human can read. Both 720p15 shapes start at 1 Mb/s.
++    /// Congestion control moves from here, so this is a starting point rather than a cap.
+     pub fn default_bitrate(self) -> u32 {
+         match self {
+             Quality::Q1080p30 => 4_000_000,
+             Quality::Q720p30 => 2_000_000,
+-            Quality::Q720p15 => 1_000_000,
++            Quality::Q720p15 | Quality::Q720p15FourThree => 1_000_000,
+             Quality::Q360p30 => 800_000,
+         }
+     }
+@@ -3221,6 +3226,27 @@ mod tests {
+         }
+     }
+ 
++    /// The VIN image must reach the pipeline without the 16:9 padding used by 720p.
++    #[test]
++    fn vin_four_three_quality_preserves_the_full_image() {
++        let media = MediaParams {
++            quality: Quality::Q720p15FourThree,
++            ..MediaParams::default()
++        };
++        assert_eq!(media.geometry(), (960, 720, 15));
++        assert_eq!(media.bitrate_resolved(), 1_000_000);
++        for quality in Quality::ALL {
++            let (width, height) = quality.size();
++            assert_eq!(width % 8, 0);
++            assert_eq!(height % 8, 0);
++            if quality == Quality::Q720p15FourThree {
++                assert_eq!(width * 3, height * 4);
++            } else {
++                assert_eq!(width * 9, height * 16);
++            }
++        }
++    }
++
+     /// [`MEDIA_SOURCE_LABELS`] is what the registry offers and what the file may contain, and
+     /// [`MediaSource::ALL`] is what `mediad` can build. A name in one and not the other is either
+     /// a choice the editor writes and `mediad` cannot read, or a source nobody can select.
+@@ -3318,9 +3344,8 @@ mod tests {
+         }
+     }
+ 
+-    /// The pattern's geometry has to satisfy the same two constraints every [`Quality`] rung does
+-    /// — 16:9, and both axes a multiple of 8 for the encoder's macroblocks — because it goes
+-    /// through the same capsfilter and the same encoder. A rate of zero would be a still image.
++    /// The pattern retains its inexpensive 16:9 frame with both axes a multiple of 8 for the
++    /// encoder's macroblocks. A rate of zero would be a still image.
+     #[test]
+     fn the_test_pattern_is_16_9_and_encodable() {
+         let (width, height, fps) = TEST_PATTERN_GEOMETRY;

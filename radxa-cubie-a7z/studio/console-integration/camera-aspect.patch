@@ -1,0 +1,12 @@
+--- a/web/sensors.js
++++ b/web/sensors.js
+@@ -228,8 +228,7 @@
+   const height = connection.height || connection.metadata?.height || 480;
+   const sideways = rotate === 90 || rotate === 270;
+   return html`<div ref=${screen} class="camera-screen" data-playing=${connection.state === 'playing'}
+-    style=${compact ? null : { aspectRatio: sideways ? `${height} / ${width}` : `${width} / ${height}`,
+-      maxWidth: `min(100%, ${72 * (sideways ? height / width : width / height)}vh)` }}>
++    style=${compact ? null : { aspectRatio: sideways ? `${height} / ${width}` : `${width} / ${height}` }}>
+     <video class=${compact ? 'inline-camera-video' : 'camera-video'} ref=${video} muted playsInline autoPlay aria-label="鸭子摄像头画面"
+       style=${{ width: sideways ? `${100 / ratio}%` : '100%', height: sideways ? `${100 * ratio}%` : '100%', transform: `translate(-50%, -50%) rotate(${rotate}deg)` }}></video>
+     ${connection.state !== 'playing' ? html`<div class="camera-placeholder">${connection.error || connection.message || CAMERA_STATES[connection.state] || '等待画面'}</div>` : null}
