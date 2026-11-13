@@ -46294,13 +46294,13 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-13T11:45:47.006289+00:00",
+  "checked_at_utc": "2026-11-13T13:47:37.304823+00:00",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-13T10:46:56.552116+00:00",
-    "source_snapshot_utc": "2026-11-13T11:41:53.207362+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-13T11:45:47.006289+00:00",
+    "previous_substantive_review_utc": "2026-11-13T11:45:47.006289+00:00",
+    "source_snapshot_utc": "2026-11-13T13:46:23.026433+00:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-13T13:47:37.304823+00:00",
     "default_branch_changes": false,
-    "new_stable_release": true,
+    "new_stable_release": false,
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
@@ -46320,17 +46320,14 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Formal 0.21.1 publishes the previously reviewed NFC MIME support, Face Board v1 timed Wi-Fi SSH, and head_alpha 0.2. It keeps API61. Official OS 1.4.2 seeds this daemon and policy v10, enabling autod and mapd.",
+    "notes": "Official OS 1.4.2 release notes report first-batch shipment. The release ID, tag SHA, original publication time and ten assets are unchanged.",
     "newly_discovered_merged_pull_requests": {},
     "development_release_inventory_changes": [],
-    "related_dependency_records_added": {
-      "pollen-robotics/microduck_yocto": [
-        134
-      ]
-    },
+    "related_dependency_records_added": {},
     "project_main_integration_records_added": [],
     "project_public_image_prerelease_records_added": [],
-    "official_os_release_changed": true
+    "official_os_release_changed": false,
+    "official_os_delivery_status_changed": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -49615,6 +49612,43 @@
       "project_main_integration_records_added": [],
       "project_public_image_prerelease_records_added": [],
       "official_os_release_changed": false
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-13T10:46:56.552116+00:00",
+      "source_snapshot_utc": "2026-11-13T11:41:53.207362+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-13T11:45:47.006289+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": true,
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Formal 0.21.1 publishes the previously reviewed NFC MIME support, Face Board v1 timed Wi-Fi SSH, and head_alpha 0.2. It keeps API61. Official OS 1.4.2 seeds this daemon and policy v10, enabling autod and mapd.",
+      "newly_discovered_merged_pull_requests": {},
+      "development_release_inventory_changes": [],
+      "related_dependency_records_added": {
+        "pollen-robotics/microduck_yocto": [
+          134
+        ]
+      },
+      "project_main_integration_records_added": [],
+      "project_public_image_prerelease_records_added": [],
+      "official_os_release_changed": true
     }
   ],
   "replica_public_image": {
@@ -50129,7 +50163,21 @@
       "impact": "High priority for testing replica service packaging, takeover, ToF behavior and persistence before adoption. The official images target beta and Face Board v1.",
       "evidence": "Pinned recipes and two checksum text files verified against release metadata. Image and update bundle bytes were not downloaded."
     },
-    "replica_integration": "not_integrated"
+    "replica_integration": "not_integrated",
+    "delivery_observation": {
+      "status": "Upstream reports OS 1.4.2 shipped with the first batch.",
+      "release_note_updated_at_utc": "2026-11-13T13:40:11Z",
+      "release_note_updated_at_jst": "2026-11-13T22:40:11+09:00",
+      "observed_at_utc": "2026-11-13T13:47:37.304823+00:00",
+      "observed_at_jst": "2026-11-13T22:47:37.304823+09:00",
+      "release_id": 444143385,
+      "release_note_url": "https://github.com/pollen-robotics/microduck_yocto/releases/tag/microduck-os-v1.4.2",
+      "source_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+      "source_ref_verified": true,
+      "asset_inventory_changed": false,
+      "hardware_acceptance_verified": false,
+      "replica_integration": "not_integrated"
+    }
   },
   "replica_zero3_image_rc_history": [
     {
@@ -50593,6 +50641,128 @@
         "delivery": "Shipping SSH blocks direct root login. Flash download may replace an interrupted temporary file. Release CI builds beta and Face Board v1; Zero 3W build remains on demand.",
         "impact": "High-priority reference for replica pairing and signed-update boundaries. Official board packaging only; no direct HD-1910 servo, camera, ToF, model, training, motion or sound code change.",
         "evidence": "Two checksum text assets matched release metadata; image, RAUC payload and signatures were not downloaded or executed."
+      },
+      "replica_integration": "not_integrated"
+    },
+    {
+      "recorded_on": "2026-11-13",
+      "tag": "microduck-os-v1.4.2",
+      "url": "https://github.com/pollen-robotics/microduck_yocto/releases/tag/microduck-os-v1.4.2",
+      "release_id": 444143385,
+      "published_at_utc": "2026-11-13T11:23:27Z",
+      "published_at_jst": "2026-11-13T20:23:27+09:00",
+      "source_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+      "source_committed_at_utc": "2026-11-13T11:07:24Z",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/635c41113cf129504c7e8ae1a7a896e0e4f94153",
+      "prerelease": false,
+      "daemon_version": "0.21.1",
+      "daemon_api_version": 61,
+      "daemon_source_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "daemon_recipe_url": "https://github.com/pollen-robotics/microduck_yocto/blob/635c41113cf129504c7e8ae1a7a896e0e4f94153/meta-microduck/recipes-microduck/microduck-daemon/microduck-daemon_0.21.1.bb",
+      "policy_set": "v10",
+      "policy_source_sha": "236d1835b03ac7b45d962efbf2fe3a6940206112",
+      "policy_recipe_url": "https://github.com/pollen-robotics/microduck_yocto/blob/635c41113cf129504c7e8ae1a7a896e0e4f94153/meta-microduck/recipes-microduck/microduck-policies/microduck-policies_v10.bb",
+      "boards": [
+        "microduck-beta",
+        "microduck-face-board-v1"
+      ],
+      "asset_inventory": [
+        {
+          "name": "microduck-beta-loader.bin",
+          "size": 481728,
+          "digest": "sha256:0fef13d0e90eb994ef563b438af74b44cd12014ff9d0b4020e9a49850cc82b0e"
+        },
+        {
+          "name": "microduck-face-board-v1-loader.bin",
+          "size": 481728,
+          "digest": "sha256:f06c74c46166a28440a2488b83710e33d8d3e1f51723872be1cad997e5a6e170"
+        },
+        {
+          "name": "microduck-image-microduck-beta.rootfs-20261113110929.wic.bmap",
+          "size": 8186,
+          "digest": "sha256:7ec2e77f6458a7c786bdefcba14b62b4bee62bb3c7f7d36fecfcbc074f9af584"
+        },
+        {
+          "name": "microduck-image-microduck-beta.rootfs-20261113110929.wic.zst",
+          "size": 291048436,
+          "digest": "sha256:608d3916f07b9e50348cece4a829f8ece81d8404206592b178d60c5bfb12ab63"
+        },
+        {
+          "name": "microduck-image-microduck-beta.rootfs-20261113110929.wic.zst.sha256sum",
+          "size": 127,
+          "digest": "sha256:a5b5857aaa98e797213dd99a71e7506b5382eedde805a4a631da31984434651d"
+        },
+        {
+          "name": "microduck-image-microduck-face-board-v1.rootfs-20261113111054.wic.bmap",
+          "size": 8186,
+          "digest": "sha256:b0cb96ba0128d5db471629f5f30a188171c4f93f2091a7602f164ef7a586a0a2"
+        },
+        {
+          "name": "microduck-image-microduck-face-board-v1.rootfs-20261113111054.wic.zst",
+          "size": 291038730,
+          "digest": "sha256:447e173f2e2b8d1c5ce497670bade4ebc42d60f0f11cf01db3b0f340e4d1c262"
+        },
+        {
+          "name": "microduck-image-microduck-face-board-v1.rootfs-20261113111054.wic.zst.sha256sum",
+          "size": 136,
+          "digest": "sha256:bcd732a387e1cae7b86b315799355f2bd577e5d6b37cc28398baceeac47ecd76"
+        },
+        {
+          "name": "microduck-os-v1.4.2-beta.raucb",
+          "size": 151788233,
+          "digest": "sha256:7895341fda0f2f52de3a559103ea38ca097d08a15bb18e1dfef0973b76091500"
+        },
+        {
+          "name": "microduck-os-v1.4.2-face-board-v1.raucb",
+          "size": 151755483,
+          "digest": "sha256:77d2dfbafe79940488fd9eb581aa856be14be9ed5434b0372991a272575ff0e2"
+        }
+      ],
+      "comparison_to_previous_os": {
+        "from_sha": "5451d13f768c8ca974777fca011c2cdfeadc4924",
+        "to_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+        "merge_base_sha": "5451d13f768c8ca974777fca011c2cdfeadc4924",
+        "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/5451d13f768c8ca974777fca011c2cdfeadc4924...635c41113cf129504c7e8ae1a7a896e0e4f94153",
+        "status": "ahead",
+        "ahead_by": 4,
+        "behind_by": 0,
+        "file_count": 5,
+        "commit_count": 4
+      },
+      "merged_pull_requests": [
+        {
+          "number": 134,
+          "url": "https://github.com/pollen-robotics/microduck_yocto/pull/134",
+          "title": "Seed daemon 0.21.1 and policy set v10; install autod and mapd",
+          "state": "closed",
+          "head_sha": "8be41cfb6ec6adecbb250b68c0bc56918a8d45e2",
+          "merge_commit_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+          "merged_at_utc": "2026-11-13T11:07:24Z",
+          "merged_at_jst": "2026-11-13T20:07:24+09:00"
+        }
+      ],
+      "checksum_texts_verified": [
+        {
+          "url": "https://github.com/pollen-robotics/microduck_yocto/releases/download/microduck-os-v1.4.2/microduck-image-microduck-beta.rootfs-20261113110929.wic.zst.sha256sum",
+          "size": 127,
+          "digest": "sha256:a5b5857aaa98e797213dd99a71e7506b5382eedde805a4a631da31984434651d",
+          "image_filename": "microduck-image-microduck-beta.rootfs-20261113110929.wic.zst",
+          "image_sha256": "608d3916f07b9e50348cece4a829f8ece81d8404206592b178d60c5bfb12ab63"
+        },
+        {
+          "url": "https://github.com/pollen-robotics/microduck_yocto/releases/download/microduck-os-v1.4.2/microduck-image-microduck-face-board-v1.rootfs-20261113111054.wic.zst.sha256sum",
+          "size": 136,
+          "digest": "sha256:bcd732a387e1cae7b86b315799355f2bd577e5d6b37cc28398baceeac47ecd76",
+          "image_filename": "microduck-image-microduck-face-board-v1.rootfs-20261113111054.wic.zst",
+          "image_sha256": "447e173f2e2b8d1c5ce497670bade4ebc42d60f0f11cf01db3b0f340e4d1c262"
+        }
+      ],
+      "review": {
+        "services": "The recipe installs and enables autod and mapd under separate users. It now fails packaging if a shipped service unit was omitted.",
+        "map_persistence": "The map is stored per OS slot. The upstream release describes remapping after an OS update.",
+        "models": "Policy v10 is pinned by commit. Only roller.onnx changes checksum relative to v9.",
+        "impact": "High priority for testing replica service packaging, takeover, ToF behavior and persistence before adoption. The official images target beta and Face Board v1.",
+        "evidence": "Pinned recipes and two checksum text files verified against release metadata. Image and update bundle bytes were not downloaded."
       },
       "replica_integration": "not_integrated"
     }
