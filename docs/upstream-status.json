@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-13",
+  "recorded_on": "2026-11-14",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -46294,11 +46294,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-13T13:47:37.304823+00:00",
+  "checked_at_utc": "2026-11-13T16:05:00Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-13T11:45:47.006289+00:00",
-    "source_snapshot_utc": "2026-11-13T13:46:23.026433+00:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-13T13:47:37.304823+00:00",
+    "previous_substantive_review_utc": "2026-11-13T13:47:37.304823+00:00",
+    "source_snapshot_utc": "2026-11-13T16:05:00Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-13T16:05:00Z",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.21.1",
@@ -46312,22 +46312,16 @@
     "retired_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
-    "local_migration_record_changed": false,
+    "official_os_release_changed": false,
+    "local_migration_record_changed": true,
+    "local_spare_card_image_record_added": true,
     "project_public_image_release_status_changed": false,
     "project_public_software_status_changed": false,
-    "project_github_latest_target_changed": false,
     "runtime_code_changed_by_heartbeat": false,
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Official OS 1.4.2 release notes report first-batch shipment. The release ID, tag SHA, original publication time and ten assets are unchanged.",
-    "newly_discovered_merged_pull_requests": {},
-    "development_release_inventory_changes": [],
-    "related_dependency_records_added": {},
-    "project_main_integration_records_added": [],
-    "project_public_image_prerelease_records_added": [],
-    "official_os_release_changed": false,
-    "official_os_delivery_status_changed": true
+    "notes": "Documents previously verified local Feetech 0.21.1 candidate and RC4-derived sensor autodetection image. Neither is a public release or a robot acceptance result."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -49649,6 +49643,40 @@
       "project_main_integration_records_added": [],
       "project_public_image_prerelease_records_added": [],
       "official_os_release_changed": true
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-13T11:45:47.006289+00:00",
+      "source_snapshot_utc": "2026-11-13T13:46:23.026433+00:00",
+      "final_relevant_sources_checked_at_utc": "2026-11-13T13:47:37.304823+00:00",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "local_migration_record_changed": false,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "project_github_latest_target_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Official OS 1.4.2 release notes report first-batch shipment. The release ID, tag SHA, original publication time and ten assets are unchanged.",
+      "newly_discovered_merged_pull_requests": {},
+      "development_release_inventory_changes": [],
+      "related_dependency_records_added": {},
+      "project_main_integration_records_added": [],
+      "project_public_image_prerelease_records_added": [],
+      "official_os_release_changed": false,
+      "official_os_delivery_status_changed": true
     }
   ],
   "replica_public_image": {
@@ -50766,5 +50794,74 @@
       },
       "replica_integration": "not_integrated"
     }
-  ]
+  ],
+  "replica_0211_local_candidate": {
+    "recorded_on": "2026-11-14",
+    "source_commit_utc": "2026-11-13T15:56:29Z",
+    "source_commit_jst": "2026-11-14T00:56:29+09:00",
+    "local_branch": "codex/runtime-0211-feetech-20261114",
+    "source_sha": "70bc940cf0fe3b3cede0ccc81c1d962418540713",
+    "canonical_git_tree": "4ae57ba30e31d284e0f1ded8f44ff2e158ebcf0d",
+    "control_foundation_sha": "2c099320f1c33313c3e1aa8ee26bfd8e2d34bccd",
+    "previous_replica_runtime_source_sha": "d870d68fa5fe16a349eaacc906a9a748608445d5",
+    "official_base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+    "official_base_url": "https://github.com/pollen-robotics/microduck/commit/094d4bb4af31ec181156e1ea772437fdd7a55978",
+    "version": "0.21.1",
+    "official_api": 61,
+    "replica_api": 62,
+    "contract_note": "Replica API62 adds local Feetech and raw telemetry extensions. Upstream PR #449 proposes a different API62 for phased skills.",
+    "software_evidence": {
+      "linux_passed": 1849,
+      "linux_default_ignored": 69,
+      "onnxruntime_version": "1.28.0",
+      "onnxruntime_explicitly_passed": 59,
+      "remaining_ignored": 10,
+      "media_and_ble_compile_checks_passed": true,
+      "arm64_programs": [
+        "robotd",
+        "padd-feetech",
+        "updaterd"
+      ],
+      "arm64_qemu_version_checks_passed": true,
+      "arm64_qemu_fake_daemon_hello_health_state_passed": true,
+      "arm64_hardware_acceptance": false
+    },
+    "replica_integration": "local_runtime_candidate",
+    "branch_pushed": false,
+    "signed_release_bundle_complete": false,
+    "image_integrated": false,
+    "device_deployed": false,
+    "legacy_live_migration_supported": false,
+    "feetech_motion_features_disabled": [
+      "laser tracking",
+      "autonomous soccer",
+      "autonomous mode"
+    ],
+    "pending": [
+      "Port RC4 UART read-order transaction and readback, and IMU mounting verification with settled hold.",
+      "Verify Zero 3W Studio and pad consumers, signed package identity and rollback.",
+      "Validate first boot, camera geometry and actual ToF readings before autonomous motion.",
+      "Verify model identity and deployment rules, HD-1910 actions and audio on hardware."
+    ]
+  },
+  "replica_zero3_local_sensor_image": {
+    "recorded_on": "2026-11-14",
+    "version": "2026.11.13-rc.1.zero3w",
+    "source_sha": "7d3a279af30275436d5aefe98d96131a4014bbaa",
+    "source_commit_utc": "2026-11-13T06:44:03Z",
+    "base": "Zero 3W RC4",
+    "controller_build": "replica-bus-health-control.51",
+    "controller_api": 44,
+    "controller_source_sha": "0a492d14457d4bc8f4940d941959c05ca1101140",
+    "filename": "microduck-replica-zero3w-20261113-sensor-auto.img.xz",
+    "size": 752931888,
+    "sha256": "e15c4c1e04a32c343b5435cf3d8c68950e5b2fd0e85f3d3c80f5adf9422d35c4",
+    "xz_integrity_verified": true,
+    "camera_start_condition_verified_offline": true,
+    "arm64_tofd_alive_with_missing_bus_and_reports_unavailable": true,
+    "published": false,
+    "physical_card_boot_verified": false,
+    "physical_camera_or_tof_verified": false,
+    "physical_motion_verified": false
+  }
 }
