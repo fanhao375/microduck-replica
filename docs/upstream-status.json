@@ -29429,6 +29429,54 @@
           },
           "priority": "Medium before enabling official account relay or credentials on DIY images. Check service identity and startup on installs with an existing credential.",
           "replica_integration": "not_integrated"
+        },
+        {
+          "number": 600,
+          "title": "tof: a return from below the floor is a drop, and the duck stops for it",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-14T09:29:50Z",
+          "updated_at": "2026-11-14T10:01:52Z",
+          "merged_at": null,
+          "merge_commit_sha": "b32cf0454109ccee8bc72a078f7f9c67722c4e79",
+          "url": "https://github.com/pollen-robotics/microduck/pull/600",
+          "head_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "base_branch": "main",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "created_at_jst": "2026-11-14T18:29:50+09:00",
+          "updated_at_jst": "2026-11-14T19:01:52+09:00",
+          "head_committed_at_utc": "2026-11-14T09:40:39Z",
+          "api_version": 61,
+          "commit_count": 2,
+          "changed_file_count": 6,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+          "classification": "Open proposal. No matching development build in the checked release list and tag refs.",
+          "replica_integration": "not_integrated",
+          "review": {
+            "projection": "Steep validated returns sufficiently below the estimated floor are classified as Drop. The threshold starts at 5 cm plus 3 cm per horizontal metre. Status 255 remains clear; no-return edges and reflective floors remain limitations.",
+            "autonomous": "Successive detections in a column are needed before considering a drop. The obstacle logic uses same-column or nearby earlier floor observations when possible and stops for an unplaced, confirmed drop in the path. Forward sight must include two beams steep enough to judge drops.",
+            "display": "robotctl paints drops red in monitor and its 3D view.",
+            "validation": "Author reports that a simulated 10 cm platform run stopped at the edge 40 times in 10 minutes; reports no robot check for an edge with no return.",
+            "fixed_sources": {
+              "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/autod/src/obstacle.rs",
+              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/docs/design/autonomous.md",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/docs/robot/cheatsheet.md",
+              "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/kinematics/src/tof.rs",
+              "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/robotctl/src/duck.rs",
+              "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/robotctl/src/monitor.rs"
+            }
+          },
+          "priority": "High before enabling autonomous movement on HD1910: verify fitted ToF geometry, braking and handover, no return, and reflective floors.",
+          "impact": {
+            "HD1910": "No servo backend change. High priority before enabling autonomous movement.",
+            "camera": "No direct change.",
+            "ToF": "Drop projection, obstacle handling and operator visualization.",
+            "models": "No model or management change.",
+            "training": "No direct change.",
+            "motion": "Forward stop and steering constraints for autonomous movement.",
+            "sound": "No direct change."
+          }
         }
       ],
       "previous_stable_releases": [
@@ -46500,38 +46548,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-14T04:17:41Z",
+  "checked_at_utc": "2026-11-14T10:22:21Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-13T16:05:00Z",
-    "source_snapshot_utc": "2026-11-14T04:17:41Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-14T04:17:41Z",
     "default_branch_changes": false,
     "new_stable_release": false,
-    "stable_release_tag": "daemon-v0.21.1",
-    "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
-    "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        594,
-        595,
-        596
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        568,
-        549
-      ]
-    },
-    "newly_indexed_older_pull_requests": {
-      "pollen-robotics/microduck": [
-        230
-      ]
-    },
     "previous_tracked_prs_merged": false,
-    "new_development_releases": [],
-    "moved_development_tags": [],
-    "retired_development_tags": [],
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "official_os_release_changed": false,
@@ -46540,7 +46561,22 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Read fixed diffs for open #594/#595/#596, revised #568/#549 and older #230. Four official heads, stable release assets, tracked development tag refs, OS release and local candidate commits match the baseline."
+    "previous_substantive_review_utc": "2026-11-14T04:17:41Z",
+    "source_snapshot_utc": "2026-11-14T10:22:21Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-14T10:22:21Z",
+    "stable_release_tag": "daemon-v0.21.1",
+    "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+    "stable_asset_count": 8,
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        600
+      ]
+    },
+    "updated_pull_requests": {},
+    "new_development_releases": [],
+    "moved_development_tags": [],
+    "retired_development_tags": [],
+    "notes": "Read the open ToF drop PR fixed diff. Official and replica release baselines, tracked development labels and local candidates remain unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -49924,6 +49960,47 @@
       "robot_connected": false,
       "image_built_or_published_by_tracker": false,
       "notes": "Documents previously verified local Feetech 0.21.1 candidate and RC4-derived sensor autodetection image. Neither is a public release or a robot acceptance result."
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-13T16:05:00Z",
+      "source_snapshot_utc": "2026-11-14T04:17:41Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-14T04:17:41Z",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          594,
+          595,
+          596
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          568,
+          549
+        ]
+      },
+      "newly_indexed_older_pull_requests": {
+        "pollen-robotics/microduck": [
+          230
+        ]
+      },
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Read fixed diffs for open #594/#595/#596, revised #568/#549 and older #230. Four official heads, stable release assets, tracked development tag refs, OS release and local candidate commits match the baseline."
     }
   ],
   "replica_public_image": {
