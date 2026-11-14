@@ -29436,7 +29436,7 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-14T09:29:50Z",
-          "updated_at": "2026-11-14T11:08:39Z",
+          "updated_at": "2026-11-14T11:39:25Z",
           "merged_at": null,
           "merge_commit_sha": "b32cf0454109ccee8bc72a078f7f9c67722c4e79",
           "url": "https://github.com/pollen-robotics/microduck/pull/600",
@@ -29445,7 +29445,7 @@
           "base_branch": "main",
           "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "created_at_jst": "2026-11-14T18:29:50+09:00",
-          "updated_at_jst": "2026-11-14T20:08:39+09:00",
+          "updated_at_jst": "2026-11-14T20:39:25+09:00",
           "head_committed_at_utc": "2026-11-14T09:40:39Z",
           "api_version": 61,
           "commit_count": 2,
@@ -29471,11 +29471,20 @@
               "pr_updated_at_jst": "2026-11-14T20:08:39+09:00",
               "code_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
               "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
-              "attachment_url": "https://github.com/user-attachments/assets/557154a4-bc37-4b86-bdb3-daca02d9a65f",
+              "attachment_url": "https://github.com/user-attachments/assets/6fc43959-0eb2-4e58-ab1b-136cd5fa7756",
               "environment": "duck-sim",
               "scenario": "20 cm step, main on the left and the PR on the right as labelled by the author.",
               "run_count_or_duration_reported": false,
-              "physical_robot_validation": false
+              "physical_robot_validation": false,
+              "attachment_replacement": {
+                "published_at_utc": "2026-11-14T11:39:25Z",
+                "published_at_jst": "2026-11-14T20:39:25+09:00",
+                "previous_url": "https://github.com/user-attachments/assets/557154a4-bc37-4b86-bdb3-daca02d9a65f",
+                "previous_endpoint_http_status": 404,
+                "current_endpoint_range_get_http_status": 206,
+                "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                "scenario_description_changed": false
+              }
             }
           },
           "priority": "High before enabling autonomous movement on HD1910: verify fitted ToF geometry, braking and handover, no return, and reflective floors.",
@@ -46559,7 +46568,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-14T11:18:34Z",
+  "checked_at_utc": "2026-11-14T12:23:03Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -46572,9 +46581,9 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-14T10:22:21Z",
-    "source_snapshot_utc": "2026-11-14T11:18:34Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-14T11:18:34Z",
+    "previous_substantive_review_utc": "2026-11-14T11:18:34Z",
+    "source_snapshot_utc": "2026-11-14T12:23:03Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-14T12:23:03Z",
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
@@ -46587,7 +46596,7 @@
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "PR #600 added an author-labelled 20 cm step comparison in simulation. The fixed code, API61, open status, releases, other tracked sources and replica candidates are unchanged."
+    "notes": "Updated the published #600 simulation attachment URL. The old link returns 404. Scenario description, fixed commit and open status are unchanged."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -50041,6 +50050,35 @@
       "moved_development_tags": [],
       "retired_development_tags": [],
       "notes": "Read the open ToF drop PR fixed diff. Official and replica release baselines, tracked development labels and local candidates remain unchanged."
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-14T10:22:21Z",
+      "source_snapshot_utc": "2026-11-14T11:18:34Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-14T11:18:34Z",
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          600
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "PR #600 added an author-labelled 20 cm step comparison in simulation. The fixed code, API61, open status, releases, other tracked sources and replica candidates are unchanged."
     }
   ],
   "replica_public_image": {
