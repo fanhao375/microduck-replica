@@ -1,0 +1,3 @@
+# root:root 0440; validate with visudo -cf before installation.
+# The helper retains its verb allowlist and read-only robotd guards.
+orangepi ALL=(root) NOPASSWD: /usr/local/sbin/microduck-helper

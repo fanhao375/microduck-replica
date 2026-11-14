@@ -1,0 +1,52 @@
+{
+  "producer": "11quanzhi-program-source-snapshot-v1",
+  "origin_project": "11quanzhi",
+  "origin_git_revision": "cbd27b562d2ee1c5f270e69917e9d940d84b9315",
+  "worktree_snapshot": true,
+  "board_destination": "/opt/11quanzhi-source",
+  "source_roots": [
+    "radxa-cubie-a7z/control",
+    "radxa-cubie-a7z/studio",
+    "radxa-cubie-a7z/provision",
+    "radxa-cubie-a7z/thermal",
+    "prototypes/smart-duck-console"
+  ],
+  "files": 128,
+  "bytes": 12550824,
+  "checksums_cover": "Copied source files; generated metadata is excluded from its own manifest.",
+  "runtime_installation": "Separate migration payload; this source archive enables no services.",
+  "archived_only": [
+    {
+      "path": "radxa-cubie-a7z/thermal",
+      "reason": "Guarded for Cubie A7Z kernel 5.15.147-21-a733; do not apply its sysfs policy writes to Orange Pi kernel 6.6.98."
+    },
+    {
+      "path": "radxa-cubie-a7z/provision",
+      "reason": "Reference only: the working orangepi-provision service already provides provisioning; starting the Cubie version would compete for networking and ports."
+    },
+    {
+      "path": "prototypes/smart-duck-console",
+      "reason": "Complete offline demonstration and model assets; not a replacement for the live Studio backend."
+    },
+    {
+      "path": "radxa-cubie-a7z/os/flash-sd.sh",
+      "reason": "Host-only macOS writer for a Radxa system image; never execute on the Orange Pi."
+    },
+    {
+      "path": "output/camera-wiring/draw_wiring.py",
+      "reason": "Host-only Cubie camera wiring illustration generator using Pillow and a macOS font path."
+    }
+  ],
+  "excluded": [
+    "Git/editor/MCP configuration and .env files",
+    "Caches, virtualenvs, artifacts, reconstructed workspaces and runtime archives/binaries",
+    "Previous-board state, calibration, authentication material and private keys",
+    "Evidence logs, test logs, screenshots, operating system images and hardware downloads"
+  ],
+  "public_copy": true,
+  "public_changes": [
+    "Workstation paths replaced with portable examples",
+    "Historical board addresses replaced with documentation addresses",
+    "Cubie host flash image/log supplied as arguments"
+  ]
+}

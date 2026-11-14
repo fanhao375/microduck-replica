@@ -1,0 +1,222 @@
+/* 手柄页（web/pad.js）。颜色、圆角、字号都用 styles.css 的变量；按钮用现成的 btn-dark / btn-light，
+   开关用 sv-switch，横幅用 banner。index.html 里在 styles.css 后面引用这个文件。
+   规矩（审查 9）：这里只定义 pd- 开头的类，而且都收在 .pd-page 里面，不碰 styles.css 已有的类
+   （以前全局的 .todo 把总览「待办」栏的字变灰、总览的 .todo 又套到向导的 li 上）。 */
+
+.pd-page { display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px; }
+/* 手柄并进了总览（总览重排 §1.2）：#/pad 滚到这里时扣掉吸顶的顶栏（56 px，审查 O13） */
+#pad-block { margin-top: 28px; scroll-margin-top: calc(64px + var(--bar-h, 0px) + var(--band-h, 0px)); }   /* 扣掉吸顶的顶栏、提示条、仪表带 */
+.pd-page .pd-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.pd-page .pd-head h1, .pd-page .pd-head h2 { margin: 0; font-size: 28px; font-weight: 600; }
+.pd-page .pd-sum { font-size: 15px; color: var(--text-2); }
+.pd-page .pd-sum b { color: var(--text); font-weight: 600; }
+.pd-page .pd-ok { color: var(--ok); font-weight: 600; margin-left: 4px; }
+.pd-page .pd-bad { color: var(--danger); font-weight: 600; margin-left: 4px; }
+.pd-page .pd-unk { color: var(--warn); font-weight: 600; margin-left: 4px; }
+
+.pd-page .pd-main { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(380px, 1.15fr); gap: 16px; align-items: start; }
+.pd-page .pd-side { display: flex; flex-direction: column; gap: 16px; }
+/* 左栏上下放姿态与前方画面，整体吸顶，卡片互不覆盖。窄屏：手柄图 → 3D → 摄像头 → 遥控。 */
+.pd-page .pd-left { --pd-view-height: calc(100vh - 80px - var(--bar-h, 0px) - var(--band-h, 0px)); display: flex; flex-direction: column; gap: 16px; min-width: 0; align-self: start; }
+@media (min-width: 1101px) {
+  .pd-page .pd-main > .pd-left { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: calc(64px + var(--bar-h, 0px) + var(--band-h, 0px)); }
+  .pd-page .pd-main > .pd-left.pd-left-overflow { position: static; }
+  .pd-page .pd-main > .pd-live { grid-column: 2; grid-row: 1; }
+  .pd-page .pd-main > .pd-remote { grid-column: 2; grid-row: 2; }
+}
+.pd-page .pd-3d { padding: 10px 12px; position: static; }
+.pd-page .pd-3d-stage { position: relative; height: clamp(180px, calc((var(--pd-view-height) - 220px) * .56), 400px); border-radius: var(--radius-board); overflow: hidden; background: var(--stage-bg); }
+.pd-page .pd-3d-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+.pd-page .pd-3d-stage canvas.stage-stale { filter: grayscale(1); opacity: .5; }
+.pd-page .pd-3d-line { margin: 8px 4px 0; }
+@media (min-width: 1101px) and (max-height: 840px) {
+  .pd-page .pd-main > .pd-left { position: static; }
+}
+/* 遥控后面：配对向导、测急停、配过的手柄（审查 O11：遥控紧跟着手柄图） */
+/* 手柄区下面这排卡片：有几张就平分整行、一样高（用户 10-19：不要一张宽一张窄、右边空一大块） */
+.pd-page .pd-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch; }
+/* 卡片里的浅色按钮跟深色的一样大（用户 10-19：「忘掉」那么小，跟默认的一起搭） */
+.pd-page .pd-card .btn-light { height: 38px; padding: 0 18px; font-size: 15px; }
+.pd-page .pd-card:focus { outline: none; box-shadow: inset 0 0 0 1px var(--board-edge), 0 0 0 2px var(--blue); }
+.pd-page .pd-card { padding: 16px 20px; }
+.pd-page .pd-card h3 { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
+.pd-page .pd-card-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 6px; }
+.pd-page .pd-card-h h3 { margin: 0; }
+.pd-page .pd-livetag { font-size: 13px; color: var(--text-2); }
+.pd-page .pd-small-p { margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: var(--text-2); }
+.pd-page .pd-bad-t { color: var(--danger); }
+.pd-page .pd-why { margin: -2px 0 8px; color: var(--warn); }
+.pd-page .pd-note { margin: 10px 0 0; font-size: 13px; line-height: 1.6; color: var(--text-2); }
+.pd-page .pd-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.pd-page .pd-link { border: 0; background: none; padding: 0; color: var(--link); font-size: 14px; }
+.pd-page .pd-link:hover { text-decoration: underline; }
+.pd-page .banner { margin: 8px 0 0; }
+
+/* ---- 手柄示意图 ---- */
+.pd-page .pd-svgbox { position: relative; width: 100%; max-width: 640px; margin: 4px auto 6px; }
+.pd-page .pd-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pd-page .pd-body { fill: #F2F2F7; stroke: #D1D1D6; stroke-width: 1.5; }
+.pd-page .pd-touch { fill: #E5E5EA; stroke: #D1D1D6; }
+.pd-page .pd-key circle, .pd-page .pd-key rect, .pd-page rect.pd-key { fill: #FFFFFF; stroke: #C7C7CC; stroke-width: 1.2; transition: fill 60ms; }
+.pd-page .pd-key text, .pd-page .pd-cap { font-family: var(--font); font-size: 11px; font-weight: 600; fill: var(--text); text-anchor: middle; pointer-events: none; }
+.pd-page .pd-key .pd-small { font-size: 9px; }
+.pd-page .pd-shoulder rect { fill: #FAFAFC; stroke: #B9B9BF; }
+.pd-page .pd-trig rect:first-of-type { fill: #FFFFFF; stroke: #B9B9BF; }
+.pd-page .pd-key.pd-seen circle, .pd-page .pd-key.pd-seen rect:first-of-type, .pd-page rect.pd-key.pd-seen { stroke: var(--blue); stroke-width: 2; }
+.pd-page .pd-key.pd-on circle, .pd-page .pd-key.pd-on rect:first-of-type, .pd-page rect.pd-key.pd-on { fill: var(--text); stroke: var(--text); }
+.pd-page .pd-key.pd-on text { fill: #FFFFFF; }
+.pd-page .pd-trig.pd-on rect:first-of-type { fill: #FFFFFF; stroke: var(--text); stroke-width: 1.6; }   /* 扳机：外框描黑、里面按深浅填 */
+.pd-page .pd-trig text, .pd-page .pd-trig.pd-on text { fill: var(--text); paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; stroke-linejoin: round; }
+.pd-page .pd-trig.pd-trig-hi text { fill: #FFFFFF; stroke: none; }
+.pd-page .pd-key .pd-fill { fill: var(--text); stroke: none; opacity: .85; }
+.pd-page .pd-key.pd-on .pd-fill { opacity: 1; }
+.pd-page .pd-key.pd-estop.pd-on circle, .pd-page .pd-key.pd-estop.pd-on rect:first-of-type { fill: var(--danger); stroke: var(--danger); }
+.pd-page .pd-dpad-mid { fill: #FFFFFF; stroke: none; }
+.pd-page .pd-stick-base { fill: #E5E5EA; stroke: #C7C7CC; stroke-width: 1.2; }
+.pd-page .pd-stick-cap { fill: #FFFFFF; stroke: #AEAEB2; stroke-width: 1.5; transition: cx 40ms linear, cy 40ms linear; }
+.pd-page .pd-stick.pd-seen .pd-stick-base { stroke: var(--blue); stroke-width: 2; }
+.pd-page .pd-stick.pd-on .pd-stick-cap { fill: var(--text); stroke: var(--text); }
+.pd-page .pd-cap { fill: var(--text-2); font-weight: 500; }
+/* 图上键外侧的小字：只说明作用，不挡点击 */
+.pd-page .pd-key-note { font-family: var(--font); font-size: 7.5px; font-weight: 500; fill: var(--text-2); pointer-events: none; }
+.pd-page .pd-key-note.pd-note-danger { fill: var(--danger); font-weight: 600; }
+
+/* ---- 网页手柄：图上的键能按（第三轮） ---- */
+/* 手机上（审查三 V17）：长按扳机不弹菜单、不选中文字。整张图能用来滚页面（pan-y，总览重排审查 O2 / 代码审查 R12）：
+   只有两个摇杆的圆帽和 Select 的点击区不让滚——那是盖在图上的透明 HTML 块（pd-ov），SVG 子元素上的 touch-action 不一定认 */
+.pd-page .pd-svg-live { touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent; }
+.pd-page .pd-ov { position: absolute; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent; }
+.pd-page .pd-ov-stick { border-radius: 50%; cursor: grab; }
+.pd-page .pd-ov-select { border-radius: 8px; cursor: pointer; }
+.pd-page .pd-press { cursor: pointer; }
+.pd-page .pd-stick.pd-press { cursor: grab; }
+.pd-page .pd-key .pd-hit, .pd-page .pd-stick .pd-hit { fill: transparent; stroke: none; }   /* 比画出来的大的点击区 */
+.pd-page .pd-key.pd-key-off, .pd-page .pd-stick.pd-key-off { cursor: not-allowed; }
+.pd-page .pd-key.pd-key-off > circle, .pd-page .pd-key.pd-key-off > rect:first-of-type, .pd-page .pd-stick.pd-key-off .pd-stick-cap { opacity: .45; }
+.pd-page .pd-key.pd-key-off text { fill: var(--text-2); }
+.pd-page .pd-modetag rect { fill: var(--blue); }
+.pd-page .pd-modetag text { font-family: var(--font); font-size: 11px; font-weight: 600; fill: #FFFFFF; text-anchor: middle; }
+/* 手柄图：点一下才接键盘，有焦点时描一圈蓝（审查三 V2） */
+.pd-page .pd-zone { border-radius: 14px; outline: none; }
+.pd-page .pd-zone.pd-kb { box-shadow: 0 0 0 2px var(--blue); }
+.pd-page .pd-svgzone { padding: 2px 0; }
+.pd-page .pd-vbar { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0 0; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+.pd-page .pd-vbar b { color: var(--text); font-weight: 600; }
+.pd-page .pd-vbar small { font-size: 12px; }
+.pd-page .pd-vmsg { flex-basis: 100%; color: var(--text); }
+.pd-page .pd-web { display: block; margin-top: 1px; font-size: 12px; line-height: 1.5; color: var(--text-2); }
+
+/* ---- 按键表 ---- */
+.pd-page .pd-legend { margin-top: 6px; }
+.pd-page .pd-legend-h { margin: 12px 0 4px; font-size: 12px; color: var(--text-2); }
+.pd-page .pd-row { display: flex; align-items: flex-start; gap: 12px; padding: 6px 8px; border-radius: 10px; font-size: 14px; line-height: 1.55; }
+.pd-page .pd-row.pd-on { background: #EEF3FD; }
+.pd-page .pd-chip { flex: none; min-width: 64px; text-align: center; padding: 1px 8px; border-radius: 7px; background: #F2F2F7; box-shadow: inset 0 0 0 1px #E5E5EA; font-size: 13px; font-weight: 600; }
+.pd-page .pd-row.pd-on .pd-chip { background: var(--text); color: #FFFFFF; box-shadow: none; }
+.pd-page .pd-does { flex: 1; min-width: 0; }
+.pd-page .pd-danger { color: var(--danger); font-weight: 600; }
+.pd-page .pd-other { margin-top: 8px; }
+.pd-page .pd-other summary { cursor: pointer; font-size: 13px; color: var(--text-2); padding: 4px 8px; }
+
+/* ---- 勾选清单（急停几条、向导每一步、测急停三步）：状态类是 pd-s-* ---- */
+.pd-page .pd-checks, .pd-page .pd-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.pd-page .pd-checks li, .pd-page .pd-steps li { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; font-size: 15px; line-height: 1.5; }
+.pd-page .pd-checks small, .pd-page .pd-steps small { display: block; font-size: 13px; color: var(--text-2); }
+.pd-page .pd-mark { flex: none; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; background: #E5E5EA; color: var(--text-2); }
+.pd-page .pd-s-ok > .pd-mark { background: var(--ok); color: #FFFFFF; }
+.pd-page .pd-s-bad > .pd-mark, .pd-page .pd-s-fail > .pd-mark { background: var(--danger); color: #FFFFFF; }
+.pd-page .pd-s-unk > .pd-mark { background: #FFF1DC; color: var(--warn); }
+.pd-page .pd-s-skip > .pd-mark { background: #F2F2F7; }
+.pd-page .pd-s-todo { color: var(--text-2); }
+.pd-page .pd-s-doing > .pd-mark { background: #FFFFFF; box-shadow: inset 0 0 0 2px var(--text); position: relative; }
+.pd-page .pd-s-doing > .pd-mark::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--text); animation: pd-pulse 1s ease-in-out infinite; }
+@keyframes pd-pulse { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pd-page .pd-s-doing > .pd-mark::after { animation: none; } }
+
+.pd-page .pd-result { margin-top: 12px; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.pd-page .pd-result.pd-good { background: #EEF8F0; box-shadow: inset 0 0 0 1px #CBE8D2; }
+.pd-page .pd-result.pd-fail { background: #FFF1F1; box-shadow: inset 0 0 0 1px rgba(215, 0, 21, 0.18); }
+.pd-page .pd-err { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #FFF1F1; box-shadow: inset 0 0 0 1px rgba(215, 0, 21, 0.18); font-size: 14px; line-height: 1.6; }
+.pd-page .pd-err b { display: block; }
+.pd-page .pd-err details { margin-top: 4px; color: var(--text-2); font-size: 12px; }
+.pd-page .pd-err code { display: block; white-space: pre-wrap; word-break: break-all; font-size: 12px; }
+
+/* ---- 向导：选型号、设备列表 ---- */
+.pd-page .pd-kinds { display: flex; flex-wrap: wrap; gap: 4px; padding: 3px; border-radius: 10px; background: #E5E5EA; align-self: flex-start; }
+.pd-page .pd-kinds button { height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; font-size: 14px; color: var(--text); }
+.pd-page .pd-kinds button.pd-on { background: #FFFFFF; box-shadow: 0 1px 3px rgba(0, 0, 0, .12); font-weight: 600; }
+.pd-page .pd-how { margin: 12px 0 0; padding-left: 20px; font-size: 15px; line-height: 1.7; }
+.pd-page .pd-devs { margin-top: 10px; display: flex; flex-direction: column; }
+.pd-page .pd-dev { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--line); }
+.pd-page .pd-dev.pd-sel { background: #EEF3FD; margin: 0 -10px; padding: 6px 10px; border-radius: 10px; }
+.pd-page .pd-dev-name { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+.pd-page .pd-dev-name b { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-page .pd-dev-name small { font-size: 12px; color: var(--text-2); }
+.pd-page .pd-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.pd-page .pd-tag { font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--text); color: #FFFFFF; white-space: nowrap; }
+.pd-page .pd-tag.pd-gray { background: #E9E9EE; color: var(--text-2); }
+.pd-page .pd-tag.pd-warn { background: #FFF7EC; color: var(--warn); box-shadow: inset 0 0 0 1px #F5DDBF; }
+.pd-page .pd-bars { flex: none; width: 22px; display: inline-flex; align-items: flex-end; gap: 2px; color: var(--text-2); font-size: 12px; }
+.pd-page .pd-bars i { display: block; width: 4px; border-radius: 1px; background: #D1D1D6; }
+.pd-page .pd-bars i.pd-on { background: var(--text); }
+.pd-page .pd-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #C7C7CC; }
+.pd-page .pd-dot.pd-on { background: #34C759; }
+.pd-page .pd-empty { padding: 14px 0; font-size: 14px; color: var(--text-2); border-top: 1px solid var(--line); }
+.pd-page .pd-devs .pd-link { align-self: flex-start; margin: 8px 0 2px; }
+
+/* ---- 测急停 ---- */
+.pd-page .pd-test { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.pd-page .pd-test .pd-steps { margin-bottom: 4px; }
+
+/* ---- 遥控 ---- */
+.pd-page .pd-pose { font-size: 14px; color: var(--text-2); }
+.pd-page .pd-pose b { color: var(--text); font-weight: 600; }
+.pd-page .pd-sec { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pd-page .pd-sec-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 10px 0 8px; font-size: 14px; font-weight: 600; }
+.pd-page .pd-sec-h:first-child { margin-top: 0; }
+.pd-page .pd-sec-h small { font-size: 12px; font-weight: 400; color: var(--text-2); }
+.pd-page .pd-bigs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pd-page .pd-big { min-height: 64px; padding: 8px 12px; border: 0; border-radius: 14px; background: var(--text); color: #FFFFFF; text-align: left;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.pd-page .pd-big b { font-size: 17px; font-weight: 600; }
+.pd-page .pd-big small { font-size: 12px; line-height: 1.4; opacity: .8; }
+.pd-page .pd-big:disabled { background: #F2F2F7; color: var(--text-2); box-shadow: inset 0 0 0 1px #E5E5EA; }
+.pd-page .pd-big:disabled small { opacity: 1; }
+.pd-page .pd-big.pd-stopbtn:not(:disabled) { background: #FFFFFF; color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
+.pd-page .pd-lit { outline: 3px solid var(--blue); outline-offset: 2px; }     /* 镜像：实体手柄上按着对应的键 */
+.pd-page .pd-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pd-page .pd-act { min-width: 96px; max-width: 220px; min-height: 48px; padding: 6px 12px; border: 0; border-radius: 12px; background: #F2F2F7; color: var(--text);
+  box-shadow: inset 0 0 0 1px #E5E5EA; text-align: left; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+.pd-page .pd-act b { font-size: 15px; font-weight: 600; }
+.pd-page .pd-act small { font-size: 12px; line-height: 1.35; color: var(--text-2); }
+.pd-page .pd-act:not(:disabled):hover { background: #E9E9EE; }
+.pd-page .pd-act:disabled { opacity: .55; cursor: default; }
+.pd-page .pd-act.pd-held { background: var(--text); color: #FFFFFF; box-shadow: none; }
+.pd-page .pd-act.pd-held small { color: #EBEBF0; }
+.pd-page .pd-chipbtn { min-width: 0; min-height: 36px; border-radius: 999px; padding: 0 14px; font-size: 14px; }
+.pd-page .pd-vbar-hint { margin-top: 4px; }
+.pd-page .pd-relax { height: 32px; padding: 0 16px; font-size: 14px; }     /* 遥控卡顶上的卸力（审查 O3），样子跟顶栏的一样 */
+.pd-page .pd-leave-note { margin: 0 0 4px; }
+.pd-page .pd-legend-box { margin-top: 8px; }
+.pd-page .pd-legend-box > summary { cursor: pointer; font-size: 13px; color: var(--text-2); padding: 4px 0; }
+
+@media (max-width: 1100px) {
+  .pd-page .pd-main { grid-template-columns: 1fr; }
+  .pd-page .pd-3d { position: static; }
+  .pd-page .pd-3d-stage { height: 220px; }
+}
+@media (max-width: 700px) {
+  .pd-page .pd-card { padding: 14px 16px; }
+  /* 手机上图小：只留 Start / Select 两处说明，别挤在一起 */
+  .pd-page .pd-key-note:not(.pd-key-note-main) { display: none; }
+  .pd-page .pd-chip { min-width: 52px; }
+  .pd-page .pd-dev { flex-wrap: wrap; }
+  .pd-page .pd-bigs { grid-template-columns: 1fr; }
+  .pd-page .pd-big { min-height: 54px; }
+  .pd-page .pd-act { flex: 1 1 calc(50% - 8px); max-width: none; }
+  .pd-page .pd-chipbtn { flex: 0 0 auto; }
+}

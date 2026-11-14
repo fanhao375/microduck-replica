@@ -1,0 +1,29 @@
+.pd-motion { margin: 18px 0; padding: 16px; border: 1px solid var(--line, #dfe4e9); border-radius: 14px; background: #f8fafb; min-width: 0; }
+.motion-heading { display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap; margin-bottom: 10px; }
+.motion-heading h4 { font-size: 15px; margin: 0; }
+.motion-heading small { color: #596570; }
+.motion-state { font-size: 12px; background: #e8edf2; color: #344655; border-radius: 999px; padding: 4px 10px; }
+.motion-state.is-recording { background: #fde4e4; color: #9b2727; }
+.motion-toolbar { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.pd-motion button { white-space: normal; min-height: 38px; max-width: 100%; }
+.pd-motion .btn-primary { border: 1px solid #1d1d1f; background: #1d1d1f; color: #fff; border-radius: 8px; padding: 8px 14px; font-weight: 600; }
+.pd-motion .btn-primary:disabled { background: #dfe2e5; border-color: #dfe2e5; color: #69717a; }
+.motion-stop { color: #862424; border: 1px solid #e2b9b9; background: #fff6f5; border-radius: 8px; padding: 8px 12px; }
+.motion-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; font-size: 12px; }
+.motion-progress progress { flex: 1 1 130px; width: 100%; min-width: 0; height: 8px; accent-color: #167a65; }
+.motion-progress .num { flex: 0 1 auto; }
+.pd-motion label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; }
+.pd-motion input, .pd-motion select { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; padding: 9px 10px; min-height: 38px; border-radius: 8px; border: 1px solid #b7c1c8; background: #fff; color: #17232c; font: inherit; font-size: 14px; }
+.pd-motion input:focus, .pd-motion select:focus { outline: 2px solid #387b9d; outline-offset: 2px; }
+.motion-save, .motion-edit { margin: 12px 0; padding: 12px; background: #fff; border: 1px solid #d8e1e6; border-radius: 10px; }
+.motion-save p, .motion-edit p { margin-top: 0; font-size: 13px; overflow-wrap: anywhere; }
+.motion-library { margin-top: 16px; padding-top: 14px; border-top: 1px solid #dce3e8; }
+.motion-repeat { flex: 0 1 92px; }
+.motion-clip-name { font-size: 13px; overflow-wrap: anywhere; margin: 10px 0 6px; }
+.motion-clip-name small { color: #596570; }
+.motion-error { background: #fff1ef; border-left: 3px solid #ba4337; padding: 9px 10px; font-size: 13px; color: #8b261e; overflow-wrap: anywhere; }
+.motion-library-warning { background: #fff5d9; padding: 9px 10px; border-radius: 8px; color: #71501b; font-size: 13px; overflow-wrap: anywhere; }
+.motion-note { line-height: 1.65; margin-bottom: 0; }
+.motion-result { overflow-wrap: anywhere; }
+.motion-posture { padding: 9px 10px; border-radius: 8px; background: #e9f2f4; color: #284f5a; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .pd-motion { padding: 12px; } .motion-toolbar { gap: 7px; } .pd-motion button { flex: 1 1 auto; } }

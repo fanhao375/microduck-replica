@@ -1,0 +1,11 @@
+--- a/studio/pad.py
++++ b/studio/pad.py
+@@ -2731,5 +2731,7 @@
+     """鸭子上的默认接法（app.py / __main__.py 用）。没有 bluetoothctl 的机器（电脑）不给蓝牙端口。"""
+     bt = BluetoothCtl(prefix=bt_prefix) if shutil.which("bluetoothctl") else None
+     from .audio_interaction import AudioClient
+-    return PadOps(log, configd=ConfigdPort(configd_addr), bt=bt, tap=PaddTap(tap_addr, log=log),
++    # Match --configd none in Robotd: an omitted service is not an RPC address.
++    configd = None if configd_addr == "none" else ConfigdPort(configd_addr)
++    return PadOps(log, configd=configd, bt=bt, tap=PaddTap(tap_addr, log=log),
+                   robot=RobotPort(robotd_addr), state_dir=state_dir, audio=AudioClient())

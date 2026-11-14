@@ -1,0 +1,21 @@
+[Unit]
+Description=Microduck Studio on Orange Pi Zero 3W
+After=network.target
+
+[Service]
+Type=exec
+User=orangepi
+Group=orangepi
+SupplementaryGroups=robot dialout
+WorkingDirectory=/opt/microduck-studio/app
+ExecStart=/opt/microduck-studio/python/bin/python3.13 -I run.py --listen 0.0.0.0:8000 --robotd unix:/run/robotd.sock --state-dir /var/lib/microduck-studio --log-dir /var/log/microduck-studio --configd none --tof none --camera-socket none --servo-port /dev/orangepi-robot-uart-unconfigured
+Restart=on-failure
+RestartSec=5
+Nice=10
+CPUWeight=20
+CPUQuota=60%
+MemoryMax=300M
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=Microduck voice Studio HTTPS
+Wants=microduck-voice.service
+After=microduck-voice.service
+StartLimitIntervalSec=60
+StartLimitBurst=10
+
+[Service]
+WorkingDirectory=%h/.local/share/microduck-voice/current
+ExecStart=/usr/bin/python3 -I deploy/https_proxy.py --port 8444 --target-port 18081 --loopback-target --password-file %h/.local/state/microduck-voice/password.json --cert %h/.local/share/microduck-voice/tls/server.crt --key %h/.local/share/microduck-voice/tls/server.key
+Restart=always
+RestartSec=5
+UMask=0077
+Nice=10
+CPUWeight=10
+MemoryMax=64M
+
+[Install]
+WantedBy=default.target

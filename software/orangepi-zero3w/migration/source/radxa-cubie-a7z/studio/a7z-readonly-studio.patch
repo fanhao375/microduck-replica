@@ -1,0 +1,335 @@
+--- a/software/studio/deploy/microduck-helper
++++ b/software/studio/deploy/microduck-helper
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python3 -IS
++#!/opt/microduck-studio/python/bin/python3.13 -IS
+ """microduck-helper：Microduck Studio 的 root 小助手。舵机总线交接三个动词，手柄配对 / 忘掉两个，鸭子热点开关两个，
+ 写进主程序 / 读标定两个，SSH 密码登录开关两个。
+ 
+@@ -164,9 +164,9 @@
+ STILL_RAD = 0.01745       # 坐姿接管：两次读之间每颗都 < 1°
+ STDIN_LIMIT = 256 * 1024
+ 
+-BIN = {"systemctl": "/usr/bin/systemctl", "systemd-run": "/usr/bin/systemd-run", "fuser": "/usr/bin/fuser",
+-       "logger": "/usr/bin/logger", "flock": "/usr/bin/flock", "sleep": "/usr/bin/sleep",
+-       "nmcli": "/usr/bin/nmcli", "journalctl": "/usr/bin/journalctl",
++BIN = {"systemctl": "/bin/systemctl", "systemd-run": "/usr/bin/systemd-run", "fuser": "/bin/fuser",
++       "logger": "/usr/bin/logger", "flock": "/usr/bin/flock", "sleep": "/bin/sleep",
++       "nmcli": "/usr/bin/nmcli", "journalctl": "/bin/journalctl",
+        "chpasswd": "/usr/sbin/chpasswd", "sshd": "/usr/sbin/sshd"}
+ CHILD_ENV = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C.UTF-8", "SYSTEMD_PAGER": "", "SYSTEMD_COLORS": "0"}
+ 
+@@ -1126,6 +1126,15 @@
+ # ---------------------------------------------------------------------------
+ # 接管的门槛（handover-plan.md §2.1）
+ 
++def readonly_ready(bus):
++    if not isinstance(bus, dict) or bus.get("mode") != "read_only" or bus.get("motor_writes_blocked") is not True:
++        return False
++    sample = bus.get("last_sample") or {}
++    rows = sample.get("servos") or []
++    return (sample.get("cycle") == bus.get("total_cycles") and len(rows) == 15
++            and {r.get("id") for r in rows} == JOINT_IDS and bus.get("last_cycle_error") is None)
++
++
+ def judge(bus, safe, pol, allow_seated):
+     """一次读数的判决：("ok"|"seated"|"wait"|"refuse", 原因)。"""
+     if not isinstance(bus, dict):
+@@ -1133,6 +1142,9 @@
+     phase, mode = bus.get("phase"), bus.get("mode")
+     if phase in STARTING_PHASES:
+         return "ok", f"主程序还在启动阶段（{phase}），没发过目标"
++    if mode == "read_only":
++        return (("ok", "只读主控，禁止电机写入") if readonly_ready(bus)
++                else ("refuse", "只读主控暂无完整新鲜反馈，稍后重试"))
+     if mode == "commissioning":
+         return "ok", "标定模式"
+     if mode != "motion" or phase != "control":
+@@ -1249,6 +1261,10 @@
+     if exists(op.ctx, COMMISSIONING_DROPIN):
+         return "commissioning", "标定模式，写完要切运动模式"
+     start = exec_start(op)
++    if "--read-only" in start:
++        if strict:
++            raise Stop(EXIT_STATE, "read_only", "当前为只读主控；请先在舵机页校准，运动许可和 IMU 确认需另行完成")
++        return "read_only", "只读主控，尚未开放运动"
+     if "--commissioning" in start:
+         if strict:
+             raise Stop(EXIT_STATE, "foreign_commissioning",
+@@ -2737,7 +2753,7 @@
+     if not isinstance(bus, dict):
+         return False
+     mode, phase = bus.get("mode"), bus.get("phase")
+-    return (mode == "motion" and phase == "control") or (mode == "commissioning" and phase in COMMISSIONING_UP)
++    return readonly_ready(bus) or (mode == "motion" and phase == "control") or (mode == "commissioning" and phase in COMMISSIONING_UP)
+ 
+ 
+ def still_starting_text(bus, waited):
+@@ -2880,6 +2896,10 @@
+         if bus is not None:
+             last_bus = bus
+         # 起来了 = 运动模式 control，或者标定模式的实时快照（ready / moving / read_error / stop_unconfirmed / power_pending）
++        if readonly_ready(bus):
++            hold_stop(op)
++            return op.finish(EXIT_OK, "soft", "交还好了：已恢复只读主控，未开启运动或手柄服务",
++                             {"mode": "read_only", "motor_writes_blocked": True})
+         if robotd_up(bus) and startup_step4(op) == "success":
+             pads_start(op)
+             hold_stop(op)
+@@ -3329,6 +3349,10 @@
+             raise Stop(EXIT_ARGS, "bad_args", f"stdin 不是 JSON：{e}") from e
+         if not isinstance(args, dict):
+             raise Stop(EXIT_ARGS, "bad_args", "stdin 要是一个 JSON 对象")
++        if verb in ("calib-commit", "imu-recalibrate", "robotd-update", "bus-give-back") and "--read-only" in exec_start(op):
++            prohibited = verb in ("calib-commit", "imu-recalibrate", "robotd-update")
++            if prohibited or (verb == "bus-give-back" and "marker" in args):
++                raise Stop(EXIT_STATE, "read_only", "只读主控阶段只开放舵机页手动校准；不会自动切运动模式或接手保持")
+         if verb in ('bus-take','bus-give-back','calib-commit') or (verb=='imu-recalibrate' and args.get('action')!='status'):
+             native_update_conflict(op)
+         if verb == "bus-take":
+--- a/software/studio/studio/bus/feetech.py
++++ b/software/studio/studio/bus/feetech.py
+@@ -230,6 +230,12 @@
+ 
+     def sync_read(self, ids, addr, n):
+         """返回 {id: (err, params) 或 None}；按应答里的 ID 归档，缺包不连带丢后续包。"""
++        ids = list(ids)
++        if len(ids) > 3:
++            result = {}
++            for offset in range(0, len(ids), 3):
++                result.update(self.sync_read(ids[offset:offset + 3], addr, n))
++            return result
+         out = dict.fromkeys(ids)
+         with self._io:
+             self._send(BROADCAST, SYNC_READ, bytes([addr, n]) + bytes(ids))
+--- a/software/studio/studio/robotd.py
++++ b/software/studio/studio/robotd.py
+@@ -2,7 +2,7 @@
+ 
+ | 连接    | 只做什么                                                      |
+ | stream  | robot.subscribe {"hz":10}。有人在看才开，最后一个人走了 10 秒后才关 |
+-| poll    | hello（一次）、health 2 s、busStatus 1 s（卸力确认时 10 Hz）、policies 2 s、calibration-status（连上时、phase 变成 control 时各一次，只认这次 hello 之后的） |
++| poll    | hello（一次）、health 2 s、busStatus 10 Hz（各运行模式保持一致）、policies 2 s、calibration-status（连上时、phase 变成 control 时各一次，只认这次 hello 之后的） |
+ | cmd     | 运动命令（S1b 才用）                                           |
+ | 卸力    | 只发 robot.relax；每次新开一条连接（不留长连接）                   |
+ | 启动步骤 | robot.startupSubscribe：这次 hello 的四步没全成功时开，全成功 / 有一步失败就关（startup.py） |
+@@ -100,8 +100,9 @@
+             return
+         self._tasks = [loop.create_task(self._supervise("轮询", self._poll_loop), name="robotd-poll"),
+                        loop.create_task(self._supervise("实时状态订阅", self._stream_loop), name="robotd-stream"),
+-                       loop.create_task(self._supervise("configd 轮询", self._configd_loop), name="configd-poll"),
+                        loop.create_task(self._supervise("启动步骤订阅", lambda: startup_loop(self)), name="robotd-startup")]
++        if self.cfg.addr != "none":
++            self._tasks.append(loop.create_task(self._supervise("configd 轮询", self._configd_loop), name="configd-poll"))
+ 
+     async def stop(self):
+         # 正在路上的卸力先让它发完（最多等 1 秒），别在关 Studio 时把它掐掉
+@@ -305,7 +306,6 @@
+                 now = time.monotonic()
+                 if now >= due["bus"]:
+-                    # 标定模式 10 Hz：IMU 页的实时读数、站着校准都从 last_sample 拿（标定模式没有 robot.state）
+-                    every = 0.1 if (self.bus.value or {}).get("mode") == "commissioning" else 1.0
+-                    bus, asked = await self._ask("bus", "robot.busStatus", every=every)
++                    # 显示回读 500 ms 后过期；各模式和首次连接都以 10 Hz 更新，避免轮询间隙闪成未知。
++                    bus, asked = await self._ask("bus", "robot.busStatus", every=0.1)
+                     if bus is not None:
+                         self.bus.set(bus)
+--- a/software/studio/studio/servo.py
++++ b/software/studio/studio/servo.py
+@@ -29,7 +29,7 @@
+ import time
+ 
+ from .bus import feetech
+-from .startup_status import servo_observations
++from .startup_status import servo_observations, sampled_joint_feedback
+ 
+ IDS = [20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 10, 11, 12, 13, 14]     # 跟 robotd 的 JOINT_NAMES 同一个顺序
+ NAMES = {
+@@ -680,7 +680,13 @@
+         return _view_startup_observations(observations, directions, state, error, sim)
+     native = (bus or {}).get("native") if isinstance(bus, dict) and isinstance(bus.get("native"), dict) else {}
+     joints = {j.get("id"): j for j in (native.get("joints") or []) if isinstance(j, dict)}
++    sampled = sampled_joint_feedback(bus, receipt_age_s=rd.bus.age() if rd is not None else None,
++                                     bus_error=getattr(rd.bus, "error", None) if rd is not None else None)
++    if sampled is not None:
++        joints = {j["id"]: j for j in sampled}
+     torque_on = native.get("torque_enabled")
++    if isinstance(bus, dict) and bus.get("mode") == "commissioning":
++        torque_on = {"off": False, "all_enabled": True}.get(bus.get("torque_state"))
+     rows, volts = [], []
+     for sid in IDS:
+         j = joints.get(sid) or {}
+@@ -703,7 +709,7 @@
+     avg_v = round(sum(volts) / len(volts), 2) if volts else None
+     return {
+         "t": "servo", "state": state, "error": error, "sim": sim, "source": "robotd",
+-        "port": "主程序", "online": sum(1 for r in rows if r["fresh"]), "total": len(IDS),
++        "port": "主程序", "online": (None if sampled is not None and not any(r["fresh"] for r in rows) else sum(1 for r in rows if r["fresh"])), "total": len(IDS),
+         "hz": None, "avg_volts": avg_v, "battery_pct": battery_percent(avg_v), "drop_rate": None, "bus": None,
+         "holding": sum(1 for r in rows if r["torque"] == 1), "all_off": False, "latched": False,
+         "relaxing": False, "last_relax": None, "rows": rows,
+--- a/software/studio/studio/state.py
++++ b/software/studio/studio/state.py
+@@ -21,7 +21,7 @@
+ 
+ from .estop import STARTING_LONG_S, STARTING_PHASES
+ from .startup import startup_todo
+-from .startup_status import imu_context_current, imu_diagnostic, servo_observations, startup_wait
++from .startup_status import imu_context_current, imu_diagnostic, servo_observations, startup_wait, sampled_joint_feedback
+ 
+ JOINT_NAMES = ["left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
+                "neck_pitch", "head_pitch", "head_yaw", "head_roll", "mouth",
+@@ -65,6 +65,8 @@
+     mode, phase = bus.get("mode"), bus.get("phase")
+     if phase in STARTING_PHASES:
+         return "starting"
++    if mode == "read_only":
++        return "read_only"
+     if mode == "commissioning":
+         return "commissioning"
+     if mode != "motion":
+@@ -204,6 +206,9 @@
+     b = (health or {}).get("battery") or {}
+     battery = {"pct": b.get("percent"), "volts": b.get("volts")}
+     joints = native.get("joints") if isinstance(native.get("joints"), list) else []
++    sampled = sampled_joint_feedback(bus, receipt_age_s=bus_age, bus_error=getattr(rd.bus, "error", None))
++    if sampled is not None:
++        joints = sampled
+     fresh = [j for j in joints if isinstance(j, dict) and j.get("feedback_fresh") is True]
+     motors = (health or {}).get("motors") or {}
+     hottest = None
+@@ -212,6 +217,13 @@
+     servos = {"online": len(fresh) if joints else None, "total": len(joints) or 15, "hottest": hottest,
+               "stale": [JOINT_CN.get(j.get("name"), j.get("name")) for j in joints
+                         if isinstance(j, dict) and j.get("feedback_fresh") is False]}
++    if sampled is not None:
++        # A whole-sample cache cannot prove that every servo went offline.
++        if not fresh:
++            servos["online"] = None
++        sync = native.get("sync") or {}
++        servos["read_error"] = bool((bus or {}).get("last_cycle_error") or sync.get("deadline_exceeded")
++                                    or sync.get("missing_ids") or sync.get("bad_checksums"))
+     observations = servo_observations(bus, present=rd.present, bus_age_s=bus_age,
+                                       bus_error=getattr(rd.bus, "error", None))
+     if observations is not None:
+@@ -226,7 +238,9 @@
+         imu_status = "missing"
+     elif (imu_h.get("consecutive_stale_blocks") or 0) >= 25:
+         imu_status = "frozen"
+-    elif native.get("imu_mount_verified") is False:
++    elif (bus or {}).get("mode") == "read_only":
++        imu_status = "unverified"  # Sensor readiness does not verify mounting/calibration.
++    elif native.get("imu_mount_verified", (bus or {}).get("imu_mount_verified")) is False:
+         imu_status = "unverified"      # 方向没确认：装歪了走路会往前冲（10-12 猛冲的根因）
+     elif imu_h.get("ready") is True:
+         imu_status = "ok"
+--- a/software/studio/studio/startup_status.py
++++ b/software/studio/studio/startup_status.py
+@@ -139,3 +139,44 @@
+                      **{key: row.get(key) if feedback and _number(row.get(key)) else None for key in TELEMETRY}})
+     known = any(row["responding"] is not None for row in rows)
+     return {"rows": rows, "online": sum(row["responding"] is True for row in rows) if known else None}
++
++
++def sampled_joint_feedback(bus, *, receipt_age_s=None, bus_error=None):
++    """Recent commissioning/read-only feedback for display, never motion readiness.
++
++    One failed cycle does not erase fifteen replies from 20 ms earlier. Conversely,
++    repeated cached replies must expire using their native sample timestamp.
++    """
++    if not isinstance(bus, dict):
++        return None
++    if bus.get("mode") == "motion":
++        native = bus.get("native") or {}
++        rows = native.get("joints")
++        if not isinstance(rows, list):
++            return None
++        receipt = _age(receipt_age_s)
++        if receipt is None:
++            return None  # Legacy dictionary callers retain native freshness semantics.
++        out = []
++        for row in rows:
++            if not isinstance(row, dict):
++                continue
++            native_age = _age(row.get("sample_age_ms"))
++            age = native_age + receipt * 1000 if native_age is not None and receipt is not None else None
++            recent = (bus_error is None and receipt is not None and receipt < .5
++                      and (age < 500 if age is not None else row.get("feedback_fresh") is True))
++            out.append(dict(row, feedback_fresh=recent, sample_age_ms=age))
++        return out
++    if bus.get("mode") not in ("read_only", "commissioning"):
++        return None
++    sample = bus.get("last_sample")
++    sample = sample if isinstance(sample, dict) else {}
++    published, captured = _age(bus.get("updated_at_us")), _age(sample.get("at_us"))
++    receipt = _age(receipt_age_s)
++    age_ms = (receipt * 1000 + (published - captured) / 1000
++              if receipt is not None and published is not None and captured is not None and published >= captured else None)
++    fresh = bus_error is None and age_ms is not None and age_ms < 500
++    return [dict(row, name=row.get("joint"), volts=row.get("voltage_v"),
++                 feedback_fresh=fresh, sample_age_ms=age_ms)
++            for row in sample.get("servos", []) if isinstance(row, dict)
++            and isinstance(row.get("id"), int) and row["id"] in (10,11,12,13,14,20,21,22,23,24,30,31,32,33,34)]
+--- a/software/studio/studio/pad_drive.py
++++ b/software/studio/studio/pad_drive.py
+@@ -756,7 +756,7 @@
+         """feed_robot 里调（拿着锁，事件循环里：只改内存）：Studio 第一次看到主程序在 → 排一次 pose 复位；
+         姿势离开「准备好走」→ 退出模式、清掉头 / 身体（三 V1 第 8 条、V12）。"""
+         self.motion_studio.policy_feed(view)
+-        if self._pose_reset == "pending" and view.get("present") is True:
++        if self._pose_reset == "pending" and view.get("present") is True and (view.get("bus") or {}).get("mode") != "read_only":
+             self._pose_reset = "due"
+             self._tick_evt.set()
+         drv = self._posture() in DRIVING
+--- a/software/studio/web/app.js
++++ b/software/studio/web/app.js
+@@ -234,6 +234,7 @@
+   const postureText = st ? ({ starting: st.start_wait?.text || (st.starting_long ? '一直报启动中' : '启动中'), absent: '主程序没在跑', homing: '在站起来',
+     servo_session: '调舵机中' }[st.posture] || WAS[st.posture] || '状态不明') : null;
+   const modeText = !st ? '连接中'
++    : st.mode === 'read_only' ? '只读主控 · 可进入舵机页校准'
+     : st.mode === 'commissioning' ? (st.posture === 'commissioning' ? '标定模式' : `标定模式 · ${postureText}`)
+     : st.mode === 'motion' && st.posture !== 'absent' && st.posture !== 'servo_session' ? `运动模式 · ${postureText}`
+     : postureText;
+@@ -314,6 +315,7 @@
+             : `已经 ${st.starting_s} 秒了。主程序可能其实起来了、只是状态没更新（旧版主程序的毛病），也可能卡在启动：去日志页看主程序最后说了什么。` };
+       }
+       return { h: '主程序正在启动', sub: st.start_error ? `卡在：${st.start_error}` : '通常 10 秒内完成。' };
++    case 'read_only': return { h: '只读主控', sub: '舵机页可手动校准。主控保持只读，尚未开放站立、走路或翻滚。' };
+     case 'commissioning': return { h: '标定模式', sub: '出厂第一次：先粗校 IMU、再一键中位，第 3 步写进主程序会自动切到运动模式。' };
+     case 'limp': return { h: `${name}软着`, sub: '双手托起它，往下滑到「遥控」点「站起来」（或者按手柄 +）。' };
+     case 'homing': return { h: '正在站起来…', sub: '扶着它，别松手。' };
+@@ -437,7 +439,7 @@
+     <div>
+       <span class="label">舵机</span>
+       <span class="num" style="display:flex;align-items:baseline;gap:4px"><span class="big">${s.online ?? '—'}</span><span class="unit">/ ${s.total ?? 15}</span></span>
+-      <span class="small">${s.hottest ? `最热 ${Math.round(s.hottest.c)} °C · ${s.hottest.name}` : '—'}</span>
++      <span class="small">${s.read_error ? '同步读取异常' : s.online == null ? '等待有效回读' : s.hottest ? `最热 ${Math.round(s.hottest.c)} °C · ${s.hottest.name}` : '—'}</span>
+     </div>
+     <a href="#/imu">
+       <span class="label">IMU</span>
+--- a/software/studio/tests/test_helper_bus.py
++++ b/software/studio/tests/test_helper_bus.py
+@@ -1280,7 +1280,7 @@
+     def test_no_env_can_move_the_root(self):
+         src = HELPER.read_text(encoding="utf-8")
+         self.assertNotIn("environ.get(\"MICRODUCK_HELPER_ROOT", src)
+-        self.assertTrue(src.startswith("#!/usr/bin/python3 -IS\n"))
++        self.assertTrue(src.startswith("#!/opt/microduck-studio/python/bin/python3.13 -IS\n"))
+         self.assertEqual(H.Ctx().root, "/")
+ 
+ 
+--- a/software/studio/tests/test_backend.py
++++ b/software/studio/tests/test_backend.py
+@@ -408,7 +408,10 @@
+         await asyncio.sleep(2.5)
+         self.assertLess(self.rd.bus.age(), 1.5)
+         n_bus = len([m for _, m in self.fake.calls if m == "robot.busStatus"])
+-        self.assertLess(n_bus, 6, "出错的那项不能让循环 20 Hz 空转")
++        self.assertGreaterEqual(n_bus, 15, "health 失败不能阻断 10 Hz 总线状态刷新")
++        self.assertLess(n_bus, 30, "出错的那项不能让循环 20 Hz 空转")
++        n_health = sum(m == "robot.health" for _, m in self.fake.calls)
++        self.assertLessEqual(n_health, 3, "失败的 health 查询仍须退避")
+ 
+     async def test_relax_is_not_blocked_by_a_slow_poll(self):
+         self.fake.delays["robot.busStatus"] = 10.0                   # poll 连接上挂一个 10 秒不回的请求

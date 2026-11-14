@@ -1,0 +1,153 @@
+# FT5 native backend commissioning configuration.
+# ID values below are the OFFICIAL mapping, not proof of your wiring. Set the
+# actual ID for each named joint. Slots/names stay in official policy order.
+# 2048/+1 are placeholders until that joint is captured and marked calibrated.
+# The service can read raw telemetry now. Explicit motion requires all 15
+# calibrated joints with measured min_rad/max_rad, verified IMU mount, and
+# motion_enabled=true. No startup torque or automatic movement.
+motion_enabled = false
+imu_mount_verified = false
+# [w, x, y, z], sensor-to-trunk rotation. Official +90 degrees about Y.
+# Verify mounting and tilt directions; do not use this as a heading/pose reset.
+imu_mount_quat = [0.7071067811865476, 0.0, 0.7071067811865476, 0.0]
+
+# HD1910 goals always use raw speed 0 and leave acceleration register 41 unchanged.
+# Present velocity uses the fixed HD1910 native scale; no local override.
+# Only current needs a measured device-specific conversion before reporting mA.
+units_verified = false
+current_ma_per_count = 0.0
+
+[[joints]]
+name = "left_hip_yaw"
+id = 20
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "left_hip_roll"
+id = 21
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "left_hip_pitch"
+id = 22
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "left_knee"
+id = 23
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "left_ankle"
+id = 24
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "neck_pitch"
+id = 30
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "head_pitch"
+id = 31
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "head_yaw"
+id = 32
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "head_roll"
+id = 33
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "mouth"
+id = 34
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "right_hip_yaw"
+id = 10
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "right_hip_roll"
+id = 11
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "right_hip_pitch"
+id = 12
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "right_knee"
+id = 13
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
+
+[[joints]]
+name = "right_ankle"
+id = 14
+zero_raw = 2048
+direction = -1
+calibrated = false
+# min_rad = <measured lower limit in official joint radians>
+# max_rad = <measured upper limit in official joint radians>
