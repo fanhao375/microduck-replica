@@ -24082,70 +24082,105 @@
         {
           "number": 549,
           "title": "kinematics, robotd: clamp non-finite gaze targets and refuse non-finite robot.look",
-          "url": "https://github.com/pollen-robotics/microduck/pull/549",
           "state": "open",
           "draft": false,
           "created_at": "2026-11-06T11:37:22Z",
-          "updated_at": "2026-11-06T11:37:22Z",
+          "updated_at": "2026-11-12T11:18:33Z",
           "merged_at": null,
-          "merge_commit_sha": "b59ea210517fb44fcbaa541ed595501b3a5f2628",
-          "head_sha": "515e0e725a45b0da04b6f37ba7f262604e7d0aae",
-          "base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+          "merge_commit_sha": "b73f78db87b1ed984a1480588f273a01c00a5a5a",
+          "url": "https://github.com/pollen-robotics/microduck/pull/549",
+          "head_sha": "e46c72a7e2e9d2a0725f22901d94e0b671b929cb",
+          "base_sha": "15dae7f1df8182584f432361fbbb4af0e8bfb1c7",
           "base_branch": "main",
-          "actual_merge_base": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
-          "source_version": "0.18.8",
-          "api_version": 50,
+          "actual_merge_base": "15dae7f1df8182584f432361fbbb4af0e8bfb1c7",
+          "created_at_jst": "2026-11-06T20:37:22+09:00",
+          "updated_at_jst": "2026-11-12T20:18:33+09:00",
+          "head_committed_at_utc": "2026-11-12T11:18:31Z",
+          "api_version": 56,
+          "commit_count": 2,
           "changed_file_count": 2,
-          "commit_count": 1,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...515e0e725a45b0da04b6f37ba7f262604e7d0aae",
-          "classification": "pending proposal; not main/formal188 or replica integration",
-          "development_release_observed": false,
-          "priority": "high_numeric_input_and_RobotLook_contract_review_before_adoption;medium_headpointing_reference;low_current_image_delivery",
-          "replica_integration": "not_integrated;no runtime/model/image/service/device/browser changes by tracker",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/15dae7f1df8182584f432361fbbb4af0e8bfb1c7...e46c72a7e2e9d2a0725f22901d94e0b671b929cb",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
           "review": {
-            "library_behavior": "HeadFk::look_at replaces nonfinite neck_pitch with0; finite neck remainsclamped to modelrange. Only nonfinite target coordinates return immediately withfinite[neck,0,0,0] andclampedtrue. Finite target plusnonfinite neck continues solving; clampedtrue notguaranteed. PRsummary saying either invalidinput immediatelyclamps differs fromcode.",
-            "solver_guards": "Break on nonfinite determinant, nonfinite or<1e-12 stepnorm, or nonfinite nextpitch/yaw; finalclamped is residual>=tolerance OR nonfiniteresidual. Existing30iteration/dampedIK/modelranges retained. Not calibration, measuredtargetlock or hardwarelimit certification.",
-            "RPC_behavior": "RobotLook rejects anynonfinite x/y/z/neck_pitch with existingINVALID_PARAMS=-32602 before HEAD_FK/intentswrite. Finite unreachable target stilluses closestpossiblegazeresult. API50/source188 unchanged but acceptedinput/errorbehavior changes; oldNeverrefused comment nowoverbroad. No newRPC method.",
-            "tests": {
-              "new_test_definitions": 2,
-              "names": [
-                "non_finite_target_or_neck_clamps_without_nan",
-                "a_non_finite_look_target_is_refused"
-              ],
-              "library_fixture": "AlphaFK: xNaN,y+infinity,z-infinity requirefinitejoints/clampedtrue; separatefinite[1,0,0]+neckNaN assertsfinitejoints only, notclamped.",
-              "RPC_fixture": "DirectRustdispatch ofxNaN into defaultintents; assertserror-32602/message andfinitehead. Does not setnonzero sentinel andassert unchangedvalues.",
-              "coverage_limit": "NoJSONserialization/parsing/socket/BLE/WebRTC,fullcontrol_loop,policy/safetyorhardwareexercise. Does not demonstratewiretransportaccepts literalNaN or exhaustiveeveryfield/nonfinitepattern.",
-              "author_reported_kinematics_unit_tests": 31,
-              "author_reported_robotd_unit_tests": 260,
-              "author_reported_fmt_and_targeted_clippy": true,
-              "author_execution_environment_or_full_logs_independently_verified": false,
-              "tracker_executed": false
-            },
-            "downstream_claim_boundary": "Authorissue548/PR says badgaze latchesNaN andSafety::NotFinite holdswhole robot. Existingintents.set_head storesrawvalues, but actualheadEMA calls slew thatalreadydrops nonfinitetarget. Newtests do not runthatloop orSafety; do not report persistentwhole-robotfreeze or itsrepair asindependentlyproven.",
+            "change": "Earlier merge-from-main advanced the proposal to a base with API56. The retained two-file change guards finite gaze targets and rejects them at the RPC entrance if invalid.",
             "fixed_sources": {
-              "library_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/kinematics/src/head.rs",
-              "RPC_loop_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/robotd/src/main.rs",
-              "protocol_and_code": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/duck-ipc-proto/src/lib.rs",
-              "version": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/Cargo.toml",
-              "existing_intent_storage": "https://github.com/pollen-robotics/microduck/blob/4a763dd893f3982c3a11c136468ccf5d26bcc28a/robotd/src/intents.rs"
-            },
-            "issue_context": {
-              "number": 548,
-              "url": "https://github.com/pollen-robotics/microduck/issues/548",
-              "state": "open",
-              "scope": "AuthorreportednumericalIKanddownstreamfailure; nothardwareacceptance."
-            },
-            "validation": "Bothactualpatches and relevantfullsolver/RPC/headfilter/intents/protocolsources read,5canonicalGitbyte/blob/hashidentities checked. No tests,compiled/downloadedsoftwareexecution,installation,environmentrepairorrobotaccess."
+              "kinematics/src/head.rs": "https://github.com/pollen-robotics/microduck/blob/e46c72a7e2e9d2a0725f22901d94e0b671b929cb/kinematics/src/head.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/e46c72a7e2e9d2a0725f22901d94e0b671b929cb/robotd/src/main.rs"
+            }
           },
-          "impact": {
-            "HD1910": "Numericinput defense reference only; no servo protocol/register,mountcalibration,necktravel orrealmotionacceptance.",
-            "camera": "Camera-axispointingIK getsfiniteinput/solverguards; no imagepipeline,visualdetection/intrinsics/distortion/previewrepair.",
-            "ToF": "No sensorprojection/ranging/filter/SLAMchange despite sharedHeadFk geometry.",
-            "model_management": "unchanged",
-            "training": "no model/weight/trainingchange",
-            "motion": "InvalidRobotLook request refusedbeforeintentwrite; finite libraryfallback semantics differfromRPC. Physicaltracking/whole-robotbehavior unverified.",
-            "sound": "unchanged"
-          }
+          "priority": "Medium for head aiming and camera target inputs. Verify safe behavior before adoption.",
+          "replica_integration": "not_integrated",
+          "previous_head_sha": "515e0e725a45b0da04b6f37ba7f262604e7d0aae",
+          "history": [
+            {
+              "number": 549,
+              "title": "kinematics, robotd: clamp non-finite gaze targets and refuse non-finite robot.look",
+              "url": "https://github.com/pollen-robotics/microduck/pull/549",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-06T11:37:22Z",
+              "updated_at": "2026-11-06T11:37:22Z",
+              "merged_at": null,
+              "merge_commit_sha": "b59ea210517fb44fcbaa541ed595501b3a5f2628",
+              "head_sha": "515e0e725a45b0da04b6f37ba7f262604e7d0aae",
+              "base_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+              "base_branch": "main",
+              "actual_merge_base": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
+              "source_version": "0.18.8",
+              "api_version": 50,
+              "changed_file_count": 2,
+              "commit_count": 1,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4a763dd893f3982c3a11c136468ccf5d26bcc28a...515e0e725a45b0da04b6f37ba7f262604e7d0aae",
+              "classification": "pending proposal; not main/formal188 or replica integration",
+              "development_release_observed": false,
+              "priority": "high_numeric_input_and_RobotLook_contract_review_before_adoption;medium_headpointing_reference;low_current_image_delivery",
+              "replica_integration": "not_integrated;no runtime/model/image/service/device/browser changes by tracker",
+              "review": {
+                "library_behavior": "HeadFk::look_at replaces nonfinite neck_pitch with0; finite neck remainsclamped to modelrange. Only nonfinite target coordinates return immediately withfinite[neck,0,0,0] andclampedtrue. Finite target plusnonfinite neck continues solving; clampedtrue notguaranteed. PRsummary saying either invalidinput immediatelyclamps differs fromcode.",
+                "solver_guards": "Break on nonfinite determinant, nonfinite or<1e-12 stepnorm, or nonfinite nextpitch/yaw; finalclamped is residual>=tolerance OR nonfiniteresidual. Existing30iteration/dampedIK/modelranges retained. Not calibration, measuredtargetlock or hardwarelimit certification.",
+                "RPC_behavior": "RobotLook rejects anynonfinite x/y/z/neck_pitch with existingINVALID_PARAMS=-32602 before HEAD_FK/intentswrite. Finite unreachable target stilluses closestpossiblegazeresult. API50/source188 unchanged but acceptedinput/errorbehavior changes; oldNeverrefused comment nowoverbroad. No newRPC method.",
+                "tests": {
+                  "new_test_definitions": 2,
+                  "names": [
+                    "non_finite_target_or_neck_clamps_without_nan",
+                    "a_non_finite_look_target_is_refused"
+                  ],
+                  "library_fixture": "AlphaFK: xNaN,y+infinity,z-infinity requirefinitejoints/clampedtrue; separatefinite[1,0,0]+neckNaN assertsfinitejoints only, notclamped.",
+                  "RPC_fixture": "DirectRustdispatch ofxNaN into defaultintents; assertserror-32602/message andfinitehead. Does not setnonzero sentinel andassert unchangedvalues.",
+                  "coverage_limit": "NoJSONserialization/parsing/socket/BLE/WebRTC,fullcontrol_loop,policy/safetyorhardwareexercise. Does not demonstratewiretransportaccepts literalNaN or exhaustiveeveryfield/nonfinitepattern.",
+                  "author_reported_kinematics_unit_tests": 31,
+                  "author_reported_robotd_unit_tests": 260,
+                  "author_reported_fmt_and_targeted_clippy": true,
+                  "author_execution_environment_or_full_logs_independently_verified": false,
+                  "tracker_executed": false
+                },
+                "downstream_claim_boundary": "Authorissue548/PR says badgaze latchesNaN andSafety::NotFinite holdswhole robot. Existingintents.set_head storesrawvalues, but actualheadEMA calls slew thatalreadydrops nonfinitetarget. Newtests do not runthatloop orSafety; do not report persistentwhole-robotfreeze or itsrepair asindependentlyproven.",
+                "fixed_sources": {
+                  "library_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/kinematics/src/head.rs",
+                  "RPC_loop_and_test": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/robotd/src/main.rs",
+                  "protocol_and_code": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/duck-ipc-proto/src/lib.rs",
+                  "version": "https://github.com/pollen-robotics/microduck/blob/515e0e725a45b0da04b6f37ba7f262604e7d0aae/Cargo.toml",
+                  "existing_intent_storage": "https://github.com/pollen-robotics/microduck/blob/4a763dd893f3982c3a11c136468ccf5d26bcc28a/robotd/src/intents.rs"
+                },
+                "issue_context": {
+                  "number": 548,
+                  "url": "https://github.com/pollen-robotics/microduck/issues/548",
+                  "state": "open",
+                  "scope": "AuthorreportednumericalIKanddownstreamfailure; nothardwareacceptance."
+                },
+                "validation": "Bothactualpatches and relevantfullsolver/RPC/headfilter/intents/protocolsources read,5canonicalGitbyte/blob/hashidentities checked. No tests,compiled/downloadedsoftwareexecution,installation,environmentrepairorrobotaccess."
+              },
+              "impact": {
+                "HD1910": "Numericinput defense reference only; no servo protocol/register,mountcalibration,necktravel orrealmotionacceptance.",
+                "camera": "Camera-axispointingIK getsfiniteinput/solverguards; no imagepipeline,visualdetection/intrinsics/distortion/previewrepair.",
+                "ToF": "No sensorprojection/ranging/filter/SLAMchange despite sharedHeadFk geometry.",
+                "model_management": "unchanged",
+                "training": "no model/weight/trainingchange",
+                "motion": "InvalidRobotLook request refusedbeforeintentwrite; finite libraryfallback semantics differfromRPC. Physicaltracking/whole-robotbehavior unverified.",
+                "sound": "unchanged"
+              }
+            }
+          ]
         },
         {
           "number": 550,
@@ -25018,69 +25053,34 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-11T07:34:24Z",
-          "updated_at": "2026-11-11T08:35:57Z",
+          "updated_at": "2026-11-13T19:22:18Z",
           "merged_at": null,
-          "merge_commit_sha": "a68086ca66e355c132dd9a81146734f693dafd7f",
+          "merge_commit_sha": "8b26f76bda2a6d84f7ecfeab358e6b4f934482a6",
           "url": "https://github.com/pollen-robotics/microduck/pull/568",
-          "head_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
-          "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+          "head_sha": "c68aea617a749cf6d6a7117f31774db917220a77",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "base_branch": "main",
-          "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "created_at_jst": "2026-11-11T16:34:24+09:00",
-          "updated_at_jst": "2026-11-11T17:35:57+09:00",
-          "source_version": "0.19.0",
-          "api_version": 53,
-          "commit_count": 1,
-          "changed_file_count": 3,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
-          "classification": "Open revision. No matching development package found. Official 0.19.0 retains its recorded source.",
+          "updated_at_jst": "2026-11-14T04:22:18+09:00",
+          "head_committed_at_utc": "2026-11-13T18:52:37Z",
+          "api_version": 61,
+          "commit_count": 3,
+          "changed_file_count": 4,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...c68aea617a749cf6d6a7117f31774db917220a77",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
           "review": {
-            "search": "The prior local candidate and same-look full fallback remain. A nearby red distractor can hold until the next full scan. Both passes now stop at the last whole UYVY macropixel for odd widths.",
-            "peak": "The cached full-frame peak now retains its position. When the cached point lies inside the new window, the current local peak replaces it. A cached point outside the window can still compete with the current local peak.",
-            "performance": "Author reports a duck-sim comparison with real daemons and 360p render frames, 0.19 to 0.04 ms median tracking scan, with 807 main and 281 branch samples. Both held 15 Hz in the reported runs. The FaceBoardV1 savings are still projected.",
+            "change": "Merged current main and clarified existing window scanning and cached peak semantics in comments, configuration and docs. The head commit does not change executable scan logic.",
             "fixed_sources": {
-              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/mediad/src/laser.rs",
-              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/deploy/robotd.toml",
-              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/docs/robot/cheatsheet.md"
-            },
-            "upstream_ci_urls": {
-              "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734802",
-              "check": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734789",
-              "board": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734475"
+              "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/c68aea617a749cf6d6a7117f31774db917220a77/deploy/robotd.toml",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/c68aea617a749cf6d6a7117f31774db917220a77/docs/robot/cheatsheet.md",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/c68aea617a749cf6d6a7117f31774db917220a77/duck-ipc-proto/src/lib.rs",
+              "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/c68aea617a749cf6d6a7117f31774db917220a77/mediad/src/laser.rs"
             }
           },
-          "impact": {
-            "HD1910": "Low for current release. Before enabling this camera-driven feature, validate target handoff and stopping on HD1910.",
-            "camera": "Medium for evaluation. Candidate scan cost may drop with a stable dot. Reacquisition, false positives and CPU usage on the target camera board need measurement.",
-            "ToF": "No direct change.",
-            "model_management": "No direct change.",
-            "training": "No direct change.",
-            "motion": "No robotd change. Different visual selection timing can affect following, takeover and stopping.",
-            "sound": "No direct change."
-          },
-          "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
+          "priority": "Medium for camera performance review. High for reacquisition and stopping before enabling motion.",
           "replica_integration": "not_integrated",
-          "comparison_to_recorded_main": {
-            "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
-            "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
-            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
-            "status": "ahead",
-            "ahead_by": 1,
-            "behind_by": 0,
-            "file_count": 3
-          },
-          "comparison_to_previous_head": {
-            "from_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
-            "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
-            "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6afda03e74e96bdbbef130165117cc83eee88bf2...a6848d702d0024bae3f46a5123e67af530fd4a04",
-            "status": "diverged",
-            "ahead_by": 1,
-            "behind_by": 1,
-            "file_count": 3
-          },
-          "previous_head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+          "previous_head_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
           "history": [
             {
               "number": 568,
@@ -25133,6 +25133,76 @@
               },
               "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
               "replica_integration": "not_integrated"
+            },
+            {
+              "number": 568,
+              "title": "laser: scan only around the dot while tracking",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-11-11T07:34:24Z",
+              "updated_at": "2026-11-11T08:35:57Z",
+              "merged_at": null,
+              "merge_commit_sha": "a68086ca66e355c132dd9a81146734f693dafd7f",
+              "url": "https://github.com/pollen-robotics/microduck/pull/568",
+              "head_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
+              "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+              "base_branch": "main",
+              "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+              "created_at_jst": "2026-11-11T16:34:24+09:00",
+              "updated_at_jst": "2026-11-11T17:35:57+09:00",
+              "source_version": "0.19.0",
+              "api_version": 53,
+              "commit_count": 1,
+              "changed_file_count": 3,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
+              "classification": "Open revision. No matching development package found. Official 0.19.0 retains its recorded source.",
+              "review": {
+                "search": "The prior local candidate and same-look full fallback remain. A nearby red distractor can hold until the next full scan. Both passes now stop at the last whole UYVY macropixel for odd widths.",
+                "peak": "The cached full-frame peak now retains its position. When the cached point lies inside the new window, the current local peak replaces it. A cached point outside the window can still compete with the current local peak.",
+                "performance": "Author reports a duck-sim comparison with real daemons and 360p render frames, 0.19 to 0.04 ms median tracking scan, with 807 main and 281 branch samples. Both held 15 Hz in the reported runs. The FaceBoardV1 savings are still projected.",
+                "fixed_sources": {
+                  "mediad/src/laser.rs": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/mediad/src/laser.rs",
+                  "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/deploy/robotd.toml",
+                  "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/a6848d702d0024bae3f46a5123e67af530fd4a04/docs/robot/cheatsheet.md"
+                },
+                "upstream_ci_urls": {
+                  "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734802",
+                  "check": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734789",
+                  "board": "https://github.com/pollen-robotics/microduck/actions/runs/42988319377/job/130414734475"
+                }
+              },
+              "impact": {
+                "HD1910": "Low for current release. Before enabling this camera-driven feature, validate target handoff and stopping on HD1910.",
+                "camera": "Medium for evaluation. Candidate scan cost may drop with a stable dot. Reacquisition, false positives and CPU usage on the target camera board need measurement.",
+                "ToF": "No direct change.",
+                "model_management": "No direct change.",
+                "training": "No direct change.",
+                "motion": "No robotd change. Different visual selection timing can affect following, takeover and stopping.",
+                "sound": "No direct change."
+              },
+              "priority": "Medium for laser camera performance evaluation. High priority target handoff and stop checks before motion adoption.",
+              "replica_integration": "not_integrated",
+              "comparison_to_recorded_main": {
+                "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
+                "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...a6848d702d0024bae3f46a5123e67af530fd4a04",
+                "status": "ahead",
+                "ahead_by": 1,
+                "behind_by": 0,
+                "file_count": 3
+              },
+              "comparison_to_previous_head": {
+                "from_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2",
+                "to_sha": "a6848d702d0024bae3f46a5123e67af530fd4a04",
+                "merge_base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/6afda03e74e96bdbbef130165117cc83eee88bf2...a6848d702d0024bae3f46a5123e67af530fd4a04",
+                "status": "diverged",
+                "ahead_by": 1,
+                "behind_by": 1,
+                "file_count": 3
+              },
+              "previous_head_sha": "6afda03e74e96bdbbef130165117cc83eee88bf2"
             }
           ]
         },
@@ -29223,6 +29293,142 @@
           ],
           "first_formal_release": "daemon-v0.21.1",
           "first_formal_source_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978"
+        },
+        {
+          "number": 594,
+          "title": "configd: build on macOS again",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-13T19:10:52Z",
+          "updated_at": "2026-11-13T19:10:52Z",
+          "merged_at": null,
+          "merge_commit_sha": "de77703ac36bfe1f6daa3a7b7ec21c212c7a16e2",
+          "url": "https://github.com/pollen-robotics/microduck/pull/594",
+          "head_sha": "0a4017376865324bc82dc98ff53dd69dabfa08bb",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "base_branch": "main",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "created_at_jst": "2026-11-14T04:10:52+09:00",
+          "updated_at_jst": "2026-11-14T04:10:52+09:00",
+          "head_committed_at_utc": "2026-11-13T19:10:21Z",
+          "api_version": 61,
+          "commit_count": 1,
+          "changed_file_count": 1,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...0a4017376865324bc82dc98ff53dd69dabfa08bb",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
+          "review": {
+            "change": "Clock selection only: configd still uses CLOCK_BOOTTIME on Linux and switches to CLOCK_MONOTONIC on macOS. Author reports whole-workspace checks together with #434.",
+            "fixed_sources": {
+              "configd/src/wifi_ssh.rs": "https://github.com/pollen-robotics/microduck/blob/0a4017376865324bc82dc98ff53dd69dabfa08bb/configd/src/wifi_ssh.rs"
+            }
+          },
+          "priority": "Low on Linux Zero 3W. Medium when developing or running duck-sim on macOS.",
+          "replica_integration": "not_integrated"
+        },
+        {
+          "number": 595,
+          "title": "duck-sim: run mapd and autod, and point laser and soccer at the duck's mediad",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-13T20:43:52Z",
+          "updated_at": "2026-11-13T20:43:52Z",
+          "merged_at": null,
+          "merge_commit_sha": "f367abeda717fad83e2846cd3dd62fe1b122293c",
+          "url": "https://github.com/pollen-robotics/microduck/pull/595",
+          "head_sha": "157c2f5f64e2f50ad2b4edc437896516877deab2",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "base_branch": "main",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "created_at_jst": "2026-11-14T05:43:52+09:00",
+          "updated_at_jst": "2026-11-14T05:43:52+09:00",
+          "head_committed_at_utc": "2026-11-13T20:43:37Z",
+          "api_version": 61,
+          "commit_count": 1,
+          "changed_file_count": 2,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...157c2f5f64e2f50ad2b4edc437896516877deab2",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
+          "review": {
+            "change": "Each simulated robot gets its own mapd, autod, ToF input and mediad frame socket. Launcher and robotctl use per-robot sockets and down stops the new services. Author reports a macOS simulation with #594.",
+            "fixed_sources": {
+              "docs/robot/simulation.md": "https://github.com/pollen-robotics/microduck/blob/157c2f5f64e2f50ad2b4edc437896516877deab2/docs/robot/simulation.md",
+              "scripts/duck-sim": "https://github.com/pollen-robotics/microduck/blob/157c2f5f64e2f50ad2b4edc437896516877deab2/scripts/duck-sim"
+            }
+          },
+          "priority": "Medium as a replay harness for autonomy and sensor IPC. No board driver or hardware acceptance.",
+          "replica_integration": "not_integrated"
+        },
+        {
+          "number": 596,
+          "title": "autod: a dot ends a survey, and a brace ends a chase",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-11-13T20:44:05Z",
+          "updated_at": "2026-11-13T20:44:05Z",
+          "merged_at": null,
+          "merge_commit_sha": "04cbecb9f3446f7edb60149438bb660a7aaea5be",
+          "url": "https://github.com/pollen-robotics/microduck/pull/596",
+          "head_sha": "5f8d37f1706283dc6fe798e3fcaf53d024b5b047",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "base_branch": "main",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "created_at_jst": "2026-11-14T05:44:05+09:00",
+          "updated_at_jst": "2026-11-14T05:44:05+09:00",
+          "head_committed_at_utc": "2026-11-13T20:31:47Z",
+          "api_version": 61,
+          "commit_count": 1,
+          "changed_file_count": 3,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...5f8d37f1706283dc6fe798e3fcaf53d024b5b047",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
+          "review": {
+            "change": "Laser sightings can interrupt survey, with uncertain map fix queued for a later survey. Brace disables tracking. A changed laser request is sent immediately and only an unaccepted repeat is throttled. Author reports 45 autod tests and simulation with #594/#595.",
+            "fixed_sources": {
+              "autod/src/brain.rs": "https://github.com/pollen-robotics/microduck/blob/5f8d37f1706283dc6fe798e3fcaf53d024b5b047/autod/src/brain.rs",
+              "autod/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/5f8d37f1706283dc6fe798e3fcaf53d024b5b047/autod/src/main.rs",
+              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/5f8d37f1706283dc6fe798e3fcaf53d024b5b047/docs/design/autonomous.md"
+            }
+          },
+          "priority": "High before enabling camera-driven motion on HD1910. Validate handover and stopping near obstacles.",
+          "replica_integration": "not_integrated"
+        },
+        {
+          "number": 230,
+          "title": "the account token gets a group of its own, with mediad as its only member",
+          "state": "open",
+          "draft": false,
+          "created_at": "2026-09-07T18:48:15Z",
+          "updated_at": "2026-11-13T19:14:43Z",
+          "merged_at": null,
+          "merge_commit_sha": "4c9a51128ba434ccbe7de962f8a0e83640de93e7",
+          "url": "https://github.com/pollen-robotics/microduck/pull/230",
+          "head_sha": "5d83f0864be49f2fa425985b5445a4351d6abd76",
+          "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "base_branch": "main",
+          "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+          "created_at_jst": "2026-09-08T03:48:15+09:00",
+          "updated_at_jst": "2026-11-14T04:14:43+09:00",
+          "head_committed_at_utc": "2026-11-13T18:44:01Z",
+          "api_version": 61,
+          "commit_count": 3,
+          "changed_file_count": 10,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...5d83f0864be49f2fa425985b5445a4351d6abd76",
+          "classification": "Open proposal. No matching development release in the checked releases and tag refs.",
+          "review": {
+            "change": "Older open proposal newly indexed after merging main. It routes the account token to a dedicated group for mediad and normalizes existing file group and permissions after updater self-test.",
+            "fixed_sources": {
+              "deploy/README.md": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/deploy/README.md",
+              "docs/design/remote-access-design.md": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/docs/design/remote-access-design.md",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/duck-ipc-proto/src/lib.rs",
+              "mediad/systemd/mediad.service": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/mediad/systemd/mediad.service",
+              "mediad/systemd/sysusers.d/mediad.conf": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/mediad/systemd/sysusers.d/mediad.conf",
+              "scripts/install.sh": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/scripts/install.sh",
+              "updater/src/account.rs": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/updater/src/account.rs",
+              "updater/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/updater/src/main.rs",
+              "updater/src/unix.rs": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/updater/src/unix.rs",
+              "updater/systemd/sysusers.d/robot.conf": "https://github.com/pollen-robotics/microduck/blob/5d83f0864be49f2fa425985b5445a4351d6abd76/updater/systemd/sysusers.d/robot.conf"
+            }
+          },
+          "priority": "Medium before enabling official account relay or credentials on DIY images. Check service identity and startup on installs with an existing credential.",
+          "replica_integration": "not_integrated"
         }
       ],
       "previous_stable_releases": [
@@ -46294,18 +46500,34 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-13T16:05:00Z",
+  "checked_at_utc": "2026-11-14T04:17:41Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-13T13:47:37.304823+00:00",
-    "source_snapshot_utc": "2026-11-13T16:05:00Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-13T16:05:00Z",
+    "previous_substantive_review_utc": "2026-11-13T16:05:00Z",
+    "source_snapshot_utc": "2026-11-14T04:17:41Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-14T04:17:41Z",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {},
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        594,
+        595,
+        596
+      ]
+    },
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        568,
+        549
+      ]
+    },
+    "newly_indexed_older_pull_requests": {
+      "pollen-robotics/microduck": [
+        230
+      ]
+    },
     "previous_tracked_prs_merged": false,
     "new_development_releases": [],
     "moved_development_tags": [],
@@ -46313,15 +46535,12 @@
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "official_os_release_changed": false,
-    "local_migration_record_changed": true,
-    "local_spare_card_image_record_added": true,
-    "project_public_image_release_status_changed": false,
-    "project_public_software_status_changed": false,
+    "local_migration_record_changed": false,
     "runtime_code_changed_by_heartbeat": false,
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "notes": "Documents previously verified local Feetech 0.21.1 candidate and RC4-derived sensor autodetection image. Neither is a public release or a robot acceptance result."
+    "notes": "Read fixed diffs for open #594/#595/#596, revised #568/#549 and older #230. Four official heads, stable release assets, tracked development tag refs, OS release and local candidate commits match the baseline."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -49677,6 +49896,34 @@
       "project_public_image_prerelease_records_added": [],
       "official_os_release_changed": false,
       "official_os_delivery_status_changed": true
+    },
+    {
+      "previous_substantive_review_utc": "2026-11-13T13:47:37.304823+00:00",
+      "source_snapshot_utc": "2026-11-13T16:05:00Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-13T16:05:00Z",
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "previous_tracked_prs_merged": false,
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": true,
+      "local_spare_card_image_record_added": true,
+      "project_public_image_release_status_changed": false,
+      "project_public_software_status_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "notes": "Documents previously verified local Feetech 0.21.1 candidate and RC4-derived sensor autodetection image. Neither is a public release or a robot acceptance result."
     }
   ],
   "replica_public_image": {
