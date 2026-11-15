@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-14",
+  "recorded_on": "2026-11-15",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -26504,12 +26504,12 @@
         {
           "number": 580,
           "title": "docs(kinematics/tof): clarify Zone::Hit range is sensor-relative",
-          "state": "open",
+          "state": "closed",
           "draft": false,
           "created_at": "2026-11-13T01:00:29Z",
-          "updated_at": "2026-11-13T01:00:29Z",
+          "updated_at": "2026-11-14T19:53:33Z",
           "merged_at": null,
-          "closed_at": null,
+          "closed_at": "2026-11-14T19:53:32Z",
           "url": "https://github.com/pollen-robotics/microduck/pull/580",
           "head_sha": "8dc198a3eaef79314e1bca1e0874df3fd6b47d25",
           "base_sha": "6eab9f3ddd8e11598b8cfad2bbef5ca3ca462a2f",
@@ -26518,7 +26518,7 @@
           "commit_count": 1,
           "changed_file_count": 1,
           "created_at_jst": "2026-11-13T10:00:29+09:00",
-          "updated_at_jst": "2026-11-13T10:00:29+09:00",
+          "updated_at_jst": "2026-11-15T04:53:33+09:00",
           "source_committed_at_utc": "2026-11-09T14:32:15Z",
           "source_committed_at_jst": "2026-11-09T23:32:15+09:00",
           "source_version": "0.18.9",
@@ -26526,7 +26526,7 @@
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/da34a2212ae12eddfd73d0dfbf924f291aaf1dc9...8dc198a3eaef79314e1bca1e0874df3fd6b47d25",
           "development_release_observed": false,
           "included_in_formal_release": false,
-          "classification": "Open documentation-only proposal from an older source base. No matching development release.",
+          "classification": "Closed unmerged. The current release independently clarifies the sensor-relative range.",
           "review": {
             "change": "Clarifies that Zone::Hit.range is the horizontal component of the sensor slant range. The implementation already computes this; point is in the trunk frame. A trunk-axis distance must be computed from a levelled point.",
             "alternative": "Open #546 instead changes the computed range to trunk-relative. Both address #430.",
@@ -26538,7 +26538,16 @@
               "formal": "https://github.com/pollen-robotics/microduck/blob/7fba12ed048d0d3a1c306ba8a2787a1a407b9974/kinematics/src/tof.rs"
             },
             "issue_url": "https://github.com/pollen-robotics/microduck/issues/430",
-            "alternative_pull_url": "https://github.com/pollen-robotics/microduck/pull/546"
+            "alternative_pull_url": "https://github.com/pollen-robotics/microduck/pull/546",
+            "closure": {
+              "author_comment_url": "https://github.com/pollen-robotics/microduck/pull/580#issuecomment-6883313093",
+              "released_source_url": "https://github.com/pollen-robotics/microduck/blob/094d4bb4af31ec181156e1ea772437fdd7a55978/kinematics/src/tof.rs",
+              "open_code_change_proposals": [
+                441,
+                546
+              ],
+              "open_issue": 430
+            }
           },
           "impact": {
             "HD1910": "High priority before using external navigation: verify head mounting geometry, reference frame and stopping threshold.",
@@ -26550,7 +26559,9 @@
             "sound": "No change."
           },
           "priority": "High geometry and stop-threshold review before navigation; low for current image.",
-          "replica_integration": "not_integrated"
+          "replica_integration": "not_integrated",
+          "closed_at_jst": "2026-11-15T04:53:32+09:00",
+          "merge_commit_sha": null
         },
         {
           "number": 581,
@@ -29436,7 +29447,7 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-14T09:29:50Z",
-          "updated_at": "2026-11-14T11:39:25Z",
+          "updated_at": "2026-11-14T19:59:47Z",
           "merged_at": null,
           "merge_commit_sha": "b32cf0454109ccee8bc72a078f7f9c67722c4e79",
           "url": "https://github.com/pollen-robotics/microduck/pull/600",
@@ -29445,7 +29456,7 @@
           "base_branch": "main",
           "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "created_at_jst": "2026-11-14T18:29:50+09:00",
-          "updated_at_jst": "2026-11-14T20:39:25+09:00",
+          "updated_at_jst": "2026-11-15T04:59:47+09:00",
           "head_committed_at_utc": "2026-11-14T09:40:39Z",
           "api_version": 61,
           "commit_count": 2,
@@ -29485,6 +29496,17 @@
                 "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
                 "scenario_description_changed": false
               }
+            },
+            "additional_simulation": {
+              "reported_at_utc": "2026-11-14T19:59:47Z",
+              "reported_at_jst": "2026-11-15T04:59:47+09:00",
+              "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+              "source_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+              "additional_runs": 3,
+              "minutes_per_run": 10,
+              "falls_over_edge": 1,
+              "limitation": "Forward-only ToF does not cover lateral or rear edges. Turning in place can drift. No-return edges still require hardware validation.",
+              "physical_robot_validation": false
             }
           },
           "priority": "High before enabling autonomous movement on HD1910: verify fitted ToF geometry, braking and handover, no return, and reflective floors.",
@@ -46568,7 +46590,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-14T12:23:03Z",
+  "checked_at_utc": "2026-11-15T02:54:01Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -46581,22 +46603,28 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-14T11:18:34Z",
-    "source_snapshot_utc": "2026-11-14T12:23:03Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-14T12:23:03Z",
+    "previous_substantive_review_utc": "2026-11-14T12:23:03Z",
+    "source_snapshot_utc": "2026-11-15T02:54:01Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-15T02:54:01Z",
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
     "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
+        580,
         600
       ]
     },
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Updated the published #600 simulation attachment URL. The old link returns 404. Scenario description, fixed commit and open status are unchanged."
+    "notes": "#580 closed unmerged after the official source clarified sensor-relative distance. #600 adds author-reported simulation evidence of one fall across three further ten-minute runs. No source movement in either PR.",
+    "closed_unmerged_pull_requests": {
+      "pollen-robotics/microduck": [
+        580
+      ]
+    }
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -50079,6 +50107,35 @@
       "moved_development_tags": [],
       "retired_development_tags": [],
       "notes": "PR #600 added an author-labelled 20 cm step comparison in simulation. The fixed code, API61, open status, releases, other tracked sources and replica candidates are unchanged."
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-14T11:18:34Z",
+      "source_snapshot_utc": "2026-11-14T12:23:03Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-14T12:23:03Z",
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          600
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Updated the published #600 simulation attachment URL. The old link returns 404. Scenario description, fixed commit and open status are unchanged."
     }
   ],
   "replica_public_image": {
