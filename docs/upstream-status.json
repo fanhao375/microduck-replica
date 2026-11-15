@@ -29447,21 +29447,21 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-14T09:29:50Z",
-          "updated_at": "2026-11-14T19:59:47Z",
+          "updated_at": "2026-11-15T09:32:05Z",
           "merged_at": null,
-          "merge_commit_sha": "b32cf0454109ccee8bc72a078f7f9c67722c4e79",
+          "merge_commit_sha": "33cca29ce90e72b0f5ac13966977d7cb04a44697",
           "url": "https://github.com/pollen-robotics/microduck/pull/600",
-          "head_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+          "head_sha": "6490b15538a50d13bed497e02df861450a246491",
           "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "base_branch": "main",
           "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "created_at_jst": "2026-11-14T18:29:50+09:00",
-          "updated_at_jst": "2026-11-15T04:59:47+09:00",
-          "head_committed_at_utc": "2026-11-14T09:40:39Z",
+          "updated_at_jst": "2026-11-15T18:32:05+09:00",
+          "head_committed_at_utc": "2026-11-15T09:31:35Z",
           "api_version": 61,
-          "commit_count": 2,
-          "changed_file_count": 6,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+          "commit_count": 3,
+          "changed_file_count": 7,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...6490b15538a50d13bed497e02df861450a246491",
           "classification": "Open proposal. No matching development build in the checked release list and tag refs.",
           "replica_integration": "not_integrated",
           "review": {
@@ -29470,12 +29470,13 @@
             "display": "robotctl paints drops red in monitor and its 3D view.",
             "validation": "Author reports that a simulated 10 cm platform run stopped at the edge 40 times in 10 minutes; reports no robot check for an edge with no return.",
             "fixed_sources": {
-              "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/autod/src/obstacle.rs",
-              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/docs/design/autonomous.md",
-              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/docs/robot/cheatsheet.md",
-              "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/kinematics/src/tof.rs",
-              "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/robotctl/src/duck.rs",
-              "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/816ef17cd3fe36599051a866e3efd392ce2c3dbd/robotctl/src/monitor.rs"
+              "autod/src/brain.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/brain.rs",
+              "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/obstacle.rs",
+              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/design/autonomous.md",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/robot/cheatsheet.md",
+              "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/kinematics/src/tof.rs",
+              "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/duck.rs",
+              "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/monitor.rs"
             },
             "simulation_comparison": {
               "pr_updated_at_utc": "2026-11-14T11:08:39Z",
@@ -29507,16 +29508,49 @@
               "falls_over_edge": 1,
               "limitation": "Forward-only ToF does not cover lateral or rear edges. Turning in place can drift. No-return edges still require hardware validation.",
               "physical_robot_validation": false
+            },
+            "edge_memory_update": {
+              "previous_source_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+              "source_sha": "6490b15538a50d13bed497e02df861450a246491",
+              "head_committed_at_utc": "2026-11-15T09:31:35Z",
+              "pr_updated_at_utc": "2026-11-15T09:32:05Z",
+              "pr_updated_at_jst": "2026-11-15T18:32:05+09:00",
+              "fixed_increment_url": "https://github.com/pollen-robotics/microduck/compare/816ef17cd3fe36599051a866e3efd392ce2c3dbd...6490b15538a50d13bed497e02df861450a246491",
+              "fixed_commit_url": "https://github.com/pollen-robotics/microduck/commit/6490b15538a50d13bed497e02df861450a246491",
+              "fixed_api_source_url": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/duck-ipc-proto/src/lib.rs",
+              "changed_files": [
+                "autod/src/brain.rs",
+                "autod/src/obstacle.rs",
+                "docs/design/autonomous.md"
+              ],
+              "behavior": "The closest drop on the forward path has its own distance even with a nearer wall. A stop for a nearby drop records the location in the odometry frame for 60 seconds of autonomous behavior time. Within 0.45 m, heading restrictions suppress forward steps toward it, reject nearby goals in that direction, and suppress zoomies. Stop turns favor the side away from the recorded locations.",
+              "author_reported_simulation": {
+                "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                "environment": "duck-sim",
+                "step_height_cm": 20,
+                "minutes_per_run": 10,
+                "without_edge_memory": {
+                  "falls": 4,
+                  "runs": 12
+                },
+                "with_edge_memory": {
+                  "falls": 0,
+                  "runs": 18
+                },
+                "walking_reduction_percent_approximate": 13,
+                "physical_robot_validation": false
+              },
+              "remaining_limits": "No-return edges require hardware validation. Heading rules suppress commanded steps, but passive turn drift and backing up can still cross an edge. Reflective-floor handling is unverified."
             }
           },
-          "priority": "High before enabling autonomous movement on HD1910: verify fitted ToF geometry, braking and handover, no return, and reflective floors.",
+          "priority": "High before enabling autonomous movement on HD1910. Verify installed ToF geometry, no-return edges, reflective floors, turning drift, backing up, braking and manual takeover.",
           "impact": {
             "HD1910": "No servo backend change. High priority before enabling autonomous movement.",
             "camera": "No direct change.",
-            "ToF": "Drop projection, obstacle handling and operator visualization.",
+            "ToF": "Drop projection and display, plus an independent forward-path drop distance for short-term edge memory.",
             "models": "No model or management change.",
             "training": "No direct change.",
-            "motion": "Forward stop and steering constraints for autonomous movement.",
+            "motion": "Autonomous forward stops, edge-aware goal selection, turning and zoomies.",
             "sound": "No direct change."
           }
         }
@@ -46590,7 +46624,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-15T02:54:01Z",
+  "checked_at_utc": "2026-11-15T10:09:34Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -46603,28 +46637,23 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-14T12:23:03Z",
-    "source_snapshot_utc": "2026-11-15T02:54:01Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-15T02:54:01Z",
+    "previous_substantive_review_utc": "2026-11-15T02:54:01Z",
+    "source_snapshot_utc": "2026-11-15T10:09:34Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-15T10:09:34Z",
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
     "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        580,
         600
       ]
     },
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "#580 closed unmerged after the official source clarified sensor-relative distance. #600 adds author-reported simulation evidence of one fall across three further ten-minute runs. No source movement in either PR.",
-    "closed_unmerged_pull_requests": {
-      "pollen-robotics/microduck": [
-        580
-      ]
-    }
+    "notes": "Open #600 adds odometry-based edge memory and new author-reported 20 cm step simulation results. No matching development release. Official branches, releases and blog, and the recorded replica candidates are unchanged.",
+    "closed_unmerged_pull_requests": {}
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -50136,6 +50165,41 @@
       "moved_development_tags": [],
       "retired_development_tags": [],
       "notes": "Updated the published #600 simulation attachment URL. The old link returns 404. Scenario description, fixed commit and open status are unchanged."
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-14T12:23:03Z",
+      "source_snapshot_utc": "2026-11-15T02:54:01Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-15T02:54:01Z",
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          580,
+          600
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "#580 closed unmerged after the official source clarified sensor-relative distance. #600 adds author-reported simulation evidence of one fall across three further ten-minute runs. No source movement in either PR.",
+      "closed_unmerged_pull_requests": {
+        "pollen-robotics/microduck": [
+          580
+        ]
+      }
     }
   ],
   "replica_public_image": {
