@@ -22571,61 +22571,61 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-10-24T20:42:52Z",
-          "updated_at": "2026-11-13T08:06:38Z",
+          "updated_at": "2026-11-16T12:53:49Z",
           "merged_at": null,
-          "head_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
-          "base_sha": "d2d8eab1d90f880ab7469c8edd205e42576667bd",
+          "head_sha": "cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
+          "base_sha": "d1fcd5f8568107e98a249ee60e4e1ef901bb6de4",
           "base_branch": "main",
-          "actual_merge_base": "d2d8eab1d90f880ab7469c8edd205e42576667bd",
-          "source_version": "0.21.0",
-          "api_version": 62,
-          "commit_count": 10,
+          "actual_merge_base": "d1fcd5f8568107e98a249ee60e4e1ef901bb6de4",
+          "source_version": "0.21.1",
+          "api_version": 63,
+          "commit_count": 11,
           "changed_file_count": 11,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d2d8eab1d90f880ab7469c8edd205e42576667bd...3e6879900c38cfca08383294bcb7c72dbc5d7021",
-          "classification": "Open phase-skill proposal on the formal API61 base. No matching development prerelease observed.",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d1fcd5f8568107e98a249ee60e4e1ef901bb6de4...cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
+          "classification": "Open phase-skill proposal on current main API62. No matching development prerelease observed.",
           "priority": "medium_motion_research;high_contract_review",
           "replica_integration": "not_integrated; no runtime/model/image/environment/device/browser change",
-          "previous_head_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+          "previous_head_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
           "latest_increment": {
-            "from_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
-            "to_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
-            "merge_base_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
-            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c771e96d9075ea84b68e3ccb0d63d87566ad3a66...3e6879900c38cfca08383294bcb7c72dbc5d7021",
+            "from_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+            "to_sha": "cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
+            "merge_base_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/3e6879900c38cfca08383294bcb7c72dbc5d7021...cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
             "status": "ahead",
-            "ahead_by": 90,
+            "ahead_by": 18,
             "behind_by": 0,
-            "file_count": 103,
-            "commit_count": 90
+            "file_count": 29,
+            "commit_count": 18
           },
           "feature_review": {
-            "change": "Syncs formal 0.21.0 and renumbers the phase contract API61 to API62. The other ten patches are unchanged.",
+            "change": "Syncs current main, including QR setup, Goal PWM and rustls updates. The phase contract is renumbered from API62 to API63. The ten other base-relative patches retain the same added and removed lines.",
             "phase_contract": "The three SkillParams fields encoding, period_s and end_phase carry fixed manifest timing. Episodic skills return at end_phase. Perpetual skills require hold and wrap. No per-run music or tempo override.",
-            "source_version": "0.21.0",
-            "api_version": 62,
-            "base_api_version": 61,
-            "classification": "Open proposal. Main and stable use API61.",
-            "validation_scope": "Compared all 11 base-relative patches and the pinned protocol. Prior author test claims retain their original scope.",
+            "source_version": "0.21.1",
+            "api_version": 63,
+            "base_api_version": 62,
+            "classification": "Open proposal. Current main uses API62 and latest stable uses API61.",
+            "validation_scope": "Compared the added and removed lines of all eleven feature patches against their previous versions. The new upstream CI run requires action. Prior author test claims retain their original scope.",
             "replica_integration": "not integrated",
             "author_sync_comment_url": "https://github.com/pollen-robotics/microduck/pull/449#issuecomment-6831181876",
             "latest_sync": {
-              "from_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
-              "to_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
-              "merge_base_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
-              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c771e96d9075ea84b68e3ccb0d63d87566ad3a66...3e6879900c38cfca08383294bcb7c72dbc5d7021",
+              "from_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+              "to_sha": "cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
+              "merge_base_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/3e6879900c38cfca08383294bcb7c72dbc5d7021...cedf2baea2b732c38b18ed4b199fa2776a6cb3f2",
               "status": "ahead",
-              "ahead_by": 90,
+              "ahead_by": 18,
               "behind_by": 0,
-              "file_count": 103,
-              "commit_count": 90
+              "file_count": 29,
+              "commit_count": 18
             },
             "fixed_sources": {
-              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/Cargo.toml",
-              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/duck-ipc-proto/src/lib.rs",
-              "robotctl/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotctl/src/main.rs",
-              "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd/src/control.rs",
-              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd/src/main.rs",
-              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd-params/src/lib.rs",
-              "docs/policy-manifest.md": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/docs/policy-manifest.md"
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/duck-ipc-proto/src/lib.rs",
+              "robotctl/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/robotctl/src/main.rs",
+              "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/robotd/src/control.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/robotd/src/main.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/robotd-params/src/lib.rs",
+              "docs/policy-manifest.md": "https://github.com/pollen-robotics/microduck/blob/cedf2baea2b732c38b18ed4b199fa2776a6cb3f2/docs/policy-manifest.md"
             },
             "impact": {
               "HD1910": "High contract review before applying any phase skill to the replica. The sync adds no servo adaptation.",
@@ -22635,6 +22635,11 @@
               "training": "No new training, weights or downloadable models.",
               "motion": "Medium research reference. Validate phase timing, exit and recovery on the replica before adoption.",
               "sound": "No sound assets or per-run synchronization to music."
+            },
+            "api_contract_note": "API63 here adds phase timing fields to SkillParams. The NFC photo prototype API63 refers to a sound tag and inherits flashlight brightness. A shared number does not imply wire compatibility.",
+            "upstream_ci": {
+              "conclusion": "action_required",
+              "url": "https://github.com/pollen-robotics/microduck/actions/runs/43870716109"
             }
           },
           "history": [
@@ -23016,15 +23021,97 @@
               "source_committed_at_jst": "2026-11-13T02:34:05+09:00",
               "development_release_observed": false,
               "included_in_formal_release": false
+            },
+            {
+              "number": 449,
+              "title": "Phase-encoded policies can run as skills",
+              "url": "https://github.com/pollen-robotics/microduck/pull/449",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-10-24T20:42:52Z",
+              "updated_at": "2026-11-13T08:06:38Z",
+              "merged_at": null,
+              "head_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+              "base_sha": "d2d8eab1d90f880ab7469c8edd205e42576667bd",
+              "base_branch": "main",
+              "actual_merge_base": "d2d8eab1d90f880ab7469c8edd205e42576667bd",
+              "source_version": "0.21.0",
+              "api_version": 62,
+              "commit_count": 10,
+              "changed_file_count": 11,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/d2d8eab1d90f880ab7469c8edd205e42576667bd...3e6879900c38cfca08383294bcb7c72dbc5d7021",
+              "classification": "Open phase-skill proposal on the formal API61 base. No matching development prerelease observed.",
+              "priority": "medium_motion_research;high_contract_review",
+              "replica_integration": "not_integrated; no runtime/model/image/environment/device/browser change",
+              "previous_head_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+              "latest_increment": {
+                "from_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+                "to_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+                "merge_base_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c771e96d9075ea84b68e3ccb0d63d87566ad3a66...3e6879900c38cfca08383294bcb7c72dbc5d7021",
+                "status": "ahead",
+                "ahead_by": 90,
+                "behind_by": 0,
+                "file_count": 103,
+                "commit_count": 90
+              },
+              "feature_review": {
+                "change": "Syncs formal 0.21.0 and renumbers the phase contract API61 to API62. The other ten patches are unchanged.",
+                "phase_contract": "The three SkillParams fields encoding, period_s and end_phase carry fixed manifest timing. Episodic skills return at end_phase. Perpetual skills require hold and wrap. No per-run music or tempo override.",
+                "source_version": "0.21.0",
+                "api_version": 62,
+                "base_api_version": 61,
+                "classification": "Open proposal. Main and stable use API61.",
+                "validation_scope": "Compared all 11 base-relative patches and the pinned protocol. Prior author test claims retain their original scope.",
+                "replica_integration": "not integrated",
+                "author_sync_comment_url": "https://github.com/pollen-robotics/microduck/pull/449#issuecomment-6831181876",
+                "latest_sync": {
+                  "from_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+                  "to_sha": "3e6879900c38cfca08383294bcb7c72dbc5d7021",
+                  "merge_base_sha": "c771e96d9075ea84b68e3ccb0d63d87566ad3a66",
+                  "fixed_url": "https://github.com/pollen-robotics/microduck/compare/c771e96d9075ea84b68e3ccb0d63d87566ad3a66...3e6879900c38cfca08383294bcb7c72dbc5d7021",
+                  "status": "ahead",
+                  "ahead_by": 90,
+                  "behind_by": 0,
+                  "file_count": 103,
+                  "commit_count": 90
+                },
+                "fixed_sources": {
+                  "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/Cargo.toml",
+                  "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/duck-ipc-proto/src/lib.rs",
+                  "robotctl/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotctl/src/main.rs",
+                  "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd/src/control.rs",
+                  "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd/src/main.rs",
+                  "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/robotd-params/src/lib.rs",
+                  "docs/policy-manifest.md": "https://github.com/pollen-robotics/microduck/blob/3e6879900c38cfca08383294bcb7c72dbc5d7021/docs/policy-manifest.md"
+                },
+                "impact": {
+                  "HD1910": "High contract review before applying any phase skill to the replica. The sync adds no servo adaptation.",
+                  "camera": "Inherits current main. No phase-specific camera change.",
+                  "ToF": "No phase-specific ToF or obstacle behavior change.",
+                  "model_management": "Phase manifest and registration semantics are unchanged since the previous proposal.",
+                  "training": "No new training, weights or downloadable models.",
+                  "motion": "Medium research reference. Validate phase timing, exit and recovery on the replica before adoption.",
+                  "sound": "No sound assets or per-run synchronization to music."
+                }
+              },
+              "updated_at_jst": "2026-11-13T17:06:38+09:00",
+              "closed_at": null,
+              "created_at_jst": "2026-10-25T05:42:52+09:00",
+              "source_committed_at_utc": "2026-11-13T08:05:53Z",
+              "source_committed_at_jst": "2026-11-13T17:05:53+09:00",
+              "development_release_observed": false,
+              "included_in_formal_release": false
             }
           ],
-          "updated_at_jst": "2026-11-13T17:06:38+09:00",
+          "updated_at_jst": "2026-11-16T21:53:49+09:00",
           "closed_at": null,
           "created_at_jst": "2026-10-25T05:42:52+09:00",
-          "source_committed_at_utc": "2026-11-13T08:05:53Z",
-          "source_committed_at_jst": "2026-11-13T17:05:53+09:00",
+          "source_committed_at_utc": "2026-11-16T12:53:31Z",
+          "source_committed_at_jst": "2026-11-16T21:53:31+09:00",
           "development_release_observed": false,
-          "included_in_formal_release": false
+          "included_in_formal_release": false,
+          "merge_commit_sha": "f13f368dccff08cbf0bbe70bfc54294293d5fea8"
         },
         {
           "number": 448,
@@ -49891,9 +49978,9 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-16T11:54:06Z",
+  "checked_at_utc": "2026-11-16T12:58:10Z",
   "latest_review": {
-    "default_branch_changes": true,
+    "default_branch_changes": false,
     "new_stable_release": false,
     "previous_tracked_prs_merged": false,
     "official_blog_new_articles": false,
@@ -49904,26 +49991,24 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-16T10:53:13Z",
-    "source_snapshot_utc": "2026-11-16T11:54:06Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-16T11:54:06Z",
+    "previous_substantive_review_utc": "2026-11-16T11:54:06Z",
+    "source_snapshot_utc": "2026-11-16T12:58:10Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-16T12:58:10Z",
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {},
-    "new_development_releases": [],
-    "moved_development_tags": [
-      "daemon-dev-main"
-    ],
-    "retired_development_tags": [],
-    "notes": "Dependabot PR #604 merged the rustls security patch and a tempfile lock resolution change. Main dev1824 is verified. The committed 0.21.1-based Feetech candidate still locks rustls 0.23.45.",
-    "closed_unmerged_pull_requests": {},
-    "newly_discovered_merged_pull_requests": {
+    "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        604
+        449
       ]
-    }
+    },
+    "new_development_releases": [],
+    "moved_development_tags": [],
+    "retired_development_tags": [],
+    "notes": "Open #449 synchronizes current main and renumbers the same phase-skill contract from API62 to API63. The other ten feature patches are unchanged. No matching development release or new CI pass.",
+    "closed_unmerged_pull_requests": {},
+    "newly_discovered_merged_pull_requests": {}
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -53730,6 +53815,39 @@
       ],
       "notes": "PR #603 merged into main dev1821 with the same tree as the retired PWM preview. NFC dev1822 stops polling 15 seconds after a detected redraw dropout, changes transmit drive and adds a bench-only both-antenna option. Stable and replica candidates are unchanged.",
       "closed_unmerged_pull_requests": {}
+    },
+    {
+      "default_branch_changes": true,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-16T10:53:13Z",
+      "source_snapshot_utc": "2026-11-16T11:54:06Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-16T11:54:06Z",
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "new_development_releases": [],
+      "moved_development_tags": [
+        "daemon-dev-main"
+      ],
+      "retired_development_tags": [],
+      "notes": "Dependabot PR #604 merged the rustls security patch and a tempfile lock resolution change. Main dev1824 is verified. The committed 0.21.1-based Feetech candidate still locks rustls 0.23.45.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {
+        "pollen-robotics/microduck": [
+          604
+        ]
+      }
     }
   ],
   "replica_public_image": {
