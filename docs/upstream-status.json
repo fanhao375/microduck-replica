@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-16",
+  "recorded_on": "2026-11-17",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -49978,7 +49978,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-16T12:58:10Z",
+  "checked_at_utc": "2026-11-16T15:01:55Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -49991,22 +49991,22 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-16T11:54:06Z",
-    "source_snapshot_utc": "2026-11-16T12:58:10Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-16T12:58:10Z",
+    "previous_substantive_review_utc": "2026-11-16T12:58:10Z",
+    "source_snapshot_utc": "2026-11-16T15:01:55Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-16T15:01:55Z",
     "stable_release_tag": "daemon-v0.21.1",
     "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        449
+    "new_pull_requests": {
+      "pollen-robotics/microduck_yocto": [
+        135
       ]
     },
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Open #449 synchronizes current main and renumbers the same phase-skill contract from API62 to API63. The other ten feature patches are unchanged. No matching development release or new CI pass.",
+    "notes": "Open Yocto #135 proposes main-only publication of the shared build cache while preserving downloads and image artifacts. No OS, daemon, runtime, or replica release change.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {}
   },
@@ -53848,6 +53848,37 @@
           604
         ]
       }
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-16T11:54:06Z",
+      "source_snapshot_utc": "2026-11-16T12:58:10Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-16T12:58:10Z",
+      "stable_release_tag": "daemon-v0.21.1",
+      "stable_release_actual_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          449
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Open #449 synchronizes current main and renumbers the same phase-skill contract from API62 to API63. The other ten feature patches are unchanged. No matching development release or new CI pass.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {}
     }
   ],
   "replica_public_image": {
@@ -55034,5 +55065,52 @@
     "physical_card_boot_verified": false,
     "physical_camera_or_tof_verified": false,
     "physical_motion_verified": false
-  }
+  },
+  "official_os_pull_requests": [
+    {
+      "number": 135,
+      "title": "build-hfjob: only main replaces the shared sstate archive",
+      "url": "https://github.com/pollen-robotics/microduck_yocto/pull/135",
+      "repository": "pollen-robotics/microduck_yocto",
+      "state": "open",
+      "draft": false,
+      "merged_at": null,
+      "created_at": "2026-11-16T15:00:17Z",
+      "created_at_jst": "2026-11-17T00:00:17+09:00",
+      "updated_at": "2026-11-16T15:00:17Z",
+      "updated_at_jst": "2026-11-17T00:00:17+09:00",
+      "head_sha": "4388dc1088e50e27dbb8f3cd6def6f2987a4efeb",
+      "head_committed_at_utc": "2026-11-16T14:40:17Z",
+      "head_committed_at_jst": "2026-11-16T23:40:17+09:00",
+      "base_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+      "base_branch": "main",
+      "merge_base_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+      "commit_count": 1,
+      "changed_file_count": 3,
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/635c41113cf129504c7e8ae1a7a896e0e4f94153...4388dc1088e50e27dbb8f3cd6def6f2987a4efeb",
+      "fixed_sources": {
+        ".github/workflows/build-image.yml": "https://github.com/pollen-robotics/microduck_yocto/blob/4388dc1088e50e27dbb8f3cd6def6f2987a4efeb/.github/workflows/build-image.yml",
+        "scripts/build-hfjob.sh": "https://github.com/pollen-robotics/microduck_yocto/blob/4388dc1088e50e27dbb8f3cd6def6f2987a4efeb/scripts/build-hfjob.sh",
+        "scripts/test-hfjob-sstate.sh": "https://github.com/pollen-robotics/microduck_yocto/blob/4388dc1088e50e27dbb8f3cd6def6f2987a4efeb/scripts/test-hfjob-sstate.sh"
+      },
+      "classification": "Pending Yocto CI/build proposal. No OS or daemon release from this change.",
+      "review": {
+        "change": "Only main CI can replace the shared Yocto sstate archive and pointer. Other branches and release tags still seed from it. Publishing artifacts and downloads follows the existing paths. Direct local invocation retains the previous default.",
+        "purpose": "Avoid branch cache writes replacing the main cache or including experimental build objects.",
+        "verification": "Author reports six local script scenarios passed. An actual hosted HF build of this source was not reported."
+      },
+      "impact": {
+        "HD1910": "No direct runtime change.",
+        "camera": "No direct runtime change.",
+        "ToF": "No direct runtime change.",
+        "models": "No direct runtime change.",
+        "training": "No direct runtime change.",
+        "motion": "No direct runtime change.",
+        "sound": "No direct runtime change.",
+        "build": "Applicable if adopting the official HF Jobs Yocto image CI. Existing image contents and installed services do not change in the diff."
+      },
+      "priority": "Low for replica runtime. Reassess when adopting the hosted Yocto build path.",
+      "replica_integration": "not_integrated"
+    }
+  ]
 }
