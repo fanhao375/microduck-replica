@@ -122,7 +122,8 @@ User=root
 RuntimeDirectory=microduck-updater
 RuntimeDirectoryMode=0755
 RuntimeDirectoryPreserve=yes
-UMask=0077
+# 新装的版本目录要让 radxa 跑的中控和语音服务读得到：0077 会建成只有 root 能进，装完必然起不来、整体退回
+UMask=0022
 Environment=PATH=/usr/local/lib/microduck-updater/engine-bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart={STABLE}/updaterd --config /etc/microduck-updater/updater.toml --socket /run/microduck-updater/engine.sock --token /var/lib/microduck-updater/unused-account.json
 Restart=on-failure

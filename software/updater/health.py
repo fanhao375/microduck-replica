@@ -49,6 +49,7 @@ def wait_healthy(seconds):
             time.sleep(.5)
 
 if __name__=='__main__':
-    try: healthy()
+    # 新版中控在 ZERO 3W 上要 10 秒左右才开始接受连接：等它起来再判（引擎给这个检查 90 秒）
+    try: wait_healthy(80)
     except Exception as error:
         print('software health failed: '+str(error)[:400],file=sys.stderr); sys.exit(1)
