@@ -43,13 +43,13 @@ class Control(unittest.TestCase):
                 fcntl.flock(voice,fcntl.LOCK_UN)
             result=self.finish(controller);self.assertTrue(entered.is_set());self.assertTrue(result['ready'])
 
-    def test_unknown_motion_low_power_and_audio_refused(self):
+    def test_unknown_or_moving_refused_but_low_power_is_not(self):
         check_robot(safe_bus(),{'battery':{'percent':70,'volts':7.8}},safe_bus())
         for key,value in (('mode','commissioning'),('phase','moving'),('homed',None),('policy_enabled',True),('all_joints_fresh',False)):
             bus=safe_bus(); bus[key]=value
             with self.assertRaises(UpdateError): check_robot(bus,{'battery':{'percent':70,'volts':7.8}},safe_bus())
-        for health in ({},{'battery':{'percent':5,'volts':6.1}}):
-            with self.assertRaises(UpdateError): check_robot(safe_bus(),health,safe_bus())
+        for health in ({},{'battery':{'percent':14,'volts':6.83}}):     # 11-18 duck-c84e 边充电边装时读到的
+            check_robot(safe_bus(),health,safe_bus())
         moving=safe_bus(); moving['native']['joints'][0]['velocity_rad_s']=.4
         with self.assertRaises(UpdateError): check_robot(moving,{'battery':{'percent':70,'volts':7.8}},safe_bus())
 

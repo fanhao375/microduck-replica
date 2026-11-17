@@ -91,9 +91,7 @@ def check_robot(bus,health,previous):
                 or not numeric(sample.get('velocity_rad_s')) or abs(sample['velocity_rad_s'])>.08
                 or not numeric(sample.get('position_rad'))): raise UpdateError('preflight','关节尚未停稳或反馈过期')
         if abs(row['position_rad']-before['position_rad'])>.02: raise UpdateError('preflight','检测到关节实际运动，请等待停稳')
-    battery=health.get('battery',{}) if isinstance(health,dict) else {}
-    if not numeric(battery.get('volts')) or battery['volts']<7.0 or not numeric(battery.get('percent')) or battery['percent']<25:
-        raise UpdateError('preflight','电量不足或无法确认供电，请充电后重试')
+    # 不拦电量（用户 11-18）：边充电边装时读到的是带载电压，会被误拦；软件升级只重启中控和语音，不动主程序
 
 def preflight(config):
     # The root marker is installed BEFORE this read: Studio refuses new commands
