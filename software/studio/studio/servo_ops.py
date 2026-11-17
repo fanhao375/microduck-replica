@@ -544,6 +544,8 @@ class ServoOps:
     def goal(self, sid, pos):
         self.guard()
         pos = max(0, min(4095, int(pos)))
+        if self._motion and self._motion.is_alive():
+            self.stop(quiet=True)              # 手动给目标盖过还在走的过渡：不然过渡收尾会把目标写回去
         self.bus.write_u16(int(sid), 42, enc_sm(pos))
         return {"id": sid, "pos": pos}
 

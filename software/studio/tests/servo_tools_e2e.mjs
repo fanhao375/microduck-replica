@@ -99,6 +99,18 @@ await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} && do
 await sleep(900);
 out.typed = { want: tuned, got: await reading(21) };
 
+log('点「+」两下、「−」一下：每下 1°（约 11 步），连点累加');
+const nudgeAt = (n, sign) => js(`(() => { const b = [...${row(n)}.querySelectorAll('.sv-nudge')][${sign > 0 ? 1 : 0}]; b.click(); return true; })()`);
+await nudgeAt(21, 1); await sleep(150); await nudgeAt(21, 1);
+await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} + 22`, '点两下 + 以后读数 +22', 8000);
+await nudgeAt(21, -1);
+await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} + 11`, '再点一下 − 以后读数 +11', 8000);
+await sleep(1500);
+out.nudged = await reading(21);
+await nudgeAt(21, -1);
+await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned}`, '回到原来的数', 8000);
+await sleep(1500);
+
 log('输到一半按 Esc：不动');
 await type(21, '1234', 'Escape');
 await sleep(700);

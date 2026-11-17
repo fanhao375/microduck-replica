@@ -161,6 +161,16 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
     setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), seconds * 1000 + 600);
     op({ op: 'move', goals: { [r.id]: pos }, seconds, mode: motion?.mode, acc: motion?.acc });
   };
+  // 点一下转一小格：小角度直接写目标（不走「用时」的慢过渡），从现在的目标往上加，连点会累加
+  const nudge = (e, dir) => {
+    stop(e);
+    if (!open) return;
+    if (r.torque !== 1) { setHint(`${r.id} ${r.cn} 扭矩没开：点了舵机也不会动（先打开它的「保持」）`); return; }
+    const steps = Math.max(1, Math.round((motion?.nudge ?? 1) * 4096 / 360));
+    const pos = Math.max(0, Math.min(4095, Math.round((drag ?? r.raw ?? 2048) + dir * steps)));
+    setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), 1200);
+    op({ op: 'goal', id: r.id, pos }, 3000, true);
+  };
   const onKey = (e) => {
     if (e.key === 'Enter') { goTyped(); e.target.blur(); }
     else if (e.key === 'Escape') { setTyped(null); e.target.blur(); }
@@ -174,10 +184,16 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
     <span class="sv-name" title=${r.en}>${r.cn}</span>
     <input class="sv-slider" type="range" min="0" max="4095" step="1" value=${val} disabled=${!open}
       aria-label=${`${r.cn} 目标位置`} onClick=${stop} onInput=${onInput} onChange=${onDone} />
-    <input class="num r sv-num" type="number" inputmode="numeric" min="0" max="4095" step="1" disabled=${!open}
-      value=${typed ?? drag ?? r.raw ?? ''} aria-label=${`${r.cn} 目标位置，0 到 4095`} title="输 0–4095，回车转过去；Esc 取消"
-      onClick=${stop} onFocus=${(e) => { setTyped(String(drag ?? r.raw ?? '')); e.target.select(); }}
-      onInput=${(e) => setTyped(e.target.value)} onKeyDown=${onKey} onBlur=${() => setTyped(null)} />
+    <span class="sv-numbox" onClick=${stop}>
+      <button class="sv-nudge" type="button" disabled=${!open} aria-label=${`${r.cn} 读数减 ${motion?.nudge ?? 1}°`}
+        title=${`读数减 ${motion?.nudge ?? 1}°（顶上「每点」改）`} onClick=${(e) => nudge(e, -1)}>−</button>
+      <input class="num r sv-num" type="number" inputmode="numeric" min="0" max="4095" step="1" disabled=${!open}
+        value=${typed ?? drag ?? r.raw ?? ''} aria-label=${`${r.cn} 目标位置，0 到 4095`} title="输 0–4095，回车转过去；Esc 取消"
+        onFocus=${(e) => { setTyped(String(drag ?? r.raw ?? '')); e.target.select(); }}
+        onInput=${(e) => setTyped(e.target.value)} onKeyDown=${onKey} onBlur=${() => setTyped(null)} />
+      <button class="sv-nudge" type="button" disabled=${!open} aria-label=${`${r.cn} 读数加 ${motion?.nudge ?? 1}°`}
+        title=${`读数加 ${motion?.nudge ?? 1}°（顶上「每点」改）`} onClick=${(e) => nudge(e, 1)}>+</button>
+    </span>
     <span class="num r sv-deg">${r.deg == null ? '—' : sign(r.deg) + '°'}</span>
     <span class=${'num r ' + tempClass(r)} title=${r.temp_limit ? `这颗的温度上限 ${r.temp_limit} °C` : ''}>${fmt(r.temp)}°C</span>
     <label class=${'sv-switch' + (r.torque === 1 ? ' on' : '')} onClick=${stop} title=${reply ? '启动诊断：只显示应答情况，扭矩状态未知' : r.torque === 1 ? '在保持：点一下松开' : '松着：点一下保持（先对准当前位置再上力，不会冲）'}>
@@ -209,7 +225,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
 const rowSig = (p) => { const r = p.r, c = r.comm || {};
   return [r.raw, r.deg, r.volt, r.temp, r.load, r.current_ma, r.current_raw, r.speed_raw, r.responding, r.torque, r.fresh, r.dir, r.offset, r.p, r.d, r.status,
     r.p_run, r.d_run, r.limit, r.gains_ok, c.missed, c.streak, p.open, p.selected, p.follow,
-    p.motion?.seconds, p.motion?.mode, p.motion?.acc].join('|'); };
+    p.motion?.seconds, p.motion?.mode, p.motion?.acc, p.motion?.nudge].join('|'); };
 class RowPure extends Component {
   shouldComponentUpdate(next) { return rowSig(next) !== rowSig(this.props) || next.op !== this.props.op; }
   render(props) { return html`<${Row} ...${props} />`; }
@@ -273,6 +289,8 @@ function Toolbar({ open, op, link, motion, setMotion, idle, setIdle, follow, set
     <button class="btn-stop" disabled=${!open} onClick=${() => op({ op: 'stop' })} title="打断正在走的过渡和灵动，停在原地">停</button>
     <span class="sv-inline">用时 <${Stepper} value=${motion.seconds} min=${0} max=${30} step=${0.5}
       onChange=${(v) => setMotion({ ...motion, seconds: v === '' ? 0 : v })} unit="秒" aria-label="用时" /></span>
+    <span class="sv-inline" title="每行读数两边的「−」「+」点一下转多少度">每点 <${Stepper} value=${motion.nudge} min=${0.5} max=${10} step=${0.5}
+      onChange=${(v) => setMotion({ ...motion, nudge: v === '' || v <= 0 ? 1 : v })} unit="°" aria-label="每点转多少度" /></span>
     <label class="sv-inline"><input type="checkbox" checked=${follow} onChange=${(e) => setFollow(e.target.checked)} /> 跟随拖动</label>
     ${main}
   </div>`;
@@ -532,7 +550,7 @@ export function ServoPage({ sv, link, leaveGuards }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
   const [hint, setHint] = useState(null);
-  const [motion, setMotion] = useState({ seconds: 2, mode: 'profile', acc: 30 });
+  const [motion, setMotion] = useState({ seconds: 2, mode: 'profile', acc: 30, nudge: 1 });
   const [follow, setFollow] = useState(true);
   const [poses, setPoses] = useState([]);
   const [idle, setIdle] = useState(false);

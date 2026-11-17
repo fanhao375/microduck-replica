@@ -43,6 +43,15 @@ class ServoOpsTest(unittest.TestCase):
         self.o.handle({"op": "goal", "id": 20, "pos": 2300})
         self.assertEqual(round(self.sim(20).pos()), 2300)
 
+    def test_manual_goal_overrides_a_transition_still_running(self):
+        """用户 11-18 点「+」：上一次 2 秒的平滑转动还没走完，它收尾时不能把手点的目标写回去。"""
+        self.o.handle({"op": "torque", "on": 1, "ids": [20]})
+        self.o.handle({"op": "move", "goals": {20: 2200}, "seconds": 1.0})
+        time.sleep(0.2)
+        self.o.handle({"op": "goal", "id": 20, "pos": 2111})
+        time.sleep(1.6)
+        self.assertEqual(round(self.sim(20).pos()), 2111)
+
     def test_calibrate_sets_2048_and_holds(self):
         plan = self.o.handle({"op": "calib_plan", "ids": "22"})
         self.assertAlmostEqual(plan["rows"][0]["diff_deg"], -26.3, delta=0.1)

@@ -84,6 +84,9 @@ class ServoToolsE2E(unittest.TestCase):
         self.assertEqual(typed["got"], typed["want"])
         self.assertEqual(self.out["escaped"], typed["want"], "按 Esc 取消以后舵机不该动")
 
+    def test_plus_and_minus_buttons_step_one_degree(self):
+        self.assertEqual(self.out["nudged"], self.out["typed"]["want"] + 11)
+
     def test_out_of_range_number_is_clamped(self):
         self.assertEqual(self.out["clamped"], 4095)
 

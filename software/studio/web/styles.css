@@ -443,7 +443,7 @@ button:disabled { cursor: default; }
 
 /* 15 颗：表头 + 三组，列宽固定 */
 .sv-list { padding: 4px 0 8px; }
-.sv-list .sv-row { display: grid; grid-template-columns: 28px 78px minmax(120px, 1fr) 46px 60px 48px 54px 46px 12px;
+.sv-list .sv-row { display: grid; grid-template-columns: 28px 78px minmax(120px, 1fr) 104px 60px 48px 54px 46px 12px;
   align-items: center; column-gap: 10px; padding: 7px 16px; border-top: 1px solid #F2F2F5; box-shadow: none; }
 .sv-list .sv-row .r { text-align: right; }
 .sv-list .sv-name { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 18px; }
@@ -453,6 +453,12 @@ button:disabled { cursor: default; }
 .sv-numbering { grid-column: 1 / -1; order: -1; }
 .sv-found .sv-chip { padding: 4px 10px; font-size: 14px; border: 1px solid transparent; }
 .sv-found .sv-chip.new { background: #FFF4E5; border-color: #F5B400; color: #8A5A00; font-weight: 600; }
+/* 读数两边的「−」「+」 */
+.sv-numbox { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.sv-nudge { flex: none; width: 26px; height: 26px; padding: 0; border: 1px solid #D1D1D6; border-radius: 6px;
+  background: #FFF; color: var(--text); font-size: 16px; line-height: 1; cursor: pointer; }
+.sv-nudge:hover:not(:disabled) { border-color: #2F7CF6; color: #2F7CF6; }
+.sv-nudge:disabled { opacity: .4; cursor: default; }
 /* 读数那一格能输数字：平时看着跟原来的数字一样，点进去才像输入框 */
 .sv-list .sv-num { width: 100%; min-width: 0; height: 24px; padding: 0 2px; border: 1px solid transparent; border-radius: 6px;
   background: transparent; color: inherit; font: inherit; -moz-appearance: textfield; appearance: textfield; }
@@ -509,9 +515,9 @@ button:disabled { cursor: default; }
   .sv-list .sv-row > :nth-child(7) { grid-area: 1 / 4; }
   .sv-list .sv-row > :nth-child(8) { grid-area: 1 / 5; }
   .sv-list .sv-row > :nth-child(9) { grid-area: 1 / 6; }
-  .sv-list .sv-row > :nth-child(3) { grid-area: 2 / 1 / 3 / 4; }
-  .sv-list .sv-row > :nth-child(6) { grid-area: 2 / 4; }
-  .sv-list .sv-row > :nth-child(4) { grid-area: 2 / 5 / 3 / 7; }
+  .sv-list .sv-row > :nth-child(3) { grid-area: 2 / 1 / 3 / 3; }
+  .sv-list .sv-row > :nth-child(6) { grid-area: 2 / 3; }
+  .sv-list .sv-row > :nth-child(4) { grid-area: 2 / 4 / 3 / 7; }
   .sv-list .sv-row > .sv-more { grid-column: 1 / -1; }
 }
 .sv-left .sv-stage { height: calc(100vh - 230px); min-height: 480px; }
