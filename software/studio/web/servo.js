@@ -136,8 +136,9 @@ function tempClass(r) {
   return '';
 }
 
-function Row({ r, open, selected, onSelect, op, follow, setHint }) {
+function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
   const [drag, setDrag] = useState(null);           // 拖动中的滑块值；松手 0.6 秒后回到实际读数
+  const [typed, setTyped] = useState(null);         // 正在输的数字；null = 显示实际读数
   const last = useRef(0), release = useRef(null);
   const send = (v, force) => {
     if (!open) return;
@@ -149,6 +150,21 @@ function Row({ r, open, selected, onSelect, op, follow, setHint }) {
   };
   const onInput = (e) => { const v = +e.target.value; setDrag(v); clearTimeout(release.current); if (follow) send(v, false); };
   const onDone = (e) => { const v = +e.target.value; send(v, true); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), 600); };
+  // 输数字：回车才动（打到一半不动），按顶上的「用时」平滑转过去，超出 0–4095 的夹住
+  const goTyped = () => {
+    const text = typed;
+    setTyped(null);
+    if (text == null || text.trim() === '' || !isFinite(+text) || !open) return;
+    if (r.torque !== 1) { setHint(`${r.id} ${r.cn} 扭矩没开：输了数舵机也不会动（先打开它的「保持」）`); return; }
+    const pos = Math.max(0, Math.min(4095, Math.round(+text)));
+    const seconds = motion?.seconds ?? 2;
+    setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), seconds * 1000 + 600);
+    op({ op: 'move', goals: { [r.id]: pos }, seconds, mode: motion?.mode, acc: motion?.acc });
+  };
+  const onKey = (e) => {
+    if (e.key === 'Enter') { goTyped(); e.target.blur(); }
+    else if (e.key === 'Escape') { setTyped(null); e.target.blur(); }
+  };
   const val = drag ?? r.raw ?? 2048;
   const stop = (e) => e.stopPropagation();
   const c = r.comm || {};
@@ -158,7 +174,10 @@ function Row({ r, open, selected, onSelect, op, follow, setHint }) {
     <span class="sv-name" title=${r.en}>${r.cn}</span>
     <input class="sv-slider" type="range" min="0" max="4095" step="1" value=${val} disabled=${!open}
       aria-label=${`${r.cn} 目标位置`} onClick=${stop} onInput=${onInput} onChange=${onDone} />
-    <span class="num r">${fmt(drag ?? r.raw)}</span>
+    <input class="num r sv-num" type="number" inputmode="numeric" min="0" max="4095" step="1" disabled=${!open}
+      value=${typed ?? drag ?? r.raw ?? ''} aria-label=${`${r.cn} 目标位置，0 到 4095`} title="输 0–4095，回车转过去；Esc 取消"
+      onClick=${stop} onFocus=${(e) => { setTyped(String(drag ?? r.raw ?? '')); e.target.select(); }}
+      onInput=${(e) => setTyped(e.target.value)} onKeyDown=${onKey} onBlur=${() => setTyped(null)} />
     <span class="num r sv-deg">${r.deg == null ? '—' : sign(r.deg) + '°'}</span>
     <span class=${'num r ' + tempClass(r)} title=${r.temp_limit ? `这颗的温度上限 ${r.temp_limit} °C` : ''}>${fmt(r.temp)}°C</span>
     <label class=${'sv-switch' + (r.torque === 1 ? ' on' : '')} onClick=${stop} title=${reply ? '启动诊断：只显示应答情况，扭矩状态未知' : r.torque === 1 ? '在保持：点一下松开' : '松着：点一下保持（先对准当前位置再上力，不会冲）'}>
@@ -189,16 +208,17 @@ function Row({ r, open, selected, onSelect, op, follow, setHint }) {
 // 舵机数据每秒推 10 次：这一行显示的东西没变就不重画（15 行带滑块，整页重画会让 3D 转起来卡）
 const rowSig = (p) => { const r = p.r, c = r.comm || {};
   return [r.raw, r.deg, r.volt, r.temp, r.load, r.current_ma, r.current_raw, r.speed_raw, r.responding, r.torque, r.fresh, r.dir, r.offset, r.p, r.d, r.status,
-    r.p_run, r.d_run, r.limit, r.gains_ok, c.missed, c.streak, p.open, p.selected, p.follow].join('|'); };
+    r.p_run, r.d_run, r.limit, r.gains_ok, c.missed, c.streak, p.open, p.selected, p.follow,
+    p.motion?.seconds, p.motion?.mode, p.motion?.acc].join('|'); };
 class RowPure extends Component {
   shouldComponentUpdate(next) { return rowSig(next) !== rowSig(this.props) || next.op !== this.props.op; }
   render(props) { return html`<${Row} ...${props} />`; }
 }
 
-function ServoList({ sv, open, selected, onSelect, op, follow, setHint }) {
+function ServoList({ sv, open, selected, onSelect, op, follow, setHint, motion }) {
   const rows = sv.rows || [];
   return html`<section class="board sv-list">
-    <div class="sv-row sv-headrow"><span></span><span>舵机</span><span>位置（拖动）</span><span class="r">读数</span><span class="r">角度</span>
+    <div class="sv-row sv-headrow"><span></span><span>舵机</span><span>位置（拖动）</span><span class="r" title="点进去输 0–4095，回车转过去">读数</span><span class="r">角度</span>
       <span class="r">温度</span><span>扭矩</span><span></span><span></span></div>
     ${GROUPS.map(([g, label, range]) => {
       const gr = rows.filter((r) => r.group === g);
@@ -207,7 +227,7 @@ function ServoList({ sv, open, selected, onSelect, op, follow, setHint }) {
         <div class="sv-grouphead"><span class=${'sv-gdot ' + g}></span>${label}<span class="sv-small">${range}</span>
           ${hold ? html`<span class="sv-hold-n">保持 ${hold}</span>` : null}</div>
         ${gr.map((r) => html`<${RowPure} key=${r.id} r=${r} open=${open} selected=${r.id === selected} onSelect=${onSelect}
-          op=${op} follow=${follow} setHint=${setHint} />`)}
+          op=${op} follow=${follow} setHint=${setHint} motion=${motion} />`)}
       </div>`;
     })}
   </section>`;
@@ -216,11 +236,13 @@ function ServoList({ sv, open, selected, onSelect, op, follow, setHint }) {
 // ---------------- 常用（3D 下面） ----------------
 
 // 选一颗舵机的下拉框：跟 3D、表格联动（哪边选了，另外两边都跟着变）
-function ServoPick({ selected, onSelect, rows }) {
+function ServoPick({ selected, onSelect, rows, extra }) {
   return html`<select class="sv-pick" value=${selected ?? ''} onChange=${(e) => onSelect(e.target.value === '' ? null : +e.target.value)}>
     <option value="">选一颗舵机</option>
     ${GROUPS.map(([g, label]) => html`<optgroup label=${label}>${(rows || []).filter((r) => r.group === g).map((r) =>
       html`<option value=${r.id}>${r.id} · ${r.cn}</option>`)}</optgroup>`)}
+    ${extra?.length ? html`<optgroup label="找到的其他编号">${extra.map((f) =>
+      html`<option value=${f.id}>${f.id} · ${f.kind === 'imu' ? 'IMU 小板' : '还没编号'}</option>`)}</optgroup>` : null}
   </select>`;
 }
 
@@ -283,7 +305,7 @@ function MoreArea({ open, op, motion, setMotion, follow, setFollow, poses, setPo
   const [name, setName] = useState('');
   const ms = { seconds: motion.seconds, mode: motion.mode, acc: motion.acc };
   return html`<details class="board sv-more-area">
-    <summary>更多：运动方式、存的姿态、高级工具、日志</summary>
+    <summary>更多：新舵机编号、运动方式、存的姿态、高级工具、日志</summary>
     <div class="sv-more-grid">
       <section class="sv-form">
         <span class="sv-label">官方姿势</span>
@@ -314,8 +336,73 @@ function MoreArea({ open, op, motion, setMotion, follow, setFollow, poses, setPo
   </details>`;
 }
 
+// 新舵机编号：主板烧完镜像就能当调试板用（用户 11-17）。出厂都是 1 号，一起接会撞号，所以一次只接一颗新的：
+// 找舵机 → 选它要装的位置 → 写 ID → 换下一颗。
+function Numbering({ open, op, rows, found, setFound, missing, setMissing }) {
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [note, setNote] = useState(null);
+  const cn = Object.fromEntries((rows || []).map((r) => [r.id, r.cn]));
+  const fresh = (found || []).filter((f) => f.kind === 'servo' && !f.known);
+  const find = async (keepNote) => {
+    const r = await op({ op: 'find' }, 40000);
+    if (!r.ok || !r.data) return null;
+    const list = r.data.found, lack = r.data.missing;
+    setFound(list); setMissing(lack);
+    const first = list.find((f) => f.kind === 'servo' && !f.known);
+    setFrom(first ? String(first.id) : ''); setTo(lack.length ? String(lack[0]) : '');
+    if (!keepNote) setNote(null);
+    return r.data;
+  };
+  const write = async () => {
+    const a = +from, b = +to;
+    if (!window.confirm(`把 ${a} 号改成 ${b} 号（${cn[b] || '自定义'}）？改的时候总线上只能有一颗 ${a} 号。`)) return;
+    const r = await op({ op: 'set_id', old: a, new: b }, 10000);
+    if (!r.ok) return;
+    const ok = r.data?.ok;
+    const after = await find(true);
+    const left = after ? after.missing : [];
+    setNote(ok ? `这颗现在是 ${b} 号${cn[b] ? ` · ${cn[b]}` : ''}。${left.length ? `还差 ${left.length} 颗（${left.join('、')}）：断电换下一颗，再点「找舵机」。` : '15 个位置都齐了。'}`
+      : `写了，但 ${b} 号 ping 不通：再点一次「找舵机」看它现在是几号。`);
+  };
+  return html`<section class="sv-form sv-numbering">
+    <span class="sv-label">新舵机编号</span>
+    <div class="sv-ctrl">
+      <button class="btn-dark sv-find" disabled=${!open} onClick=${() => find(false)}>找舵机</button>
+      <span class="sv-small">新舵机出厂都是 1 号，一起接会撞号：一次只接一颗新的，编好再换下一颗。</span>
+    </div>
+    ${found ? html`<span class="sv-label">找到</span>
+    <div class="sv-ctrl sv-chips sv-found">
+      ${found.length ? found.map((f) => html`<span class=${'sv-chip' + (f.kind === 'servo' && !f.known ? ' new' : '')} data-id=${f.id}>
+        ${f.id} · ${f.kind === 'imu' ? 'IMU 小板' : f.known ? (cn[f.id] || f.joint) : '还没编号'}</span>`)
+        : html`<span class="sv-small">一颗都没找到：看看舵机线和电池接好没有。</span>`}
+    </div>
+    ${fresh.length > 1 ? html`<span></span><p class="sv-warn">有 ${fresh.length} 颗还没编号的。编号相同的两颗会一起被改，先确认它们编号各不相同。</p>` : null}
+    <span class="sv-label">编成</span>
+    <div class="sv-ctrl">
+      <select class="sv-from" value=${from} onChange=${(e) => setFrom(e.target.value)}>
+        <option value="">选要改的那颗</option>
+        ${found.filter((f) => f.kind === 'servo').map((f) => html`<option value=${f.id}>${f.id} · ${f.known ? (cn[f.id] || f.joint) : '还没编号'}</option>`)}
+      </select>
+      <span>→</span>
+      <select class="sv-to" value=${to} onChange=${(e) => setTo(e.target.value)}>
+        <option value="">选它要装的位置</option>
+        ${GROUPS.map(([g, label]) => html`<optgroup label=${label}>${(rows || []).filter((r) => r.group === g).map((r) =>
+          html`<option value=${r.id} disabled=${!missing.includes(r.id)}>${r.id} · ${r.cn}${missing.includes(r.id) ? '' : '（已有）'}</option>`)}</optgroup>`)}
+      </select>
+      <button class="btn-danger sv-write-id" disabled=${!open || from === '' || to === '' || from === to} onClick=${write}>写 ID</button>
+    </div>` : null}
+    ${note ? html`<span></span><p class="sv-out sv-number-note">${note}</p>` : null}
+  </section>`;
+}
+
 function Tools({ open, op, selected, onSelect, sv, dirs }) {
-  const sel = selected ?? 20;
+  const [found, setFound] = useState(null);         // 「找舵机」的结果：不在 15 个编号里的也能在下面选
+  const [missing, setMissing] = useState([]);
+  const [other, setOther] = useState(null);         // 选中的是 15 个编号以外的那颗
+  const extra = (found || []).filter((f) => !f.known);
+  const sel = other ?? selected ?? 20;
+  const pick = (id) => { if (extra.some((f) => f.id === id)) setOther(id); else { setOther(null); onSelect(id ?? 20); } };
   const [newId, setNewId] = useState('');
   const [reg, setReg] = useState(41);
   const [size, setSize] = useState(1);
@@ -330,9 +417,10 @@ function Tools({ open, op, selected, onSelect, sv, dirs }) {
     navigator.clipboard?.writeText(line);
     setOut({ op: 'note', text: `已复制：${line}（robotd.toml 的 [bus.feetech] directions，顺序 20–24、30–34、10–14）` });
   };
-  return html`<section class="sv-form">
+  return html`<${Numbering} open=${open} op=${op} rows=${sv.rows} found=${found} setFound=${setFound} missing=${missing} setMissing=${setMissing} />
+  <section class="sv-form">
     <span class="sv-label">舵机</span>
-    <div class="sv-ctrl"><${ServoPick} selected=${sel} onSelect=${(id) => onSelect(id ?? 20)} rows=${sv.rows} /></div>
+    <div class="sv-ctrl"><${ServoPick} selected=${sel} onSelect=${pick} rows=${sv.rows} extra=${extra} /></div>
     <span class="sv-label">高级</span>
     <div class="sv-ctrl">
       <button class="btn-light" disabled=${!open} onClick=${() => run({ op: 'dump', id: sel })}>导出寄存器</button>
@@ -545,7 +633,7 @@ export function ServoPage({ sv, link, leaveGuards }) {
       </div>
       <div class="sv-right">
         <${CalibCard} open=${open} op=${op} selected=${selected} onSelect=${onSelect} rows=${sv?.rows} />
-        <${ServoList} key=${'list' + syncKey} sv=${sv || { rows: [] }} open=${open} selected=${selected} onSelect=${onSelect} op=${op} follow=${follow} setHint=${setHint} />
+        <${ServoList} key=${'list' + syncKey} sv=${sv || { rows: [] }} open=${open} selected=${selected} onSelect=${onSelect} op=${op} follow=${follow} setHint=${setHint} motion=${motion} />
       </div>
     </div>
     <${MoreArea} open=${open} op=${op} motion=${motion} setMotion=${setMotion} follow=${follow} setFollow=${setFollow}

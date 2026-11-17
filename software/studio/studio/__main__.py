@@ -155,9 +155,12 @@ def main(argv=None):
     from .sensors import Sensors
     sensors = Sensors(log=log, root=a.dev_duck_root or "/", tof_addr=a.tof,
                       camera_signaling_port=a.camera_signaling_port, camera_addr=a.camera_socket)
+    from .sensors_auto import SensorAuto
+    # 开机自动用上摄像头和 ToF：接了才切。台架模式（电脑上调舵机）没有这回事
+    sensor_auto = None if a.bench else SensorAuto(log, state_dir, root=a.dev_duck_root or "/")
     app = build_app(auth=auth, robotd=rd, log=log, web_dir=a.web_dir, duck=duck, names=names, state_dir=state_dir,
                     dev_autologin=a.dev_autologin, servo=servo, imu=imu, pad=pad, onboard=onboard, battery=battery,
-                    tune=tune, net=net, commit=commit, models=models, sensors=sensors)
+                    tune=tune, net=net, commit=commit, models=models, sensors=sensors, sensor_auto=sensor_auto)
     log.info(f"网页地址：http://{host if host not in ('0.0.0.0', '') else '<鸭子 IP>'}:{port}/", cat="系统", dedup=False)
     if a.bench:
         import threading

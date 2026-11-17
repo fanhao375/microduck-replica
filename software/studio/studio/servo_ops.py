@@ -34,6 +34,7 @@ CALIB_TOLERANCE = 2      # 校准后读数离目标多少步算到位
 DROOP_TOLERANCE = 3      # 关扭矩那几毫秒关节垂了多少步以内就不补偿
 OFFSET_LIMIT = 2047      # 偏移寄存器 31 的安全量程（|偏移| ≤ 2047 几种编码理解都一致，超出不写）
 CALIB_BIG_DEG = 30       # 摆好的位置离目标差这么多度以上：页面再确认一次，日志单独列出来（不拦）
+IMU_BUS_ID = 200         # 总线上的 IMU 小板占这个编号：找舵机时认出来，不当成新舵机，也不让改
 FOLD_KNEE_SEND = 88 * math.pi / 180     # 发「折叠」时膝只折 88°：官方 90° 会让踝顶着大腿上的舵机
 JOINT = {20: "left_hip_yaw", 21: "left_hip_roll", 22: "left_hip_pitch", 23: "left_knee", 24: "left_ankle",
          30: "neck_pitch", 31: "head_pitch", 32: "head_yaw", 33: "head_roll", 34: "mouth",
@@ -1154,6 +1155,27 @@ class ServoOps:
                  "总线", "warn" if lost else "info")
         return {"found": found, "lost": lost}
 
+    def find(self):
+        """全网找一遍（0–253），每颗报编号和固件。给新舵机编号用：出厂都是 1 号，不在那 15 个编号里，
+        平时的表上看不到它（用户 11-17：主板烧完镜像就能编号，不用调试板）。"""
+        found = []
+        for i in range(254):
+            if self.bus.ping(i) is None:
+                continue
+            row = {"id": i, "known": i in IDS, "joint": JOINT.get(i), "kind": "imu" if i == IMU_BUS_ID else "servo"}
+            try:
+                r = self.bus.read(i, 0, 5)[1]
+                row["firmware"], row["model"] = f"{r[0]}.{r[1]}", f"{r[3]}.{r[4]}"
+            except feetech.BusError:
+                pass                                     # ping 得通、读不了版本：照样列出来
+            found.append(row)
+        have = {f["id"] for f in found}
+        missing = [i for i in IDS if i not in have]
+        new = [f["id"] for f in found if f["kind"] == "servo" and not f["known"]]
+        self.log(f"找舵机 0–253：在线 {len(found)} 颗 {sorted(have)}" + (f"；还没编号的 {new}" if new else "")
+                 + (f"；15 个位置里还缺 {missing}" if missing else ""), "总线", "warn" if new or missing else "info")
+        return {"found": found, "missing": missing}
+
     def dump(self, sid):
         d = self.bus.dump(int(sid))
         r = d["raw"]
@@ -1209,11 +1231,16 @@ class ServoOps:
         old, new = int(old), int(new)
         if not 0 <= new <= 253:
             raise Refused("新 ID 要在 0–253")
+        if IMU_BUS_ID in (old, new):
+            raise Refused(f"{IMU_BUS_ID} 号是总线上 IMU 小板的编号：不改它，也别把舵机编成它")
+        if self.bus.ping(old) is None:
+            raise Refused(f"总线上找不到 {old} 号：先点「找舵机」看看它现在是几号")
         if new != old and self.bus.ping(new) is not None:
             raise Refused(f"ID {new} 已经有舵机在用，会撞号")
         ok = self.bus.set_id(old, new)
         self.log(f"改 ID {old} → {new}：" + ("新 ID ping 得通" if ok else "新 ID ping 不通"), "寄存器", "info" if ok else "error")
-        return {"ok": ok}
+        self.s.refresh_static([new])
+        return {"ok": ok, "old": old, "new": new}
 
     def timing(self, n=200):
         """sync_read 全部在线舵机 n 次，看耗时和失败。"""
@@ -1295,6 +1322,8 @@ class ServoOps:
             return self.scan(parse_ids(args.get("ids") or "20-24,30-34,10-14"))
         if op == "scan_all":
             return self.scan(list(range(0, 254)))
+        if op == "find":
+            return self.find()
         if op == "dump":
             return self.dump(args["id"])
         if op == "write_reg":

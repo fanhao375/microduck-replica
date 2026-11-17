@@ -333,6 +333,17 @@ def ssh_password(by, on, password=None, timeout=40):
     return _call("ssh-password", payload, timeout)
 
 
+def sensors_apply(by, camera=None, tof=None, timeout=90):
+    """摄像头视频来源切成真实画面 / 测试画面、ToF 设成开机启动（sensors-apply）。回 (ok, result, detail)。
+    切到真实画面以后视频服务起不来，小助手会自己退回测试画面，result 是 camera_unstable。"""
+    payload = {"by": by}
+    if camera is not None:
+        payload["camera"] = camera
+    if tof:
+        payload["tof"] = True
+    return _call("sensors-apply", payload, timeout)
+
+
 def last_result():
     """读小助手最后一次写下的完整结果（Studio 重启 / 调用超时以后用）。读不到回 None。"""
     try:

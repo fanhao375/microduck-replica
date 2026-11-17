@@ -155,23 +155,30 @@ def _bus_give_back(by, servo=None):
 
 
 def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev_autologin=False, servo=None, imu=None, pad=None,
-              onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None):
+              onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None,
+              sensor_auto=None):
     guard = OriginGuard(names=names)
     ai = AiService(state_dir)
     updates = updates or Updates()
     if pad is not None:
         pad.update_guard=updates.installing
+    if sensor_auto is not None:
+        sensor_auto.busy = updates.installing        # 软件正在更新时不自动设摄像头和 ToF
     update_commands = set()
     mapping_requests = set()
 
     def update_readiness(*,native_transaction=None):
         busy = any(not task.done() for task in update_commands) or model_upload_gate.locked()
         motion = getattr(pad,'motion_studio',None)
-        native=updates.native_state() if native_transaction is not None else {}
+        native=updates.native_state()
         own_prepared=(native.get('bundle_schema')=='microduck-controller-payload/1' and native.get('active') is True
             and native.get('phase')=='prepared' and isinstance(native_transaction,str)
             and native.get('transaction_id')==native_transaction)
-        guarded=updates.marker.exists() or (updates.installing() and not own_prepared)
+        # The software updater writes its own marker before this query, so the plain
+        # query must not count it or no install can ever pass preflight. Native updates
+        # check that marker themselves as root; native recovery still counts it here.
+        guarded=((native_transaction is not None and updates.marker.exists())
+                 or (native.get('active') is True and not own_prepared))
         if (guarded or busy or (servo is not None and servo.state != 'closed')
             or mapping_requests or (pad is not None and getattr(getattr(pad,'mapping',None),'blocked',False))
             or (motion is not None and (motion.state != 'idle' or motion.session is not None))
@@ -508,6 +515,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             return JSONResponse({"ok": False, "error": "当前未开启传感器页面的后端"}, status_code=503, headers=headers)
         try:
             data = await getattr(sensors, kind)()
+            if kind == "camera" and sensor_auto is not None:
+                data["auto"] = sensor_auto.view()
             return JSONResponse({"ok": True, "data": data}, headers=headers)
         except Exception as e:
             label = "摄像头" if kind == "camera" else "ToF"
@@ -1556,9 +1565,19 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                           hint="这是 Studio 的问题，导出诊断包发出来；不影响站和走")
                 await asyncio.sleep(5.0)
 
+    async def sensors_on_boot():
+        try:
+            await sensor_auto.run("开机自动识别")
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:  # noqa: BLE001
+            log.error("开机自动设摄像头 / ToF 的时候出错", cat="传感器", raw=f"{type(e).__name__}: {e}", exc=True,
+                      hint="不影响站和走；摄像头页、ToF 页照原来的设置显示")
+
     @contextlib.asynccontextmanager
     async def lifespan(app):
         await updates.start_readiness(update_readiness)
+        auto_task = asyncio.create_task(sensors_on_boot()) if sensor_auto is not None else None
         watch = asyncio.create_task(servo_watch())
         feed = asyncio.create_task(pad_feed()) if pad is not None else None
         ob_task = asyncio.create_task(onboard_loop()) if onboard is not None else None
@@ -1572,6 +1591,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                  dedup=False)
         yield
         await updates.stop_readiness()
+        if auto_task is not None:
+            auto_task.cancel()
         restore.cancel()
         watch.cancel()
         if tune_task is not None:

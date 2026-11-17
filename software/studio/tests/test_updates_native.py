@@ -260,6 +260,39 @@ class NativeHttp(unittest.IsolatedAsyncioTestCase):
         self.updates.marker.touch()
         self.assertFalse(callback(native_transaction='a'*32)['ready'],'software marker is never ignored')
 
+    async def test_software_updater_passes_readiness_with_its_own_marker_present(self):
+        """升级器先写「正在安装」标记再来问空不空闲（updater/control.py 的 run → validate → preflight）。
+        标记是它自己的，算进去就永远装不上；主程序升级那条路是自己查这个标记的，不靠这里。"""
+        self.updates.marker=Path(self.tmp.name)/'software-installing'
+        callback=self.updates.readiness_snapshot
+        self.assertTrue(callback()['ready'])
+        self.updates.marker.write_text('job-1',encoding='utf-8')
+        self.assertTrue(callback()['ready'],'the software updater must pass its own preflight')
+        self.servo.state='opening'
+        self.assertFalse(callback()['ready'],'real servo activity remains a refusal')
+        self.servo.state='closed'
+        self.native.update(active=True,phase='guarded')
+        self.assertFalse(callback()['ready'],'a native update in progress still refuses')
+        self.native.update(active=False,phase='idle')
+        self.assertFalse(callback(native_transaction='a'*32)['ready'],'native recovery still sees the software marker')
+
+    @unittest.skipUnless(os.name=='posix','real Linux root/app readiness socket')
+    async def test_actual_readiness_socket_answers_the_software_updater_during_its_install(self):
+        snapshot=self.updates.readiness_snapshot
+        await self.updates.stop_readiness()
+        self.updates.readiness=Path(self.tmp.name)/'software-ready.sock'
+        self.updates.marker=Path(self.tmp.name)/'software-installing'
+        await self.updates.start_readiness(snapshot)
+        def ask(request):
+            with socket.socket(socket.AF_UNIX) as sock:
+                sock.settimeout(2);sock.connect(str(self.updates.readiness))
+                sock.sendall(json.dumps(request).encode()+b'\n')
+                return json.loads(sock.recv(8192))
+        self.updates.marker.write_text('job-1',encoding='utf-8')
+        self.assertEqual(await asyncio.to_thread(ask,{'op':'readiness'}),{'ready':True})
+        recovery=await asyncio.to_thread(ask,{'op':'native-recovery-readiness','transaction_id':'a'*32})
+        self.assertFalse(recovery['ready'])
+
     @unittest.skipUnless(os.name=='posix','real Linux root/app readiness socket')
     async def test_actual_readiness_socket_before_journal_and_after_guard(self):
         # Lifespan already started; restart the actual server with its original callback.

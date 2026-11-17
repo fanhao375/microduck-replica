@@ -267,7 +267,8 @@ export function CameraPage({ api }) {
     <header class="sensor-heading"><div><h1 id="camera-title">摄像头</h1><p>查看鸭子当前的视频画面。</p></div>
       <span class="sensor-pill camera-status" role="status" data-state=${connection.state}>${CAMERA_STATES[connection.state] || connection.state}</span></header>
     <div class="board sensor-board camera-source"><strong>${source.label}</strong><p>${source.note}</p>
-      ${config?.error ? html`<p class="sensor-note">${config.error}；仍会尝试连接视频服务。</p>` : null}</div>
+      ${config?.error ? html`<p class="sensor-note">${config.error}；仍会尝试连接视频服务。</p>` : null}
+      ${config?.auto?.note ? html`<p class="sensor-note camera-auto">${config.auto.note}</p>` : null}</div>
     <div class="sensor-actions">
       <button type="button" class="camera-start sensor-primary" onClick=${reconnect} disabled=${wanted && connection.state !== 'error' && connection.state !== 'stopped'}>开始预览</button>
       <button type="button" class="camera-stop" onClick=${stop} disabled=${!wanted}>停止预览</button>

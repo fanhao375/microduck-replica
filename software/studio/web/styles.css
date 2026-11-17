@@ -449,6 +449,16 @@ button:disabled { cursor: default; }
 .sv-list .sv-name { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 18px; }
 .sv-list .sv-id { margin: 0; min-width: 28px; }
 .sv-list .sv-slider { width: 100%; min-width: 0; }
+/* 新舵机编号：还没编号的那颗标出来 */
+.sv-numbering { grid-column: 1 / -1; order: -1; }
+.sv-found .sv-chip { padding: 4px 10px; font-size: 14px; border: 1px solid transparent; }
+.sv-found .sv-chip.new { background: #FFF4E5; border-color: #F5B400; color: #8A5A00; font-weight: 600; }
+/* 读数那一格能输数字：平时看着跟原来的数字一样，点进去才像输入框 */
+.sv-list .sv-num { width: 100%; min-width: 0; height: 24px; padding: 0 2px; border: 1px solid transparent; border-radius: 6px;
+  background: transparent; color: inherit; font: inherit; -moz-appearance: textfield; appearance: textfield; }
+.sv-list .sv-num::-webkit-outer-spin-button, .sv-list .sv-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sv-list .sv-num:hover:not(:disabled) { border-color: #D1D1D6; background: #FFF; }
+.sv-list .sv-num:focus { border-color: #2F7CF6; background: #FFF; outline: none; }
 .sv-list .sv-deg { font-size: 14px; font-weight: 600; }
 .sv-list .warn { color: var(--warn); font-weight: 600; } .sv-list .bad { color: var(--danger); font-weight: 700; }
 .sv-list .sv-switch span { min-width: 44px; }

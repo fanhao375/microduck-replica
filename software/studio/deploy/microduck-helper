@@ -71,10 +71,10 @@ import time
 import tomllib
 import types
 
-VERSION = "0.7.2"
+VERSION = "0.8.0"
 VERBS = ("bus-take", "bus-give-back", "bus-abort", "pad-pair", "pad-forget",
          "wifi-hotspot-down", "wifi-hotspot-up", "calib-read", "calib-commit", "ssh-status", "ssh-password",
-         "imu-recalibrate", "robotd-update")
+         "imu-recalibrate", "robotd-update", "sensors-apply")
 
 EXIT_OK, EXIT_ARGS, EXIT_STATE, EXIT_BUSY, EXIT_FAIL, EXIT_RETAKE = 0, 2, 3, 4, 5, 6
 
@@ -125,6 +125,11 @@ HOTSPOT = "Microduck-Hotspot"
 PAD_TIMEOUT_DEFAULT, PAD_TIMEOUT_MIN, PAD_TIMEOUT_MAX = 60, 10, 120
 PAD_EXTRA_S = 30          # 子进程总超时 = robotctl 自己的 timeout + 这 30 秒
 FORGET_TIMEOUT_S = 60
+MEDIA_CONFIG = "/etc/robot/robotd.toml"
+SENSORS_LOCK = HELPER_DIR + "/sensors.lock"
+SOFTWARE_MARKER = "/run/microduck-updater/installing"
+MEDIA_SETTLE_S = 3.0      # 重启视频服务以后先等这么久
+MEDIA_STABLE_S = 6.0      # 再看这么久：一直在跑、主进程没换才算起来了（起不来的话它每 5 秒重启一次）
 WIFI_DOWN_WAIT = 10.0
 WIFI_UP_WAIT = 30.0
 WIFI_POLL = 0.2
@@ -3155,6 +3160,110 @@ def verb_ssh_status(op, args):
     return op.finish(EXIT_OK, "ssh_status", "读到了 SSH 的状态", detail, record=False)
 
 
+# ---------------------------------------------------------------------------
+# 摄像头 / ToF（用户 11-17：接了就自动用，不用 SSH 改配置）
+
+def media_source_text(text, source):
+    """只换 [media] 里 source 那一行（官方配置里它可能是注释掉的），别的原样。找不到这一行回 None。"""
+    lines, section, done = text.split("\n"), None, False
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("["):
+            section = stripped
+        elif section == "[media]" and not done and re.match(r"#?\s*source\s*=", stripped):
+            lines[index] = f'source = "{source}"'
+            done = True
+    return "\n".join(lines) if done else None
+
+
+def read_media_source(op):
+    """回 (整份配置的文字, 现在的 source)。配置读不了、不是 root 的普通文件就停。"""
+    try:
+        text = imu_profile_safe_file(op, MEDIA_CONFIG).decode("utf-8")
+        media = tomllib.loads(text).get("media")
+    except (OSError, ValueError) as e:
+        raise Stop(EXIT_STATE, "bad_config", f"读不了 {MEDIA_CONFIG}：{type(e).__name__}: {e}") from e
+    return text, media.get("source") if isinstance(media, dict) else None
+
+
+def write_media_source(op, text, source):
+    new = media_source_text(text, source)
+    try:
+        ok = new is not None and tomllib.loads(new).get("media", {}).get("source") == source
+    except ValueError:
+        ok = False
+    if not ok:
+        raise Stop(EXIT_STATE, "bad_config", f"{MEDIA_CONFIG} 的 [media] 里找不到能改的 source 这一行，没动它")
+    mode = stat.S_IMODE(os.lstat(op.ctx.p(MEDIA_CONFIG)).st_mode)
+    write_atomic(op.ctx, MEDIA_CONFIG, new.encode("utf-8"), mode)
+    return new
+
+
+def restart_mediad(op):
+    rc, out, err = op.ctx.run(["systemctl", "restart", "mediad"], timeout=30.0)
+    return None if rc == 0 else ((err or out or "").strip()[:300] or f"systemctl 退出码 {rc}")
+
+
+def mediad_stable(op):
+    """视频服务真起来了没有：隔几秒看两次，都在跑、主进程没换才算。"""
+    op.ctx.sleep(MEDIA_SETTLE_S)
+    first = show(op, "mediad", ["ActiveState", "MainPID"])
+    op.ctx.sleep(MEDIA_STABLE_S)
+    second = show(op, "mediad", ["ActiveState", "MainPID"])
+    ok = (first.get("ActiveState") == "active" and second.get("ActiveState") == "active"
+          and first.get("MainPID") not in (None, "", "0") and first.get("MainPID") == second.get("MainPID"))
+    return ok, {"first": first, "second": second}
+
+
+def verb_sensors_apply(op, args):
+    """camera："camera" = 视频用真实画面，"test" = 用测试画面；改了才重启视频服务。
+    切成真实画面以后视频服务起不来（没接好、识别错了）就退回测试画面：网页上的视频和遥控不能跟着没了。
+    tof：true = ToF 服务设成开机启动并马上起（没接传感器它自己安静地等，官方就是这么设计的）。"""
+    check_keys(args, ("by", "camera", "tof"), "sensors-apply 的参数")
+    op.by = check_by(args)
+    camera, tof = args.get("camera"), args.get("tof")
+    if camera not in (None, "camera", "test"):
+        raise Stop(EXIT_ARGS, "bad_args", 'camera 只能是 "camera" 或 "test"')
+    if tof not in (None, True):
+        raise Stop(EXIT_ARGS, "bad_args", "tof 只能是 true")
+    if camera is None and tof is None:
+        raise Stop(EXIT_ARGS, "bad_args", "camera 和 tof 至少给一个")
+    if exists(op.ctx, SOFTWARE_MARKER):
+        raise Stop(EXIT_BUSY, "busy", "软件正在更新：等它装完再设传感器")
+    native_update_conflict(op)
+    op.take_lock("传感器设置", SENSORS_LOCK)
+    detail = {}
+    if tof:
+        rc, out, err = op.ctx.run(["systemctl", "enable", "--now", "tofd.service"], timeout=30.0)
+        if rc != 0:
+            why = (err or out or "").strip()[:300] or f"systemctl 退出码 {rc}"
+            return op.finish(EXIT_FAIL, "tof_failed", f"ToF 服务没设成开机启动：{why}", {"rc": rc})
+        op.emit("tof", "info", "ToF 服务设成开机启动，已启动")
+        detail["tof"] = "enabled"
+    if camera:
+        text, current = read_media_source(op)
+        if current == camera:
+            op.emit("camera", "info", f"视频来源本来就是 {camera}，没动")
+            detail["camera"] = "unchanged"
+        else:
+            write_media_source(op, text, camera)
+            op.emit("camera", "info", f"视频来源 {current} → {camera}，重启视频服务")
+            why = restart_mediad(op)
+            stable, seen = (False, {}) if why else mediad_stable(op) if camera == "camera" else (True, {})
+            if why or not stable:
+                # 退回去：原文整份写回，别让视频服务一直起不来
+                write_atomic(op.ctx, MEDIA_CONFIG, text.encode("utf-8"),
+                             stat.S_IMODE(os.lstat(op.ctx.p(MEDIA_CONFIG)).st_mode))
+                back = restart_mediad(op)
+                op.emit("camera", "warn", "视频服务没起来，视频来源已退回原来的", {"restart": back, **seen})
+                return op.finish(EXIT_FAIL, "camera_unstable" if not why else "restart_failed",
+                                 (f"视频服务重启没成功：{why}" if why else "切到真实画面以后视频服务起不来")
+                                 + f"，已退回 {current}" + (f"（退回后重启也没成功：{back}）" if back else ""),
+                                 {**detail, "camera": "reverted", "source": current, **seen})
+            detail["camera"] = camera
+    return op.finish(EXIT_OK, "sensors_applied", "传感器设置好了", detail)
+
+
 def check_ssh_password(pw):
     if not isinstance(pw, str):
         raise Stop(EXIT_ARGS, "bad_args", "password 要是字符串")
@@ -3378,6 +3487,8 @@ def run(argv, ctx):
             return verb_ssh_status(op, args)
         if verb == "ssh-password":
             return verb_ssh_password(op, args)
+        if verb == "sensors-apply":
+            return verb_sensors_apply(op, args)
         return verb_abort(op, args)
     except Stop as s:
         # bad_verb 是 Studio 探测小助手可用性用的：不能把上一次真正的结果覆盖成 bad_verb

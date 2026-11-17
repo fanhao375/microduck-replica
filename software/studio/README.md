@@ -101,6 +101,11 @@ Windows 的 Python 没有 Unix socket，所以地址写成 `tcp:主机:端口`�
 
 同日后续 aa825fc 已把坐下/站起加入录制，389 项软件检查及独立审查通过并部署。用户确认“能保存，回放坐站也正常”；真机范围、状态等待和 v2 回退边界见[坐站验收](../../docs/superpowers/verification/2026-10-25-web-posture-recording.md)。
 
+## 新舵机编号：主板当调试板用
+
+舵机页「更多 → 新舵机编号」：「找舵机」扫 0–253，把不在 15 个编号里的标成「还没编号」，选它要装的位置写 ID。
+出厂都是 1 号，一次只接一颗新的。200 号留给总线上的 IMU 小板，不改它。接线和步骤见[烧录和第一次使用](../image/烧录和第一次使用.md)。
+
 ## 台架模式：主控没烧，用飞特调试板在电脑上调舵机
 
 把飞特调试板（或 USB 转 TTL）插到电脑上，接好舵机和电源，然后：
@@ -116,7 +121,7 @@ py -3.13 -I run.py --bench
 
 1. 拷贝：把 `software/studio` 整个目录拷到鸭子的 `/home/radxa/studio-dev`（`scp -r`、U 盘解压包都行）。
 2. 自检：在鸭子上运行 `python3 -I run.py --selfcheck`（只读：打印版本，对 robotd / configd / padd 各问一次）。
-3. 装 root 小助手：`cd deploy && sudo sh install.sh radxa`。0.7.2 的小助手负责舵机总线交接、手柄配对、热点开关、`calib-read` / `calib-commit`（把标定写进主程序、切运动模式）、`ssh-status` / `ssh-password`（「更多」页的 SSH 开关），以及 `imu-recalibrate`（重新校验已保存的 IMU 安装方向）；关热点前会写 `/run/microduck/studio-connecting.json`，让 netcheck 在连接期间别插手。从舵机页交还时，标定模式的实时快照也算主程序起来了（0.5.1 只认运动模式的 `control`，标定模式下每次都等满 30 秒判「起不来」）。步骤、卸载和上机核对见 `deploy/INSTALL.md`。
+3. 装 root 小助手：`cd deploy && sudo sh install.sh radxa`。0.8.0 的小助手负责舵机总线交接、手柄配对、热点开关、`sensors-apply`（开机自动切摄像头的视频来源、把 ToF 设成开机启动）、`calib-read` / `calib-commit`（把标定写进主程序、切运动模式）、`ssh-status` / `ssh-password`（「更多」页的 SSH 开关），以及 `imu-recalibrate`（重新校验已保存的 IMU 安装方向）；关热点前会写 `/run/microduck/studio-connecting.json`，让 netcheck 在连接期间别插手。从舵机页交还时，标定模式的实时快照也算主程序起来了（0.5.1 只认运动模式的 `control`，标定模式下每次都等满 30 秒判「起不来」）。步骤、卸载和上机核对见 `deploy/INSTALL.md`。
 4. 开机服务：照 `deploy/microduck-studio.service` 文件头的命令装：
 
    ```bash
