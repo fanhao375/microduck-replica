@@ -236,6 +236,9 @@ class ImuBackend:
                 and bus.get("homed") is True and isinstance(error, (int, float)) and not isinstance(error, bool)
                 and math.isfinite(error) and 0 <= error <= 5)
         age = native.get("imu_age_ms")
+        if age is None:
+            # 总线 IMU 小板（legacy 协议）不报读数年龄，只有主程序算的上限（11-18 duck-c84e：一直 None，上限 30 ms）
+            age = native.get("imu_age_upper_bound_ms")
         reason = None
         if not available:
             reason = "当前不能在 HOME 原地采安装方向：先读取安装方向或进入初次标定模式"

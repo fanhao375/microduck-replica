@@ -72,6 +72,8 @@ class HomeCoarseTest(unittest.TestCase):
             {'home_start_guard': {'max_joint_error_deg': float('nan')}},
             {'native': {'torque_state_confirmed': None}},
             {'native': {'imu_ready': False}}, {'native': {'imu_age_ms': 2000}},
+            {'native': {'imu_age_ms': None}},
+            {'native': {'imu_age_ms': None, 'imu_age_upper_bound_ms': 2000}},
         ):
             b = self.home()
             if 'native' in mutation:
@@ -80,6 +82,16 @@ class HomeCoarseTest(unittest.TestCase):
                 b.rd.bus.value.update(mutation)
             with self.subTest(mutation=mutation), self.assertRaises(Refused):
                 asyncio.run(b.handle({'op':'coarse-capture','phase':'still','seconds':.5}))
+
+    def test_bus_imu_without_a_reported_age_uses_its_upper_bound(self):
+        """11-18 duck-c84e：总线 IMU 小板不报读数年龄（None），主程序给了上限 30 ms：站着采数不该说「不新鲜」。"""
+        b = self.home()
+        b.rd.bus.value['native'].update(imu_age_ms=None, imu_age_upper_bound_ms=30)
+        state = b.view()['coarse_sampling']
+        self.assertTrue(state['available'])
+        self.assertIsNone(state['reason'])
+        still = asyncio.run(b.handle({'op':'coarse-capture','phase':'still','seconds':3}))
+        self.assertGreaterEqual(still['n'], 15)
 
     def test_motion_stream_does_not_recount_a_frozen_sample(self):
         b = self.home()
