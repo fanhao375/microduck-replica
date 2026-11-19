@@ -31843,6 +31843,199 @@
             "sound": "No direct change."
           },
           "priority": "Medium as an autonomous-motion regression case. Low for the current replica delivery."
+        },
+        {
+          "number": 617,
+          "title": "docs: measure duck-sim walking and turning on v8 and v10",
+          "state": "open",
+          "draft": true,
+          "url": "https://github.com/pollen-robotics/microduck/pull/617",
+          "head_sha": "5ca0d40f87fb37d71ea6b5c5e7e88eec4890ec6d",
+          "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "base_branch": "main",
+          "actual_merge_base": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "created_at": "2026-11-19T08:33:07Z",
+          "created_at_jst": "2026-11-19T17:33:07+09:00",
+          "updated_at": "2026-11-19T08:33:07Z",
+          "updated_at_jst": "2026-11-19T17:33:07+09:00",
+          "merged_at": null,
+          "merge_commit_sha": null,
+          "source_committed_at_utc": "2026-11-19T08:32:04Z",
+          "source_committed_at_jst": "2026-11-19T17:32:04+09:00",
+          "source_version": "0.23.0",
+          "api_version": 68,
+          "commit_count": 1,
+          "changed_file_count": 2,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...5ca0d40f87fb37d71ea6b5c5e7e88eec4890ec6d",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/5ca0d40f87fb37d71ea6b5c5e7e88eec4890ec6d",
+          "classification": "Draft, unmerged documentation proposal; contributor-reported simulator measurements. No runtime or model release.",
+          "development_release_observed": false,
+          "included_in_formal_release": false,
+          "review": {
+            "change": "Labels the original simulation-guide speeds as policy-set v8 measurements and adds v8/v10 walking and turning observations. The quickstart example becomes drive 0.20 0, while the script default remains 0.15 m/s. Only two Markdown files change.",
+            "fixed_sources": {
+              "measurements": "https://github.com/pollen-robotics/microduck/blob/5ca0d40f87fb37d71ea6b5c5e7e88eec4890ec6d/docs/design/simulation.md",
+              "quickstart": "https://github.com/pollen-robotics/microduck/blob/5ca0d40f87fb37d71ea6b5c5e7e88eec4890ec6d/docs/robot/simulation.md"
+            },
+            "related_issue": {
+              "number": 597,
+              "url": "https://github.com/pollen-robotics/microduck/issues/597",
+              "state": "open",
+              "created_at_utc": "2026-11-14T03:53:21Z",
+              "scope": "Earlier measurements used Raspberry Pi 5 / aarch64 / Debian 13 and daemon prefix 094d4bb4. They are separate from the new PR report on WSL2 x86_64 / daemon 56424efe."
+            },
+            "author_report": {
+              "daemon_source_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+              "training_repo_sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+              "platform": "Ubuntu 24.04.5 under WSL2, x86_64, Intel Core i9-10900KF",
+              "mujoco_version": "3.10.0",
+              "onnxruntime_version": "1.24.4 CPU",
+              "scene": "default backlash scene, headless",
+              "duration_per_run_s": 8,
+              "repetitions_per_command_per_set": 2,
+              "command_count": 5,
+              "total_runs": 20,
+              "restart_between_runs": true,
+              "standing_before_each_command": true,
+              "final_health": "Author reports all 20 runs ended standing, with zero missed control ticks in the final health report.",
+              "realtime_factor_range": [
+                1.0,
+                1.01
+              ],
+              "forward_metric": "Horizontal displacement of simulated trunk, not daemon odometry.",
+              "turn_metric": "Accumulated heading changes for in-place turns.",
+              "measurements": [
+                {
+                  "vx_m_s": 0.15,
+                  "vyaw_rad_s": 0,
+                  "v8_trunk_displacement_cm": [
+                    59,
+                    59
+                  ],
+                  "v10_trunk_displacement_cm": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "vx_m_s": 0.2,
+                  "vyaw_rad_s": 0,
+                  "v8_trunk_displacement_cm": [
+                    74,
+                    75
+                  ],
+                  "v10_trunk_displacement_cm": [
+                    74,
+                    75
+                  ]
+                },
+                {
+                  "vx_m_s": 0.25,
+                  "vyaw_rad_s": 0,
+                  "v8_trunk_displacement_cm": [
+                    85,
+                    86
+                  ],
+                  "v10_trunk_displacement_cm": [
+                    90,
+                    91
+                  ]
+                },
+                {
+                  "vx_m_s": 0,
+                  "vyaw_rad_s": 1.0,
+                  "v8_heading_change_deg": [
+                    483,
+                    490
+                  ],
+                  "v10_heading_change_deg": [
+                    8,
+                    8
+                  ]
+                },
+                {
+                  "vx_m_s": 0,
+                  "vyaw_rad_s": 0.5,
+                  "v8_heading_change_deg": [
+                    15,
+                    15
+                  ],
+                  "v10_heading_change_deg": [
+                    2,
+                    3
+                  ]
+                }
+              ],
+              "model_identity_check": "Author reports checking SHA-256 of the configured walking model for every run; prefixes 2fc7f8ee (v8), ce894d30 (v10).",
+              "validation_limit": "Contributor-reported software simulations, not tracker reruns, robot hardware measurements or HD-1910 acceptance."
+            },
+            "policy_metadata_review": {
+              "scope": "Read immutable JSON manifests and remote LFS metadata only; no model weight bytes downloaded or executed.",
+              "model_file": "velstand.onnx",
+              "common_manifest_contract": {
+                "schema_version": 2,
+                "model_api": 1,
+                "obs_len": 61,
+                "action_len": 14,
+                "servos": "xl330",
+                "control_hz": 50
+              },
+              "same_lfs_digest_sets": [
+                "v7",
+                "v9",
+                "v10"
+              ],
+              "sets": [
+                {
+                  "tag": "v7",
+                  "source_sha": "f745f1089051c64f9fd1fc2a3b1ef67feec14703",
+                  "manifest_url": "https://huggingface.co/pollen-robotics/microduck-policies/blob/f745f1089051c64f9fd1fc2a3b1ef67feec14703/manifest.json",
+                  "tree_api_url": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/f745f1089051c64f9fd1fc2a3b1ef67feec14703?recursive=false&expand=false",
+                  "model_lfs_sha256": "ce894d30b3343036d499bfac1102bdaa58d59a21c1b58401ecb70fb6a2f63e0a",
+                  "model_size": 793705
+                },
+                {
+                  "tag": "v8",
+                  "source_sha": "665ae4eb20bfe13bca1ef4ea6d4bb6b4a096e448",
+                  "manifest_url": "https://huggingface.co/pollen-robotics/microduck-policies/blob/665ae4eb20bfe13bca1ef4ea6d4bb6b4a096e448/manifest.json",
+                  "tree_api_url": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/665ae4eb20bfe13bca1ef4ea6d4bb6b4a096e448?recursive=false&expand=false",
+                  "model_lfs_sha256": "2fc7f8ee6acd7d0d3f66a99927b5d5a56589aeed02ec714de329b252d5ccf492",
+                  "model_size": 793705
+                },
+                {
+                  "tag": "v9",
+                  "source_sha": "8dc9feca069ca4e89f0e307d405cf9e1f0bb1ee9",
+                  "manifest_url": "https://huggingface.co/pollen-robotics/microduck-policies/blob/8dc9feca069ca4e89f0e307d405cf9e1f0bb1ee9/manifest.json",
+                  "tree_api_url": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/8dc9feca069ca4e89f0e307d405cf9e1f0bb1ee9?recursive=false&expand=false",
+                  "model_lfs_sha256": "ce894d30b3343036d499bfac1102bdaa58d59a21c1b58401ecb70fb6a2f63e0a",
+                  "model_size": 793705
+                },
+                {
+                  "tag": "v10",
+                  "source_sha": "236d1835b03ac7b45d962efbf2fe3a6940206112",
+                  "manifest_url": "https://huggingface.co/pollen-robotics/microduck-policies/blob/236d1835b03ac7b45d962efbf2fe3a6940206112/manifest.json",
+                  "tree_api_url": "https://huggingface.co/api/models/pollen-robotics/microduck-policies/tree/236d1835b03ac7b45d962efbf2fe3a6940206112?recursive=false&expand=false",
+                  "model_lfs_sha256": "ce894d30b3343036d499bfac1102bdaa58d59a21c1b58401ecb70fb6a2f63e0a",
+                  "model_size": 793705
+                }
+              ],
+              "weights_downloaded": false,
+              "tracker_inference_executed": false
+            },
+            "exact_head_check_runs_returned": 0,
+            "interpretation": "The reported 0.20 m/s command produces about 0.75 m of travel in 8 s, still below the nominal speed. Standing health, equal API dimensions and a selected policy tag are insufficient to establish walking/turning performance. No new weights, training recipe or default policy change is introduced."
+          },
+          "impact": {
+            "HD1910": "No servo code changes. Before adoption, review actual actuator/backlash assumptions and the XL330-trained manifest contract; measurements do not certify Feetech behavior.",
+            "camera": "No capture, streaming or camera calibration change.",
+            "ToF": "No driver or geometry change.",
+            "model_management": "Pin exact policy-set revision, selected velstand path and digest; fresh simulation state and no local model override are part of the reported reproduction.",
+            "training": "Record scene/actuator assumptions and actual walking/turning response. No new training recipe or model weights.",
+            "motion": "For simulator-based command sizing or acceptance, measure trunk displacement and accumulated turn angle rather than upright health alone; command defaults are unchanged.",
+            "sound": "No change."
+          },
+          "priority": "Medium before simulator-based command sizing or training acceptance; actuator/model review before HD-1910 adoption. No current delivery change.",
+          "replica_integration": "not_integrated; no runtime, model, image or device changes by tracker"
         }
       ],
       "previous_stable_releases": [
@@ -53017,7 +53210,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-19T01:36:56Z",
+  "checked_at_utc": "2026-11-19T08:43:36Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -53030,27 +53223,23 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-18T11:06:03Z",
-    "source_snapshot_utc": "2026-11-19T01:36:56Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-19T01:36:56Z",
+    "previous_substantive_review_utc": "2026-11-19T01:36:56Z",
+    "source_snapshot_utc": "2026-11-19T08:43:36Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-19T08:43:36Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
+    "new_pull_requests": {
       "pollen-robotics/microduck": [
-        441
+        617
       ]
     },
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Tracked ToF trunk-axis range proposal #441 closed unmerged at 2026-11-18T15:35:00Z without a public reason. Its fixed source is preserved. Formal/main 0.23.0 still uses sensor-relative horizontal range; #546 and issue #430 remain open. No default-branch, release/tag, tracked model, blog, replica integration or image change. No tests or hardware actions by tracker.",
-    "closed_unmerged_pull_requests": {
-      "pollen-robotics/microduck": [
-        441
-      ]
-    },
+    "notes": "New unmerged draft #617 adds contributor-reported v8/v10 duck-sim walking and turning measurements and changes only a quickstart example to drive 0.20 0. Runtime default remains 0.15 m/s. Immutable manifests and remote LFS metadata identify v9/v10 walking weights as v7, distinct from v8. These are historical models, not new weights. Four default heads, stable/development releases, OS and blog are unchanged. Existing replica 3D wiring documentation was synchronized from master and preserved; no runtime integration or image change. No tests, inference or hardware actions by tracker.",
+    "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
     "merged_previously_tracked_pull_requests": {},
@@ -57257,6 +57446,45 @@
       "merged_previously_tracked_pull_requests": {},
       "formal_release_artifacts_available": true,
       "formal_release_assets_completed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-18T11:06:03Z",
+      "source_snapshot_utc": "2026-11-19T01:36:56Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-19T01:36:56Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          441
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Tracked ToF trunk-axis range proposal #441 closed unmerged at 2026-11-18T15:35:00Z without a public reason. Its fixed source is preserved. Formal/main 0.23.0 still uses sensor-relative horizontal range; #546 and issue #430 remain open. No default-branch, release/tag, tracked model, blog, replica integration or image change. No tests or hardware actions by tracker.",
+      "closed_unmerged_pull_requests": {
+        "pollen-robotics/microduck": [
+          441
+        ]
+      },
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false
     }
   ],
   "replica_public_image": {
