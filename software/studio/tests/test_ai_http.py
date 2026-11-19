@@ -132,6 +132,32 @@ class AiHttp(unittest.IsolatedAsyncioTestCase):
             self.assertIn(status,(400,404,413))
             self.assertFalse(result['ok'])
 
+    async def test_tts_preview_authorization_and_saved_key_privacy(self):
+        with mock.patch('studio.tts.TtsService.preview', new_callable=mock.AsyncMock,
+                        return_value={'mime':'audio/wav','data':'mock-audio'}) as preview:
+            status,_,_ = await self.call('POST','/api/ai',{'op':'tts_preview'})
+            self.assertEqual(status,401)
+            status,_,_ = await self.call('POST','/api/ai',{'op':'tts_preview'},
+                {k:v for k,v in self.headers.items() if k != 'X-CSRF'})
+            self.assertEqual(status,403)
+            preview.assert_not_called()
+            status,headers,result = await self.call('POST','/api/ai',{'op':'tts_preview'},self.headers)
+            self.assertEqual(status,200)
+            self.assertEqual(headers['cache-control'],'no-store')
+            self.assertEqual(result['audio']['mime'],'audio/wav')
+        settings={'enabled':False,'provider':'volcano','speaker':'custom_voice',
+                  'api_key':'private-tts-key','clear_key':False}
+        with mock.patch('studio.tts.http.client.HTTPSConnection') as network:
+            status,_,result = await self.call('POST','/api/ai',{'op':'tts_save','settings':settings},self.headers)
+            self.assertEqual(status,200)
+            self.assertNotIn('private-tts-key',json.dumps(result))
+            network.assert_not_called()
+        from studio.app import _diag_zip
+        with zipfile.ZipFile(io.BytesIO(_diag_zip(self.log, {}, {}))) as bundle:
+            self.assertFalse(any('tts-settings' in name for name in bundle.namelist()))
+            for name in bundle.namelist():
+                self.assertNotIn(b'private-tts-key',bundle.read(name))
+
 
 if __name__ == '__main__':
     unittest.main()

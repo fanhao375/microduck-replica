@@ -42,6 +42,18 @@ tests/              单元测试 + 真机录的数据 fixtures/now-20261018.json
 
 ## 在电脑上跑（不接鸭子）
 
+### TTS 语音回复与试听
+
+「更多 → AI 对话 → 鸭子语音回复」可选择豆包语音合成 2.0 或火山 Agent Plan，保存对应的语音 API Key 和音色。两者均使用火山原生接口，不是 OpenAI 兼容语音接口。豆包语音合成 2.0 使用豆包语音控制台 Key；Agent Plan 使用套餐专属 Key。切换服务不会沿用另一服务的 Key。旧语音配置默认归入 Agent Plan。
+
+开启「自动朗读 AI 回复」后，文字试聊成功的回复会由鸭子扬声器朗读；测试文字模型连接不会触发朗读。语音错误不影响文字回复。「鸭子试听」需要设备上的 `/usr/bin/aplay` 和 `aic3104` 声卡；「停止播放」停止鸭子端语音。
+
+「浏览器试听」生成固定示例文字的 WAV，直接从当前电脑或手机播放，无需设备声卡。若浏览器拦截自动播放，可点音频播放器播放；暂停也使用播放器控件。每次生成会调用所选云服务并可能收费，重复播放已生成音频不再请求云端。
+
+Key 只保存在 state 目录的 `tts-settings.json`（0600），不会回显到浏览器；试听音频仅在内存中生成，不写入文件。接口沿用 `/api/ai` 的登录、来源和 CSRF 校验。默认关闭自动朗读，配置保存不会请求云端。备份 state 目录时请将语音 Key 视作私密凭据。
+
+参考：[豆包语音 HTTP 单向流式接口](https://docs.volcengine.com/docs/doubao-voice/unidirectional-streaming-text-to-speech-http?lang=zh)、[Agent Plan 语音接入](https://docs.volcengine.com/docs/ark/agent-plan-personal-voice-model?lang=zh)。两者使用 `seed-tts-2.0` 资源和 24kHz 单声道 PCM；浏览器试听在服务端封装 WAV。
+
 需要 Python 3.13（跟板子一样；Windows 上是 `py -3.13`）。
 
 ```bash
