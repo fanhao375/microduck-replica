@@ -51,6 +51,7 @@ from .state import summarize
 from .pad import Refused as PadRefused, robot_view  # 手柄页
 from .ai_connections import AiError
 from .ai_service import AiService
+from .maintenance import make_handler
 from .updates import Updates, UpdateError, handle as handle_updates, safe_during_update
 
 VERSION = "0.1.0-dev"
@@ -1697,7 +1698,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         headers={"Content-Disposition": 'attachment; filename="Microduck-Local-CA.crt"',
                                  **no_store})
 
+    maintenance_handler = make_handler(auth, session_of, origin_ok)
     routes = [
+        Route("/api/maintenance", maintenance_handler, methods=["GET", "POST"]),
         Route("/healthz", healthz),
         Route("/api/session", api_session),
         Route("/api/ai", api_ai, methods=["GET", "POST"]),

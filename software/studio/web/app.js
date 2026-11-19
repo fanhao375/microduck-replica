@@ -1,3 +1,4 @@
+import { ShutdownButton } from './shutdown-button.js';
 // Microduck Studio 前端。不构建：Preact + htm（vendor/preact-htm.module.js）直接在浏览器里跑。
 //
 // 跟 Studio 后端只有两条路：
@@ -241,6 +242,7 @@ function TopBar({ duck, st, live, age, open, hideEStop }) {
   const net = st?.net;
   const addrTitle = net?.known ? [`IP ${net.ip_now || '不知道'}`, ...(net.urls || []).map((u) => u.url)].join('\n') : undefined;
   return html`<header class="topbar">
+    <${ShutdownButton} api=${api} />
     <div class="duckid">
       <span class="dot" style=${{ background: duck?.color || '#0F7C80' }}></span>
       <span class="name" title=${addrTitle}>${duck?.label || '鸭子'}</span>

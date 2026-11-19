@@ -1,0 +1,145 @@
+#!/usr/bin/python3
+"""Fixed-scope maintenance helper. No user-selected paths or shell commands."""
+import base64,datetime,hashlib,io,json,os,pathlib,shutil,socket,subprocess,sys,tempfile,tomllib,zipfile
+STATE=pathlib.Path('/var/lib/microduck-studio')
+ROOT=pathlib.Path('/opt/microduck/software/current/studio')
+CONFIG={}
+for p in ['/etc/robot/feetech-ft5/hd1910-calibration.toml','/etc/robot/feetech-ft5/hd1910-calibration.saved.toml','/etc/robot/feetech-ft5/robotd.toml','/etc/robot/robotd.toml','/var/lib/padd/mappings.json','/etc/robot/feetech-ft5/pad-settings.json']:
+ CONFIG['config/'+p.lstrip('/')]=pathlib.Path(p)
+for n in ['servo-centered.json','servo-directions.json','imu-pending.json','ai-connections.json','tts-settings.json','ai-tools.json','battery-settings.json','onboarding.json']:
+ CONFIG['config/var/lib/microduck-studio/'+n]=STATE/n
+CAMERA='config/boot/radxa-camera-8m-local.dtbo'
+TOF='config/etc/systemd/system/tofd.service.d/60-local-vl53l5cx.conf'
+TOF_TEXT='[Service]\nExecStart=\nExecStart=/opt/robot/daemon/current/bin/tofd --bus /dev/i2c-3 --address 0x29 --no-imu\n'
+CONFIG[CAMERA]=pathlib.Path('/boot/radxa-camera-8m-local.dtbo')
+CONFIG[TOF]=pathlib.Path('/etc/systemd/system/tofd.service.d/60-local-vl53l5cx.conf')
+MAX=16*1024*1024
+
+def validate_camera(data):
+ # Validate against this board's current boot tree without replacing its boot settings.
+ lines=pathlib.Path('/boot/extlinux/extlinux.conf').read_text().splitlines()
+ base=next(x.split()[1] for x in lines if x.strip().startswith('fdt '))
+ overlays=next(x.split()[1:] for x in lines if x.strip().startswith('fdtoverlays '))
+ if str(CONFIG[CAMERA]) not in overlays:raise ValueError('当前启动配置未启用此相机设备树，不能直接恢复')
+ with tempfile.TemporaryDirectory() as tmp:
+  candidate=pathlib.Path(tmp)/'camera.dtbo';candidate.write_bytes(data)
+  r=subprocess.run(['fdtoverlay','-i',base,'-o',str(pathlib.Path(tmp)/'merged.dtb'),*[str(candidate) if x==str(CONFIG[CAMERA]) else x for x in overlays]],capture_output=True)
+  if r.returncode:raise ValueError('相机设备树与当前启动配置不兼容')
+
+
+def rpc(method):
+ with socket.socket(socket.AF_UNIX) as s:
+  s.settimeout(5);s.connect('/run/robotd.sock');s.sendall((json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':{}})+'\n').encode());r=json.loads(s.makefile().readline())
+  if 'error' in r:raise ValueError('主程序未接受操作：'+str(r['error'].get('message',''))[:200])
+  return r['result']
+def atomic(p,data,mode=0o600,owner=None):
+ p.parent.mkdir(parents=True,exist_ok=True);fd,n=tempfile.mkstemp(prefix='.maintenance-',dir=p.parent)
+ try:
+  with os.fdopen(fd,'wb') as f:
+   f.write(data);f.flush();os.fchmod(f.fileno(),mode)
+   if owner:os.fchown(f.fileno(),*owner)
+   os.fsync(f.fileno())
+  os.replace(n,p);d=os.open(p.parent,os.O_RDONLY);os.fsync(d);os.close(d)
+ finally:
+  if os.path.exists(n):os.unlink(n)
+def parse_config(name,data):
+ if len(data)>1024*1024:raise ValueError('单份配置过大')
+ if name==CAMERA:
+  if len(data)<40 or data[:4]!=b'\xd0\x0d\xfe\xed':raise ValueError('相机设备树格式不正确')
+  validate_camera(data);return
+ if name==TOF:
+  if data.decode().replace('\r\n','\n')!=TOF_TEXT:raise ValueError('ToF 启动配置不是受支持的硬件参数')
+  return
+ v=tomllib.loads(data.decode()) if name.endswith('.toml') else json.loads(data)
+ if not isinstance(v,(dict,list)):raise ValueError('配置格式不正确')
+ return v
+
+def export():
+ files={};missing=[]
+ for name,p in CONFIG.items():
+  if p.exists():
+   d=p.read_bytes();parse_config(name,d);files[name]=d
+  else:missing.append(name)
+ for sub in ['studio','web']:
+  for p in (ROOT/sub).rglob('*'):
+   rel=p.relative_to(ROOT)
+   if 'vendor' in rel.parts or '__pycache__' in rel.parts:continue
+   if p.is_file() and p.suffix in ['.py','.js','.css','.html']:
+    d=p.read_bytes()
+    if len(d)<2*1024*1024:files['source/'+str(rel).replace('\\','/')]=d
+ if sum(map(len,files.values()))>MAX:raise ValueError('备份超过大小限制')
+ manifest={'format':'microduck-backup/v1','created':datetime.datetime.now().astimezone().isoformat(),'hostname':socket.gethostname(),'missing':missing,'files':{n:hashlib.sha256(d).hexdigest() for n,d in files.items()}}
+ buf=io.BytesIO()
+ with zipfile.ZipFile(buf,'w',zipfile.ZIP_DEFLATED) as z:
+  z.writestr('manifest.json',json.dumps(manifest,ensure_ascii=False));
+  for n,d in files.items():z.writestr(n,d)
+ sys.stdout.buffer.write(buf.getvalue())
+
+def load(data):
+ if len(data)>MAX:raise ValueError('备份文件过大')
+ z=zipfile.ZipFile(io.BytesIO(data));infos=z.infolist();names=[x.filename for x in infos]
+ if len(names)!=len(set(names)) or len(names)>500 or sum(x.file_size for x in infos)>MAX:raise ValueError('备份包结构或解压大小不正确')
+ for n in names:
+  if n.startswith('/') or '..' in pathlib.PurePosixPath(n).parts or '\\' in n:raise ValueError('备份路径不正确')
+ m=json.loads(z.read('manifest.json'));expected=m.get('files')
+ if m.get('format')!='microduck-backup/v1' or not isinstance(expected,dict) or set(names)!=set(expected)|{'manifest.json'}:raise ValueError('不是支持的鸭子备份文件')
+ restore={}
+ for n,h in expected.items():
+  d=z.read(n)
+  if hashlib.sha256(d).hexdigest()!=h:raise ValueError('备份校验失败：'+n)
+  if n in CONFIG:parse_config(n,d);restore[n]=d
+  elif not n.startswith('source/'):raise ValueError('备份包含不支持的配置')
+ if not restore:raise ValueError('备份没有可恢复的配置')
+ return m,restore
+
+def off():
+ b=rpc('robot.busStatus')
+ return (b.get('torque_state')=='off'
+         and (b.get('native') or {}).get('torque_state_confirmed') is not True
+         and not any(b.get(k) for k in ('torque_off_pending','power_pending','home_recovery','motion')))
+
+def main():
+ if len(sys.argv)!=2:raise ValueError('操作不正确')
+ op=sys.argv[1]
+ if op=='export':export();return
+ if op in ['preview','restore']:
+  m,files=load(sys.stdin.buffer.read(MAX+1))
+  if op=='preview':print(json.dumps({'ok':True,'created':m['created'],'hostname':m.get('hostname'),'files':list(files),'reboot_required':CAMERA in files,'source_included':any(n.startswith('source/') for n in m['files'])}));return
+  if not off():raise ValueError('请先扶稳鸭子并卸力，再导入备份')
+  b=pathlib.Path('/var/backups/microduck-import-'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));b.mkdir(mode=0o700)
+  for n in files:
+   p=CONFIG[n]
+   if p.exists():
+    d=b/n;d.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,d)
+  written=[]
+  try:
+   for n,d in files.items():
+    p=CONFIG[n];st=p.stat() if p.exists() else None
+    owner=(st.st_uid,st.st_gid) if st else ((1000,1000) if STATE in p.parents else None)
+    atomic(p,d,st.st_mode&0o777 if st else (0o644 if n in (CAMERA,TOF) else 0o600),owner);written.append(n)
+  except Exception:
+   for n in written:
+    p=CONFIG[n];old=b/n
+    if old.exists():atomic(p,old.read_bytes(),old.stat().st_mode&0o777,(old.stat().st_uid,old.stat().st_gid))
+    else:p.unlink(missing_ok=True)
+   os.sync();raise
+  os.sync()
+  if TOF in files:subprocess.run(['systemctl','daemon-reload'],check=True)
+  services=['robotd.service','padd.service','microduck-studio.service']
+  if TOF in files:services.append('tofd.service')
+  subprocess.run(['systemd-run','--unit=microduck-import-reload-'+str(os.getpid()),'--on-active=4s','/bin/systemctl','restart',*services],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  print(json.dumps({'ok':True,'backup':str(b),'restored':len(files),'reboot_required':CAMERA in files}));return
+ if op=='shutdown':
+  rpc('robot.stop');rpc('robot.relax')
+  import time
+  for _ in range(30):
+   if off():break
+   time.sleep(.1)
+  else:raise ValueError('卸力未确认，尚未安排关机')
+  os.sync();subprocess.run(['systemd-run','--unit=microduck-web-poweroff-'+str(os.getpid()),'--on-active=4s','/bin/systemctl','poweroff'],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  print(json.dumps({'ok':True,'scheduled':True}));return
+ raise ValueError('操作不支持')
+if __name__=='__main__':
+ try:main()
+ except Exception as e:
+  print(json.dumps({'ok':False,'error':str(e)[:300] if isinstance(e,ValueError) else '维护操作失败，请检查备份格式或服务日志'}));sys.exit(1)

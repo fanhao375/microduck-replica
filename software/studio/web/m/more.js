@@ -1,8 +1,10 @@
+import { CertificateDownload } from '../certificate-download.js';
 // 更多：语音方式切换、能看到但这一版手机页没重做的能力（跳到桌面版对应页）、以及连接信息。
 // 桌面版的那几页本来就是响应式的（#/tof、#/servos、#/imu），手机上能用，所以这一版先给入口。
 // 「模型」已经是手机壳里的整页（内嵌桌面版组件），不在这里重复列。
 import { html, useState, useEffect } from '../vendor/preact-htm.module.js';
-import { link } from './link.js';
+import { link, api } from './link.js';
+import { Maintenance } from '../maintenance.js';
 
 const SRC_KEY = 'duck.voice.source';
 const HOT_KEY = 'duck.hotspot';
@@ -129,7 +131,7 @@ export function MorePage({ hello, st, conn, say, nick, rename }) {
     <h2 class="m-h2">手机麦克风证书</h2>
     <div class="m-card m-pad">
       <div class="m-sub">第一次用「手机说话」前，让手机信任鸭子自己的 https 证书。只影响手机麦克风；板载麦克风和实体手柄不需要。</div>
-      <a class="m-btn" href="/ca.crt" download="Microduck-Local-CA.crt">下载证书</a>
+      <${CertificateDownload} />
       <ol class="m-tip" style="padding-left:18px;margin:10px 0 0">
         <li>iPhone：点下载 → 设置 → 已下载描述文件 → 安装；再到 设置 → 通用 → 关于本机 → 证书信任设置，打开 Microduck Local CA。</li>
         <li>Android：设置 → 安全 → 加密与凭据 → 安装证书 → CA 证书，选刚下载的文件。</li>
@@ -187,6 +189,7 @@ export function MorePage({ hello, st, conn, say, nick, rename }) {
     </div>
     <p class="m-tip">「摄像头」是手机版页面；其余是桌面版 Studio 的页面，手机上也能用，只是没按手机重新排过。</p>
 
+    <${Maintenance} api=${api} />
     <h2 class="m-h2">这只鸭子</h2>
     <div class="m-card">
       <div class="m-kv"><span class="k">昵称</span><span class="v">${nick}</span></div>
