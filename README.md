@@ -106,7 +106,9 @@
 
 两种舵机的配合件不能混用。打印文件的具体版本和更新日期在 CAD 仓库对应专区维护；这份采购清单按飞特方案整理，XL330 的舵机及配套电控需另行核对。
 
-**接线怎么接：** 点下图打开 3D 接线图，可旋转、缩放，按步骤高亮每一根线（电池 → 香蕉板 → HUB → 腿 / 头 / IMU，摄像头、ToF、扬声器、HAT 各接口）。
+**接线怎么接：** **[3D 接线图在线预览](https://fanhao375.github.io/microduck-replica/wiring3d/)**（点下图也可以打开）。可旋转、缩放，按步骤高亮每一根线（电池 → 香蕉板 → HUB → 腿 / 头 / IMU，摄像头、ToF、扬声器、HAT 各接口）。
+
+预览地址：<https://fanhao375.github.io/microduck-replica/wiring3d/>
 
 <div align="center">
   <a href="https://fanhao375.github.io/microduck-replica/wiring3d/"><img src="docs/wiring3d/preview.png" alt="Microduck 3D 接线图" width="420"></a>

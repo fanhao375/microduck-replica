@@ -106,7 +106,9 @@ Choose print resources for your servo version, then prepare the matching purchas
 
 Mating parts from the two servo versions are not interchangeable. File versions and update dates are maintained in the respective CAD sections. This shopping list follows the Feetech build; XL330 servos and associated electronics need separate checks.
 
-**How it is wired:** click the picture below for the 3D wiring diagram. Rotate and zoom it, and step through every wire (battery → banana board → HUB → legs / head / IMU, plus the camera, ToF, speaker and each HAT connector).
+**How it is wired:** **[3D wiring diagram, live preview](https://fanhao375.github.io/microduck-replica/wiring3d/)** (the picture below opens it too). Rotate and zoom it, and step through every wire (battery → banana board → HUB → legs / head / IMU, plus the camera, ToF, speaker and each HAT connector).
+
+Preview address: <https://fanhao375.github.io/microduck-replica/wiring3d/>
 
 <div align="center">
   <a href="https://fanhao375.github.io/microduck-replica/wiring3d/"><img src="docs/wiring3d/preview.png" alt="Microduck 3D wiring diagram" width="420"></a>
