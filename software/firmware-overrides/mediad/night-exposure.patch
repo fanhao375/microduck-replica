@@ -1,0 +1,26 @@
+--- a/mediad/src/exposure.rs
++++ b/mediad/src/exposure.rs
+@@ -62,7 +62,7 @@
+ const REPORT_TICKS: u32 = 20;
+ 
+ /// Mean-luma setpoint, 8-bit and *after* the ISP's gamma curve.
+-const TARGET_Y: f64 = 90.0;
++const TARGET_Y: f64 = 115.0;
+ 
+ /// Relative error tolerated without a step. Without a deadband the exposure jitters continuously on
+ /// sensor noise alone, which is visible as a picture that breathes.
+@@ -81,12 +81,12 @@
+ /// 3500 lines silently halves the frame rate. The mode is 1766 lines total; measured on the
+ /// prototype, 1762 lines held 29.96 fps and 3500 collapsed to 15.1.
+ const SOFT_LINES: f64 = 600.0; // ≈ 11.4 ms
+-const HARD_LINES: f64 = 1200.0; // ≈ 22.9 ms
++const HARD_LINES: f64 = 1700.0; // ≈ 32.4 ms
+ /// Sensor analogue gain ceiling, in multiples. The register is this × 256.
+ const MAX_ANALOGUE: f64 = 11.0;
+ /// ISP digital gain ceiling, in multiples. Well under what the sensor will accept, because past
+ /// this the picture is brighter and no more legible.
+-const MAX_DIGITAL: f64 = 16.0;
++const MAX_DIGITAL: f64 = 32.0;
+ 
+ /// What the loop writes to the sensor, in the sensor's own units.
+ #[derive(Debug, Clone, Copy, PartialEq, Eq)]
