@@ -1,19 +1,21 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 
 /* ================= 基础 ================= */
 const cv=document.getElementById('cv'), stage=document.getElementById('stage');
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,preserveDrawingBuffer:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,preserveDrawingBuffer:/[?&]shot/.test(location.search)});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+const SHOT=/[?&]shot/.test(location.search); let dirty=true; const redraw=()=>{dirty=true};
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(30,1,2,4000);
 camera.up.set(0,0,1);
-const ctl=new OrbitControls(camera,cv); ctl.enableDamping=true;
+const ctl=new OrbitControls(camera,cv); ctl.enableDamping=true; ctl.addEventListener('change',()=>dirty=true);
 scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f99,1.7));
 const dl=new THREE.DirectionalLight(0xffffff,2.2); dl.position.set(200,300,500); scene.add(dl);
 const dl2=new THREE.DirectionalLight(0xffffff,.9); dl2.position.set(-300,-200,150); scene.add(dl2);
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();dirty=true}
 new ResizeObserver(resize).observe(stage); resize();
 
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
@@ -36,10 +38,10 @@ const MM=new THREE.Matrix4().makeScale(1000,1000,1000);
 const mat4=(pos,q)=>new THREE.Matrix4().compose(V(...pos),new THREE.Quaternion(q[1],q[2],q[3],q[0]),V(1,1,1));
 const STAND={left_hip_yaw:0,left_hip_roll:-0.0873,left_hip_pitch:-0.4579,left_knee:-0.0049,left_ankle:0.453,neck_pitch:0.3491,head_pitch:0.3491,head_yaw:0,head_roll:0,right_hip_yaw:0,right_hip_roll:0.0873,right_hip_pitch:0.4579,right_knee:0.0049,right_ankle:-0.453};
 const [duckGLB,duck]=await Promise.all([
-  new GLTFLoader().loadAsync('model/duck-mech.glb'),
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('model/duck-mech.glb'),
   fetch('model/duck.json').then(r=>r.json()),
 ]);
-const hdGLB=await new GLTFLoader().loadAsync('model/hd1910.glb');
+const hdGLB=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('model/hd1910.glb');
 hdGLB.scene.traverse(o=>{if(o.isMesh){const ms=Array.isArray(o.material)?o.material:[o.material]; ms.forEach(m=>{if(m.color&&m.color.r+m.color.g+m.color.b<.06)m.color.set(0x2b2d31)})}});
 // 仿真模型里舵机是 XL330 的方块：把 HD-1910 真模型对到同一个位置（输出轴对输出轴，长边对长边）
 const A_HD=new THREE.Matrix4().set(-1,0,0,0, 0,0,1,0.0077, 0,1,0,0.0069, 0,0,0,1);
@@ -174,7 +176,7 @@ const tof=new THREE.Group();
 tof.updateMatrixWorld(true);
 
 /* GLB：HAT / 主控 / IMU v2 ———— HAT + 主控叠成一摞，竖着装在头里，位置取仿真模型里的占位板 */
-const gl=new GLTFLoader(); const load=(f)=>gl.loadAsync(f).then(g=>g.scene);
+const gl=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder); const load=(f)=>gl.loadAsync(f).then(g=>g.scene);
 const ph=duck.geoms.find(g=>g.mesh==='elec_rpi_robot_hat_pcb');
 const STACK_S=1;     // 叠层方向：+1 = HAT 的元件面朝鸭子后方
 const Wph=geomW(ph);
@@ -355,6 +357,7 @@ function setOpacity(obj,o){
 }
 const T={shell:true,mech:true,wires:true,ids:true,des:true,name:true,all:false};
 function applyFade(){
+  dirty=true;
   const st=STEPS[active]; const showAll=T.all||!st;
   for(const [id,p] of Object.entries(parts)){const on=showAll||st.parts.includes(id); setOpacity(p.obj,on?1:.13); p.on=on}
   for(const [id,w] of Object.entries(wires)){const on=showAll||st.wires.includes(id); w.visible=T.wires; setOpacity(w,on?1:.1)}
@@ -380,7 +383,9 @@ cv.addEventListener('pointerup',e=>{
 const tmp=V(0,0,0);
 function frame(){
   if(tween){tween.t=Math.min(1,tween.t+.04);const k=tween.t<.5?2*tween.t*tween.t:1-Math.pow(-2*tween.t+2,2)/2;camera.position.lerpVectors(tween.p0,tween.p1,k);ctl.target.lerpVectors(tween.c0,tween.c1,k);if(tween.t>=1)tween=null}
-  ctl.update(); renderer.render(scene,camera);
+  ctl.update();
+  if(!dirty&&!tween&&!SHOT){requestAnimationFrame(frame);return}
+  dirty=false; renderer.render(scene,camera);
   const w=stage.clientWidth,h=stage.clientHeight, st0=STEPS[active];
   for(const l of labels){
     const desOn=T.des&&(T.all||(st0&&st0.des&&st0.des.includes(l.key)));
