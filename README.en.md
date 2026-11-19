@@ -17,6 +17,8 @@ Check the model printed on the board. **Radxa ZERO 3W** and **Radxa Cubie A7Z** 
 
 **The first-use workflow has also been completed on real hardware:** flash the image → hotspot and Wi-Fi setup → servo and IMU calibration → gamepad pairing and e-stop test → stand and walk. [Real hardware validation records](docs/update-history.en.md#latest)
 
+**Wiring diagram (3D, rotatable, step-by-step highlight):** [open online](https://fanhao375.github.io/microduck-replica/wiring3d/). Battery → banana board → HUB → legs / head / IMU, plus the camera, ToF, speaker and every HAT connector, so you can see exactly where each wire goes.
+
 ## The ducks in action
 
 **2026-10-24 · Motion validated on real hardware**: the two recordings below show a forward roll followed by standing back up, and walking on a tabletop.
