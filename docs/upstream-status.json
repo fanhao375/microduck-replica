@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-18",
+  "recorded_on": "2026-11-19",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -22482,11 +22482,62 @@
           "number": 441,
           "url": "https://github.com/pollen-robotics/microduck/pull/441",
           "title": "kinematics: measure ToF hit range from the trunk axis",
-          "state": "open",
+          "state": "closed",
           "merged_at": null,
-          "updated_at": "2026-10-24T01:00:50Z",
+          "updated_at": "2026-11-18T15:35:00Z",
           "head_sha": "6ac0c34a0e741b3334d0b772cc18f7a5216c9c56",
-          "draft": false
+          "draft": false,
+          "created_at": "2026-10-24T01:00:50Z",
+          "closed_at": "2026-11-18T15:35:00Z",
+          "closed_at_jst": "2026-11-19T00:35:00+09:00",
+          "merge_commit_sha": null,
+          "closed_by": "Amidwestnoob",
+          "closure_reason": null,
+          "base_sha": "942e58e3aa6dbb28e7037203fff11866122c7567",
+          "actual_merge_base": "942e58e3aa6dbb28e7037203fff11866122c7567",
+          "source_committed_at_utc": "2026-10-24T00:55:43Z",
+          "source_committed_at_jst": "2026-10-24T09:55:43+09:00",
+          "commit_count": 2,
+          "changed_file_count": 2,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/942e58e3aa6dbb28e7037203fff11866122c7567...6ac0c34a0e741b3334d0b772cc18f7a5216c9c56",
+          "classification": "Closed unmerged proposal. Current formal/main ToF range remains sensor-relative.",
+          "review": {
+            "change": "The two-commit proposal would derive Zone::Hit.range from the gravity-levelled trunk-frame point, including sensor mounting offset. The short-range noise filter remains sensor-relative and floor classification is unchanged. It also adds independent geometry and sensor-noise-boundary regression definitions.",
+            "closure": "Closed by Amidwestnoob with no public explanation in the PR conversation or closing event. No merge commit. Closure alone does not establish that the proposal was accepted or superseded.",
+            "current_formal_behavior": "At daemon-v0.23.0 / 56424efe58b7de40efcf3b2d3a5cd169ee83a182, range is the horizontal component of sensor-relative slant range; point remains in the trunk frame and height is above ground. #546 still proposes trunk-axis range; issue #430 remains open.",
+            "author_validation": "The PR author reports 37 kinematics tests passed, two existing performance probes ignored, and formatting/clippy checks. Those are historical author-reported results, not tracker reruns or hardware acceptance.",
+            "fixed_sources": {
+              "proposal": "https://github.com/pollen-robotics/microduck/blob/6ac0c34a0e741b3334d0b772cc18f7a5216c9c56/kinematics/src/tof.rs",
+              "proposal_test_definitions": "https://github.com/pollen-robotics/microduck/blob/6ac0c34a0e741b3334d0b772cc18f7a5216c9c56/kinematics/tests/tof_range.rs",
+              "current_formal_and_main": "https://github.com/pollen-robotics/microduck/blob/56424efe58b7de40efcf3b2d3a5cd169ee83a182/kinematics/src/tof.rs"
+            },
+            "issue_url": "https://github.com/pollen-robotics/microduck/issues/430",
+            "alternative_pull_url": "https://github.com/pollen-robotics/microduck/pull/546",
+            "example_scope": "The roughly 8 cm and 6 cm offsets in #430 are upstream alpha examples, not HD-1910 mounting calibration."
+          },
+          "impact": {
+            "HD1910": "No servo-driver change. High priority before external navigation: verify actual head/ToF mounting geometry, reference frame and stopping threshold.",
+            "camera": "No capture or camera projection change.",
+            "ToF": "Proposal closed without merging; formal sensor-relative range and trunk-frame point semantics remain unchanged.",
+            "model_management": "No change.",
+            "training": "No new training recipe or model weights.",
+            "motion": "No merged stop or avoidance behavior change. External consumers must handle the distance origin explicitly.",
+            "sound": "No change."
+          },
+          "priority": "High geometry and stop-threshold review before external navigation; low for current delivery.",
+          "replica_integration": "not_integrated; tracker changed documentation only",
+          "history": [
+            {
+              "number": 441,
+              "url": "https://github.com/pollen-robotics/microduck/pull/441",
+              "title": "kinematics: measure ToF hit range from the trunk axis",
+              "state": "open",
+              "merged_at": null,
+              "updated_at": "2026-10-24T01:00:50Z",
+              "head_sha": "6ac0c34a0e741b3334d0b772cc18f7a5216c9c56",
+              "draft": false
+            }
+          ]
         },
         {
           "number": 439,
@@ -52966,7 +53017,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-18T11:06:03Z",
+  "checked_at_utc": "2026-11-19T01:36:56Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -52979,24 +53030,32 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-18T10:09:45Z",
-    "source_snapshot_utc": "2026-11-18T11:06:03Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-18T11:06:03Z",
+    "previous_substantive_review_utc": "2026-11-18T11:06:03Z",
+    "source_snapshot_utc": "2026-11-19T01:36:56Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-19T01:36:56Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {},
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        441
+      ]
+    },
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Previously empty formal 0.23.0 release now has all 8 assets. Both JSON manifest byte digests, source SHA and package metadata match. Stable publish succeeded; staging/promote skipped. Same source, no new functional delta. No packaged hardware acceptance established and no replica integration change.",
-    "closed_unmerged_pull_requests": {},
+    "notes": "Tracked ToF trunk-axis range proposal #441 closed unmerged at 2026-11-18T15:35:00Z without a public reason. Its fixed source is preserved. Formal/main 0.23.0 still uses sensor-relative horizontal range; #546 and issue #430 remain open. No default-branch, release/tag, tracked model, blog, replica integration or image change. No tests or hardware actions by tracker.",
+    "closed_unmerged_pull_requests": {
+      "pollen-robotics/microduck": [
+        441
+      ]
+    },
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
     "merged_previously_tracked_pull_requests": {},
     "formal_release_artifacts_available": true,
-    "formal_release_assets_completed": true
+    "formal_release_assets_completed": false
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -57167,6 +57226,37 @@
         ]
       },
       "formal_release_artifacts_available": false
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-18T10:09:45Z",
+      "source_snapshot_utc": "2026-11-18T11:06:03Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-18T11:06:03Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Previously empty formal 0.23.0 release now has all 8 assets. Both JSON manifest byte digests, source SHA and package metadata match. Stable publish succeeded; staging/promote skipped. Same source, no new functional delta. No packaged hardware acceptance established and no replica integration change.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": true
     }
   ],
   "replica_public_image": {
