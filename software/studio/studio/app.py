@@ -1303,6 +1303,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         finally:
             for t in tasks:
                 t.cancel()
+            verification = getattr(imu, "home_verification_task", None)
+            if verification in cmd_tasks:
+                verification.cancel()
             log.unsubscribe(logq)
             clients.pop(ws, None)
             if pad is not None:

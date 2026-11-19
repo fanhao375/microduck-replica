@@ -227,10 +227,12 @@ function EStop({ st, live, open }) {
       ${es.state === 'pending' ? '卸力中…' : '卸力'}<span class="kbd">空格</span></button></span>`;
 }
 
-function TopBar({ duck, st, live, age, open, hideEStop }) {
+function TopBar({ duck, st, live, age, open, hideEStop, imu }) {
   // 顶栏先说现在是什么模式（出厂标定模式 / 写完切运动模式），再带姿势；标定模式没有策略，别写成「调试中」。
   // 连续报启动阶段超过 30 秒（Studio 从这次连上算）：写「一直报启动中」（10-20 真机：旧 fork 的标定模式永远报 configuring_bus）
-  const postureText = st ? ({ starting: st.start_wait?.text || (st.starting_long ? '一直报启动中' : '启动中'), absent: '主程序没在跑', homing: '在站起来',
+  const calibrationText = live && imu?.job?.phase === 'verify' ? 'IMU 验证中'
+    : live && st?.posture === 'homing' && imu?.coarse_sampling?.hold_ready ? '站姿已停稳' : null;
+  const postureText = st ? (calibrationText || { starting: st.start_wait?.text || (st.starting_long ? '一直报启动中' : '启动中'), absent: '主程序没在跑', homing: '在站起来',
     servo_session: '调舵机中' }[st.posture] || WAS[st.posture] || '状态不明') : null;
   const modeText = !st ? '连接中'
     : st.mode === 'commissioning' ? (st.posture === 'commissioning' ? '标定模式' : `标定模式 · ${postureText}`)
@@ -967,7 +969,7 @@ function Main({ duck }) {
     <${Nav} route=${route} padInView=${padInView} onSame=${onSame} />
     <main class="main">
       <${TopBar} duck=${duck} st=${st} live=${live} age=${age} open=${status === 'open'}
-        hideEStop=${route === '/servos' && sv?.state === 'open'} />
+        hideEStop=${route === '/servos' && sv?.state === 'open'} imu=${route === '/imu' ? imu : null} />
       <div class="sticky-bar" ref=${barRef}><${ServoBar} st=${st} onServos=${route === '/servos'} /></div>
       ${overview}${page}
     </main>
