@@ -19007,6 +19007,167 @@
             "file_count": 1,
             "commit_count": 1
           }
+        },
+        {
+          "tag": "daemon-dev-docs/ble-robustness-review",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-docs/ble-robustness-review",
+          "release_id": 451564275,
+          "published_at": "2026-11-19T15:50:15Z",
+          "published_at_jst": "2026-11-20T00:50:15+09:00",
+          "version": "daemon 0.23.0-dev.1859.c916b0a (docs/ble-robustness-review)",
+          "head_sha": "c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+          "source_version": "0.23.0",
+          "api_version": 68,
+          "prerelease": true,
+          "source_committed_at_utc": "2026-11-19T15:44:50Z",
+          "source_committed_at_jst": "2026-11-20T00:44:50+09:00",
+          "change": "Development packaging of PR619 documentation-only commit. Two Markdown files differ from formal0.23.0; no BLE recovery, stale-input or replay fix.",
+          "classification": "Unmerged documentation branch development build; not a new formal runtime release.",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+          "fixed_increment_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+          "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "commit_count": 1,
+          "changed_file_count": 2,
+          "asset_inventory": [
+            {
+              "name": "0.23.0-dev.1859.c916b0a.manifest.json",
+              "size": 386,
+              "digest": "sha256:83f90051cb08b9a233a675082b38be6c9e341f6686f74585cfa71ab15a6c1c8e"
+            },
+            {
+              "name": "0.23.0-dev.1859.c916b0a.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:9923e451a29a27b40b701c39680449c3959370fb598f22f1bf15ab61331618c6"
+            },
+            {
+              "name": "daemon-0.23.0-dev.1859.c916b0a.tar.zst",
+              "size": 19418333,
+              "digest": "sha256:b539795745f15cc5d12d100886f706037e5ee9a5f726fc3443cf98e03bf5e7d0"
+            },
+            {
+              "name": "daemon-0.23.0-dev.1859.c916b0a.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:30c2d0750986622c18beb65098bf586cac6080d34f9b713464666ee2168f2585"
+            },
+            {
+              "name": "duckctl-0.23.0-py3-none-macosx_10_12_x86_64.whl",
+              "size": 2310324,
+              "digest": "sha256:290781781fc081d94031a5fcf0e983cca94f8b3fd914a373e7f65af075987d16"
+            },
+            {
+              "name": "duckctl-0.23.0-py3-none-macosx_11_0_arm64.whl",
+              "size": 2201947,
+              "digest": "sha256:c6efda6175f40fd9dc89174a8814ecc22d80051f47978bc684307567dec0cba4"
+            },
+            {
+              "name": "duckctl-0.23.0-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 3529399,
+              "digest": "sha256:10358fde490081a13ab147bdc487814e0ced7ac0494c29318a74f3b456ebb834"
+            },
+            {
+              "name": "duckctl-0.23.0-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3754002,
+              "digest": "sha256:fb91c0bee13d25db56d64094080ea811be07b9a92238cec5df5db74895f0e6f1"
+            },
+            {
+              "name": "duckctl-0.23.0-py3-none-win_amd64.whl",
+              "size": 2144177,
+              "digest": "sha256:159ff8fb5c7beb8e21d5edd181732f5187e9dddc6d85725ac147b14b83c4f4b5"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:ff02dbe0589d4bc647d6135d87456e160e497b70bf45ce6cc869a2ec88fe194b"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:e43132a170ff59e18ce8041d063ac8d4264e15dda02f268e7a0d7a9ea8b7d954"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 2073718,
+              "digest": "sha256:695df94375b1ac553ea32be63aba99443a22f157540ee25bf35063b052c44bb7"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 2210349,
+              "digest": "sha256:0b56325d20a4098a0be51a915c3711053d103a6af68d7f1b20adcee3846dbf7a"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1965351,
+              "digest": "sha256:330c83628aa8c8d7d5189ed442f9dc4285395cd6edc7c25280f5a520dce39c92"
+            },
+            {
+              "name": "manifest.json",
+              "size": 588,
+              "digest": "sha256:3d8ec1865b10f81d92c6be23dfd5a10ae0e22f463d64a1c20f7265031be46825"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:2082efea8109a775eac5a20d3b60f42ac148046c173353d188ba7a3fc92feadc"
+            }
+          ],
+          "manifest_verification": [
+            {
+              "asset_id": 768283093,
+              "name": "0.23.0-dev.1859.c916b0a.manifest.json",
+              "sha256": "83f90051cb08b9a233a675082b38be6c9e341f6686f74585cfa71ab15a6c1c8e",
+              "content": {
+                "channel": "daemon",
+                "min_hw_rev": 1,
+                "schema_version": 1,
+                "sha256": "b539795745f15cc5d12d100886f706037e5ee9a5f726fc3443cf98e03bf5e7d0",
+                "sig_url": "daemon-0.23.0-dev.1859.c916b0a.tar.zst.minisig",
+                "size": 19418333,
+                "source_revision": "c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+                "url": "daemon-0.23.0-dev.1859.c916b0a.tar.zst",
+                "version": "0.23.0-dev.1859.c916b0a"
+              },
+              "raw_bytes_hash_matches_asset_metadata": true
+            },
+            {
+              "asset_id": 768283281,
+              "name": "manifest.json",
+              "sha256": "3d8ec1865b10f81d92c6be23dfd5a10ae0e22f463d64a1c20f7265031be46825",
+              "content": {
+                "channel": "daemon",
+                "min_hw_rev": 1,
+                "schema_version": 1,
+                "sha256": "b539795745f15cc5d12d100886f706037e5ee9a5f726fc3443cf98e03bf5e7d0",
+                "sig_url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-docs/ble-robustness-review/daemon-0.23.0-dev.1859.c916b0a.tar.zst.minisig",
+                "size": 19418333,
+                "source_revision": "c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+                "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-docs/ble-robustness-review/daemon-0.23.0-dev.1859.c916b0a.tar.zst",
+                "version": "0.23.0-dev.1859.c916b0a"
+              },
+              "raw_bytes_hash_matches_asset_metadata": true
+            }
+          ],
+          "package_bytes_downloaded": false,
+          "package_signature_verified_by_tracker": false,
+          "replica_integration": "not_integrated; documentation tracking only",
+          "priority": "High adoption-review reference for BLE controls; no production fix to adopt from this documentation build.",
+          "review": {
+            "related_pull_request": 619,
+            "source_scope": "Production files unchanged relative to formal0.23.0; different build/version metadata does not certify identical package bytes.",
+            "signing_scope": "Release body says team.dev; package signatures were not verified by tracker.",
+            "fixed_manifests": [
+              "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-docs/ble-robustness-review/0.23.0-dev.1859.c916b0a.manifest.json",
+              "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-docs/ble-robustness-review/manifest.json"
+            ]
+          },
+          "impact": {
+            "HD1910": "No servo or physical acceptance change.",
+            "camera": "No change.",
+            "ToF": "No change.",
+            "model_management": "No weights or contract change.",
+            "training": "No change.",
+            "motion": "Review619 remains documentation only; no loss-stop or repeated-intent fix.",
+            "sound": "No change."
+          }
         }
       ],
       "pending_pull_requests": [
@@ -32516,7 +32677,7 @@
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
           "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
           "classification": "Open unmerged documentation review; source-traced findings and explicitly suspected radio/BlueZ behavior. No runtime fix or release.",
-          "development_release_observed": false,
+          "development_release_observed": true,
           "included_in_formal_release": false,
           "review": {
             "change": "Adds dated BLE robustness review and navigation link only; covers Yocto,btd,configd,padd and phone application, recovery gaps and missing radio-path coverage.",
@@ -32579,7 +32740,107 @@
             "wireless": "Separate code-traced recovery gaps from unmeasured BlueZ/radio claims; app source unavailable."
           },
           "priority": "High adoption-review reference for wireless control and loss-stop behavior; pending documentation proposal, no current delivery change.",
-          "replica_integration": "not_integrated; documentation tracking only"
+          "replica_integration": "not_integrated; documentation tracking only",
+          "history": [
+            {
+              "number": 619,
+              "title": "docs: a robustness review of the BLE stack",
+              "state": "open",
+              "draft": false,
+              "url": "https://github.com/pollen-robotics/microduck/pull/619",
+              "head_sha": "c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+              "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+              "base_branch": "main",
+              "actual_merge_base": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+              "created_at": "2026-11-19T15:45:04Z",
+              "created_at_jst": "2026-11-20T00:45:04+09:00",
+              "updated_at": "2026-11-19T15:45:04Z",
+              "updated_at_jst": "2026-11-20T00:45:04+09:00",
+              "merged_at": null,
+              "merge_commit_sha": null,
+              "source_committed_at_utc": "2026-11-19T15:44:50Z",
+              "source_committed_at_jst": "2026-11-20T00:44:50+09:00",
+              "source_version": "0.23.0",
+              "api_version": 68,
+              "commit_count": 1,
+              "changed_file_count": 2,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+              "classification": "Open unmerged documentation review; source-traced findings and explicitly suspected radio/BlueZ behavior. No runtime fix or release.",
+              "development_release_observed": false,
+              "included_in_formal_release": false,
+              "review": {
+                "change": "Adds dated BLE robustness review and navigation link only; covers Yocto,btd,configd,padd and phone application, recovery gaps and missing radio-path coverage.",
+                "fixed_review_url": "https://github.com/pollen-robotics/microduck/blob/c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4/docs/project/ble-robustness-review.md",
+                "author_review_execution_scope": "Read-only; author explicitly built or ran nothing. Verified in that document means traced in code, not physical or software reproduction.",
+                "reported_revisions": {
+                  "microduck": {
+                    "sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+                    "actual_commit_verified": true
+                  },
+                  "microduck_yocto": {
+                    "sha": "6371aa6429a168925907acc218ffcda0e5fa5f47",
+                    "committed_at_utc": "2026-11-05T11:30:15Z",
+                    "actual_commit_verified": true,
+                    "behind_current_9921dee_commits": 115
+                  },
+                  "microduck_app": {
+                    "reported_short_revision": "d2bd2f7",
+                    "reported_version": "0.3.0",
+                    "actual_commit_verified": false,
+                    "lookup_status": 404,
+                    "scope": "Official design points to pollen-robotics/microduck-app; public repository/commit unavailable and public org search found no match. App findings remain author-reported."
+                  }
+                },
+                "tracker_source_inspection": {
+                  "padd": "Main loop reads cached stick values each tick; tap docs explicitly describe stalled input continuing to produce fresh intents. No radio timing or local replica failure reproduced.",
+                  "btd_registration": "serve retries registration with ADAPTER_RETRY after session/adapter return.",
+                  "secure_session": "60-second lease renewed by authenticated inbound data, not outbound replies/notifications.",
+                  "fixed_sources": {
+                    "padd/src/main.rs": {
+                      "repository": "https://github.com/pollen-robotics/microduck/blob/56424efe58b7de40efcf3b2d3a5cd169ee83a182/padd/src/main.rs",
+                      "source_blob_sha": "d6441cd5b93f8be21da77a1117c8206d9c33964b"
+                    },
+                    "padd/src/tap.rs": {
+                      "repository": "https://github.com/pollen-robotics/microduck/blob/56424efe58b7de40efcf3b2d3a5cd169ee83a182/padd/src/tap.rs",
+                      "source_blob_sha": "3c6fbfeaaac7aaa4566541d1215ed2fe9c88f044"
+                    },
+                    "btd/src/bluez.rs": {
+                      "repository": "https://github.com/pollen-robotics/microduck/blob/56424efe58b7de40efcf3b2d3a5cd169ee83a182/btd/src/bluez.rs",
+                      "source_blob_sha": "9691901c1fc95bde8f4edbce327f9d4484e6b757"
+                    },
+                    "btd/src/secure.rs": {
+                      "repository": "https://github.com/pollen-robotics/microduck/blob/56424efe58b7de40efcf3b2d3a5cd169ee83a182/btd/src/secure.rs",
+                      "source_blob_sha": "42555def951b1f89e609a33f953ecbe07be0ee9a"
+                    }
+                  }
+                },
+                "author_reported_app_concerns": "Link-error retry can replay non-idempotent calls; reconnect ordering and error classification need review. App revision could not be independently read.",
+                "suspected_not_measured": "BlueZ callback/StopNotify behavior, stale-bond removal, controller recovery/BD-address and soak behavior require real radio observation.",
+                "validation_limit": "No new tests, radio measurements, compatibility claim or fixes. Yocto reference is Nov5 source,115 commits behind current tracked main; do not call it a current whole-stack validation."
+              },
+              "impact": {
+                "HD1910": "High priority before adopting wireless control: review fresh-input age, disconnect stop and duplicate-intent handling. This review does not establish a bug in the current replica.",
+                "camera": "No camera or media implementation change.",
+                "ToF": "No sensor or geometry change.",
+                "model_management": "No model or import contract change.",
+                "training": "No training recipe or weights.",
+                "motion": "Review stale controller input and non-idempotent retries before adoption; no motion behavior changed by this PR.",
+                "sound": "No assets/playback change; retry/reconnect concerns may matter to one-shot actions.",
+                "wireless": "Separate code-traced recovery gaps from unmeasured BlueZ/radio claims; app source unavailable."
+              },
+              "priority": "High adoption-review reference for wireless control and loss-stop behavior; pending documentation proposal, no current delivery change.",
+              "replica_integration": "not_integrated; documentation tracking only"
+            }
+          ],
+          "development_release": {
+            "tag": "daemon-dev-docs/ble-robustness-review",
+            "version": "daemon 0.23.0-dev.1859.c916b0a (docs/ble-robustness-review)",
+            "head_sha": "c916b0ad0c0a2dce17ff053ddf1d3a4f779019c4",
+            "published_at_utc": "2026-11-19T15:50:15Z",
+            "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-docs/ble-robustness-review",
+            "production_fix": false
+          }
         }
       ],
       "previous_stable_releases": [
@@ -53923,7 +54184,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-19T15:46:07Z",
+  "checked_at_utc": "2026-11-19T16:46:47Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -53936,33 +54197,33 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-19T14:49:48Z",
-    "source_snapshot_utc": "2026-11-19T15:46:07Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-19T15:50:14Z",
+    "previous_substantive_review_utc": "2026-11-19T15:46:07Z",
+    "source_snapshot_utc": "2026-11-19T16:46:47Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-19T16:47:43Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck_yocto": [
-        143,
-        144,
-        145
-      ],
+        146,
+        147
+      ]
+    },
+    "updated_pull_requests": {
       "pollen-robotics/microduck": [
         619
       ]
     },
-    "updated_pull_requests": {},
-    "new_development_releases": [],
+    "new_development_releases": [
+      "daemon-dev-docs/ble-robustness-review"
+    ],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Yocto main9921dee adds merged143/144/145: recipe notes moved, distro feature requirements explicit, prebuilt binaries use bin_package with custom install preserved. PR145 merged recipe retains PR144 requirements absent in proposal blob. Prior68ba dev/candidate builds now fully observed; latest9921 build pending. Pre-rebase Face Board reports retain unknown actual build SHA and no NPU exercise; ORT/RKNN sstate reuse is not a fresh rebuild. Four default heads, formal daemon/dev releases, formal OS, models, blog and replica integrations unchanged. Documentation only. New open documentation PR619 reviews BLE recovery and stale pad inputs; code-traced/suspected findings and unverified app source remain distinct. No runtime fix.",
+    "notes": "Yocto mainaaa629 merges146 TOML parser. New147 proposes board/QEMU suites and candidate gate; current-head script CI succeeds, while reported42-check QEMU source131a436 is4commits older, board source unknown and54/55 includes kernel failure with backward motion2of4 failures. Gate unmerged. Documentation-only BLE619 development release1859 verified atc916b0a; no production fix. Channels name intermediate6342999; new main build in progress. No formal releases/models/blog/replica delivery changes or tracker test/build/device activity.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {
       "pollen-robotics/microduck_yocto": [
-        143,
-        144,
-        145
+        146
       ]
     },
     "official_os_main_changed": true,
@@ -58429,6 +58690,53 @@
       "formal_release_artifacts_available": true,
       "formal_release_assets_completed": false,
       "official_os_development_channels_changed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-19T14:49:48Z",
+      "source_snapshot_utc": "2026-11-19T15:46:07Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-19T15:50:14Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck_yocto": [
+          143,
+          144,
+          145
+        ],
+        "pollen-robotics/microduck": [
+          619
+        ]
+      },
+      "updated_pull_requests": {},
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Yocto main9921dee adds merged143/144/145: recipe notes moved, distro feature requirements explicit, prebuilt binaries use bin_package with custom install preserved. PR145 merged recipe retains PR144 requirements absent in proposal blob. Prior68ba dev/candidate builds now fully observed; latest9921 build pending. Pre-rebase Face Board reports retain unknown actual build SHA and no NPU exercise; ORT/RKNN sstate reuse is not a fresh rebuild. Four default heads, formal daemon/dev releases, formal OS, models, blog and replica integrations unchanged. Documentation only. New open documentation PR619 reviews BLE recovery and stale pad inputs; code-traced/suspected findings and unverified app source remain distinct. No runtime fix.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {
+        "pollen-robotics/microduck_yocto": [
+          143,
+          144,
+          145
+        ]
+      },
+      "official_os_main_changed": true,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "official_os_development_channels_changed": true
     }
   ],
   "replica_public_image": {
@@ -60527,22 +60835,183 @@
         "build": "Use prebuilt-package class while retaining custom install and file ownership/symlink handling."
       },
       "priority": "Medium reference for reuse of official BSP or cross-distro builds; low for current HD1910 delivery."
+    },
+    {
+      "number": 146,
+      "repository": "pollen-robotics/microduck_yocto",
+      "title": "gstreamer1.0-plugins-rs: parse Cargo TOML with tomllib, not regexes",
+      "url": "https://github.com/pollen-robotics/microduck_yocto/pull/146",
+      "state": "closed",
+      "draft": false,
+      "head_sha": "10a2ec202ebe10ffba7d4420eab189fc781aec26",
+      "base_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+      "base_branch": "main",
+      "actual_merge_base": "9921deef8ee3fdd907226372acd19cf181178c92",
+      "source_committed_at_utc": "2026-11-19T16:18:29Z",
+      "source_committed_at_jst": "2026-11-20T01:18:29+09:00",
+      "merge_commit_sha": "aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
+      "commit_count": 2,
+      "changed_file_count": 1,
+      "classification": "Merged build-time TOML parsing change; not a new formal OS.",
+      "included_in_formal_os_release": false,
+      "replica_integration": "not_integrated",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/9921deef8ee3fdd907226372acd19cf181178c92...10a2ec202ebe10ffba7d4420eab189fc781aec26",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/10a2ec202ebe10ffba7d4420eab189fc781aec26",
+      "impact": {
+        "HD1910": "No servo driver or actuator mapping change.",
+        "camera": "No capture/encoding runtime implementation change.",
+        "ToF": "No sensor/geometry implementation change.",
+        "model_management": "No weights or model contract change.",
+        "training": "No training recipe change.",
+        "motion": "No gait/control behavior change.",
+        "sound": "No sound assets or playback implementation change.",
+        "build": "Real stricter malformed-TOML handling at build time; same plugin versions and intended generated patch paths. QA changes in140 remain pending."
+      },
+      "created_at": "2026-11-19T16:19:07Z",
+      "created_at_jst": "2026-11-20T01:19:07+09:00",
+      "updated_at": "2026-11-19T16:22:24Z",
+      "updated_at_jst": "2026-11-20T01:22:24+09:00",
+      "closed_at": "2026-11-19T16:21:54Z",
+      "closed_at_jst": "2026-11-20T01:21:54+09:00",
+      "merged_at": "2026-11-19T16:21:53Z",
+      "merged_at_jst": "2026-11-20T01:21:53+09:00",
+      "merge_committed_at_utc": "2026-11-19T16:21:53Z",
+      "merge_committed_at_jst": "2026-11-20T01:21:53+09:00",
+      "merged_files_match_proposal_blobs": true,
+      "review": {
+        "change": "One GStreamer Rust-plugin recipe replaces hand-parsed Cargo.lock/Cargo.toml lines with Python tomllib. Invalid Cargo.toml now stops the build with its path instead of being silently skipped. Removes stale two-member wording.",
+        "plugin_version_unchanged": "1.28.2",
+        "author_validation": "Reports same generated config for70 git crates across5 repositories from6 pinned source checkouts; parse/lint pass. Beta recipe-only HF job6aff1ae8 ran configure through package fresh without warning.",
+        "validation_limit": "Author job also carried a separate buildpaths fix replaced by pending140; only helper function is reported byte-identical, not the full finalaaa629 image/source tree. No robot test reported or tracker execution.",
+        "fixed_merged_recipe": "https://github.com/pollen-robotics/microduck_yocto/blob/aaa62914a7a4437ff007c0a8ed9770060b0bdf95/meta-microduck/recipes-multimedia/gstreamer/gstreamer1.0-plugins-rs_1.28.2.bb"
+      },
+      "priority": "Medium for official media build reproducibility and source diagnostics; low current HD1910 delivery impact."
+    },
+    {
+      "number": 147,
+      "repository": "pollen-robotics/microduck_yocto",
+      "title": "Functional tests on a board and under QEMU (cukinia), gated in CI",
+      "url": "https://github.com/pollen-robotics/microduck_yocto/pull/147",
+      "state": "open",
+      "draft": false,
+      "head_sha": "62899d6bf19569e8a6a0c4edf6a78932914e3797",
+      "base_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+      "base_branch": "main",
+      "actual_merge_base": "9921deef8ee3fdd907226372acd19cf181178c92",
+      "source_committed_at_utc": "2026-11-19T16:21:12Z",
+      "source_committed_at_jst": "2026-11-20T01:21:12+09:00",
+      "merge_commit_sha": null,
+      "commit_count": 9,
+      "changed_file_count": 21,
+      "classification": "Open unmerged image-test and CI-gating proposal; no published production gate.",
+      "included_in_formal_os_release": false,
+      "replica_integration": "not_integrated",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/9921deef8ee3fdd907226372acd19cf181178c92...62899d6bf19569e8a6a0c4edf6a78932914e3797",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/62899d6bf19569e8a6a0c4edf6a78932914e3797",
+      "impact": {
+        "HD1910": "High review priority before any future movement test: mappings,current thresholds,source identity and exclusive control differ; not executed or integrated.",
+        "camera": "Proposed frame/luma test uses GC2093/ UYVY assumptions and flashlight; no camera runtime fix.",
+        "ToF": "Proposed frame/status validity test only; no geometry change.",
+        "model_management": "Proposed ORT/NPU runtime presence and synthetic inference smoke checks; no new model or accuracy certification.",
+        "training": "No training recipe change.",
+        "motion": "Optional movement checks can expose backward-step failures; author repeatability is incomplete, not a gait fix.",
+        "sound": "Proposed500Hz speaker/mic test targets face-board facemic; adapt audio device and thresholds before reuse."
+      },
+      "created_at": "2026-11-19T16:21:34Z",
+      "created_at_jst": "2026-11-20T01:21:34+09:00",
+      "updated_at": "2026-11-19T16:24:40Z",
+      "updated_at_jst": "2026-11-20T01:24:40+09:00",
+      "closed_at": null,
+      "closed_at_jst": null,
+      "merged_at": null,
+      "merged_at_jst": null,
+      "review": {
+        "change": "Adds cukinia0.9.1 board/system suites, optional motion checks, HTML report with captured camera/audio/ToF, QEMU dev-bundle runner and script CI. Replaces old qemu-test.sh.",
+        "candidate_gate_proposed": "dev publishes before QEMU; candidate publishes only after successful dev-image QEMU test. Shipping bundle itself is not boot-tested by the proposed gate. Promotion warning is advisory. Proposal remains unmerged.",
+        "board_suite_side_effects": "Default board suite captures frame/audio, plays500Hz tone, spins fan and uses face flashlight. Movement requires --motion; tracker ran none.",
+        "motion_contract": "Source checks autonomous mode off, then uses state, odometry, head-yaw index7 and currents<5mA. Although prose asks for no connected pad, current source has no connected-pad rejection; review actuator assumptions and exclusive-control guard before HD1910 reuse.",
+        "tof_contract": "~4s stream, at least3 frames and16 valid zones; raw8x8 map, not a new distance/geometry algorithm.",
+        "npu_contract": "duck-bench synthetic colour card checks runtime/model loading and latency; detections are reported without accuracy judgement.",
+        "author_board_report": {
+          "board": "face-board-v1",
+          "build": "20261119143736",
+          "actual_source_sha_verified": false,
+          "passed": 54,
+          "total": 55,
+          "kernel_log_failure": "Author reports BUG: spinlock bad magic ... wq_sdio_adma_rx and attributes it to uninitialised WQ9201S lock; no fix in this proposal.",
+          "motion": "Selected run reportedly passes including motors off, while backward walking fails2of4 attempts despite applied-0.3m/s. Do not generalise selected success.",
+          "report_scope": "Separate later board/NPU report; earlier PR145 report explicitly did not exercise NPU and is preserved."
+        },
+        "qemu_report": {
+          "author_reported_checks": 42,
+          "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44558423396",
+          "actual_source_sha": "131a4369703244c3914b20d073c75a8bae6a1973",
+          "conclusion": "success",
+          "job_completed_at_utc": "2026-11-19T16:03:20Z",
+          "commits_before_current_head": 4,
+          "later_delta": "Adds cache-miss message handling,NPU test/runtime check,wider ToF window,camera flashlight and script-tests workflow. Old42-check report is not relabelled as current62899d6 rerun.",
+          "fixed_delta_url": "https://github.com/pollen-robotics/microduck_yocto/compare/131a4369703244c3914b20d073c75a8bae6a1973...62899d6bf19569e8a6a0c4edf6a78932914e3797"
+        },
+        "current_head_script_ci": {
+          "source_sha": "62899d6bf19569e8a6a0c4edf6a78932914e3797",
+          "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44565202859",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Shell tests",
+              "conclusion": "success"
+            },
+            {
+              "name": "osupdate page",
+              "conclusion": "success"
+            },
+            {
+              "name": "ssh access (systemd in Docker)",
+              "conclusion": "success"
+            },
+            {
+              "name": "HF job sstate handling (kas image)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ],
+          "scope": "Shell/page checks and both Docker-based steps pass at exact current head; not QEMU image, hardware or promotion-gate execution. U-Boot sandbox test excluded."
+        },
+        "fixed_suite_url": "https://github.com/pollen-robotics/microduck_yocto/blob/62899d6bf19569e8a6a0c4edf6a78932914e3797/tests/cukinia/cukinia.conf",
+        "validation_limit": "Current publishing gate has not fired; board source unverified; QEMU uses a test-only Rockchip DRM blacklist and excludes hardware. No local or HD1910 acceptance."
+      },
+      "priority": "Medium reference for image test coverage; high actuator/exclusive-control review before future HD1910 movement tests. No current delivery acceptance."
     }
   ],
   "official_os_main_since_release": {
     "from_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
-    "to_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+    "to_sha": "aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
     "merge_base_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
-    "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/635c41113cf129504c7e8ae1a7a896e0e4f94153...9921deef8ee3fdd907226372acd19cf181178c92",
+    "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/635c41113cf129504c7e8ae1a7a896e0e4f94153...aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
     "status": "ahead",
-    "ahead_by": 12,
+    "ahead_by": 13,
     "behind_by": 0,
-    "file_count": 34,
-    "commit_count": 12,
+    "file_count": 35,
+    "commit_count": 13,
     "head": {
-      "sha": "9921deef8ee3fdd907226372acd19cf181178c92",
-      "committed_at": "2026-11-19T15:31:59Z",
-      "subject": "Inherit bin_package for the prebuilt binaries (#145)"
+      "sha": "aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
+      "committed_at": "2026-11-19T16:21:53Z",
+      "subject": "gstreamer1.0-plugins-rs: parse Cargo TOML with tomllib, not regexes (#146)"
     },
     "merged_pull_requests": [
       137,
@@ -60554,7 +61023,8 @@
       139,
       143,
       144,
-      145
+      145,
+      146
     ],
     "formal_os_tag": "microduck-os-v1.4.2",
     "formal_os_daemon": "0.21.1",
@@ -61505,88 +61975,486 @@
             ]
           }
         ]
+      },
+      {
+        "from_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+        "to_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+        "merge_base_sha": "635c41113cf129504c7e8ae1a7a896e0e4f94153",
+        "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/635c41113cf129504c7e8ae1a7a896e0e4f94153...9921deef8ee3fdd907226372acd19cf181178c92",
+        "status": "ahead",
+        "ahead_by": 12,
+        "behind_by": 0,
+        "file_count": 34,
+        "commit_count": 12,
+        "head": {
+          "sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+          "committed_at": "2026-11-19T15:31:59Z",
+          "subject": "Inherit bin_package for the prebuilt binaries (#145)"
+        },
+        "merged_pull_requests": [
+          137,
+          135,
+          132,
+          138,
+          141,
+          142,
+          139,
+          143,
+          144,
+          145
+        ],
+        "formal_os_tag": "microduck-os-v1.4.2",
+        "formal_os_daemon": "0.21.1",
+        "classification": "main only",
+        "latest_change": {
+          "observed_at_utc": "2026-11-19T15:46:07Z",
+          "merged_pull_requests": [
+            143,
+            144,
+            145
+          ],
+          "diff_since_previous_head": {
+            "from_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
+            "to_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+            "merge_base_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
+            "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/68ba72321868b8c9bd1074f99d4c774cae281d09...9921deef8ee3fdd907226372acd19cf181178c92",
+            "status": "ahead",
+            "ahead_by": 3,
+            "behind_by": 0,
+            "file_count": 16,
+            "commit_count": 3
+          },
+          "classification": "Main-only recipe documentation, distro feature requirements and prebuilt-package class changes; formal OS1.4.2 unchanged.",
+          "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44555857401",
+          "ci_status": "pending",
+          "ci_conclusion": null,
+          "last_fully_observed_development_source_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
+          "build_jobs": [],
+          "prior_main_development_build": {
+            "source_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
+            "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251",
+            "build_jobs": [
+              {
+                "name": "build (microduck-face-board-v1)",
+                "status": "completed",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-19T14:41:33Z",
+                "completed_at_utc": "2026-11-19T14:53:19Z",
+                "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251/job/135638344660"
+              },
+              {
+                "name": "build (microduck-beta)",
+                "status": "completed",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-19T14:41:33Z",
+                "completed_at_utc": "2026-11-19T14:54:54Z",
+                "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251/job/135638345174"
+              }
+            ]
+          },
+          "intermediate_build_observations": {
+            "pr143": {
+              "source_sha": "63429995c928bcb691c4d9601abe9386be41bdb2",
+              "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190",
+              "build_jobs": [
+                {
+                  "name": "build (microduck-beta)",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "started_at_utc": "2026-11-19T14:54:57Z",
+                  "completed_at_utc": null,
+                  "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646973547"
+                },
+                {
+                  "name": "build (microduck-face-board-v1)",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "started_at_utc": "2026-11-19T14:54:56Z",
+                  "completed_at_utc": null,
+                  "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646974240"
+                }
+              ]
+            },
+            "pr144": {
+              "source_sha": "111db56ae172956a70baec3ec2fbbe313b9c4bb1",
+              "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44554988412",
+              "status": "completed",
+              "conclusion": "cancelled",
+              "failure_not_inferred_from_cancellation": true
+            }
+          }
+        },
+        "update_channel_observation": {
+          "checked_at_utc": "2026-11-19T15:46:07Z",
+          "source_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/.github/workflows/build-image.yml",
+          "publish_script_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/scripts/publish-os.sh",
+          "channels": [
+            {
+              "board": "microduck-beta",
+              "channel": "dev",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
+              "raw_sha256": "5fe49a5966928609084aea3f2add38a7c3ddcc4d4495a4790d4a372567bced11",
+              "fields": {
+                "VERSION": "1.4.2+20261119144428",
+                "BUILD": "20261119144428",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119144428/dev.raucb",
+                "SHA256": "baee61ec1c7ec52867041ac05067753df1d3b5bbd7970cf4d2a5b62ca92c1089",
+                "SIZE": "158132247",
+                "COMPATIBLE": "microduck-beta",
+                "JOB": "6aff0aaa4fdc5ab3c559cdf2",
+                "CHANNEL": "dev",
+                "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+              },
+              "fixed_build_manifest": {
+                "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119144428.env",
+                "sha256": "5fe49a5966928609084aea3f2add38a7c3ddcc4d4495a4790d4a372567bced11"
+              }
+            },
+            {
+              "board": "microduck-beta",
+              "channel": "candidate",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/candidate.env",
+              "raw_sha256": "8113e6d3ffbc60e1ef6a3db151622a7b2e372b5f671b94afc8d2c11c64d85220",
+              "fields": {
+                "VERSION": "1.4.2+20261119144429",
+                "BUILD": "20261119144429",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119144429/candidate.raucb",
+                "SHA256": "eb2a065c9f396a2d9dbd59f12ae9f4820fcc790807c80fd37e44d737589189ce",
+                "SIZE": "151787539",
+                "COMPATIBLE": "microduck-beta",
+                "JOB": "6aff0aaa4fdc5ab3c559cdf2",
+                "CHANNEL": "candidate",
+                "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+              },
+              "fixed_build_manifest": {
+                "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119144429.env",
+                "sha256": "8113e6d3ffbc60e1ef6a3db151622a7b2e372b5f671b94afc8d2c11c64d85220"
+              }
+            },
+            {
+              "board": "microduck-beta",
+              "channel": "stable",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/stable.env",
+              "raw_sha256": "322cbcfea6d45d6c42130f2e3660abf1d8a206fc4498bd4547069497e44be70d",
+              "fields": {
+                "VERSION": "1.4.2",
+                "BUILD": "20261113110930",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261113110930/stable.raucb",
+                "SHA256": "7895341fda0f2f52de3a559103ea38ca097d08a15bb18e1dfef0973b76091500",
+                "SIZE": "151788233",
+                "COMPATIBLE": "microduck-beta",
+                "JOB": "6af6ef7f0f431c4f7b573ffd",
+                "CHANNEL": "stable",
+                "COMMIT": "635c41113cf129504c7e8ae1a7a896e0e4f94153"
+              }
+            },
+            {
+              "board": "microduck-face-board-v1",
+              "channel": "dev",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/dev.env",
+              "raw_sha256": "7994d05bbfb836fc34732bcd86986c407eb7b33898c0a2b64c775b21bd5c4335",
+              "fields": {
+                "VERSION": "1.4.2+20261119144312",
+                "BUILD": "20261119144312",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119144312/dev.raucb",
+                "SHA256": "84ae022c8e646df32d82208ccff0bc1ba4791cab679123c50e464456e66970cf",
+                "SIZE": "158160937",
+                "COMPATIBLE": "microduck-face-board-v1",
+                "JOB": "6aff0aa7efaf5e14f4b17fae",
+                "CHANNEL": "dev",
+                "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+              },
+              "fixed_build_manifest": {
+                "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119144312.env",
+                "sha256": "7994d05bbfb836fc34732bcd86986c407eb7b33898c0a2b64c775b21bd5c4335"
+              }
+            },
+            {
+              "board": "microduck-face-board-v1",
+              "channel": "candidate",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/candidate.env",
+              "raw_sha256": "905dcdd20ef3e0f50e3f377d658a7317357a441138865164e7b06d6fb0c68bfe",
+              "fields": {
+                "VERSION": "1.4.2+20261119144313",
+                "BUILD": "20261119144313",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119144313/candidate.raucb",
+                "SHA256": "fce4da6d65c77accba924a91883967ac6f8025f419d84a7a6184bbd320405b0d",
+                "SIZE": "151754789",
+                "COMPATIBLE": "microduck-face-board-v1",
+                "JOB": "6aff0aa7efaf5e14f4b17fae",
+                "CHANNEL": "candidate",
+                "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+              },
+              "fixed_build_manifest": {
+                "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119144313.env",
+                "sha256": "905dcdd20ef3e0f50e3f377d658a7317357a441138865164e7b06d6fb0c68bfe"
+              }
+            },
+            {
+              "board": "microduck-face-board-v1",
+              "channel": "stable",
+              "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/stable.env",
+              "raw_sha256": "3604d29be1be4662edda3b8a083f8cc7183237e068a632c282306a6ec022e407",
+              "fields": {
+                "VERSION": "1.4.2",
+                "BUILD": "20261113111055",
+                "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261113111055/stable.raucb",
+                "SHA256": "77d2dfbafe79940488fd9eb581aa856be14be9ed5434b0372991a272575ff0e2",
+                "SIZE": "151755483",
+                "COMPATIBLE": "microduck-face-board-v1",
+                "JOB": "6af6ef890f431c4f7b574010",
+                "CHANNEL": "stable",
+                "COMMIT": "635c41113cf129504c7e8ae1a7a896e0e4f94153"
+              }
+            }
+          ],
+          "signature_scope": "The fixed workflow publishes dev and candidate as development-signed bundles; only promote-os.yml writes stable after production re-signing. Tracker did not download bundles or verify signatures.",
+          "bundle_bytes_downloaded": false,
+          "bundle_signatures_verified_by_tracker": false,
+          "image_installed_or_built_by_tracker": false,
+          "history": [
+            {
+              "checked_at_utc": "2026-11-19T10:42:40Z",
+              "source_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/.github/workflows/build-image.yml",
+              "publish_script_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/scripts/publish-os.sh",
+              "channels": [
+                {
+                  "board": "microduck-beta",
+                  "channel": "dev",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
+                  "raw_sha256": "9902b86967a0a7b55ac6814f0b03da37064d079aab118de48d998d5c8b5277c5",
+                  "fields": {
+                    "VERSION": "1.4.2+20261119095319",
+                    "BUILD": "20261119095319",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119095319/dev.raucb",
+                    "SHA256": "52cf23cefdcec38cb3f149efed9aea5d5eca564868ebd28136efba71346964f9",
+                    "SIZE": "158132247",
+                    "COMPATIBLE": "microduck-beta",
+                    "JOB": "6afec6a7545f95df1c072a0a",
+                    "CHANNEL": "dev",
+                    "COMMIT": "946f0b703cfbae490e0c302d28caea8dba2a5b7e"
+                  },
+                  "fixed_build_manifest": {
+                    "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119095319.env",
+                    "sha256": "9902b86967a0a7b55ac6814f0b03da37064d079aab118de48d998d5c8b5277c5"
+                  }
+                },
+                {
+                  "board": "microduck-beta",
+                  "channel": "candidate",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/candidate.env",
+                  "raw_sha256": "9d65d1cf3f1b51d99d965f084354feb03337ea6e7fd31e1c43df21b399c2aa12",
+                  "fields": {
+                    "VERSION": "1.4.2+20261119095320",
+                    "BUILD": "20261119095320",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119095320/candidate.raucb",
+                    "SHA256": "75ad862464ca5f9f3da8731a3c9b783212acc7a385226e3ecae9288c94624470",
+                    "SIZE": "151787539",
+                    "COMPATIBLE": "microduck-beta",
+                    "JOB": "6afec6a7545f95df1c072a0a",
+                    "CHANNEL": "candidate",
+                    "COMMIT": "946f0b703cfbae490e0c302d28caea8dba2a5b7e"
+                  },
+                  "fixed_build_manifest": {
+                    "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119095320.env",
+                    "sha256": "9d65d1cf3f1b51d99d965f084354feb03337ea6e7fd31e1c43df21b399c2aa12"
+                  }
+                },
+                {
+                  "board": "microduck-beta",
+                  "channel": "stable",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/stable.env",
+                  "raw_sha256": "322cbcfea6d45d6c42130f2e3660abf1d8a206fc4498bd4547069497e44be70d",
+                  "fields": {
+                    "VERSION": "1.4.2",
+                    "BUILD": "20261113110930",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261113110930/stable.raucb",
+                    "SHA256": "7895341fda0f2f52de3a559103ea38ca097d08a15bb18e1dfef0973b76091500",
+                    "SIZE": "151788233",
+                    "COMPATIBLE": "microduck-beta",
+                    "JOB": "6af6ef7f0f431c4f7b573ffd",
+                    "CHANNEL": "stable",
+                    "COMMIT": "635c41113cf129504c7e8ae1a7a896e0e4f94153"
+                  }
+                },
+                {
+                  "board": "microduck-face-board-v1",
+                  "channel": "dev",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/dev.env",
+                  "raw_sha256": "c937b41e6d7d3d9f3776d13dd15196e25f76e8b28e0c5bb0b14e7b304003f737",
+                  "fields": {
+                    "VERSION": "1.4.2+20261119095429",
+                    "BUILD": "20261119095429",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119095429/dev.raucb",
+                    "SHA256": "824fd1011bcca5e707a8a64a0cbd821e4f321f82c4678fcdf5bcd837aec48f6c",
+                    "SIZE": "158160937",
+                    "COMPATIBLE": "microduck-face-board-v1",
+                    "JOB": "6afec6aee41aae15936d456f",
+                    "CHANNEL": "dev",
+                    "COMMIT": "946f0b703cfbae490e0c302d28caea8dba2a5b7e"
+                  },
+                  "fixed_build_manifest": {
+                    "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119095429.env",
+                    "sha256": "c937b41e6d7d3d9f3776d13dd15196e25f76e8b28e0c5bb0b14e7b304003f737"
+                  }
+                },
+                {
+                  "board": "microduck-face-board-v1",
+                  "channel": "candidate",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/candidate.env",
+                  "raw_sha256": "fb389da2b16a28d38b555953b14cb3b1457fbf302f4ec3d46447148e84a9de69",
+                  "fields": {
+                    "VERSION": "1.4.2+20261119095430",
+                    "BUILD": "20261119095430",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119095430/candidate.raucb",
+                    "SHA256": "9bb260970f70aa6d8a80f36a4a825f1dcae166fdbb6736a763a10e377f5ec5fc",
+                    "SIZE": "151754789",
+                    "COMPATIBLE": "microduck-face-board-v1",
+                    "JOB": "6afec6aee41aae15936d456f",
+                    "CHANNEL": "candidate",
+                    "COMMIT": "946f0b703cfbae490e0c302d28caea8dba2a5b7e"
+                  },
+                  "fixed_build_manifest": {
+                    "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119095430.env",
+                    "sha256": "fb389da2b16a28d38b555953b14cb3b1457fbf302f4ec3d46447148e84a9de69"
+                  }
+                },
+                {
+                  "board": "microduck-face-board-v1",
+                  "channel": "stable",
+                  "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/stable.env",
+                  "raw_sha256": "3604d29be1be4662edda3b8a083f8cc7183237e068a632c282306a6ec022e407",
+                  "fields": {
+                    "VERSION": "1.4.2",
+                    "BUILD": "20261113111055",
+                    "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261113111055/stable.raucb",
+                    "SHA256": "77d2dfbafe79940488fd9eb581aa856be14be9ed5434b0372991a272575ff0e2",
+                    "SIZE": "151755483",
+                    "COMPATIBLE": "microduck-face-board-v1",
+                    "JOB": "6af6ef890f431c4f7b574010",
+                    "CHANNEL": "stable",
+                    "COMMIT": "635c41113cf129504c7e8ae1a7a896e0e4f94153"
+                  }
+                }
+              ],
+              "signature_scope": "The fixed workflow publishes dev and candidate as development-signed bundles; only promote-os.yml writes stable after production re-signing. Tracker did not download bundles or verify signatures.",
+              "bundle_bytes_downloaded": false,
+              "bundle_signatures_verified_by_tracker": false,
+              "image_installed_or_built_by_tracker": false
+            }
+          ]
+        },
+        "latest_change_history": [
+          {
+            "observed_at_utc": "2026-11-19T10:42:40Z",
+            "merged_pull_request": 132,
+            "diff_since_previous_head": {
+              "from_sha": "533e5eeec4ad620390c6d80702b923c26dafbe56",
+              "to_sha": "946f0b703cfbae490e0c302d28caea8dba2a5b7e",
+              "merge_base_sha": "533e5eeec4ad620390c6d80702b923c26dafbe56",
+              "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/533e5eeec4ad620390c6d80702b923c26dafbe56...946f0b703cfbae490e0c302d28caea8dba2a5b7e",
+              "status": "ahead",
+              "ahead_by": 1,
+              "behind_by": 0,
+              "file_count": 15,
+              "commit_count": 1
+            },
+            "classification": "Main-only recipe naming change; formal microduck-os-v1.4.2 unchanged.",
+            "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44500228184",
+            "build_jobs": [
+              {
+                "name": "build (microduck-beta)",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-19T09:51:24Z",
+                "completed_at_utc": "2026-11-19T09:57:44Z",
+                "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44500228184/job/135477741852",
+                "os_update_publish_step": "success",
+                "release_attachment_step": "skipped"
+              },
+              {
+                "name": "build (microduck-face-board-v1)",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-19T09:51:24Z",
+                "completed_at_utc": "2026-11-19T09:58:27Z",
+                "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44500228184/job/135477742137",
+                "os_update_publish_step": "success",
+                "release_attachment_step": "skipped"
+              }
+            ]
+          }
+        ]
       }
     ],
     "latest_change": {
-      "observed_at_utc": "2026-11-19T15:46:07Z",
+      "observed_at_utc": "2026-11-19T16:46:47Z",
       "merged_pull_requests": [
-        143,
-        144,
-        145
+        146
       ],
       "diff_since_previous_head": {
-        "from_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
-        "to_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
-        "merge_base_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
-        "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/68ba72321868b8c9bd1074f99d4c774cae281d09...9921deef8ee3fdd907226372acd19cf181178c92",
+        "from_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+        "to_sha": "aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
+        "merge_base_sha": "9921deef8ee3fdd907226372acd19cf181178c92",
+        "fixed_url": "https://github.com/pollen-robotics/microduck_yocto/compare/9921deef8ee3fdd907226372acd19cf181178c92...aaa62914a7a4437ff007c0a8ed9770060b0bdf95",
         "status": "ahead",
-        "ahead_by": 3,
+        "ahead_by": 1,
         "behind_by": 0,
-        "file_count": 16,
-        "commit_count": 3
+        "file_count": 1,
+        "commit_count": 1
       },
-      "classification": "Main-only recipe documentation, distro feature requirements and prebuilt-package class changes; formal OS1.4.2 unchanged.",
-      "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44555857401",
-      "ci_status": "pending",
+      "classification": "Main-only Cargo TOML parsing and error diagnostics; formalOS1.4.2 unchanged.",
+      "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44565255864",
+      "ci_status": "in_progress",
       "ci_conclusion": null,
-      "last_fully_observed_development_source_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
-      "build_jobs": [],
+      "build_jobs": [
+        {
+          "name": "build (microduck-beta)",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at_utc": "2026-11-19T16:34:15Z",
+          "completed_at_utc": null,
+          "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44565255864/job/135713402147"
+        },
+        {
+          "name": "build (microduck-face-board-v1)",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at_utc": "2026-11-19T16:34:15Z",
+          "completed_at_utc": null,
+          "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44565255864/job/135713402785"
+        }
+      ],
+      "last_fully_observed_development_source_sha": "63429995c928bcb691c4d9601abe9386be41bdb2",
       "prior_main_development_build": {
-        "source_sha": "68ba72321868b8c9bd1074f99d4c774cae281d09",
-        "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251",
+        "source_sha": "63429995c928bcb691c4d9601abe9386be41bdb2",
+        "ci_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190",
         "build_jobs": [
-          {
-            "name": "build (microduck-face-board-v1)",
-            "status": "completed",
-            "conclusion": "success",
-            "started_at_utc": "2026-11-19T14:41:33Z",
-            "completed_at_utc": "2026-11-19T14:53:19Z",
-            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251/job/135638344660"
-          },
           {
             "name": "build (microduck-beta)",
             "status": "completed",
             "conclusion": "success",
-            "started_at_utc": "2026-11-19T14:41:33Z",
-            "completed_at_utc": "2026-11-19T14:54:54Z",
-            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44544159251/job/135638345174"
+            "started_at_utc": "2026-11-19T14:54:57Z",
+            "completed_at_utc": "2026-11-19T16:34:13Z",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646973547"
+          },
+          {
+            "name": "build (microduck-face-board-v1)",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at_utc": "2026-11-19T14:54:56Z",
+            "completed_at_utc": "2026-11-19T16:33:38Z",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646974240"
           }
         ]
       },
-      "intermediate_build_observations": {
-        "pr143": {
-          "source_sha": "63429995c928bcb691c4d9601abe9386be41bdb2",
-          "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190",
-          "build_jobs": [
-            {
-              "name": "build (microduck-beta)",
-              "status": "in_progress",
-              "conclusion": null,
-              "started_at_utc": "2026-11-19T14:54:57Z",
-              "completed_at_utc": null,
-              "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646973547"
-            },
-            {
-              "name": "build (microduck-face-board-v1)",
-              "status": "in_progress",
-              "conclusion": null,
-              "started_at_utc": "2026-11-19T14:54:56Z",
-              "completed_at_utc": null,
-              "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44548783190/job/135646974240"
-            }
-          ]
-        },
-        "pr144": {
-          "source_sha": "111db56ae172956a70baec3ec2fbbe313b9c4bb1",
-          "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44554988412",
-          "status": "completed",
-          "conclusion": "cancelled",
-          "failure_not_inferred_from_cancellation": true
-        }
+      "previous_9921_build": {
+        "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44555857401",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "failure_not_inferred_from_cancellation": true
       }
     },
     "update_channel_observation": {
-      "checked_at_utc": "2026-11-19T15:46:07Z",
+      "checked_at_utc": "2026-11-19T16:46:47Z",
       "source_workflow_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/.github/workflows/build-image.yml",
       "publish_script_url": "https://github.com/pollen-robotics/microduck_yocto/blob/533e5eeec4ad620390c6d80702b923c26dafbe56/scripts/publish-os.sh",
       "channels": [
@@ -61594,42 +62462,42 @@
           "board": "microduck-beta",
           "channel": "dev",
           "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
-          "raw_sha256": "5fe49a5966928609084aea3f2add38a7c3ddcc4d4495a4790d4a372567bced11",
+          "raw_sha256": "ff3debc77e8063a54856b046efdebf4882525c71af9625bc272f817faa932d94",
           "fields": {
-            "VERSION": "1.4.2+20261119144428",
-            "BUILD": "20261119144428",
-            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119144428/dev.raucb",
-            "SHA256": "baee61ec1c7ec52867041ac05067753df1d3b5bbd7970cf4d2a5b62ca92c1089",
+            "VERSION": "1.4.2+20261119152630",
+            "BUILD": "20261119152630",
+            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119152630/dev.raucb",
+            "SHA256": "99606fb95ea2d8e6fe7c2d33a933cdcc0a6c3a5cd3db0abebcbb1241ac2ea4c4",
             "SIZE": "158132247",
             "COMPATIBLE": "microduck-beta",
-            "JOB": "6aff0aaa4fdc5ab3c559cdf2",
+            "JOB": "6aff0dcb4fdc5ab3c559d1a0",
             "CHANNEL": "dev",
-            "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+            "COMMIT": "63429995c928bcb691c4d9601abe9386be41bdb2"
           },
           "fixed_build_manifest": {
-            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119144428.env",
-            "sha256": "5fe49a5966928609084aea3f2add38a7c3ddcc4d4495a4790d4a372567bced11"
+            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119152630.env",
+            "sha256": "ff3debc77e8063a54856b046efdebf4882525c71af9625bc272f817faa932d94"
           }
         },
         {
           "board": "microduck-beta",
           "channel": "candidate",
           "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/candidate.env",
-          "raw_sha256": "8113e6d3ffbc60e1ef6a3db151622a7b2e372b5f671b94afc8d2c11c64d85220",
+          "raw_sha256": "4f9f285e15c8c90ba9095df5d6d93451d6095bc87ed6abdea3ee9beab86a0d0f",
           "fields": {
-            "VERSION": "1.4.2+20261119144429",
-            "BUILD": "20261119144429",
-            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119144429/candidate.raucb",
-            "SHA256": "eb2a065c9f396a2d9dbd59f12ae9f4820fcc790807c80fd37e44d737589189ce",
+            "VERSION": "1.4.2+20261119152631",
+            "BUILD": "20261119152631",
+            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/20261119152631/candidate.raucb",
+            "SHA256": "9cb43e40caa3ba0f3bc97f03a7ad0be10eb8d379747cfc41fc5f459b64fe6871",
             "SIZE": "151787539",
             "COMPATIBLE": "microduck-beta",
-            "JOB": "6aff0aaa4fdc5ab3c559cdf2",
+            "JOB": "6aff0dcb4fdc5ab3c559d1a0",
             "CHANNEL": "candidate",
-            "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+            "COMMIT": "63429995c928bcb691c4d9601abe9386be41bdb2"
           },
           "fixed_build_manifest": {
-            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119144429.env",
-            "sha256": "8113e6d3ffbc60e1ef6a3db151622a7b2e372b5f671b94afc8d2c11c64d85220"
+            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261119152631.env",
+            "sha256": "4f9f285e15c8c90ba9095df5d6d93451d6095bc87ed6abdea3ee9beab86a0d0f"
           }
         },
         {
@@ -61653,42 +62521,42 @@
           "board": "microduck-face-board-v1",
           "channel": "dev",
           "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/dev.env",
-          "raw_sha256": "7994d05bbfb836fc34732bcd86986c407eb7b33898c0a2b64c775b21bd5c4335",
+          "raw_sha256": "a27565edadf738f94a4ce32918ff4d791d3deb3ca67c555a5aa9f648b3282114",
           "fields": {
-            "VERSION": "1.4.2+20261119144312",
-            "BUILD": "20261119144312",
-            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119144312/dev.raucb",
-            "SHA256": "84ae022c8e646df32d82208ccff0bc1ba4791cab679123c50e464456e66970cf",
+            "VERSION": "1.4.2+20261119152631",
+            "BUILD": "20261119152631",
+            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119152631/dev.raucb",
+            "SHA256": "4b6eb6fa7275d67a2d464578a88cf7a4d95e8689c387f1d07e3158250920d644",
             "SIZE": "158160937",
             "COMPATIBLE": "microduck-face-board-v1",
-            "JOB": "6aff0aa7efaf5e14f4b17fae",
+            "JOB": "6aff0dcb4fdc5ab3c559d1a2",
             "CHANNEL": "dev",
-            "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+            "COMMIT": "63429995c928bcb691c4d9601abe9386be41bdb2"
           },
           "fixed_build_manifest": {
-            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119144312.env",
-            "sha256": "7994d05bbfb836fc34732bcd86986c407eb7b33898c0a2b64c775b21bd5c4335"
+            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119152631.env",
+            "sha256": "a27565edadf738f94a4ce32918ff4d791d3deb3ca67c555a5aa9f648b3282114"
           }
         },
         {
           "board": "microduck-face-board-v1",
           "channel": "candidate",
           "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/candidate.env",
-          "raw_sha256": "905dcdd20ef3e0f50e3f377d658a7317357a441138865164e7b06d6fb0c68bfe",
+          "raw_sha256": "224aaa5109f062b355bee3c41702cd510db381877ed2f3fd72da2c8f889d8b5e",
           "fields": {
-            "VERSION": "1.4.2+20261119144313",
-            "BUILD": "20261119144313",
-            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119144313/candidate.raucb",
-            "SHA256": "fce4da6d65c77accba924a91883967ac6f8025f419d84a7a6184bbd320405b0d",
+            "VERSION": "1.4.2+20261119152632",
+            "BUILD": "20261119152632",
+            "URL": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/20261119152632/candidate.raucb",
+            "SHA256": "e1901763fa1185c8b8c46aafd8fb05eb35aafcf6d19600c772a9973e93003579",
             "SIZE": "151754789",
             "COMPATIBLE": "microduck-face-board-v1",
-            "JOB": "6aff0aa7efaf5e14f4b17fae",
+            "JOB": "6aff0dcb4fdc5ab3c559d1a2",
             "CHANNEL": "candidate",
-            "COMMIT": "68ba72321868b8c9bd1074f99d4c774cae281d09"
+            "COMMIT": "63429995c928bcb691c4d9601abe9386be41bdb2"
           },
           "fixed_build_manifest": {
-            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119144313.env",
-            "sha256": "905dcdd20ef3e0f50e3f377d658a7317357a441138865164e7b06d6fb0c68bfe"
+            "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/builds/20261119152632.env",
+            "sha256": "224aaa5109f062b355bee3c41702cd510db381877ed2f3fd72da2c8f889d8b5e"
           }
         },
         {
