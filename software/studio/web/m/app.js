@@ -55,12 +55,12 @@ function nickStored() {
 function Head({ name, dot, onEstop, busy, onNotice }) {
   return html`<header class="m-head">
     <div class="m-head-in">
-      <${ShutdownButton} api=${api} onNotice=${onNotice} />
       <div class="m-duck">
         <span class=${'m-dot ' + dot} aria-hidden="true"></span>
         <span class="m-duck-name">${name}</span>
       </div>
       <span class="m-head-gap"></span>
+      <${ShutdownButton} api=${api} onNotice=${onNotice} />
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
       <button class="m-estop" onClick=${onEstop} disabled=${busy}
         aria-label="卸力：让所有舵机松掉力气">卸力</button></div>

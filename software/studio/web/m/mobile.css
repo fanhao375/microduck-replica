@@ -309,6 +309,14 @@ a { color: var(--link); text-decoration: none; }
 .m-key.start.stop.on { background: var(--text); color: #fff; box-shadow: none; }
 .m-key.start.stop.on small { color: rgba(255, 255, 255, .6); }
 
+[data-maintenance] { margin: 16px 0; }
+[data-mobile-ai] > label { display: block; margin: 12px 0; font-size: 14px; line-height: 1.5; }
+[data-mobile-ai] select { display: block; width: 100%; min-width: 0; min-height: 44px; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--line, #d2d2d7); border-radius: 9px; background: white; color: var(--text); font: inherit; }
+[data-mobile-ai] input[type="checkbox"] { width: 18px; height: 18px; margin: 0 7px 0 0; vertical-align: middle; }
+[data-mobile-ai] > p { color: var(--text-2); font-size: 14px; line-height: 1.5; margin: 10px 0; }
+[data-mobile-ai] > [role="alert"] { color: var(--danger, #b42318); }
+[data-mobile-ai] .m-seg button { min-height: 44px; }
+
 .m-seg { display: flex; padding: 3px; border-radius: 11px; background: #E9E9EE; gap: 3px; }
 .m-seg button { flex: 1; height: 34px; border-radius: 9px; font-size: 13.5px; color: var(--text-2); }
 .m-seg button[aria-pressed="true"] { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }

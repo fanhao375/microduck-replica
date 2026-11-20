@@ -1,4 +1,3 @@
-import { ShutdownButton } from './shutdown-button.js';
 // Microduck Studio 前端。不构建：Preact + htm（vendor/preact-htm.module.js）直接在浏览器里跑。
 //
 // 跟 Studio 后端只有两条路：
@@ -14,6 +13,9 @@ import { BatteryCell } from './battery.js';
 import { BatterySettings } from './settings-battery.js';
 import { AiSettings } from './settings-ai.js';
 import { UpdateSettings } from './settings-updates.js';
+import { CertificateDownload } from './certificate-download.js';
+import { Maintenance } from './maintenance.js';
+import { ShutdownButton } from './shutdown-button.js';
 import { AccessGuide, AiSshEntry } from './settings-access.js';
 import { TuneSection, ModelSettings } from './tune.js';
 import { WifiCard, WifiSettings, DuckAddresses } from './wifi.js';
@@ -244,13 +246,13 @@ function TopBar({ duck, st, live, age, open, hideEStop, imu }) {
   const net = st?.net;
   const addrTitle = net?.known ? [`IP ${net.ip_now || '不知道'}`, ...(net.urls || []).map((u) => u.url)].join('\n') : undefined;
   return html`<header class="topbar">
-    <${ShutdownButton} api=${api} />
     <div class="duckid">
       <span class="dot" style=${{ background: duck?.color || '#0F7C80' }}></span>
       <span class="name" title=${addrTitle}>${duck?.label || '鸭子'}</span>
       ${st?.servo_session ? html`<span class="sv-badge">调舵机中</span>` : null}
       <span class="meta num">${live ? '' : `${Math.round(age / 1000)} 秒前 · `}${modeText}${typeof pct === 'number' ? ` · ${Math.round(pct)}%` : ''}</span>
     </div>
+    <${ShutdownButton} api=${api} />
     <span class=${hideEStop ? 'estop-hidden' : ''}><${EStop} st=${st} live=${live} open=${open} /></span>
   </header>`;
 }
@@ -764,10 +766,16 @@ async function refreshAccessSession() {
 function Settings({ st, tune }) {
   const [v, setV] = useState(loadStage());
   const pick = (x) => { setV(x); applyStage(x); try { localStorage.setItem('studio.stage', x); } catch { /* 隐私模式 */ } };
-  return html`<div style="display:flex;flex-direction:column;gap:16px;max-width:640px">
+  return html`<div class="studio-settings">
     <h1 style="margin:0;font-size:28px;font-weight:600">设置</h1>
     <${AiSshEntry} />
     <${UpdateSettings} api=${api} csrf=${csrf} />
+    <${Maintenance} api=${api} />
+    <details class="board device-certificate">
+      <summary>手机麦克风证书</summary>
+      <p>用手机麦克风之前，请下载本机证书并在手机上安装。<a href="/m#/more">查看 iPhone 和 Android 安装步骤</a></p>
+      <${CertificateDownload} />
+    </details>
     <${AiSettings} api=${api} />
     <div class="board" style="padding:16px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
       <span style="font-size:15px;font-weight:600;flex:1">日志和诊断</span>

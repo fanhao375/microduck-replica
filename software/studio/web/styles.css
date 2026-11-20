@@ -68,13 +68,24 @@ button:disabled { cursor: default; }
   .nav { position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto; }
 }
 
+/* 桌面设置与手机共用相同的设备维护操作。 */
+.studio-settings { display: flex; flex-direction: column; gap: 16px; max-width: 640px; min-width: 0; overflow-wrap: anywhere; }
+.studio-settings > [data-maintenance], .device-certificate { background: var(--board); border-radius: var(--radius-board); box-shadow: inset 0 0 0 1px var(--board-edge); }
+.studio-settings > [data-maintenance] h3 { margin: 0; font-size: 18px; }
+.studio-settings > [data-maintenance] p, .device-certificate p { color: var(--text-2); font-size: 14px; line-height: 1.6; }
+.studio-settings > [data-maintenance] .btn, .device-certificate .btn { padding: 9px 14px; min-height: 40px; border-radius: 10px; background: var(--page); border: 1px solid var(--board-edge); font: inherit; cursor: pointer; }
+.studio-settings > [data-maintenance] [role="alert"] { color: var(--danger); }
+.device-certificate { padding: 16px 20px; }
+.device-certificate summary { cursor: pointer; font-weight: 600; }
+.device-certificate a { color: var(--link); }
+
 /* ---- 顶部安全条 ---- */
 /* 吸顶（总览重排审查 O3）：总览成了往下刷的长页（下面就是遥控），卸力不能滑出屏幕。左右各伸出 .main 的内边距，底色盖住下面滚上来的内容 */
 .topbar { position: sticky; top: 0; z-index: 30; height: 56px; margin: 0 -24px; padding: 0 24px; background: var(--page);
   display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.duckid { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.duckid { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
 .duckid .dot { width: 10px; height: 10px; border-radius: 50%; }
-.duckid .name { font-size: 15px; font-weight: 600; }
+.duckid .name { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; font-size: 15px; font-weight: 600; }
 .duckid .meta { font-size: 13px; color: var(--text-2); }
 .estop { display: inline-flex; align-items: center; gap: 10px; height: 36px; padding: 0 8px 0 18px; border: 0; border-radius: 999px; background: var(--danger); color: #FFF; font-size: 15px; font-weight: 600; }
 .estop .kbd { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.22); }
