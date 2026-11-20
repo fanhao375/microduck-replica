@@ -2,6 +2,8 @@ import {AiCameraPreview} from './ai-camera-preview.js';
 import { AiTools } from './settings-tools.js';
 import { TtsSettings } from './settings-tts.js';
 import { html, useEffect, useRef, useState } from './vendor/preact-htm.module.js';
+import { Maintenance } from './maintenance.js';
+import { CertificateDownload } from './certificate-download.js';
 import { ARK_URL, blankDraft, draftFrom, isDirty, missingFields, requestMessages } from './ai-ui-state.js';
 const CSS = `.ai-settings{padding:18px 20px;min-width:0}.ai-settings h2{margin:0 0 8px;font-size:20px}.ai-settings p{font-size:13px;line-height:1.65;color:var(--text-2);margin:8px 0}.ai-settings .ai-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.ai-settings label{display:flex;flex-direction:column;gap:5px;font-size:13px;min-width:0}.ai-settings input,.ai-settings select,.ai-settings textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line,#d2d2d7);border-radius:9px;background:var(--surface,#fff);color:inherit;padding:9px;font:inherit}.ai-settings .ai-wide{grid-column:1/-1}.ai-settings .ai-check{flex-direction:row;align-items:center}.ai-settings .ai-check input{width:auto}.ai-settings .btn{border:0;border-radius:999px;padding:9px 15px;min-height:38px;font:inherit;font-size:14px;background:#e9e9ee;color:#242428;cursor:pointer}.ai-settings .btn.primary{background:#007aff;color:white}.ai-settings .btn:disabled{opacity:.4;cursor:default}.ai-settings .btn:focus-visible{outline:2px solid #007aff;outline-offset:2px}.ai-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.ai-settings .ai-result{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.ai-settings .ai-chat{border-top:1px solid var(--line,#ddd);margin-top:18px;padding-top:12px}.ai-settings .ai-message{white-space:pre-wrap;overflow-wrap:anywhere;border-radius:9px;padding:9px 11px;margin:7px 0;background:var(--surface-2,#f1f2f5);font-size:14px}.ai-settings .ai-camera-image{display:block;width:25%;max-width:100%;height:auto;object-fit:contain;border-radius:6px;margin:4px 0 10px}.ai-settings .ai-message strong{font-size:12px;display:block;margin-bottom:3px}.ai-settings [role=alert]{color:var(--red,#b42318)}@media(max-width:480px){.ai-settings{padding:16px 12px}.ai-settings .ai-fields{grid-template-columns:1fr}.ai-settings .btn{max-width:100%;white-space:normal}}`;
 if (!document.getElementById('ai-settings-css')) {
@@ -65,6 +67,9 @@ export function AiSettings({ api }) {
     });
   };
   return html`<section id="ai-settings" class="board ai-settings" data-ai-settings aria-label="AI 对话">
+    <h3>手机 HTTPS 证书</h3>
+    <${CertificateDownload} />
+    <${Maintenance} api=${api} />
     <h2>AI 对话</h2>
     <p>先保存提供商与模型配置，开通账号后再填写 Key。支持网页文字试聊与鸭子扬声器语音回复。可选择开启 AI 动作工具。</p>
     ${error ? html`<p role="alert">${error}</p>` : null}
