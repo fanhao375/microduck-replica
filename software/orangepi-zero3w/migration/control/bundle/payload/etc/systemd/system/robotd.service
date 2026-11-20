@@ -1,0 +1,26 @@
+[Unit]
+Description=Robot control daemon (Orange Pi, unconfigured read-only bus)
+After=local-fs.target
+
+[Service]
+Type=exec
+User=root
+Group=robot
+ExecStart=/opt/robot/feetech-ft5-r5/robotd --socket /run/robotd.sock --params /etc/robot/feetech-ft5/robotd.toml --read-only
+Environment=RUST_LOG=info
+# Single-request alternative: unset CUBIE_A7Z_SYNC_GROUP_SIZE (16 devices in one packet).
+# On this board single-request tests had UART overruns; grouped reads restored.
+Environment=CUBIE_A7Z_SYNC_GROUP_SIZE=3
+Environment=ORT_DYLIB_PATH=/opt/robot/feetech-ft5-r5/onnxruntime/libonnxruntime.so.1.28.0
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+RestrictSUIDSGID=yes
+RuntimeDirectory=robotd
+UMask=0007
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

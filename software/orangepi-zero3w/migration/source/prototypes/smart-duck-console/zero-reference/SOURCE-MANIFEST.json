@@ -1,0 +1,163 @@
+{
+  "upstream": "Microduck Studio A7Z installation snapshot",
+  "source_directory": "<workspace>/10fanhao_duck/studio-replica/software/studio/web",
+  "model_notice": "model/NOTICE.md",
+  "three_revision": "160",
+  "files": [
+    {
+      "source": "vendor/three/three.module.js",
+      "path": "zero-reference/three.module.js",
+      "source_sha256": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
+      "output_sha256": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
+      "changes": "byte-identical"
+    },
+    {
+      "source": "vendor/three/addons/OrbitControls.js",
+      "path": "zero-reference/OrbitControls.js",
+      "source_sha256": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064",
+      "output_sha256": "749768c9d93d7d1f22787d222d69d5ed645fdb51027dc88409fd123dec4fa327",
+      "changes": "import alias only"
+    },
+    {
+      "source": "vendor/three/addons/RoomEnvironment.js",
+      "path": "zero-reference/RoomEnvironment.js",
+      "source_sha256": "e21f41b7ef2016f2984a5d27850b42dffa797a6a194a138e288b06576d765a7b",
+      "output_sha256": "6d52564e43b38764c0d3165d22b280adb223cd1f1c97822f66eaf472ee0c5d72",
+      "changes": "import alias only"
+    },
+    {
+      "source": "vendor/three/addons/BufferGeometryUtils.js",
+      "path": "zero-reference/BufferGeometryUtils.js",
+      "source_sha256": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb",
+      "output_sha256": "c56d9bb7c81ce20cbd49dad2ebcfdb38e6b4b5e3156ddbf958546a44ac98f15e",
+      "changes": "import alias only"
+    },
+    {
+      "source": "labels.js",
+      "path": "zero-reference/labels.js",
+      "source_sha256": "fa6f2c56beb958740387692f27eeac7f29d1c075b8a10a19e9e8d4c1b0d68281",
+      "output_sha256": "2d7b0731e3faabab30c45cdd6453dcac5d33529bc7bb65351b98f0ebe1f88b18",
+      "changes": "import alias only"
+    },
+    {
+      "source": "model/NOTICE.md",
+      "path": "zero-reference/model/NOTICE.md",
+      "source_sha256": "6b0445fa294ae29326509486c642aa489ed47002645e2a268d3b0eff33629db3",
+      "output_sha256": "6b0445fa294ae29326509486c642aa489ed47002645e2a268d3b0eff33629db3",
+      "changes": "byte-identical"
+    },
+    {
+      "source": "model/model.json",
+      "path": "zero-reference/model/model.json",
+      "source_sha256": "4759870326c14f8030393c6ceb9c4c1e9f264a45ef6d604a92df06c2c8d04073",
+      "output_sha256": "4759870326c14f8030393c6ceb9c4c1e9f264a45ef6d604a92df06c2c8d04073",
+      "changes": "byte-identical"
+    },
+    {
+      "source": "duck3d.js",
+      "path": "zero-reference/duck3d.js",
+      "source_sha256": "f3e6ef6af0c132bd2160c4b67699d245b4c02c4a09eaf2ed861b0b28147e710a",
+      "output_sha256": "d2fd7e026b9a2a006506a6dfcee307b1a54aeb360391707a035420cadc8d0221",
+      "changes": [
+        "local module aliases",
+        "Worker/fetch loader replaced with embedded original JSON and int16 mesh",
+        "original main-thread toCreasedNormals(g, PI/6) preserved",
+        "side view [90,8] added",
+        "load() no longer accepts a network base URL",
+        "yield to the UI event loop after each complete mesh; vertex and normal calculations unchanged"
+      ]
+    },
+    {
+      "source": "model/model.json",
+      "embedded_in": "zero-model-data.js",
+      "source_sha256": "4759870326c14f8030393c6ceb9c4c1e9f264a45ef6d604a92df06c2c8d04073",
+      "bytes": 17056,
+      "changes": "original JSON value / base64 of original mesh bytes; no geometry edits"
+    },
+    {
+      "source": "model/meshes.bin",
+      "embedded_in": "zero-model-data.js",
+      "source_sha256": "d2252354ee5a04367aaf82242e08e52491b02ebbf27d48dc2c20350e6714d1a8",
+      "bytes": 2856560,
+      "changes": "original JSON value / base64 of original mesh bytes; no geometry edits"
+    }
+  ],
+  "not_shipped": [
+    "model-worker.js (offline loader uses original main-thread normal algorithm)",
+    "meshes.bin.gz (mesh bytes embedded directly)"
+  ],
+  "runtime_scope": "zero-reference, overview and IMU demo rendering only; no device APIs or live telemetry",
+  "license_notes": {
+    "studio_code": "Apache-2.0; original full text preserved",
+    "three": "MIT; original full text preserved",
+    "model_geometry": "Upstream repository LICENSE explicitly assigns software/studio/web/model to CC BY-NC-SA 4.0. Original model/NOTICE.md and model.json instead say Apache-2.0; both original statements are preserved. This adaptation does not assert relicensing or resolve the upstream discrepancy.",
+    "notices": [
+      "licenses/UPSTREAM-REPOSITORY-LICENSE.txt",
+      "licenses/UPSTREAM-NOTICE.md",
+      "model/NOTICE.md"
+    ]
+  },
+  "verification": {
+    "embedded_mesh_bytes": 2856560,
+    "mesh_types": 28,
+    "joints": 15,
+    "mapped_servos": 15,
+    "visible_mesh_instances": 47,
+    "zero_angles": true,
+    "checks": [
+      "embedded base64 SHA256 equals original meshes.bin",
+      "embedded model JSON values equal original model.json",
+      "original fallback normal decode produced finite position and normal arrays",
+      "controller VM tested retained view/canvas, selection-only pick, labels cleanup, disposal, failure and retry",
+      "per-mesh yield loader reverified: 28 mesh yields plus initial yield, original output hashes unchanged except adapted renderer"
+    ],
+    "browser": "Root handles browser and single-file QA separately",
+    "loader_event_loop_yields": 29
+  },
+  "generated_artifacts": [
+    {
+      "path": "zero-model-data.js",
+      "sha256": "3ff38e8f0b0c5d62333af5f69031effc25be32cd7d400e6ba9c52cafda1f9fd8",
+      "bytes": 3826185
+    },
+    {
+      "path": "zero-reference-viewer.js",
+      "sha256": "c146949914aa26dcbf2e3878bca5521259ee2ace50312cd11ce38388e1bb804e",
+      "bytes": 6175
+    },
+    {
+      "path": "overview-viewer.js",
+      "sha256": "d6811752e68c464ab63cd7797756b9aa62cff74941a840c1d73597723eac1638",
+      "bytes": 4258
+    },
+    {
+      "path": "imu.js",
+      "sha256": "f75375a33080987fd89443c5b090201b1aa6e273769a1869f90a7d6d8225b487",
+      "bytes": 24725
+    },
+    {
+      "path": "imu-viewer.js",
+      "sha256": "d3d6dd296f73a8aae83fdf93343480f1715f408b6fb12c39326a3a5141aaf665",
+      "bytes": 13725
+    }
+  ],
+  "overview_demo": {
+    "pose_source": "upstream web/servo.js POSES.stand",
+    "gravity": null,
+    "live_telemetry": false,
+    "renderer": "same adapted original Duck3D and embedded CAD geometry",
+    "background_source": "upstream white theme stage background"
+  },
+  "imu_demo": {
+    "source": "upstream web/imu.js and imu.css: module structure, direction cues, qRotate, view framing and plumb reference",
+    "sampling": "explicit user-driven demo steps; no sensor stream or calibration solver",
+    "pose": "original Studio POSES.stand",
+    "comparison": "same before gravity rotated by a relative correction quaternion in w,x,y,z order",
+    "fixture_angles_deg": {
+      "before": 8,
+      "after": 0.5,
+      "correction": 7.5
+    },
+    "submit": "shared prototype calibration transaction; no hardware writes"
+  }
+}

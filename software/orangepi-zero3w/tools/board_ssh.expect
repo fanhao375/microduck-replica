@@ -1,0 +1,59 @@
+#!/usr/bin/expect -f
+# Keep authentication out of saved scripts and preserve the pinned board identity.
+if {![info exists env(ORANGEPI_SSH_PASSWORD)]} {
+    puts stderr "ORANGEPI_SSH_PASSWORD is required"
+    exit 2
+}
+set timeout 180
+set project_root [file dirname [file dirname [file normalize [info script]]]]
+set mode [lindex $argv 0]
+set arguments [lrange $argv 1 end]
+set user "orangepi"
+if {[info exists env(ORANGEPI_SSH_USER)]} {set user $env(ORANGEPI_SSH_USER)}
+
+# The board takes a DHCP lease, so the address moves. Identity stays pinned by
+# HostKeyAlias; only the address is resolved: env override, then the last
+# verified result of tools/find_master.py. No address is embedded in source.
+proc resolve_host {} {
+    global env project_root
+    if {[info exists env(ORANGEPI_SSH_HOST)] && $env(ORANGEPI_SSH_HOST) ne ""} {
+        return $env(ORANGEPI_SSH_HOST)
+    }
+    set record [file join $project_root output master-discovery.json]
+    if {[file readable $record]} {
+        set handle [open $record r]
+        set data [read $handle]
+        close $handle
+        if {[regexp {"verdict"\s*:\s*"verified"} $data] && [regexp {"ip"\s*:\s*"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"} $data -> host]} {
+            return $host
+        }
+    }
+    error "Set ORANGEPI_SSH_HOST or run tools/find_master.py with a verified pinned host key"
+}
+
+set target "$user@[resolve_host]"
+puts stderr "board target: $target"
+set known_hosts [file join $project_root output orangepi_known_hosts]
+set common [list -o HostKeyAlias=orangepizero3w-setup -o UserKnownHostsFile=$known_hosts -o StrictHostKeyChecking=yes -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=3]
+if {$mode eq "run" && [llength $arguments] == 1} {
+    set command [concat [list /usr/bin/ssh -T] $common [list $target [lindex $arguments 0]]]
+} elseif {$mode eq "upload" && [llength $arguments] == 2} {
+    set command [concat [list /usr/bin/scp] $common [list [lindex $arguments 0] $target:[lindex $arguments 1]]]
+} elseif {$mode eq "download" && [llength $arguments] == 2} {
+    set command [concat [list /usr/bin/scp] $common [list $target:[lindex $arguments 0] [lindex $arguments 1]]]
+} else {
+    puts stderr "Usage: board_ssh.expect run COMMAND | upload LOCAL REMOTE | download REMOTE LOCAL"
+    exit 2
+}
+log_user 0
+spawn {*}$command
+expect {
+    -re {(?i)password:} {send -- "$env(ORANGEPI_SSH_PASSWORD)\r"; log_user 1}
+    timeout {puts stderr "SSH authentication timed out"; exit 124}
+    eof {puts stderr "SSH closed before authentication"; exit 1}
+}
+expect {
+    -re {.+} {exp_continue}
+    timeout {puts stderr "SSH operation timed out"; exit 124}
+    eof {set result [wait]; exit [lindex $result 3]}
+}

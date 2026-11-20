@@ -1,0 +1,15 @@
+[Unit]
+Description=Fix Cubie A7Z low-temperature CPU frequency cap
+After=systemd-modules-load.service
+Before=robotd.service microduck-studio.service
+ConditionPathExists=/proc/device-tree/compatible
+ConditionKernelVersion=5.15.147-21-a733
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/lib/cubie-thermal-policy/thermal_policy.py --apply
+RemainAfterExit=yes
+TimeoutStartSec=15
+
+[Install]
+WantedBy=multi-user.target

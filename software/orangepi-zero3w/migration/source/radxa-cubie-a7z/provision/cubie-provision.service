@@ -1,0 +1,13 @@
+[Unit]
+Description=Cubie boot Wi-Fi provisioning
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/cubie-provision/cubie_provision.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

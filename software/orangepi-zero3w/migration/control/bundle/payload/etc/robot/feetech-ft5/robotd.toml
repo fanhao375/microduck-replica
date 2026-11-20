@@ -1,0 +1,83 @@
+# Orange Pi installation: no UART/IMU wiring has been commissioned.
+# The nonexistent device is deliberate: report waiting_for_bus, never guess a real UART.
+# R17 self-trained HD1910: native HAT transport stays unchanged.
+[bus]
+port = "/dev/orangepi-robot-uart-unconfigured"
+protocol = "feetech"
+feetech_calibration = "/etc/robot/feetech-ft5/hd1910-calibration.toml"
+[control]
+hz = 50
+[policy]
+custom_only = true
+enabled = false
+mode = "walk"
+walk = "/opt/robot/feetech-ft5-r5/models/1cbf8730eadd75a5704332c9f3c10f60/policy.onnx"
+sitstand = "/opt/robot/feetech-ft5-r5/models/1c94934c6421ec72ed48079cea749668/policy.onnx"
+stand = "none"
+ground_pick = "/opt/robot/feetech-ft5-r5/models/b14e3a8b56ddbb8d2d831e727774a168/policy.onnx"
+kick_left = "/opt/robot/feetech-ft5-r5/models/ee0376c927044cdece056ba1d3e6eac7/policy.onnx"
+kick_right = "/opt/robot/feetech-ft5-r5/models/67ad09d82f4865d222a7ae06f250cf9f/policy.onnx"
+roulade = "/opt/robot/feetech-ft5-r5/models/59e15d7b04d0c40e9b11b8a70bdecae6/policy.onnx"
+gain = 5
+# Policy defaults are generated from config/r17-management.json.
+action_scale = 0.7
+standing_action_scale = 1.0
+ground_pick_period = 4.0
+ground_pick_action_scale = 1.0
+ground_pick_gain_ratio = 1.0
+[safety]
+limp_fall = false
+battery_empty_shutdown = false
+
+[[policy.skill]]
+name = "roulade"
+duration = 1.0
+chain = true
+command = [0.0, 0.0, 0.0]
+unwind = [0.0, 0.0, 0.0]
+unwind_s = 0.0
+[policy.skill.params]
+action_scale = 1.0
+gain_ratio = 1.0
+
+[[policy.skill]]
+name = "kick_right"
+path = "/opt/robot/feetech-ft5-r5/models/67ad09d82f4865d222a7ae06f250cf9f/policy.onnx"
+duration = 0.5
+chain = false
+command = [0.0, 0.0, 0.0]
+unwind = [0.0, 0.0, 0.0]
+unwind_s = 0.0
+[policy.skill.params]
+action_scale = 1.0
+
+[[policy.skill]]
+name = "kick_left"
+path = "/opt/robot/feetech-ft5-r5/models/ee0376c927044cdece056ba1d3e6eac7/policy.onnx"
+duration = 0.5
+chain = false
+command = [0.0, 0.0, 0.0]
+unwind = [0.0, 0.0, 0.0]
+unwind_s = 0.0
+[policy.skill.params]
+action_scale = 1.0
+
+[pad]
+a = "ground_pick"
+x = "roulade"
+lb = "kick_left"
+rb = "kick_right"
+dpad_down = "sit_toggle"
+
+# Operator-requested L3 test, through the existing generic skill scheduler.
+# Five seconds is a test limit chosen here, not a duration from training.
+[[policy.skill]]
+name = "roller_stand"
+path = "/opt/robot/feetech-ft5-r5/roller/standup/policy.onnx"
+duration = 5.0
+chain = false
+command = [0.0, 0.0, 0.0]
+unwind = [0.0, 0.0, 0.0]
+unwind_s = 0.0
+[policy.skill.params]
+action_scale = 1.0

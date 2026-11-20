@@ -1,0 +1,309 @@
+--- a/microduck-hd1910/firmware/duck-control/src/feetech.rs
++++ b/microduck-hd1910/firmware/duck-control/src/feetech.rs
+@@ -270,6 +270,8 @@
+     imu_board: BusImuBoard,
+     imu_protocol: BusImuProtocol,
+     imu_identity: Option<Vec<u8>>,
++    /// Explicit opt-in for the Cubie A7Z's 64-byte, interrupt-driven RX FIFO.
++    sync_group_size: Option<usize>,
+ }
+ 
+ /// Minimal acquisition result. No recovery, raw-packet history or UART polling.
+@@ -292,6 +294,13 @@
+ 
+ impl Bus {
+     pub fn open(path: &str) -> Result<Self> {
++        let sync_group_size = match std::env::var("CUBIE_A7Z_SYNC_GROUP_SIZE") {
++            Ok(value) if value == "3" => Some(3),
++            Ok(_) | Err(std::env::VarError::NotUnicode(_)) => {
++                return Err(error("CUBIE_A7Z_SYNC_GROUP_SIZE must be 3 or unset"));
++            }
++            Err(std::env::VarError::NotPresent) => None,
++        };
+         let builder = serialport::new(path, BAUD).timeout(Duration::from_millis(2));
+         #[cfg(unix)]
+         let port: Box<dyn serialport::SerialPort> = {
+@@ -309,6 +318,7 @@
+             imu_board: BusImuBoard::Ft6,
+             imu_protocol: BusImuProtocol::Auto,
+             imu_identity: None,
++            sync_group_size,
+         })
+     }
+ 
+@@ -631,7 +641,52 @@
+         ids: &[u8],
+         allow_partial: bool,
+     ) -> Result<BTreeMap<u8, Vec<u8>>> {
++        if self.sync_group_size == Some(3)
++            && address == SYNC_ADDRESS && length == SYNC_LENGTH && ids.len() > 3
++        {
++            return self.fifo_bounded_telemetry(ids);
++        }
+         self.sync_read_window(address, length, ids, allow_partial, None, false)
++    }
++
++    /// Each reply is 21 bytes: three fit in a 64-byte FIFO even if an IRQ is late.
++    /// All groups share ONE 20 ms deadline. No retry and no partial-frame acceptance.
++    fn fifo_bounded_telemetry(&mut self, ids: &[u8]) -> Result<BTreeMap<u8, Vec<u8>>> {
++        sync_read_packet(SYNC_ADDRESS, SYNC_LENGTH, ids)?;
++        let started = Instant::now();
++        let deadline = started + Duration::from_millis(TELEMETRY_DEADLINE_MS);
++        let mut combined = SyncTrace { address: SYNC_ADDRESS, length: SYNC_LENGTH,
++            request_sent: true, ..SyncTrace::default() };
++        let mut replies = BTreeMap::new();
++        for (index, group) in ids.chunks(3).enumerate() {
++            let result = self.sync_read_window(SYNC_ADDRESS, SYNC_LENGTH, group, false,
++                Some((started, deadline)), false);
++            let trace = &self.last_sync;
++            combined.rx_bytes += trace.rx_bytes;
++            combined.bad_checksums += trace.bad_checksums;
++            combined.discarded += trace.discarded;
++            combined.request_sent &= trace.request_sent;
++            combined.deadline_exceeded |= trace.deadline_exceeded;
++            combined.complete_but_late |= trace.complete_but_late;
++            combined.elapsed_us = started.elapsed().as_micros() as u64;
++            if let Err(problem) = result {
++                // Only count missing replies from the request actually sent. Devices in
++                // unqueried groups are not falsely blamed for a timeout.
++                combined.missing_ids = trace.missing_ids.clone();
++                self.last_sync = combined;
++                return Err(error(format!("A7Z Sync Read group {} failed; unqueried IDs {:?}: {problem}",
++                    index + 1, &ids[((index + 1) * 3).min(ids.len())..])));
++            }
++            replies.extend(result?);
++        }
++        if Instant::now() >= deadline {
++            combined.deadline_exceeded = true;
++            combined.complete_but_late = true;
++            self.last_sync = combined;
++            return Err(error("A7Z Sync Read groups exceeded shared 20 ms deadline"));
++        }
++        self.last_sync = combined;
++        Ok(replies)
+     }
+ 
+     fn sync_read_window(
+@@ -2802,6 +2857,7 @@
+             imu_board: BusImuBoard::Ft6,
+             imu_protocol: BusImuProtocol::Auto,
+             imu_identity: None,
++            sync_group_size: None,
+         };
+         let mut io = FeetechIo::from_bus(bus, calibrated()).unwrap();
+         for _ in 0..30 {
+@@ -2898,6 +2954,7 @@
+                 imu_board: BusImuBoard::Ft6,
+                 imu_protocol: BusImuProtocol::Auto,
+                 imu_identity: None,
++                sync_group_size: None,
+             };
+             let result = bus.telemetry(&crate::model::JOINT_IDS);
+             finish.send(()).unwrap();
+@@ -2951,6 +3008,7 @@
+             imu_board: BusImuBoard::Ft6,
+             imu_protocol: BusImuProtocol::Auto,
+             imu_identity: None,
++            sync_group_size: None,
+         };
+         bus.verify_torque(&ids, false).unwrap();
+         assert!(bus.last_sync.missing_ids.is_empty());
+@@ -3345,6 +3403,67 @@
+         Arc, Mutex,
+         atomic::{AtomicBool, Ordering},
+     };
++
++    #[test]
++    fn a7z_fifo_groups_cover_all_devices_once_without_writes() {
++        let (mut bus, device) = emulator(false);
++        bus.sync_group_size = Some(3);
++        bus.imu_board = BusImuBoard::MicroduckV12;
++        let result = bus.telemetry(&crate::model::JOINT_IDS).unwrap();
++        assert_eq!(result.len(), 16);
++        let requests = device.requests.lock().unwrap();
++        assert_eq!(requests.len(), 6);
++        let expected = telemetry_ids(BusImuBoard::MicroduckV12, &crate::model::JOINT_IDS);
++        let mut actual = Vec::new();
++        for (instruction, address, ids) in requests.iter() {
++            assert_eq!((*instruction, *address), (SYNC_READ, SYNC_ADDRESS));
++            assert!(ids.len() * (usize::from(SYNC_LENGTH) + 6) <= 64);
++            actual.extend_from_slice(ids);
++        }
++        assert_eq!(actual, expected);
++        assert_eq!(actual.last(), Some(&IMU_ID));
++        assert!(device.writes.lock().unwrap().is_empty());
++        assert_eq!(bus.last_sync.rx_bytes, 336);
++        assert!(!bus.last_sync.partial_received);
++    }
++
++    #[test]
++    fn a7z_missing_group_is_not_retried_or_accepted_as_partial() {
++        let (mut bus, device) = emulator(false);
++        bus.sync_group_size = Some(3);
++        bus.imu_board = BusImuBoard::MicroduckV12;
++        let missing = crate::model::JOINT_IDS[0];
++        device.faults.lock().unwrap().missing = vec![missing];
++        assert!(bus.telemetry_partial(&crate::model::JOINT_IDS).is_err());
++        assert_eq!(bus.last_sync.missing_ids, vec![missing]);
++        assert_eq!(device.requests.lock().unwrap().len(), 1);
++        assert!(device.writes.lock().unwrap().is_empty());
++        assert!(!bus.last_sync.partial_received);
++    }
++
++    #[test]
++    fn a7z_groups_share_deadline_even_in_read_only_mode() {
++        let (mut bus, device) = emulator(false);
++        bus.sync_group_size = Some(3);
++        bus.imu_board = BusImuBoard::MicroduckV12;
++        bus.read_only = true;
++        bus.timeout = Duration::from_millis(100);
++        let (mut bus, delay) = stall_reads(bus, 63);
++        delay.store(25_000, Ordering::Relaxed);
++        assert!(bus.telemetry(&crate::model::JOINT_IDS).is_err());
++        assert!(bus.last_sync.complete_but_late);
++        assert_eq!(device.requests.lock().unwrap().len(), 1);
++        assert!(device.writes.lock().unwrap().is_empty());
++    }
++
++    #[test]
++    fn a7z_does_not_group_control_register_reads() {
++        let (mut bus, device) = emulator(false);
++        bus.sync_group_size = Some(3);
++        bus.sync_read(40, 1, &crate::model::JOINT_IDS).unwrap();
++        assert_eq!(device.requests.lock().unwrap().len(), 1);
++        assert!(device.writes.lock().unwrap().is_empty());
++    }
+ 
+     // Stall the return of an already-complete serial read, as a descheduled host
+     // can do. Delaying the device response instead would merely hit the unchanged
+@@ -3603,6 +3722,7 @@
+                 imu_board: BusImuBoard::Ft6,
+                 imu_protocol: BusImuProtocol::Auto,
+                 imu_identity: None,
++                sync_group_size: None,
+             },
+             Emulator {
+                 faults,
+--- a/microduck-hd1910/firmware/duck-control/src/feetech_dxl2_tests.rs
++++ b/microduck-hd1910/firmware/duck-control/src/feetech_dxl2_tests.rs
+@@ -186,6 +186,7 @@
+         imu_board: BusImuBoard::Ft6,
+         imu_protocol: BusImuProtocol::Auto,
+         imu_identity: None,
++        sync_group_size: None,
+     };
+     (
+         bus,
+--- a/microduck-hd1910/firmware/robotd/src/feetech_commissioning.rs
++++ b/microduck-hd1910/firmware/robotd/src/feetech_commissioning.rs
+@@ -22,7 +22,7 @@
+ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+ use tokio::sync::oneshot;
+ 
+-pub const BUILD: &str = "4734cbb-feetech-imu-auto-control.44";
++pub const BUILD: &str = "4734cbb-feetech-imu-auto-control.44-a7z-sync3.1";
+ const MAX_PENDING: usize = 16;
+ const POSITION_TOLERANCE: u16 = 8;
+ const SETTLE_TIMEOUT: Duration = Duration::from_secs(4);
+--- a/microduck-hd1910/firmware/robotd/src/feetech_read_only.rs
++++ b/microduck-hd1910/firmware/robotd/src/feetech_read_only.rs
+@@ -15,7 +15,7 @@
+ use std::time::{Duration, Instant};
+ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+ 
+-pub const BUILD: &str = "590b986-feetech-ft6-readonly.2";
++pub const BUILD: &str = "4734cbb-feetech-imu-auto-control.44-a7z-sync3.1-readonly";
+ const WINDOW: u64 = 3000;
+ 
+ #[derive(Default)]
+@@ -168,6 +168,12 @@
+         ids = duck_control::feetech::telemetry_ids(bus.imu_board(), &JOINT_IDS);
+     }
+     state.startup_bus_failures.store(0, Ordering::Relaxed);
++    let ids = if host_imu.is_none() {
++        duck_control::feetech::telemetry_ids(bus.imu_board(), &JOINT_IDS)
++    } else {
++        ids
++    };
++    let mut communication_stats = super::communication_stats::CommunicationStats::new(ids.iter().copied());
+     tracing::warn!(
+         build = BUILD,
+         port,
+@@ -212,6 +218,7 @@
+             bus.telemetry(&JOINT_IDS)
+         };
+         let read_us = bus.last_sync.elapsed_us;
++        communication_stats.observe(&bus.last_sync);
+         window.read_ms.push(read_us as f64 / 1000.0);
+         window.over_period += u64::from(Duration::from_micros(read_us) > period);
+         window.cycles += 1;
+@@ -255,7 +262,7 @@
+                             if !valid {
+                                 imu_fault = Some("IMU not ready/stale".to_owned());
+                             }
+-                            imu_json = json!({"id": IMU_ID, "sequence": imu.sequence,
++                            imu_json = json!({"id": IMU_ID, "source": "bus", "sequence": imu.sequence,
+                             "age_ms": imu.age_ms, "age_upper_bound_ms":imu.age_upper_bound_ms,
+                             "status":imu.status, "sequence_bits":imu.sequence.map(|_|8), "ready": imu.ready, "valid": valid,
+                             "bus":bus.imu_info(),
+@@ -337,7 +344,7 @@
+             tracing::info!(report = %report, "FT5_3000_RESULT");
+             completed = Some(report);
+         }
+-        if cycle == 1 || cycle.is_multiple_of(50) || last_error.is_some() || done {
++        if cycle == 1 || cycle.is_multiple_of(5) || last_error.is_some() || done {
+             publish(
+                 state,
+                 json!({"build": BUILD, "mode": "read_only", "phase": "reading",
+@@ -345,6 +352,8 @@
+                 "calibrated": false, "motor_writes_blocked": true,
+                 "total_cycles": cycle, "total_success": total_success, "total_communication_failures": total_failures,
+                 "total_imu_faults": total_imu_faults,
++                "device_communication": communication_stats,
++                "imu_bus": bus.imu_info(),
+                 "achieved_hz": f64::from_bits(state.achieved_hz.load(Ordering::Relaxed)),
+                 "updated_at_us": state.started.elapsed().as_micros() as u64,
+                 "window": window.report(), "last_3000": completed,
+@@ -436,8 +445,8 @@
+                     &mut master,
+                     &mut slave,
+                     name.as_mut_ptr(),
+-                    std::ptr::null(),
+-                    std::ptr::null(),
++                    std::ptr::null_mut(),
++                    std::ptr::null_mut(),
+                 )
+             },
+             0
+@@ -676,8 +685,8 @@
+                     &mut master,
+                     &mut slave,
+                     name.as_mut_ptr(),
+-                    std::ptr::null(),
+-                    std::ptr::null(),
++                    std::ptr::null_mut(),
++                    std::ptr::null_mut(),
+                 )
+             },
+             0
+--- a/microduck-hd1910/firmware/robotd/src/feetech_r9_tests.rs
++++ b/microduck-hd1910/firmware/robotd/src/feetech_r9_tests.rs
+@@ -40,15 +40,15 @@
+ fn commissioning_flow(dxl2: bool) {
+     let mut master = 0;
+     let mut slave = 0;
+-    let mut name = [0i8; 128];
++    let mut name = [0 as libc::c_char; 128];
+     assert_eq!(
+         unsafe {
+             libc::openpty(
+                 &mut master,
+                 &mut slave,
+                 name.as_mut_ptr(),
+-                std::ptr::null(),
+-                std::ptr::null(),
++                std::ptr::null_mut(),
++                std::ptr::null_mut(),
+             )
+         },
+         0

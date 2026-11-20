@@ -1,0 +1,43 @@
+@import url('./servo.css');
+
+.console-devices{--cd-accent:#00877e;--cd-soft:#e4f3ef;--cd-line:#e3e9ee;--cd-muted:#80919f;--cd-text:#233746;min-width:0;color:var(--cd-text)}
+.console-devices [hidden]{display:none!important}
+.console-device-nav{display:flex;gap:26px;border-bottom:1px solid var(--cd-line);margin:0 0 22px;overflow-x:auto;white-space:nowrap}
+.console-device-nav a{padding:12px 1px 14px;color:var(--cd-muted);border-bottom:2px solid transparent;font-size:13px;text-decoration:none}
+.console-device-nav a.active{color:var(--cd-accent);border-color:var(--cd-accent);font-weight:600}
+.console-devices .board{border:1px solid var(--cd-line);border-radius:12px;box-shadow:none;background:#fff;min-width:0}
+.console-devices button,.console-devices input,.console-devices select{font:inherit}
+.console-devices button{font-size:12px}
+.console-devices .btn-dark{background:var(--cd-accent);color:#fff;border:1px solid var(--cd-accent);box-shadow:none}
+.console-devices .btn-light{background:#f6f9fa;border:1px solid var(--cd-line);color:#637a88;box-shadow:none}
+.console-devices .btn-danger{background:#fff1ee;border:1px solid #efc9c4;color:#b94f49;box-shadow:none}
+.console-devices :is(.btn-dark,.btn-light,.btn-danger){border-radius:7px;padding:9px 12px;line-height:1.4;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.console-devices button:disabled{opacity:.45;cursor:not-allowed}
+.console-devices :focus-visible{outline-color:var(--cd-accent)}
+.console-devices .banner{border-radius:8px;padding:12px 15px;font-size:12px;line-height:1.7;margin-bottom:16px}
+.console-devices details>summary{cursor:pointer;font-size:12px;line-height:1.7;color:#718693}
+.console-devices details p{font-size:12px;line-height:1.8;color:var(--cd-muted)}
+.console-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 21px;border-bottom:1px solid var(--cd-line)}
+.console-card-head h2{font-size:15px;margin:0;font-weight:600}
+.console-card-head>span{font-size:11px;line-height:1.5;color:var(--cd-muted)}
+.console-card-content{padding:4px 21px 20px;min-width:0}
+.console-card-content>p{font-size:12px;line-height:1.8;margin:16px 0;color:var(--cd-muted)}
+.console-card-content>details{padding-top:15px;margin-top:14px;border-top:1px solid var(--cd-line)}
+.console-card-content>.btn-light+.btn-light{margin-left:8px}
+.console-tracking-capability details{margin-top:18px}
+.console-empty{padding:25px;color:var(--cd-muted);font-size:12px;line-height:1.8}
+.console-diagnostics-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.console-diagnostic-stack{display:flex;flex-direction:column;gap:18px;min-width:0}
+.console-diagnostic-field{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:13px 0;border-bottom:1px solid var(--cd-line);font-size:12px;line-height:1.6}
+.console-diagnostic-field>span{color:var(--cd-muted)}
+.console-diagnostic-field strong{font-weight:500;text-align:right;overflow-wrap:anywhere}
+.console-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin-top:8px}
+.console-table-scroll{overflow-x:auto;max-width:100%;margin-top:15px}
+.console-table-scroll table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.7}
+.console-table-scroll th,.console-table-scroll td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--cd-line);white-space:nowrap}
+.console-table-scroll th{font-weight:500;color:var(--cd-muted)}
+.console-diagnostic-stack>.imu-diagnostic{padding:20px}
+.console-diagnostic-stack>.imu-diagnostic h3{font-size:15px;margin:0 0 14px}
+.console-diagnostic-stack>.imu-diagnostic p{font-size:12px;line-height:1.8;margin:8px 0}
+@media(max-width:900px){.console-diagnostics-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.console-device-nav{gap:21px;margin-bottom:17px}.console-device-nav a{font-size:12px;padding-top:8px}.console-card-head{padding:17px 16px}.console-card-content{padding:3px 16px 17px}.console-card-head h2{font-size:14px}.console-stat-grid{grid-template-columns:1fr}.console-devices .btn-light,.console-devices .btn-dark,.console-devices .btn-danger{min-height:38px;padding:8px 10px}.console-diagnostic-field{font-size:11px}.console-diagnostics-grid{gap:16px}}

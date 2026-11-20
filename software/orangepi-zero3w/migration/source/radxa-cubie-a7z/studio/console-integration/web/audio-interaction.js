@@ -1,0 +1,53 @@
+import { html, useEffect, useRef, useState } from './vendor/preact-htm.module.js';
+import { audioLabel, rhythmLabel } from './audio-ui-state.js';
+
+export function AudioInteraction({ pad, link, activity }) {
+  const status = pad?.audio;
+  const [active, setActive] = useState(activity.active);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState(null);
+  const alive = useRef(false), busy = useRef(false);
+  useEffect(() => {
+    alive.current = true;
+    const off = activity.subscribe(({active:value}) => setActive(value));
+    return () => { alive.current = false; off(); };
+  }, [activity]);
+  const change = async values => {
+    if (busy.current || !activity.active || link.status !== 'open') return;
+    busy.current = true; setPending(true); setError(null);
+    try {
+      const response = await link.cmd('pad.op', {op:'audio', ...values}, 2500);
+      if (alive.current && !response?.ok) setError(response?.reason || response?.error || '语音开关没有完成');
+    } catch (err) {
+      if (alive.current) setError(err?.message || '语音连接中断');
+    } finally {
+      busy.current = false;
+      if (alive.current) setPending(false);
+    }
+  };
+  const ready = active && link.status === 'open' && !pending;
+  return html`<section id="audio-interaction" class="pd-motion" aria-label="语音与音乐互动">
+    <div class="motion-heading"><h4>语音与音乐互动</h4>
+      <span class="motion-state" role="status" data-audio-listening=${!!status?.listening}>${audioLabel(status)}</span>
+    </div>
+    <div class="motion-toolbar">
+      <a class="btn-light" href="#/settings/ai" data-ai-link>AI 对话设置</a>
+      <button type="button" class=${status?.listening ? 'motion-stop' : 'btn-primary'} data-audio="listening"
+        disabled=${!ready || !status?.available} onClick=${() => change({listening:!status?.listening})}>
+        ${status?.listening ? '关闭监听' : '开启监听'}</button>
+      <button type="button" class="btn-light" data-audio="music" disabled=${!ready || !status?.available}
+        onClick=${() => change({music:!status?.music})}>${status?.music ? '退出音乐模式' : '听音乐'}</button>
+    </div>
+    ${error || status?.error ? html`<p class="motion-error" role="alert">${error || status.error}</p>` : null}
+    ${!status?.available ? html`<p class="pd-small-p">${status?.why || '等待语音服务连接'}</p>` : null}
+    ${status?.listening && status?.music ? html`<p class="pd-small-p" data-audio-rhythm>${rhythmLabel(status.rhythm)}</p>` : null}
+    <details class="motion-help"><summary>口令、音乐与持续运行</summary>
+    <p class="pd-small-p">音乐模式可问“感觉怎么样”“喜欢这种歌吗”，暂不执行坐站口令或复读整首歌。</p>
+    <p class="pd-small-p motion-note">R3 按一下开启并短叫一声，再按一下关闭；提示声后稍停再说话。
+      日常口令是“坐下”“站起来”，执行后用叫声确认，普通话语不会原样播放。录音复读单独保留，专门按键以后再设。</p>
+    <p class="pd-small-p motion-note">监听会持续到关闭。听音乐后，先关闭实体手柄、站稳并点“开始走”，
+      再保持网页在前台并停留在遥控区，点下面的“随乐律动”。头部会小幅跟拍；身体跟随效果取决于运动模型。
+      独立随乐律动开启后，失焦、切后台、滚出遥控区或切换站内页面仍会继续；关闭网页或连接断开会停止。
+      返回页面可停止律动。录制和录制中的随乐律动仍需保持前台和遥控区可见，离开后停止。</p></details>
+  </section>`;
+}

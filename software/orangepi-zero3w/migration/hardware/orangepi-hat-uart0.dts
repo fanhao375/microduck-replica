@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: MIT
+/dts-v1/;
+/plugin/;
+
+/*
+ * Orange Pi Zero 3W A733, vendor Linux 6.6.98.
+ * Base DT paths and the ccu symbol were checked on the current board.
+ * HAT UART uses physical pin 8 (PB9/TX) and pin 10 (PB10/RX).
+ *
+ * APB UART is shared by UART0..6. Consumer clock assignments run before
+ * each platform driver probe. 48 MHz gives exact 1 Mbaud (divisor 3)
+ * and 1.5 Mbaud (divisor 2, onboard Bluetooth).
+ * Preserve the original single gate clock. UART_NG v1.1.20 then reads
+ * the CCF rate without entering its legacy three-clock reparenting path.
+ * Both enabled UARTs assign the same shared rate before caching it.
+ * Do not change this shared clock live while either UART is in use.
+ *
+ * CCU IDs from the vendor sun60iw2-ccu.h:
+ *   46 = CLK_APB_UART; 5 = CLK_PLL_PERI0_480M.
+ * GPIO state names, functions and drive strength preserve the base DT.
+ * Existing UART0 pinctrl references and phandles remain untouched.
+ *
+ * This overlay does not release the kernel console or serial getty.
+ * Those must be handled separately before any HAT serial communication.
+ */
+
+/ {
+    fragment@1 {
+        target-path = "/soc@3000000/pinctrl@2000000/uart0_pins@0";
+
+        __overlay__ {
+            pins = "PB9", "PB10";
+            function = "uart0";
+            drive-strength = <10>;
+        };
+    };
+
+    fragment@2 {
+        target-path = "/soc@3000000/pinctrl@2000000/uart0_pins@1";
+
+        __overlay__ {
+            pins = "PB9", "PB10";
+            function = "gpio_in";
+            drive-strength = <10>;
+        };
+    };
+
+    fragment@3 {
+        target-path = "/soc@3000000/uart@2500000";
+        __overlay__ {
+            assigned-clocks = <&ccu 46>;
+            assigned-clock-rates = <48000000>;
+        };
+    };
+
+    fragment@4 {
+        target-path = "/soc@3000000/uart@2501000";
+        __overlay__ {
+            assigned-clocks = <&ccu 46>;
+            assigned-clock-rates = <48000000>;
+        };
+    };
+};
