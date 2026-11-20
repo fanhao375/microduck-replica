@@ -70,8 +70,8 @@ function chipLabel(imu, live = true, diagnosticElapsed = 0) {
   return info ? `${BUS_BOARD_CN[info.board] || info.board || '总线小板'} · ${BUS_PROTOCOL_CN[info.protocol] || info.protocol}（ID 200）`
     : CHIP_CN.bus;
 }
-function imuContext(mode, imu) {
-  return JSON.stringify([mode, imu?.source, imu?.source === 'bus' ? imu.imu_bus || null : null,
+function imuContext(st, imu) {
+  return JSON.stringify([st?.mode || imu?.mode, st?.imu?.generation, imu?.source, imu?.source === 'bus' ? imu.imu_bus || null : null,
     imu?.configured_imu_profile ?? null, imu?.metadata_error ?? null, imu?.profile_error ?? null,
     imu?.redo?.session_id || null, !!imu?.redo?.active]);
 }
@@ -856,7 +856,7 @@ function CoarseCard({ st, imu, link, live }) {
   const [busy, setBusy] = useState(false);
   const mode = st?.mode || imu?.mode;
   const redo = imu?.redo || {};
-  const context = imuContext(mode, imu);
+  const context = imuContext(st, imu);
   useLayoutEffect(() => { setOpened(false); setMsg(null); }, [context]);
   const open = link.status === 'open' && live !== false;
   const commissioning = mode === 'commissioning';
@@ -900,9 +900,9 @@ function CoarseCard({ st, imu, link, live }) {
       <div class="imu-actions"><${TwoStep} label="取消并恢复原参数" ask="扶好鸭子，确认恢复原方向和模式？"
         disabled=${!open || busy || working || needsUnload}
         onConfirm=${() => run('redo-cancel')} busyLabel="正在恢复…" /></div>` : null}
-    ${showStart ? html`<div class="imu-actions">${localEntry
+    ${showStart ? html`<div class="imu-actions">${liveVerify
       ? html`<button class="btn-dark" disabled=${!!startWhy || busy} title=${startWhy} onClick=${start}>重新标定方向</button>`
-      : html`<${TwoStep} label="重新标定方向" ask="扶好并已卸力，确认重启并进入标定模式？"
+      : html`<${TwoStep} label="重新标定方向" ask=${inPlace ? '保持 HOME，确认采集安装方向？' : commissioning ? '扶好鸭子，确认重新采集？' : '扶好并已卸力，确认重启并进入标定模式？'}
           cls="btn-dark" disabled=${!!startWhy || busy} title=${startWhy} onConfirm=${start} busyLabel="正在进入标定模式…" />`}</div>
       <p class="sv-small">${liveVerify
         ? '保持 HOME 站姿，扶稳后可以采数、验证并保存。先停下模型，采前倾时托住整个躯干。'
@@ -1062,7 +1062,7 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
   const [muted, setMutedState] = useState(loadMute);
   const mutedRef = useRef(muted);
   const setMuted = (v) => { mutedRef.current = v; setMutedState(v); saveMute(v); };
-  const context = imuContext(st?.mode || imu?.mode, imu);
+  const context = imuContext(st, imu);
 
   useEffect(() => {
     W.current = freshWizard(); setRes(null); setMsg(null); redraw();

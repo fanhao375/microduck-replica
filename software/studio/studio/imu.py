@@ -28,6 +28,7 @@ ON_DUCK = ("总线 ID 200 的 IMU 由主程序启动时自动识别。I²C IMU �
 # （5° 是 imu_calib RULES 的 stand_confirm_deg：robotd 自己验方向时直立只放 5°）
 CHECK_MAX_DIFF_DEG = 2.0
 IMU_VERIFICATION_CONTRACT = "upright_nose_down_v1"
+IMU_HOME_CONTRACT = "home_mount_v1"
 
 
 class Refused(Exception):
@@ -242,8 +243,6 @@ class ImuBackend:
         age = native.get("imu_age_ms")
         if age is None:
             age = native.get("imu_age_upper_bound_ms")
-        if age is None and source == "bus" and bus_imu_of(bus):
-            age = native.get("sample_age_ms")  # Age-less wire formats still have host sample age.
         reason = None
         if not available:
             reason = "当前不能在 HOME 原地采安装方向：先读取安装方向或进入初次标定模式"
@@ -264,7 +263,7 @@ class ImuBackend:
         elif helper.flag_present():
             reason = "舵机页占着总线：先交还主程序"
         live_verify = (available and isinstance(calib, dict)
-                       and calib.get("imu_home_verification_contract") == "home_mount_v1")
+                       and calib.get("imu_home_verification_contract") == IMU_HOME_CONTRACT)
         return {"available": available, "reason": reason,
                 "hold_ready": held,
                 "live_verify": live_verify,
@@ -624,6 +623,7 @@ class ImuBackend:
         bus = await self._bus_once()
         if bus.get("mode") == "motion":
             return await self._verify_from_home(bus, args, by)
+        self.home_verification_task = None
         if bus.get("mode") != "commissioning":
             raise Refused("主程序已经在运动模式：站起来以后用站着校准")
         redo = self._coarse_guard(bus)
@@ -704,18 +704,24 @@ class ImuBackend:
                 or (last.get("mode") != "coarse" and last.get("live_verify") is not True)
                 or last.get("mount") != mount):
             raise Refused("这份方向不是刚刚标定算出来的：重新采数并确认后再验证")
-        if self._result_basis != self._sampling_basis(bus):
+        basis = self._sampling_basis(bus)
+        if self._result_basis != basis:
             self.last_result = None
             raise Refused("实时读回的 IMU 来源、板卡、原方向或连接已改变：重新采静止和前倾")
         source, old_mount = mount_of(bus, fresh_calib(self.rd))
         transport = calibration_context(bus, source, {})[1]
         status = await self._rpc_once("robot.busCommand", {"action": "calibration-status"},
                                       5.0, "核对原地 IMU 核验能力")
-        if isinstance(status, dict) and status.get("imu_home_verification_contract") == "home_mount_v1":
+        bus = await self._bus_once()
+        if self._result_basis != self._sampling_basis(bus):
+            self.last_result = None
+            raise Refused("核对期间 IMU 来源、板卡、原方向或连接已改变：重新采静止和前倾")
+        self._coarse_guard(bus)
+        if isinstance(status, dict) and status.get("imu_home_verification_contract") == IMU_HOME_CONTRACT:
             if reason := self._motion_sampling(bus, source, {})["verify_reason"]:
                 raise Refused(reason)
             actual = mount_of(bus, status)
-            if actual != (source, old_mount):
+            if status.get("imu_source") != source or actual != (source, old_mount):
                 if actual[0] == source and actual[1] and status.get("imu_source") == source:
                     self.rd.calib.set(status)
                 self.last_result = None
@@ -723,7 +729,6 @@ class ImuBackend:
             self.job = {"kind": "coarse", "phase": "verify", "title": "保持站姿验证 IMU 方向",
                         "msg": "摆正，然后 20 秒内往前低头 15–30°", "target_deg": 20}
             self._redo_busy = True
-            self.home_verification_task = asyncio.current_task()
             try:
                 try:
                     reply = await self._rpc_once(
@@ -737,6 +742,8 @@ class ImuBackend:
                     raise Refused("连接中断，未收到验证结果：重新连接后检查当前保存的方向") from err
                 self._require_verification_proof(reply, source)
                 status = await self._verified_readback(source, mount, motion=True, transport=transport)
+                if getattr(getattr(self.rd, "hello", None), "at", None) != basis[2]:
+                    raise Refused("验证期间主程序连接已改变：重新核对当前保存的方向")
             except asyncio.CancelledError:
                 self.job = {"kind": "coarse", "title": "IMU 验证连接已断开", "failed": True,
                             "msg": "重连后检查当前保存的方向"}
@@ -751,12 +758,11 @@ class ImuBackend:
                 self.job = {"kind": "coarse", "title": "IMU 核验或读回未确认", "failed": True, "msg": str(err)}
                 raise Refused(str(err)) from err
             finally:
-                self.home_verification_task = None
                 self._redo_busy = False
             self.last_result = None
-            from .commit import clear_pending, load_pending
+            from .commit import clear_pending, load_pending, pending_matches
             pending = load_pending(self.state_dir)
-            if pending and pending.get("source") == source:
+            if pending_matches(pending, source, bus):
                 try:
                     clear_pending(self.state_dir)
                 except OSError as err:
@@ -769,12 +775,15 @@ class ImuBackend:
             return {"ok": True, "note": note, "reply": reply, "calibration": status}
         if last.get("live_verify") is True:
             raise Refused("请恢复 HOME 站姿并保持模型停止，再验证并保存这次精校结果")
-        if self._motion_sampling(bus, source, {})["needs_unload"]:
+        # The live reply supersedes any previously advertised HOME capability.
+        # _coarse_guard already requires a confirmed hold or a confirmed unload.
+        if self._motion_sampling(bus, source, {})["hold_ready"]:
             raise Refused("静止和前倾可以保持 HOME 采集；验证写入前先扶稳并卸力，已采结果会保留")
         await self._require_verification_contract(source)
         if not helper.available():
             raise Refused("验证写入需要新版 root 小助手和 sudoers")
-        basis = self._sampling_basis(bus)
+        # From here the persisted legacy transaction owns its recovery.
+        self.home_verification_task = None
         self._redo_busy = True
         self.job = {"kind": "coarse", "title": "进入安装方向验证", "msg": "已采结果保留；备份原方向并切换验证模式"}
         try:
@@ -943,7 +952,12 @@ class ImuBackend:
                 raise
         if op == "verify":
             async with self._verify_lock:
-                return await self._verify(args, by)
+                # A disconnect during the capability probe must also stop the HOME command.
+                self.home_verification_task = asyncio.current_task()
+                try:
+                    return await self._verify(args, by)
+                finally:
+                    self.home_verification_task = None
         if op in ("save", "coarse", "detect", "set_chip"):
             if op == "save":
                 raise Refused("新的 IMU 方向已经记下了：去「上手清单」第 3 步点「写进主程序」")

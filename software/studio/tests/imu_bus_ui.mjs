@@ -301,6 +301,22 @@ try {
   await js(`props.imu={...props.imu,coarse_sampling:{...props.imu.coarse_sampling,needs_unload:false}};draw()`);
   await wait(`[...document.querySelectorAll('.imu-coarse button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'motion HOME unload preserves solved candidate');
   assert.equal(await js(`calls.some(c=>c.args.op==='redo-start'||c.name==='relax'||c.args.op==='verify')`),false);
+  await js(`props.imu={...props.imu,coarse_sampling:{available:true,live_verify:true,needs_unload:false,
+    hold_ready:false,verify_reason:'先站稳',reason:null}};draw()`);
+  const verifyButton = `[...document.querySelectorAll('.imu-coarse button')].find(b=>b.textContent.trim()==='交给主程序验证')`;
+  await wait(`(${verifyButton})?.disabled`, 'live verification requires ready HOME');
+  await js(`props.imu.coarse_sampling={...props.imu.coarse_sampling,hold_ready:true,verify_reason:null};
+    props.live=false;draw()`);
+  await wait(`(${verifyButton})?.disabled`, 'offline live verification stays disabled');
+  await js(`props.live=true;draw()`);
+  await wait(`(${verifyButton})?.disabled===false`, 'fresh live HOME can verify without unloading');
+  await js(`clickText('交给主程序验证')`);
+  await wait(`calls.length===4`, 'only the explicit click sends live verification');
+  assert.deepEqual(await js(`calls[3]`), {name:'imu.op',args:{op:'verify',confirmed:true,mount_wxyz:[1,0,0,0]}});
+  await js(`replies.shift()({ok:true,data:{note:'安装方向已核验、保存并生效，保持当前站姿'}})`);
+  await wait(`document.querySelector('.imu-coarse').innerText.includes('安装方向已核验、保存并生效')`, 'live save result');
+  await js(`props.st={...props.st,imu:{...props.st.imu,generation:200}};draw()`);
+  await wait(`!document.querySelector('.imu-coarse').innerText.includes('安装方向已核验、保存并生效')`, 'new daemon clears previous HOME result');
   // A persisted redo session may hold HOME for sampling, but must unload before
   // final verification/cancellation. Unloading must keep the solved samples.
   await js(`window.calls=[];window.replies=[];window.confirm=()=>true;
