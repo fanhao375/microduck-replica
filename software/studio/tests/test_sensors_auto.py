@@ -120,6 +120,51 @@ class SensorAutoTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.calls, [("test", False), ("camera", False)])
         self.assertEqual(last["source"], "camera")
 
+    async def test_ota_restart_waits_then_starts_installed_devices(self):
+        self.duck(source="test", camera=True)
+        auto = self.auto()
+        self.updating = True
+        work = asyncio.create_task(auto.run_on_boot("开机", retry_delay=.01))
+        await asyncio.sleep(.025)
+        self.assertEqual(auto.view()["state"], "busy")
+        self.assertFalse(work.done())
+        self.assertEqual(self.calls, [])
+        self.updating = False
+        self.assertEqual((await asyncio.wait_for(work, 1))["source"], "camera")
+        self.assertEqual(self.calls, [("camera", True)])
+
+    async def test_boot_retries_if_helper_claims_update_after_local_check(self):
+        self.duck(source="test", camera=True)
+        auto = self.auto()
+        results = iter([(False, "busy", {}), (False, "native_update_active", {}), self.reply])
+        def apply(by, camera, tof):
+            self.calls.append((camera, tof))
+            return next(results)
+        auto.apply = apply
+        self.assertEqual((await auto.run_on_boot("开机", retry_delay=.01))["source"], "camera")
+        self.assertEqual(self.calls, [("camera", True)] * 3)
+
+    async def test_shutdown_cancels_deferred_start_without_touching_hardware(self):
+        self.duck(source="test", camera=True)
+        self.updating = True
+        auto = self.auto()
+        work = asyncio.create_task(auto.run_on_boot("开机"))
+        await asyncio.sleep(.01)
+        self.assertEqual(auto.view()["state"], "busy")
+        work.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await work
+        self.assertEqual(self.calls, [])
+
+    async def test_absent_optional_devices_finish_even_during_update(self):
+        self.duck(source="test", camera=False, tofd=False)
+        self.updating = True
+        auto = self.auto()
+        auto.settle = 0
+        result = await asyncio.wait_for(auto.run_on_boot("开机", late_settle=.02), 1)
+        self.assertFalse(result["camera_present"])
+        self.assertEqual(self.calls, [])
+
     async def test_duck_without_tofd_installed_is_not_asked_to_enable_it(self):
         self.duck(source="test", camera=False, tofd=False)
         await self.auto().run("开机")

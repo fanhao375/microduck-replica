@@ -72,12 +72,21 @@ class SensorAuto:
                 return False
             await asyncio.sleep(min(0.5, remaining))
 
-    async def run_on_boot(self, by, late_settle=60.0):
-        initial = await self.run(by)
-        if (initial["state"] == "ok" and initial.get("camera_present") is False
-                and initial.get("source") == "test" and await self._camera_seen(late_settle)):
-            return await self.run(by)
-        return initial
+    async def run_on_boot(self, by, late_settle=60.0, retry_delay=2.0):
+        # A normal OTA restarts Studio before clearing the installation marker.
+        # Re-read the configuration and detector state after every deferral.
+        delay = retry_delay
+        while True:
+            result = await self.run(by)
+            if result["state"] == "busy":
+                await asyncio.sleep(delay)
+                delay = min(30.0, delay * 2)
+                continue
+            if (late_settle > 0 and result["state"] == "ok" and result.get("camera_present") is False
+                    and result.get("source") == "test" and await self._camera_seen(late_settle)):
+                late_settle = 0
+                continue
+            return result
 
     async def run(self, by):
         if self.off is not None and self.off.exists():
@@ -95,14 +104,15 @@ class SensorAuto:
         if not self.available():
             return self._done("unavailable", None, camera_present=present, source=source)
         if self.busy():
-            self.log.info("软件正在更新：这次开机不自动设摄像头和 ToF", cat="传感器")
-            return self._done("busy", None, camera_present=present, source=source)
+            return self._done("busy", "软件更新完成后自动设置传感器。", camera_present=present, source=source)
         ok, result, detail = await asyncio.to_thread(self.apply, by, want, tof)
         if not ok and result == "tof_failed" and want is not None:
             # The helper exits before touching the camera if tofd cannot start.
             self.log.warn("ToF 服务启动失败，继续设置摄像头", cat="传感器", raw=str(detail)[:400])
             ok, result, detail = await asyncio.to_thread(self.apply, by, want, False)
         detail = detail if isinstance(detail, dict) else {}
+        if not ok and result in ("busy", "native_update_active"):
+            return self._done("busy", "等待小助手完成当前操作后自动设置传感器。", camera_present=present, source=source)
         if tof and detail.get("tof") == "enabled":
             self.log.info("已为 ToF 服务启用开机启动，测距状态可在 ToF 页查看", cat="传感器", dedup=False)
         if ok and want == "camera":

@@ -1655,6 +1655,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         await updates.stop_readiness()
         if auto_task is not None:
             auto_task.cancel()
+            await asyncio.gather(auto_task, return_exceptions=True)
         restore.cancel()
         watch.cancel()
         if tune_task is not None:
