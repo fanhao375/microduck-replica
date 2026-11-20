@@ -1,5 +1,5 @@
 import {html,useEffect,useRef,useState} from './vendor/preact-htm.module.js';
-import {updateMessage,updateOffer,updateActions,PHASES,nativeMessage,nativeActions} from './updates-ui-state.js';
+import {discoverUpdateNotice,updateMessage,updateOffer,updateActions,PHASES,nativeMessage,nativeActions} from './updates-ui-state.js';
 
 const CSS=`.update-settings{padding:18px 20px;min-width:0;overflow-wrap:anywhere}.update-settings h2{font-size:20px;margin:0 0 8px}.update-settings p{font-size:13px;line-height:1.65;color:var(--text-2);margin:8px 0}.update-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.update-settings button{border:0;border-radius:999px;padding:9px 14px;min-height:38px;font:inherit;font-size:14px;background:#e9e9ee;color:#242428;cursor:pointer}.update-settings button.primary{background:#007aff;color:white}.update-settings button:disabled{opacity:.4;cursor:default}.update-settings button:focus-visible{outline:2px solid #007aff;outline-offset:2px}.update-settings [role=alert]{color:var(--red,#b42318)}.update-settings pre{white-space:pre-wrap;font:inherit;font-size:13px;line-height:1.6;max-height:200px;overflow:auto}.update-settings input{max-width:100%;font-size:13px}.update-settings progress{width:100%}@media(max-width:480px){.update-settings{padding:16px 12px}.update-settings button{max-width:100%;white-space:normal}}`;
 if(!document.getElementById('updates-css')){
@@ -16,26 +16,15 @@ export function UpdateNotice({api}){
   const [version,setVersion]=useState(null);
   useEffect(()=>{
     const controller=new AbortController();
-    const read=body=>api('/api/updates',body,10000,controller.signal);
-    const delays=[1000,3000,7000,15000,30000];
-    let timer,index=0;
-    function show(result){
-      if(controller.signal.aborted||!result.ok||result.online_update!==true)return;
-      if(!result.busy){
-        setVersion(updateOffer(result)?.version||null);return;
-      }
-      if(index<delays.length){
-        timer=setTimeout(()=>read().then(show).catch(()=>{}),delays[index++]);
-      }
-    }
-    async function check(){
-      const status=await read();
-      if(controller.signal.aborted||!status.ok||!status.available||status.online_update!==true
-        ||status.busy||status.native?.active||status.native?.submitting)return;
-      show(await read({op:'check_auto'}));
-    }
-    check().catch(()=>{});
-    return ()=>{controller.abort();clearTimeout(timer);};
+    const {signal}=controller;
+    const read=(body,timeout=10000)=>api('/api/updates',body,timeout,signal);
+    const pause=ms=>new Promise(resolve=>{
+      function done(){clearTimeout(timer);signal.removeEventListener('abort',done);resolve();}
+      const timer=setTimeout(done,ms);
+      signal.addEventListener('abort',done,{once:true});
+    });
+    discoverUpdateNotice(read,pause,signal).then(found=>{if(!signal.aborted)setVersion(found);});
+    return ()=>controller.abort();
   },[api]);
   return version?html`<a class="update-notice" data-update-notice href="#/settings/updates">发现新版本 ${version} · 查看更新</a>`:null;
 }

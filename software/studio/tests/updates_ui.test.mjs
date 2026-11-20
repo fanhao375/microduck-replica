@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 const source=await fs.readFile(new URL('../web/updates-ui-state.js',import.meta.url),'utf8');
-const {updateMessage,updateActions,nativeMessage,nativeActions}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const {updateMessage,updateActions,nativeMessage,nativeActions,discoverUpdateNotice}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 assert.match(updateMessage({available:false}),/尚未安装/);
 assert.match(updateMessage({available:true,source_state:'no_release'}),/尚无发布/);
 assert.match(updateMessage({available:true,source_state:'network_error'}),/网络/);
@@ -63,4 +63,34 @@ for(const changed of [{supported:false},{active:true},{submitting:true},{restora
 assert.equal(nativeActions({...stage2,native:predecessor},false,false).restore,false);
 assert.equal(nativeActions({...stage2,native:predecessor},true,true).restore,false);
 assert.equal(nativeActions({...stage2,busy:true,native:predecessor},false,true).restore,false);
+const idleHost={ok:true,available:true,online_update:true,busy:false,installed:'2026.11.4'};
+const sharedCheck={...idleHost,busy:true,catalog_checking:true};
+const publicOffer={...idleHost,source_state:'available',candidate:{version:'2026.11.20'}};
+async function noticeDuring(states){
+  const requests=[],waits=[];
+  const version=await discoverUpdateNotice(async body=>{
+    requests.push(body?.op||'status');
+    assert.ok(states.length,'unexpected extra discovery request');
+    return states.shift();
+  },async ms=>{waits.push(ms);},new AbortController().signal);
+  return {requests,waits,version};
+}
+const shared=await noticeDuring([...Array(9).fill(sharedCheck),publicOffer]);
+assert.equal(shared.version,'2026.11.20','show result even when another tab starts a slow check');
+assert.ok(shared.waits.reduce((a,b)=>a+b,0)>60000);
+assert.ok(shared.requests.every(op=>op==='status'),'do not start another catalog check');
+const cold=await noticeDuring([idleHost,sharedCheck,publicOffer]);
+assert.deepEqual(cold.requests,['status','check_auto','status']);
+assert.equal(cold.version,'2026.11.20');
+const mutating=await noticeDuring([{...idleHost,busy:true,job:{operation:'online'}}]);
+assert.equal(mutating.version,null);assert.equal(mutating.requests.length,1);
+const stuck=await noticeDuring(Array(100).fill(sharedCheck));
+assert.equal(stuck.version,null);
+assert.ok(stuck.waits.reduce((a,b)=>a+b,0)<=600000);
+assert.ok(stuck.waits.reduce((a,b)=>a+b,0)>480000,'cover a catalog and three slow detail requests');
+const leave=new AbortController();
+let reads=0;
+assert.equal(await discoverUpdateNotice(async()=>{reads++;return sharedCheck;},async()=>leave.abort(),leave.signal),null);
+assert.equal(reads,1,'leaving the page must cancel subsequent status reads');
+assert.equal(await discoverUpdateNotice(async()=>{throw Error('network offline');},async()=>{},new AbortController().signal),null);
 console.log('updates UI state checks passed');

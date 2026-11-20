@@ -7,6 +7,33 @@ export function updateOffer(data){
   const candidate=data?.candidate;
   return data?.source_state==='available'&&candidate?.version&&candidate.version!==data.installed?candidate:null;
 }
+
+export async function discoverUpdateNotice(read,pause,signal){
+  const limit=10*60*1000,deadline=performance.now()+limit;
+  let waitBudget=limit,delay=1000;
+  const remaining=()=>Math.min(waitBudget,deadline-performance.now());
+  const usable=result=>!signal.aborted&&result?.ok&&result.available&&result.online_update===true
+    &&!result.native?.active&&!result.native?.submitting;
+  try{
+    if(signal.aborted)return null;
+    let status=await read();
+    if(!usable(status))return null;
+    if(!status.busy)status=await read({op:'check_auto'});
+    // A catalog request may already belong to another tab. Follow only that
+    // read-only operation; a persisted job may describe an earlier installation.
+    while(usable(status)&&status.busy&&status.catalog_checking===true){
+      const wait=Math.min(delay,remaining());
+      if(wait<=0)return null;
+      await pause(wait);
+      waitBudget-=wait;
+      if(signal.aborted||remaining()<=0)return null;
+      status=await read(undefined,Math.min(10000,remaining()));
+      delay=Math.min(delay*2,30000);
+    }
+    return usable(status)&&!status.busy&&remaining()>0?updateOffer(status)?.version||null:null;
+  }catch{return null;}
+}
+
 export function updateMessage(data){
   if(!data)return '正在读取更新状态…';
   if(!data.available)return '软件更新服务尚未安装或暂时不可用';
