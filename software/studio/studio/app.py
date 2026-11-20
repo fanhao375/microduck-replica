@@ -162,7 +162,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
               onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None,
               ca_cert=None):
     guard = OriginGuard(names=names)
-    ai = AiService(state_dir)
+    ai = AiService(state_dir, robotd, pad)
     updates = updates or Updates()
     if pad is not None:
         pad.update_guard=updates.installing

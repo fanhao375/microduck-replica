@@ -1,3 +1,4 @@
+import { useAiVoice } from './ai-voice.js';
 // 语音页：两条**互相独立**的通道，跟手柄页无关（手柄页摇杆、这页说话，各管各的）。
 //
 // 两条路**都不需要唤醒词**：说什么就是什么，口令对了就执行（说了「鸭鸭」也照样认，会被剥掉）。
@@ -17,6 +18,14 @@
 import { html, useState, useEffect, useRef, useCallback } from '../vendor/preact-htm.module.js';
 import { link } from './link.js';
 import { parseUtterance, runAction, CMD_CN, openPadArea, setAudio } from './actions.js';
+
+// Keep a long press on the recording control from invoking text selection/callouts.
+if (!document.getElementById('m-voice-hold-style')) {
+  const style = document.createElement('style');
+  style.id = 'm-voice-hold-style';
+  style.textContent = `.m-mic-talk,.m-mic-talk *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.m-mic-talk{touch-action:none}.m-mic-talk *{pointer-events:none}`;
+  document.head.appendChild(style);
+}
 
 const MODE_KEY = 'duck.voice.mode';
 const SECURE = typeof window !== 'undefined' ? window.isSecureContext !== false : false;
@@ -249,8 +258,8 @@ async function openRecorder(onStage) {
 }
 
 /** 把一段 PCM 交给板子认。返回识别出的文字 */
-async function asrOnBoard(pcm, signal) {
-  const res = await fetch('/api/asr', {
+async function asrOnBoard(pcm, signal, free = false) {
+  const res = await fetch(free ? '/api/asr?free=1' : '/api/asr', {
     method: 'POST',
     headers: { 'Content-Type': 'application/octet-stream' },
     body: pcm,
@@ -303,7 +312,8 @@ const BOARD_WORDS = '站起来 · 坐下 · 停下 · 前滚翻 · 低头捡东�
 const KNOWN_WORDS = `走一小步 · ${BOARD_WORDS}`;
 
 export function VoicePage({ st, pad, live, name, say }) {
-  const [mode, setMode] = useState(modeOf());      // board | phone
+  const ai = useAiVoice();
+  const [mode, setMode] = useState('phone');      // board | phone
   const [listening, setListening] = useState(false);  // 手机麦克风正在录
   const [boardBusy, setBoardBusy] = useState(false);
   const [heard, setHeard] = useState('');
@@ -321,9 +331,11 @@ export function VoicePage({ st, pad, live, name, say }) {
   postureRef.current = live ? st?.posture : null;
   useEffect(() => () => { postureRef.current = null; }, []);
 
+  useEffect(()=>{if(ai.enabled)setMode('phone');},[ai.enabled]);
   const audio = pad?.audio || {};
   const boardOk = audio.available === true;
   const boardOn = audio.listening === true;
+  useEffect(()=>{if(ai.enabled && boardOn)setAudio(link,{listening:false}).catch(()=>{});},[ai.enabled,boardOn]);
   const phoneOk = SECURE && CAN_RECORD;
   // 手机这边拿不到麦克风时，给一句说清「为什么 + 怎么办」，别让人以为是坏了
   const phoneWhy = phoneOk ? null
@@ -386,6 +398,7 @@ export function VoicePage({ st, pad, live, name, say }) {
    * （说了「鸭鸭」也照样认，parseUtterance 会把它剥掉。）
    */
   const handleText = useCallback(async (text) => {
+    if(ai.enabled){if(boardOn){setErr('先关闭板载口令聆听，再使用 AI 对话');return;}setHeard(text);setIsInterim(false);setSent(null);setErr(null);await ai.send(text);return;}
     const { cmd, said } = parseUtterance(text, { requireWake: false });
     if (cmd) { await dispatch(cmd, said); return; }
     setHeard(said || text);
@@ -393,7 +406,7 @@ export function VoicePage({ st, pad, live, name, say }) {
     setSent(null);
     setAsk(null);
     setErr(said ? `「${said}」还不会做。试试：${KNOWN_WORDS}` : '没听清，再说一遍？');
-  }, [dispatch]);
+  }, [dispatch, ai.enabled, ai.send, boardOn]);
 
   // ---- 手机麦克风：按下开始录，松开传回板子认 ----
   const recRef = useRef(null);
@@ -485,7 +498,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       if (!turn.signal.aborted) setAsrSec((n) => n + 1);
     }, 1000);
     try {
-      const recognized = await recognizePhoneRecording(pcm, turn.signal, asrOnBoard, handleText);
+      const recognized = await recognizePhoneRecording(pcm, turn.signal, (pcm,signal)=>asrOnBoard(pcm,signal,ai.enabled), handleText);
       if (!recognized && !turn.signal.aborted) {
         setIsInterim(false);
         setErr(`传回去了 ${(pcm.byteLength / 32000).toFixed(1)} 秒声音，板子没认出词。`
@@ -502,7 +515,7 @@ export function VoicePage({ st, pad, live, name, say }) {
   }, [handleText]);
 
   const onDown = useCallback((event) => {
-    if (!event.isPrimary || event.button !== 0 || pointerRef.current !== null) return;
+    if (ai.busy || !event.isPrimary || event.button !== 0 || pointerRef.current !== null) return;
     event.preventDefault();
     if (!phoneOk) { setErr(`${phoneWhy}用输入法上的话筒键听写，或者开板载麦克风。`); return; }
     discardPhone();
@@ -510,7 +523,7 @@ export function VoicePage({ st, pad, live, name, say }) {
     const turn = new AbortController();
     turnRef.current = turn;
     startPhone(turn);
-  }, [discardPhone, phoneOk, phoneWhy, startPhone]);
+  }, [discardPhone, phoneOk, phoneWhy, startPhone, ai.busy]);
 
   const onUp = useCallback((event) => {
     if (pointerRef.current !== event.pointerId) return;
@@ -566,12 +579,13 @@ export function VoicePage({ st, pad, live, name, say }) {
 
   return html`<div class="m-voice-hero">
     <h1 class="m-voice-title">${name}，听我说</h1>
+    ${ai.panel}
     <p class="m-voice-lede">${mode === 'board'
       ? html`直接对着${name}说话就行，说什么就是什么。`
-      : html`按住对着手机说话，她说完松手就发过去。跟板载一样，直接说口令就行。`}</p>
+      : html`按住对着手机说话，她说完松手就发过去。${ai.enabled ? '可以聊天，也可以请鸭子做动作。' : '直接说口令就行。'}`}</p>
 
     <div class="m-seg" role="group" aria-label="语音通道" style="margin:14px 0 0">
-      <button aria-pressed=${mode === 'board' ? 'true' : 'false'} onClick=${() => { if (mode !== 'board') cancelPhone(); setMode('board'); setErr(null); setAsk(null); }}>
+      <button disabled=${ai.enabled} aria-pressed=${mode === 'board' ? 'true' : 'false'} onClick=${() => { if (mode !== 'board') cancelPhone(); setMode('board'); setErr(null); setAsk(null); }}>
         板载麦克风${boardOn ? ' · 听' : ''}
       </button>
       <button aria-pressed=${mode === 'phone' ? 'true' : 'false'} onClick=${() => { setMode('phone'); setErr(null); setAsk(null); }}>
@@ -605,9 +619,9 @@ export function VoicePage({ st, pad, live, name, say }) {
     </div>` : html`<div>
       <div class=${'m-mic-wrap' + (listening ? ' live' : '')}>
         <span class="m-halo" aria-hidden="true"></span>
-        <button class=${'m-mic m-mic-talk' + (listening ? ' live' : '')}
+        <button type="button" class=${'m-mic m-mic-talk' + (listening ? ' live' : '')}
           onPointerDown=${onDown} onPointerUp=${onUp} onPointerCancel=${onCancel} onPointerLeave=${onCancel} onLostPointerCapture=${onCancel}
-          onContextMenu=${(e) => e.preventDefault()}
+          onContextMenu=${(e) => e.preventDefault()} onSelectStart=${(e) => e.preventDefault()} onDragStart=${(e) => e.preventDefault()}
           aria-label="按住说话，松开发送">
           <${MicIcon} />
           <span class="t1">${listening ? (stage || '现在说') : '按住说话'}</span>
@@ -647,17 +661,18 @@ export function VoicePage({ st, pad, live, name, say }) {
     ${err ? html`<div class="m-banner bad" style="text-align:left">${err}</div>` : null}
 
     <form class="m-type" onSubmit=${submitTyped}>
-      <input id="m-type" placeholder="也可以打字：站起来" value=${typed} enterkeyhint="send"
+      <input id="m-type" placeholder=${ai.enabled ? "也可以打字和鸭子聊天" : "也可以打字：站起来"} value=${typed} enterkeyhint="send"
         onInput=${(e) => setTyped(e.currentTarget.value)} />
-      <button class="m-btn primary" type="submit" disabled=${!typed.trim()}>发送</button>
+      <button class="m-btn primary" type="submit" disabled=${ai.busy || !typed.trim()}>发送</button>
     </form>
 
-    <div class="m-policy-row">
+    ${!ai.enabled ? html`<div class="m-policy-row">
       <button class="m-key pol-start" onClick=${() => dispatch('walk', '')}>开始走<small>start 策略</small></button>
       <button class="m-key pol-stop" onClick=${() => dispatch('stop', '')}>停止策略<small>stop 策略</small></button>
     </div>
 
-    <h2 class="m-h2" style="text-align:left">它认这些</h2>
+    ` : null}
+    ${!ai.enabled ? html`<h2 class="m-h2" style="text-align:left">它认这些</h2>
     <div class="m-card m-pad" style="text-align:left">
       <div class="m-sub">${mode === 'board' ? BOARD_WORDS : KNOWN_WORDS}</div>
       <div class="m-tip" style="margin-bottom:0">
@@ -667,6 +682,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       </div>
     </div>
 
+    ` : null}
     ${history.length ? html`<h2 class="m-h2" style="text-align:left">刚刚</h2>
       <div class="m-card m-pad" style="text-align:left">
         <ul class="m-log">

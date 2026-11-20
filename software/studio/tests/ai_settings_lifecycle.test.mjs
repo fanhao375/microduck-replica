@@ -33,7 +33,7 @@ test('a remote revision rejection clears earlier successful test and conversatio
     : body.op === 'test' ? {ok:true,id:'a',revision:1,text:'verified'}
     : ++chats === 1 ? {ok:true,id:'a',revision:1,text:'old assistant reply'}
     : {ok:false,code:'stale',error:'连接已更改'};
-  const context = vm.createContext({...state,html,AbortController,TtsSettings:()=>null,document:{getElementById:()=>true},
+  const context = vm.createContext({...state,html,AbortController,TtsSettings:()=>null,AiTools:()=>null,AiCameraPreview:()=>null,document:{getElementById:()=>true},
     useState(initial) {const index=cursor++; if (!(index in slots)) slots[index]=typeof initial === 'function' ? initial() : initial;
       return [slots[index],value=>{slots[index]=typeof value === 'function' ? value(slots[index]) : value;}];},
     useRef(initial) {const index=cursor++;return slots[index] ||= {current:initial};},
