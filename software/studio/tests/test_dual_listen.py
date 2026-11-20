@@ -273,10 +273,11 @@ class StudioBothSchemesTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_plain_updater_health_and_signed_asset_with_secure_mobile_page(self):
         from studio.app import RUNTIME_ROOT, SUITE_VERSION
-        from urllib.request import urlopen
+        from urllib.request import build_opener, HTTPSHandler, ProxyHandler
 
         def check():
             plain = f"http://127.0.0.1:{self.port}"
+            urlopen = build_opener(ProxyHandler({}), HTTPSHandler(context=self.trust)).open
             with urlopen(plain + "/healthz", timeout=3) as response:
                 status = json.load(response)
             self.assertEqual(status["suite_version"], SUITE_VERSION)
@@ -284,7 +285,7 @@ class StudioBothSchemesTest(unittest.IsolatedAsyncioTestCase):
             with urlopen(plain + "/app.js", timeout=3) as response:
                 served = response.read(2 * 1024 * 1024)
             self.assertEqual(hashlib.sha256(served).digest(), hashlib.sha256((WEB / "app.js").read_bytes()).digest())
-            with urlopen(f"https://127.0.0.1:{self.port}/m", timeout=3, context=self.trust) as response:
+            with urlopen(f"https://127.0.0.1:{self.port}/m", timeout=3) as response:
                 self.assertIn(b'm/app.js', response.read())
         await asyncio.to_thread(check)
 
