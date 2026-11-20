@@ -22,6 +22,13 @@ def record(method,params=None,progress=None):
         stream.write(json.dumps({'method':method,'params':params},ensure_ascii=False)+'\n')
     return original_call(method,params,progress)
 fixture.engine.call=record
+legacy_host=True
+current_view=fixture.controller.view
+def view():
+    result=current_view()
+    if legacy_host:result.pop('online_update',None)
+    return result
+fixture.controller.view=view
 server=fixture.serve(int(os.environ['UPDATE_FIXTURE_PORT']))
 
 from studio import app as app_module
@@ -81,12 +88,13 @@ def native_call(by,action,**kwargs):
 base_handler=server.RequestHandlerClass
 class NativeControl(base_handler):
     def handle(self):
-        global native_failure
+        global native_failure,legacy_host
         first=self.rfile.peek(8193).split(b'\n',1)[0]
         try: request=json.loads(first)
         except ValueError:return super().handle()
         if request.get('op')!='native_fixture':return super().handle()
         self.rfile.readline(8193)
+        if 'legacy_host' in request:legacy_host=request.pop('legacy_host')
         if 'software_version' in request:fixture.engine.version=request.pop('software_version')
         if 'failure' in request:native_failure=request.pop('failure')
         native_save(**{key:value for key,value in request.items() if key!='op'})

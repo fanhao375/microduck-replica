@@ -15,7 +15,10 @@ const click=async op=>{await wait(`document.querySelector('[data-update="${op}"]
 const fixture=values=>new Promise((resolve,reject)=>{const socket=net.createConnection({host:'127.0.0.1',port:Number(arg('fixture-port'))});let data='';socket.on('connect',()=>socket.write(JSON.stringify({op:'fixture',...values})+'\n'));socket.on('data',chunk=>{data+=chunk;if(data.includes('\n')){socket.end();const r=JSON.parse(data.split('\n')[0]);r.ok?resolve(r):reject(Error(JSON.stringify(r)));}});socket.on('error',reject);});
 const nativeFixture=values=>fixture({op:'native_fixture',...values});
 const nativePost=body=>js(`fetch('/api/session').then(r=>r.json()).then(s=>fetch('/api/updates',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF':s.csrf},body:JSON.stringify(${JSON.stringify(body)})})).then(async r=>({status:r.status,data:await r.json()}))`);
-const acknowledge=()=>js(`document.querySelector('[data-native-confirm]').click()`);
+const acknowledge=async()=>{
+  await wait(`document.querySelector('[data-native-confirm]')?.disabled===false`,'native acknowledgement enabled');
+  await js(`document.querySelector('[data-native-confirm]').click()`);
+};
 const nativeSettled=phase=>wait(`window.__updates.some(r=>r.native?.phase===${JSON.stringify(phase)}&&!r.native?.submitting)`,phase);
 const state=()=>js(`fetch('/api/updates').then(r=>r.json())`);
 const settled=async(phase='completed')=>wait(`window.__updates.some(r=>r.job?.phase===${JSON.stringify(phase)}&&!r.busy)`,phase);
@@ -25,10 +28,21 @@ const upload=async(data,name)=>{
 };
 try{
   await send('Runtime.enable');await send('Page.enable');
-  await send('Page.addScriptToEvaluateOnNewDocument',{source:`window.__updates=[];{const original=window.fetch;window.fetch=async function(...args){const response=await original.apply(this,args);if(String(args[0]).includes('/api/updates')){try{window.__updates.push(await response.clone().json());}catch{}}return response;};}`});
+  await send('Page.addScriptToEvaluateOnNewDocument',{source:`window.__updates=[];window.__updatePosts=[];{const original=window.fetch;window.fetch=async function(...args){if(args[0]==='/api/updates'&&args[1]?.method==='POST')window.__updatePosts.push(JSON.parse(args[1].body));const response=await original.apply(this,args);if(String(args[0]).includes('/api/updates')){try{window.__updates.push(await response.clone().json());}catch{}}return response;};}`});
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
-  await send('Page.navigate',{url:arg('url')});
+  const overview=arg('url').split('#')[0]+'#/';
+  await send('Page.navigate',{url:overview});
+  await wait(`window.__updates.some(r=>r.available)`,'overview detects an older host');
+  if(await js(`!!document.querySelector('[data-update-notice]')||window.__updatePosts.length>0`))throw Error('an old host should not receive overview check requests');
+  await nativeFixture({legacy_host:false});await fixture({no_release:false});await send('Page.reload');
+  await wait(`document.querySelector('[data-update-notice]')?.textContent.includes('2026.10.27')`,'overview discovers stable release');
+  report.overview_notice=await js(`window.__updatePosts.length===1&&window.__updatePosts[0].op==='check_auto'&&document.querySelector('[data-update-notice]').textContent.includes('查看更新')`);
+  await js(`document.querySelector('[data-update-notice]').click()`);
+  await wait(`location.hash==='#/settings/updates'&&document.activeElement.matches('[data-updates]')&&document.querySelector('[data-update="online"]')?.disabled===false`,'overview opens software settings');
+  await nativeFixture({legacy_host:true});await fixture({no_release:true});
+  await send('Page.navigate',{url:arg('url')});await send('Page.reload');
   await wait(`document.querySelector('[data-updates]')&&!document.querySelector('[data-update="check"]').disabled`,'software update card');
+  if(!await js(`document.querySelector('[data-updates]').textContent.includes('一次性准备')&&!window.__updatePosts.length`))throw Error('legacy host must show manual preparation without sending automatic checks');
   report.stage1_old_helper=await js(`document.querySelector('[data-native-updates]').textContent.includes('先安装匹配')&&document.querySelector('[data-update="native_install"]').disabled`);
   await clear();await click('check');await settled();
   report.no_release=(await state()).source_state==='no_release';
@@ -55,6 +69,38 @@ try{
     const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});writeFileSync(`${shots}/updates-${width}.png`,Buffer.from(shot.data,'base64'));report.layouts.push(width);
   }
   report.privileged_fields_rejected=await js(`fetch('/api/session').then(r=>r.json()).then(s=>fetch('/api/updates',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF':s.csrf},body:JSON.stringify({op:'download',url:'http://evil.example'})})).then(r=>r.status===400)`);
+  await nativeFixture({legacy_host:false});await send('Page.reload');
+  await wait(`document.querySelector('[data-update="online"]')?.disabled===false&&window.__updatePosts.some(p=>p.op==='check_auto')`,'automatic stable release check');
+  await wait(`window.__updates.length>=4`,'multiple status polls');
+  report.offer=await js(`document.querySelector('[data-update="online"]').textContent==='立即更新'&&document.querySelector('[data-update-offer]').textContent.includes('2026.10.27')&&document.querySelector('[data-update-offer]').textContent.includes('本地语音坐下/站起')&&window.__updatePosts.filter(p=>p.op==='check_auto').length===1`);
+  for(const width of [1440,390,320]){
+    await send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<500});
+    await js(`document.querySelector('[data-updates]').scrollIntoView();new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))`);
+    if(await js('document.documentElement.scrollWidth>innerWidth+2'))throw Error(`online layout overflows at ${width}`);
+    const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+    writeFileSync(`${shots}/online-offer-${width}.png`,Buffer.from(shot.data,'base64'));
+  }
+  // The independent coordinator accepts the click, then the web connection drops.
+  // Keep this page alive so a fresh mount cannot accidentally clear stale feedback.
+  await js(`{
+    const original=window.fetch;let offlineUntil=0;
+    window.fetch=async function(path,options){
+      if(path==='/api/updates'&&Date.now()<offlineUntil)throw TypeError('test connection drop');
+      const result=await original.apply(this,arguments);
+      if(path==='/api/updates'&&options?.method==='POST'&&JSON.parse(options.body).op==='online'&&result.ok){
+        offlineUntil=Date.now()+2000;throw TypeError('test response lost');
+      }
+      return result;
+    }
+  }`);
+  await clear();await click('online');
+  await wait(`window.__updates.some(r=>r.busy&&r.job?.operation==='online')`,'single online job running');
+  report.single_click=await js(`JSON.stringify(window.__updatePosts.filter(p=>p.op!=='check_auto'))===JSON.stringify([{op:'online',version:'2026.10.27'}])`);
+  await wait(`document.querySelector('[data-updates]').textContent.includes('网页连接中断')`,'live reconnect');
+  await wait(`document.querySelector('[data-update-phase="completed"]')?.textContent.includes('已更新')&&!document.querySelector('[data-updates]').textContent.includes('网页连接中断')`,'real result after lost response');
+  await send('Page.reload');
+  await wait(`document.querySelector('[data-update-phase="completed"]')?.textContent.includes('已更新')&&document.querySelector('[data-update-installed]')?.textContent==='2026.10.27'`,'durable online result after reload');
+  report.online_installed=(await state()).job?.operation==='online';
   await clear();await upload(Buffer.from('not an update archive').toString('base64'),'invalid.tar');
   await wait(`document.querySelector('[data-updates] [role="alert"]')`,'invalid package error');
   report.invalid_package=true;

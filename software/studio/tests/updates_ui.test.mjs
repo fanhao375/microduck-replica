@@ -12,6 +12,18 @@ assert.equal(updateActions({available:true,busy:true,ready:true}).install,false)
 assert.equal(updateActions({available:true,busy:false,ready:false,staged:{version:'2026.10.27'}}).install,false);
 assert.equal(updateActions({available:true,busy:false,ready:true}).install,true);
 assert.equal(updateActions({available:true,busy:false,candidate:{version:'2026.10.27'},source_state:'available'}).download,true);
+const release={available:true,online_update:true,installed:'2026.11.4',ready:false,
+  candidate:{version:'2026.11.20',changelog:'语音更新'},source_state:'available'};
+assert.equal(updateActions(release).online,true,'the displayed stable release needs no separate download or upload');
+for(const change of [{online_update:false},{online_update:undefined},{online_update:'true'},
+  {source_state:'network_error'},{source_state:'installed_unknown'},{source_state:'up_to_date'},
+  {candidate:null},{installed:'2026.11.20'},{busy:true},{native:{active:true}},{native:{submitting:true}}]){
+  assert.equal(updateActions({...release,...change}).online,false);
+}
+assert.equal(updateActions(release,true).online,false);
+assert.match(updateMessage({...release,job:{operation:'online',phase:'completed',result:{outcome:'applied',to:'2026.11.20'}}}),/已更新.*2026\.11\.20/);
+assert.match(updateMessage({...release,ready:true,job:{operation:'rollback',phase:'completed',result:{outcome:'applied',to:'2026.11.4'}}}),/已退回.*2026\.11\.4/);
+assert.match(updateMessage({...release,source_state:'installed_unknown'}),/当前版本/);
 assert.equal(typeof nativeMessage,'function','separate native stage missing');
 const native={service_available:true,available:true,supported:true,current:false,active:false,phase:'idle'};
 const stage2={available:true,busy:false,ready:true,installed:'2026.10.28',native};

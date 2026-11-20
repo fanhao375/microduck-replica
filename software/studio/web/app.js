@@ -14,7 +14,7 @@ import { PadPage, padActivity, padGo } from './pad.js';
 import { BatteryCell } from './battery.js';
 import { BatterySettings } from './settings-battery.js';
 import { AiSettings } from './settings-ai.js';
-import { UpdateSettings } from './settings-updates.js';
+import { UpdateNotice, UpdateSettings } from './settings-updates.js';
 import { AccessGuide, AiSshEntry } from './settings-access.js';
 import { TuneSection, ModelSettings } from './tune.js';
 import { WifiCard, WifiSettings, DuckAddresses } from './wifi.js';
@@ -698,6 +698,7 @@ function Overview({ st, live, age, diagnosticElapsed, duck, pd, onSame, tune, se
   const short = duck?.short || '鸭子';
   const name = /[A-Za-z0-9]$/.test(short) ? short + ' ' : short;
   return html`<div class="overview">
+    ${sensorsActive?html`<${UpdateNotice} api=${api} />`:null}
     ${st?.net?.known && st.net.mode === 'hotspot'
       ? html`<${WifiCard} net=${st.net} link=${link} secure=${st?.auth?.has_password} />` : null}
     <${Stage} st=${st} live=${live} age=${age} name=${name} />
@@ -812,7 +813,7 @@ function Later({ what }) {
 const OVERVIEW = (r) => r === '/' || r === '/pad';
 function navCur(route, padInView) {
   return (r) => {
-    if (r === '/settings') return route === '/settings' || route === '/settings/ssh' ? 'page' : undefined;
+    if (r === '/settings') return route === r || route.startsWith(r+'/') ? 'page' : undefined;
     if (r === '/pad') return OVERVIEW(route) && padInView ? 'page' : undefined;
     if (r === '/') return OVERVIEW(route) && !padInView ? 'page' : undefined;
     return route === r ? 'page' : undefined;
@@ -871,11 +872,11 @@ function useRoute() {
 
 // 换页、点导航时滚到哪：#/pad 滚到手柄那一块（scroll-margin-top 扣掉吸顶的顶栏），别的都回到顶上
 function scrollFor(route) {
-  if (route === '/settings/ssh') {
+  if (route === '/settings/ssh' || route === '/settings/updates') {
     requestAnimationFrame(() => {
-      const guide = document.getElementById('ssh-guide');
-      guide?.scrollIntoView({ block: 'start' });
-      guide?.focus({ preventScroll: true });
+      const section = document.getElementById(route === '/settings/ssh' ? 'ssh-guide' : 'software-updates');
+      section?.scrollIntoView({ block: 'start' });
+      section?.focus({ preventScroll: true });
     });
     return;
   }
@@ -971,7 +972,7 @@ function Main({ duck }) {
   else if (route === '/camera') page = html`<${CameraPage} api=${api} />`;
   else if (route === '/tof') page = html`<${TofPage} api=${api} />`;
   else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards} />`;
-  else if (route === '/settings' || route === '/settings/ssh') page = html`<${Settings} st=${st} tune=${tune} />`;
+  else if (['/settings','/settings/ssh','/settings/updates'].includes(route)) page = html`<${Settings} st=${st} tune=${tune} />`;
   else if (route === '/models') page = html`<${ModelsPage} api=${api} csrf=${csrf} link=${link} live=${live} />`;
   else if (route === '/imu') page = html`<${ImuPage} st=${st}
     imu=${imu && st?.imu?.diagnostic ? { ...imu, diagnostic: st.imu.diagnostic } : imu}

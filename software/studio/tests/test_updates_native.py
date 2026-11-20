@@ -140,6 +140,42 @@ class NativeHttp(unittest.IsolatedAsyncioTestCase):
         with mock.patch('studio.app.Updates', return_value=self.updates),mock.patch.object(http,'build_app',build):
             await http.AiHttp.asyncSetUp(self)
 
+    async def test_online_http_binds_displayed_version_to_a_single_guarded_root_request(self):
+        calls = []
+        async def receive(reader, writer):
+            calls.append(json.loads(await reader.readline()))
+            writer.write(b'{"ok":true,"busy":true}\n')
+            await writer.drain()
+            writer.close()
+        server = await asyncio.start_server(receive, '127.0.0.1', 0)
+        self.addAsyncCleanup(server.wait_closed)
+        self.addCleanup(server.close)
+        self.updates.address = f'tcp:127.0.0.1:{server.sockets[0].getsockname()[1]}'
+        request = {'op':'online','version':'2026.11.20'}
+        for headers, expected in (({},401), ({**self.headers,'X-CSRF':'wrong'},403),
+                                  ({**self.headers,'Origin':'http://elsewhere.invalid'},403)):
+            status,_,_=await self.call('POST','/api/updates',request,headers)
+            self.assertEqual(status,expected)
+        for body in ({'op':'online'}, {'op':'online:2026.11.20'}, {**request,'url':'https://example.org'},
+                     *({**request,'version':value} for value in (None, 1, '2026.11.20\n','2026.11.20-rc.1',
+                        '2026.011.20', '1.2.'+'9'*80, '../2026.11.20'))):
+            status,_,_=await self.call('POST','/api/updates',body,self.headers)
+            self.assertEqual(status,400,body)
+        self.native['active']=True
+        status,_,data=await self.call('POST','/api/updates',request,self.headers)
+        self.assertEqual(status,409,data)
+        self.native['active']=False
+        async with self.updates.native_gate:
+            status,_,data=await self.call('POST','/api/updates',request,self.headers)
+            self.assertEqual(status,409,data)
+        self.assertEqual(calls,[])
+        for body in ({'op':'check_auto'}, {'op':'check'}, request):
+            status,headers,data=await self.call('POST','/api/updates',body,self.headers)
+            self.assertEqual(status,200,data)
+            self.assertEqual(headers['cache-control'],'no-store')
+        self.assertEqual(calls,[{'op':'check_auto'}, {'op':'check'}, {'op':'online:2026.11.20'}])
+        self.assertFalse(any(action!='status' for _,action,_ in self.native_calls))
+
     async def test_fixed_native_http_schema_and_authentication(self):
         for headers, expected in (({},401), ({'Origin':'http://evil.example'},401),
                                   ({**self.headers,'X-CSRF':'wrong'},403),

@@ -7,8 +7,9 @@ from pathlib import Path
 from . import helper
 
 MAX_UPLOAD=160*1024*1024
-OPS={'check','download','validate','install','rollback'}
+OPS={'check','check_auto','download','validate','install','rollback'}
 NATIVE_OPS={'native_status','native_install','native_recover','native_restore'}
+STABLE_VERSION=re.compile(r'(?:0|[1-9][0-9]*)(?:\.(?:0|[1-9][0-9]*)){2}')
 
 def safe_during_update(name,args):
     if name in {'relax','servo.ports'}:return True
@@ -137,14 +138,25 @@ class Updates:
             raise UpdateError(code,str(result.get('error','更新请求失败'))[:500],409 if code in {'busy','preflight','cache'} else 400)
         return result
 
-    async def request(self,operation='status'):
-        if operation not in OPS|{'status'}: raise UpdateError('validation','不支持的更新操作')
-        if operation in {'install','rollback'} and (self.native_preparing() or self.native_state().get('active') is True):
+    async def request(self,operation='status',*,version=None):
+        if operation=='online':
+            if not isinstance(version,str) or len(version)>80 or not STABLE_VERSION.fullmatch(version):
+                raise UpdateError('validation','请选择已发布的正式软件版本')
+        elif operation not in OPS|{'status'} or version is not None:
+            raise UpdateError('validation','不支持的更新操作')
+        if operation not in {'online','install','rollback'}:
+            return await self._send(operation)
+        if self.native_preparing() or self.native_state().get('active') is True:
             raise UpdateError('busy','主程序更新尚未结束：先完成或恢复主程序更新',409)
-        if operation=='rollback' and self.native_state().get('bundle_schema'):
-            native=await self.native_status()
-            if native.get('restorable') or native.get('phase')!='restored':
-                raise UpdateError('busy','退回旧网页 / 语音前，请先恢复旧配套驱动并核验',409)
+        # Serialize software admission with the native helper's async idle check.
+        async with self.native_gate:
+            if operation=='rollback' and self.native_state().get('bundle_schema'):
+                native=await self.native_status()
+                if native.get('restorable') or native.get('phase')!='restored':
+                    raise UpdateError('busy','退回旧网页 / 语音前，请先恢复旧配套驱动并核验',409)
+            return await self._send('online:'+version if operation=='online' else operation)
+
+    async def _send(self,operation):
         writer=None
         try:
             reader,writer=await self.connect()
@@ -222,6 +234,8 @@ async def handle(request,updates,session,has_password,local_dev,origin_ok):
         if set(body)!=expected or (body['op']!='native_status' and body.get('confirmed') is not True):
             raise UpdateError('validation','主程序更新需要明确确认，且不接受额外字段')
         return await updates.native_request(body['op'][7:],confirmed=body.get('confirmed'))
+    if body['op']=='online' and set(body)=={'op','version'}:
+        return await updates.request('online',version=body['version'])
     if set(body)!={'op'} or body['op'] not in OPS:
         raise UpdateError('validation','不支持的更新操作或字段')
     return await updates.request(body['op'])

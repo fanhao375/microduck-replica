@@ -51,6 +51,7 @@ class UpdatesBrowser(unittest.TestCase):
             self.assertEqual(report['layouts'],[1440,390,320])
             for name in ('no_release','downloaded_waiting','validated','installed','reloaded_task',
                          'rollback','uploaded','invalid_package','privileged_fields_rejected','stage1_old_helper',
+                         'overview_notice','offer','single_click','online_installed',
                          'native_pending','native_no_automatic_call','native_schema','native_csrf_origin',
                          'native_software_exclusion','native_reconnect_success','native_no_payload',
                          'native_unsupported','native_failure','native_recovery','bundle_complete','bundle_restore'):
