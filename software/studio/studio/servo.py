@@ -29,6 +29,7 @@ import threading
 import time
 
 from .bus import feetech
+from .communication import ServoHealth, accepted_snapshot_age_ms, counter, number
 from .startup_status import servo_observations
 
 IDS = [20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 10, 11, 12, 13, 14]     # 跟 robotd 的 JOINT_NAMES 同一个顺序
@@ -115,6 +116,9 @@ class ServoSession:
         self.by = None
         self._stop = threading.Event()
         self._thread = None
+        self._health = ServoHealth()
+        self._sample_sequence = 0
+        self._last_poll_at = None
         self._window = []                # 最近几秒的 (时间, asked, missed) 用来算丢帧率
         self.sim_serial = None
         self.handed_back_at = None       # 上一次交还主程序的时间（monotonic）：主程序连上以前页面上一直提示「要手动起来」
@@ -156,6 +160,8 @@ class ServoSession:
             self.state, self.error = "closed", None
             return False, "先选一个串口（电脑上插 USB 转 TTL）或者「演示（没接舵机）」"
         self.state, self.error, self.by = "opening", None, by
+        self._health = ServoHealth()
+        self._sample_sequence, self._last_poll_at = 0, None
         try:
             if self.sim:
                 from .bus.sim_bus import SimSerial
@@ -389,6 +395,7 @@ class ServoSession:
                 d["torque_limit"] = self.bus.read_u16(sid, 48)
             except feetech.BusError:
                 d.setdefault("offset", None)
+            d["_at"] = time.monotonic()
             self.static[sid] = d
 
     def _baseline_path(self, bid):
@@ -533,6 +540,9 @@ class ServoSession:
             try:
                 states = self.bus.states(IDS)
                 now = time.monotonic()
+                if any(state is not None for state in states.values()):
+                    self._sample_sequence += 1
+                    self._last_poll_at = now
                 for sid, s in states.items():
                     if s is not None:
                         s["at"] = now
@@ -608,7 +618,7 @@ class ServoSession:
 
     # ---- 给网页的 ----
 
-    def snapshot(self):
+    def snapshot(self, *, diagnostics=False):
         now = time.monotonic()
         rows, volts = [], []
         per = self.bus.per_id if self.bus else {}
@@ -631,13 +641,13 @@ class ServoSession:
                 "status": s["status_text"] if s else None, "moving": s["moving"] if s else None,
                 "torque": self.torque.get(sid), "fresh": fresh, "age_ms": None if age is None else round(age * 1000),
                 "p": st.get("p"), "d": st.get("d"), "mode": st.get("mode"), "offset": st.get("offset"),
-                "comm": {k: c.get(k, 0) for k in ("asked", "ok", "missed", "alarm", "streak", "max_streak")},
+                "comm": {k: c.get(k) for k in ("asked", "ok", "missed", "alarm", "streak", "max_streak")},
             })
         avg_v = round(sum(volts) / len(volts), 2) if volts else None
         torque_fresh = self.torque_at is not None and now - self.torque_at < 2.5
         all_off = torque_fresh and all(self.torque.get(i) == 0 for i in IDS)
         dr = self.drop_rate()
-        return {
+        result = {
             "t": "servo", "state": self.state, "error": self.error, "sim": self.sim, "source": "bus",
             "port": "演示（没接舵机）" if self.sim else self.port,
             "marker_error": self.marker_error,
@@ -652,6 +662,22 @@ class ServoSession:
             # 页头「软硬：P5 · D0 · 限力 1000（跟主程序一样）」；顺手给每行补运行中的 P/D/限力（servo_ops.gains_view）
             "gains": ops.gains_view(rows) if (ops := self.ops) is not None else None,
         }
+
+        if not diagnostics:
+            return result
+        for row in rows:
+            inspected_at = self.static.get(row["id"], {}).get("_at")
+            row["parameters"] = {"source": "studio_cached_inspection",
+                                 "age_ms": round(max(0., now-inspected_at)*1000) if inspected_at is not None else None,
+                                 "runtime": {"p": self.static.get(row["id"], {}).get("p_run"),
+                                             "d": self.static.get(row["id"], {}).get("d_run"),
+                                             "torque_limit": self.static.get(row["id"], {}).get("torque_limit")},
+                                 "eeprom": {"p": row["p"], "d": row["d"], "mode": row["mode"], "offset": row["offset"]}}
+        return self._health.apply(result, identity=("bus", self.opened_at),
+            receipt=now, token=self._sample_sequence, row_tokens={i: self.rows.get(i, {}).get("at") for i in IDS},
+            counters=result["bus"] or {},
+            source_age_ms=None if self._last_poll_at is None else max(0., now-self._last_poll_at)*1000,
+            available=self.state == "open", sequence=self._sample_sequence, now=now)
 
     def estop_status(self):
         """给顶栏卸力按钮：舵机会话期间以总线回读为准。"""
@@ -678,9 +704,38 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
                                       bus_age_s=rd.bus.age() if rd is not None else None,
                                       bus_error=getattr(rd.bus, "error", None) if rd is not None else None)
     if observations is not None:
-        return _view_startup_observations(observations, directions, state, error, sim)
+        view = _view_startup_observations(observations, directions, state, error, sim)
+        native = (bus or {}).get("native") or {}
+        observed = (native.get("servo_observations") or {}).get("rows") or []
+        by_id = {r.get("id"): r for r in observed if isinstance(r, dict)}
+        for row in view["rows"]:
+            comm = by_id.get(row["id"], {}).get("communication")
+            if isinstance(comm, dict):
+                row["comm"] = dict(comm)
+        return _robotd_health(view, rd, bus)
     native = (bus or {}).get("native") if isinstance(bus, dict) and isinstance(bus.get("native"), dict) else {}
     joints = {j.get("id"): j for j in (native.get("joints") or []) if isinstance(j, dict)}
+    if (bus or {}).get("mode") == "commissioning":
+        last_sample = bus.get("last_sample") if isinstance(bus.get("last_sample"), dict) else {}
+        sampled = {r.get("id"): r for r in (last_sample.get("servos") or []) if isinstance(r, dict)}
+        observed = native.get("servo_observations") or {}
+        observed_rows = {r.get("id"): r for r in observed.get("rows", []) if isinstance(r, dict)}
+        sample_age = accepted_snapshot_age_ms(bus)
+        for sid in IDS:
+            feedback = sampled.get(sid, {})
+            check = observed_rows.get(sid, {})
+            age = sample_age
+            if number(observed.get("age_ms")) and number(check.get("feedback_age_ms")):
+                age = observed["age_ms"]+check["feedback_age_ms"]
+            joints[sid] = {"position_raw": check.get("position_raw", feedback.get("position_raw")),
+                "volts": check.get("volts", feedback.get("voltage_v")),
+                "temperature_c": check.get("temperature_c", feedback.get("temperature_c")),
+                "load_raw": check.get("load_raw", feedback.get("load_raw")),
+                "speed_raw": check.get("speed_raw", feedback.get("speed_raw")),
+                "current_raw": check.get("current_raw", feedback.get("current_raw")),
+                "sample_age_ms": age, "feedback_fresh": age is not None and age < 500.
+                    and check.get("responding", bool(feedback)) is True,
+                "communication": check.get("communication")}
     torque_on = native.get("torque_enabled")
     rows, volts = [], []
     for sid in IDS:
@@ -696,19 +751,74 @@ def view_from_robotd(bus, directions, state="closed", error=None, sim=False):
             "raw": raw, "deg": round(angle_deg(raw, d), 1) if isinstance(raw, int) else None,
             "volt": j.get("volts"), "temp": j.get("temperature_c"), "temp_limit": None,
             "load": j.get("load_raw"), "current_ma": j.get("current_ma"), "status": None, "moving": None,
+            "speed_raw": j.get("speed_raw"), "current_raw": j.get("current_raw"),
+            "velocity_rad_s": j.get("velocity_rad_s"),
             "torque": None if torque_on is None else int(bool(torque_on)), "fresh": fresh,
             "age_ms": j.get("sample_age_ms"), "p": None, "d": None, "mode": None, "offset": None,
-            "comm": {"asked": None, "ok": None, "missed": j.get("missing_total", 0) or 0, "alarm": 0,
-                     "streak": j.get("consecutive_missing", 0) or 0, "max_streak": None},
+            "comm": dict(j["communication"]) if isinstance(j.get("communication"), dict) else
+                    {"asked": None, "ok": None, "missed": j.get("missing_total"), "alarm": None,
+                     "streak": j.get("consecutive_missing"), "max_streak": None},
         })
     avg_v = round(sum(volts) / len(volts), 2) if volts else None
-    return {
+    return _robotd_health({
         "t": "servo", "state": state, "error": error, "sim": sim, "source": "robotd",
         "port": "主程序", "online": sum(1 for r in rows if r["fresh"]), "total": len(IDS),
         "hz": None, "avg_volts": avg_v, "battery_pct": battery_percent(avg_v), "drop_rate": None, "bus": None,
         "holding": sum(1 for r in rows if r["torque"] == 1), "all_off": False, "latched": False,
         "relaxing": False, "last_relax": None, "rows": rows,
-    }
+    }, rd, bus)
+
+
+def _robotd_health(view, rd, bus):
+    bus = bus if isinstance(bus, dict) else {}
+    native = bus.get("native") or {}
+    telemetry = native.get("telemetry") or {}
+    order = native.get("read_order") if isinstance(native.get("read_order"), dict) else None
+    hd = native.get("hd1910") or {}
+    inspection = {item.get("id"): item for item in hd.get("registers_before_arm", []) if isinstance(item, dict)}
+    for row in view["rows"]:
+        cached = inspection.get(row["id"], {})
+        row["parameters"] = {"source": "robotd_before_arm_cache", "age_ms": None,
+            "runtime": {"pdi": cached.get("temporary_pdi"), "observed": False,
+                        "temporary_gains_applied": hd.get("temporary_gains_applied"),
+                        "restore_pending": hd.get("restore_pending")},
+            "eeprom": {"pdi": cached.get("eeprom_pdi"), "mode": cached.get("mode")},
+            "before_arm": {key: cached.get(key) for key in ("acceleration_raw", "goal_current_raw", "goal_speed_raw")},
+            "configured": hd.get("servo_parameters")}
+    session = telemetry.get("session", (order or {}).get("session", bus.get("session")))
+    hello_at = getattr(getattr(rd, "hello", None), "at", None)
+    identity = ("robotd", session, hello_at,
+                (order or {}).get("generation"), tuple((order or {}).get("ids", (order or {}).get("servo_ids", []))))
+    tracker = getattr(rd, "_servo_health", None) if rd is not None else None
+    if tracker is None:
+        tracker = ServoHealth()
+        if rd is not None:
+            rd._servo_health = tracker
+    receipt = getattr(getattr(rd, "bus", None), "at", None)
+    if rd is None:
+        receipt = time.monotonic()
+    token = (bus.get("cycle", bus.get("total_cycles")), native.get("sample_sequence"),
+             tuple((r["id"], r["comm"].get("asked"), r.get("raw")) for r in view["rows"]))
+    if view.get("diagnostic") and receipt is not None:
+        receipt_age = max(0., time.monotonic()-receipt)*1000
+        for row in view["rows"]:
+            if row["age_ms"] is not None:
+                row["age_ms"] = max(0., row["age_ms"]-receipt_age)
+    counters = {"bad_checksum": telemetry.get("bad_checksums"), "timeout": telemetry.get("timeouts"),
+                "failed_reads": telemetry.get("failed_reads")}
+    available = rd is None or (getattr(rd, "present", None) is True and not rd.bus.error
+                               and (hello_at is None or receipt is not None and receipt >= hello_at))
+    total, failed = telemetry.get("total_reads"), telemetry.get("failed_reads")
+    sequence = bus.get("total_success") if bus.get("mode") == "commissioning" else None
+    if counter(total) and counter(failed) and total >= failed:
+        sequence = total - failed
+    age = native.get("sample_age_ms")
+    if not number(age):
+        age = (native.get("servo_observations") or {}).get("age_ms")
+    if not number(age):
+        age = min((r["age_ms"] for r in view["rows"] if number(r["age_ms"])), default=None)
+    return tracker.apply(view, identity=identity, receipt=receipt, token=token, counters=counters,
+                         source_age_ms=age, available=available, sequence=sequence, require_age=rd is not None)
 
 
 def _view_startup_observations(observations, directions, state, error, sim):
