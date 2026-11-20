@@ -18,6 +18,7 @@ from package import MAX_OUTER, unpack_outer, valid_version
 REPOSITORY='fanhao375/microduck-replica'
 PREFIX='microduck-software-v'
 CATALOG=f'https://api.github.com/repos/{REPOSITORY}/releases?per_page=100'
+CHECK_INTERVAL=6*60*60
 MUTATIONS={'validate','install','rollback'}
 TERMINAL={'completed','rolled_back','failed','waiting_validation','interrupted'}
 
@@ -105,17 +106,26 @@ def preflight(config):
     from health import identities
     atomic_json(Path(config['marker']).parent/'protected-services.json',identities())
 
-def version_key(version): return tuple(int(piece) for piece in version.split('+')[0].split('-')[0].split('.'))
+def version_key(version):
+    core, _, pre = version.partition('+')[0].partition('-')
+    identifiers = tuple((0, int(part)) if part.isdigit() else (1, part) for part in pre.split('.') if part)
+    return (tuple(map(int, core.split('.'))), not pre, identifiers)
+
+def stable_tag(release):
+    if not isinstance(release,dict) or release.get('draft') is not False or release.get('prerelease') is not False:
+        return None
+    tag=release.get('tag_name')
+    if not isinstance(tag,str) or not tag.startswith(PREFIX): return None
+    version=tag[len(PREFIX):]
+    return version if valid_version(version) and '-' not in version and '+' not in version else None
 
 def choose_release(releases):
     if not isinstance(releases,list): raise UpdateError('network','发布源返回格式不正确')
     choices=[]
     for release in releases:
-        if not isinstance(release,dict) or release.get('draft') or release.get('prerelease'): continue
-        tag=release.get('tag_name','')
-        if not isinstance(tag,str) or not tag.startswith(PREFIX): continue
-        version=tag[len(PREFIX):]
-        if not valid_version(version) or '-' in version or '+' in version: continue
+        version=stable_tag(release)
+        if version is None: continue
+        tag=release['tag_name']
         name=f'{version}.software-update.tar'
         assets=[asset for asset in release.get('assets',[]) if asset.get('name')==name]
         if len(assets)!=1: continue
@@ -146,7 +156,8 @@ def fetch(url,destination,maximum,loopback=False):
     validate_url(url,loopback)
     opener=build_opener(RestrictedRedirect(loopback))
     deadline=time.monotonic()+120; received=0
-    with opener.open(Request(url,headers={'User-Agent':'Microduck-Software-Updater/1','Accept':'application/vnd.github+json' if url==CATALOG else 'application/octet-stream'}),timeout=15) as response:
+    accept='application/vnd.github+json' if urlsplit(url).hostname=='api.github.com' else 'application/octet-stream'
+    with opener.open(Request(url,headers={'User-Agent':'Microduck-Software-Updater/1','Accept':accept}),timeout=15) as response:
         length=response.headers.get('Content-Length')
         if length and (not length.isdigit() or int(length)>maximum): raise UpdateError('network','下载大小超限')
         while True:
@@ -161,15 +172,19 @@ class Controller:
     def __init__(self,state_dir,engine=None,preflight=None,catalog=None,marker=None,fetcher=fetch):
         self.root=Path(state_dir); self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.engine=engine or Engine(); self.preflight=preflight or (lambda:None); self.catalog=catalog or self.remote_catalog
-        self.fetcher=fetcher; self.can_rollback=False
+        self.fetcher=fetcher; self.previous_versions=[]
         self.marker=Path(marker) if marker else self.root/'installing'
         self.motion_descriptor=None
         self.marker.parent.mkdir(parents=True,exist_ok=True,mode=0o755)
         descriptor=os.open(self.marker.parent/'motion.lock',os.O_CREAT|os.O_RDWR|getattr(os,'O_NOFOLLOW',0),0o644)
         os.close(descriptor)
-        self.lock=threading.Lock(); self.state_lock=threading.RLock(); self.busy=False
+        self.lock=threading.Lock(); self.state_lock=threading.RLock(); self.refresh_lock=threading.Lock(); self.busy=False
         self.job=read_json(self.root/'job.json'); self.staged=read_json(self.root/'staged.json')
-        self.ready=False; self.candidate=None; self.source_state='unchecked'; self.engine_status=None;self.dispatched=False
+        self.ready=False; self.engine_status=None; self.installed=None; self.dispatched=False
+        cached=read_json(self.root/'catalog.json') or {}
+        self.candidate=cached.get('candidate')
+        self.catalog_checked_at=cached.get('checked_at')
+        self.source_state=cached.get('source_state','unchecked')
         # A restarted coordinator does NOT infer success from its own counter. It
         # keeps the mutation gate while reconciling the engine's durable outcome.
         if self.job and self.job.get('phase') not in TERMINAL:
@@ -185,10 +200,7 @@ class Controller:
         if not isinstance(releases,list):raise UpdateError('network','发布源返回格式不正确')
         # Some unauthenticated GitHub list responses omit assets. Fetch only
         # matching formal releases, newest first, bounded to three detail calls.
-        missing=[entry for entry in releases if isinstance(entry,dict) and not entry.get('assets')
-            and not entry.get('draft') and not entry.get('prerelease')
-            and str(entry.get('tag_name','')).startswith(PREFIX)
-            and valid_version(str(entry['tag_name'])[len(PREFIX):]) and type(entry.get('id')) is int]
+        missing=[entry for entry in releases if stable_tag(entry) and not entry.get('assets') and type(entry.get('id')) is int]
         for entry in sorted(missing,key=lambda item:version_key(item['tag_name'][len(PREFIX):]),reverse=True)[:3]:
             detail=get(f'https://api.github.com/repos/{REPOSITORY}/releases/{entry["id"]}')
             if not isinstance(detail,dict) or detail.get('id')!=entry['id'] or detail.get('tag_name')!=entry['tag_name']:
@@ -201,31 +213,103 @@ class Controller:
             self.job.update(values,updated_at=time.time()); atomic_json(self.root/'job.json',self.job)
 
     def refresh(self):
+        with self.refresh_lock:
+            state,active,previous=self.engine_identity()
+            with self.state_lock:
+                self.engine_status,self.installed,self.previous_versions=state,active,previous
+
+    def engine_identity(self):
+        state=None
+        active=None
+        previous=[]
         try:
             status=self.engine.call('update.status')
-            self.engine_status=next((entry for entry in status if entry.get('component')=='software'),None)
-            installed=self.engine.call('update.listInstalled',{'component':'software'})
-            self.can_rollback=any(not entry.get('active') for entry in installed)
-        except (OSError,ValueError,UpdateError): self.engine_status=None
+            software=[entry for entry in status if entry.get('component')=='software']
+            if len(software)==1:
+                state=software[0]
+                installed=self.engine.call('update.listInstalled',{'component':'software'})
+                versions=[entry.get('version') for entry in installed if entry.get('active') is True]
+                if versions==[state.get('installed')] and valid_version(versions[0]):
+                    active=versions[0]
+                    previous=[entry['version'] for entry in installed if entry.get('active') is False
+                              and valid_version(entry.get('version')) and version_key(entry['version'])<version_key(active)]
+        except (OSError,ValueError,UpdateError,TypeError,AttributeError,KeyError): pass
+        return state,active,previous
+
+    def compare_installed(self,version):
+        if not self.installed or (self.engine_status or {}).get('phase')!='idle': return 'installed_unknown'
+        return 'available' if version_key(self.installed)<version_key(version) else 'up_to_date'
+
+    def availability(self):
+        if not self.candidate: return self.source_state
+        current=self.compare_installed(self.candidate['version'])
+        if current=='available' and self.source_state!='available': return 'unchecked'
+        return current
+
+    def catalog_fresh(self):
+        return self.catalog_checked_at is not None and 0<=time.time()-self.catalog_checked_at<CHECK_INTERVAL
+
+    def check_catalog(self):
+        try:
+            candidate=choose_release(self.catalog())
+        except Exception:
+            self.record_catalog(None,'network_error')
+            raise
+        self.record_catalog(candidate,self.compare_installed(candidate['version']) if candidate else 'no_release')
+
+    def record_catalog(self,candidate,source_state):
+        with self.state_lock:
+            self.candidate,self.source_state,self.catalog_checked_at=candidate,source_state,time.time()
+            atomic_json(self.root/'catalog.json',{'candidate':candidate,'source_state':source_state,'checked_at':self.catalog_checked_at})
+
+    def require_online(self,version):
+        with self.state_lock:
+            if not self.catalog_fresh() or not self.candidate or self.candidate['version']!=version:
+                raise UpdateError('validation','可用版本已改变或检查已过期，请重新检查更新')
+            if self.availability()!='available':
+                raise UpdateError('validation','未能确认当前安装状态和可升级版本，请重新检查更新')
 
     def view(self):
         with self.state_lock:
-            return {'available':True,'busy':self.busy,'ready':self.ready,
-                'installed':(self.engine_status or {}).get('installed'),'engine_available':self.engine_status is not None,
-                'can_rollback':self.can_rollback,
-                'source_state':self.source_state,'candidate':{key:value for key,value in (self.candidate or {}).items() if key!='url'} or None,
+            return {'available':True,'busy':self.busy,'ready':self.ready,'online_update':True,
+                'channel':'stable','catalog_checked_at':self.catalog_checked_at,
+                'installed':self.installed,'engine_available':self.engine_status is not None,
+                'can_rollback':bool(self.previous_versions),
+                'source_state':self.availability(),'candidate':{key:value for key,value in (self.candidate or {}).items() if key!='url'} or None,
                 'staged':{key:value for key,value in (self.staged or {}).items() if key in {'version','changelog','source_revision'}} or None,
-                'job':dict(self.job) if self.job else None}
+                'job':{key:value for key,value in self.job.items() if key!='dispatch'} if self.job else None}
 
     def start(self,operation):
-        if not isinstance(operation,str) or operation not in {'check','download','validate','install','rollback'}: raise UpdateError('validation','不支持的更新操作')
-        if operation=='install' and not self.ready: raise UpdateError('validation','请先让升级引擎完成软件包验证')
-        if not self.lock.acquire(blocking=False): raise UpdateError('busy','另一项更新任务正在进行')
-        self.busy=True
-        self.job={'id':uuid.uuid4().hex,'operation':operation,'phase':'queued','started_at':time.time(),'error':None}
-        self.save()
-        threading.Thread(target=self.run,args=(operation,),daemon=True).start()
-        return self.view()
+        if not isinstance(operation,str): raise UpdateError('validation','不支持的更新操作')
+        version=None
+        if operation.startswith('online:'):
+            version=operation[len('online:'):]
+            if not valid_version(version) or '-' in version or '+' in version: raise UpdateError('validation','无效的正式软件版本')
+            operation='online'
+        elif operation not in {'check','check_auto','download','validate','install','rollback'}:
+            raise UpdateError('validation','不支持的更新操作')
+        if not self.lock.acquire(blocking=False):
+            if operation=='check_auto': return self.view()
+            raise UpdateError('busy','另一项更新任务正在进行')
+        started=False
+        try:
+            with self.state_lock:
+                if operation=='check_auto' and self.catalog_fresh():
+                    return self.view()
+                if operation=='online': self.require_online(version)
+                if operation=='install' and not self.ready: raise UpdateError('validation','请先让升级引擎完成软件包验证')
+                if operation!='check_auto':
+                    self.job={'id':uuid.uuid4().hex,'operation':operation,'phase':'queued','started_at':time.time(),'error':None}
+                    if version: self.job['version']=version
+                    self.save()
+                self.busy=True
+                threading.Thread(target=self.run,args=(operation,),daemon=True).start()
+                started=True
+                return self.view()
+        finally:
+            if not started:
+                self.busy=False
+                self.lock.release()
 
     def upload(self,source):
         if not self.lock.acquire(blocking=False): raise UpdateError('busy','另一项更新任务正在进行')
@@ -237,13 +321,16 @@ class Controller:
         threading.Thread(target=self.run,args=('validate',),daemon=True).start()
         return self.view()
 
-    def stage(self,source):
+    def stage(self,source,expected_version=None):
         cache=self.root/'cache'; cache.mkdir(exist_ok=True,mode=0o700)
         # Bound storage to two prior cached packages plus the in-flight envelope.
         for old in sorted(cache.iterdir(),key=lambda path:path.stat().st_mtime)[:-2]:
             if old.is_dir() and not old.is_symlink(): shutil.rmtree(old)
         temporary=cache/('.incoming-'+uuid.uuid4().hex)
         manifest=unpack_outer(source,temporary)
+        if expected_version is not None and manifest['version']!=expected_version:
+            shutil.rmtree(temporary)
+            raise UpdateError('validation','下载包的清单版本与选定的正式版不一致')
         target=cache/manifest['version']
         if target.exists(): shutil.rmtree(target)
         temporary.rename(target)
@@ -267,17 +354,41 @@ class Controller:
         directory=self.root/'cache'/self.staged['version']
         if self.fingerprint(directory)!=self.staged['fingerprint']:
             self.ready=False; raise UpdateError('cache','缓存校验值发生变化，请重新下载或上传')
-        self.ready=False; self.save(phase='preflight'); self.preflight()
-        self.save(phase='verifying' if not apply else 'applying',version=self.staged['version'])
+        self.ready=False
+        version=self.staged['version']
+        online=self.job['operation']=='online'
+        if online or apply:
+            self.refresh()
+            if online: self.require_online(version)
+        self.save(phase='preflight')
+        self.preflight()
+        if apply: self.mark_dispatch(version)
+        else: self.save(phase='verifying',version=version)
         options={'from_dir':str(directory)}
         if not apply: options['dry_run']=True
-        self.dispatched=apply
-        result=self.engine.call('update.apply',{'component':'software','target':{'exact':self.staged['version']},'options':options},self.progress)
+        result=self.engine.call('update.apply',{'component':'software','target':{'exact':version},'options':options},self.progress)
+        if not apply:
+            if result.get('outcome')!='dry_run_passed' or result.get('candidate')!=version:
+                raise UpdateError('engine','升级引擎未确认选定版本的软件包验证成功')
+            if not online:
+                self.ready=True
+                self.save(phase='completed',result=result)
+            return
         self.dispatched=False
-        outcome=result.get('outcome')
-        if not apply and outcome=='dry_run_passed':
-            self.ready=True; self.save(phase='completed',result=result); return
+        if result.get('outcome')=='applied' and result.get('to')!=version:
+            raise UpdateError('engine','升级引擎返回的已安装版本与选定版本不一致')
+        if result.get('outcome')=='already_current' and result.get('version')!=version:
+            raise UpdateError('engine','升级引擎返回的当前版本与选定版本不一致')
         self.finish_result(result)
+
+    def mark_dispatch(self,version):
+        state=self.engine_status or {}
+        if state.get('phase')!='idle':
+            raise UpdateError('preflight','未能确认升级引擎当前空闲，请重新验证')
+        dispatch={'at':int(time.time()),'from':state.get('installed'),'to':version,'before':state.get('last_attempt')}
+        if self.job['operation']=='rollback': dispatch['previous_versions']=list(self.previous_versions)
+        self.save(phase='applying',dispatch=dispatch,version=version)
+        self.dispatched=True
 
     def finish_result(self,result):
         outcome=result.get('outcome')
@@ -287,7 +398,9 @@ class Controller:
 
     def progress(self,progress):
         if progress.get('component')=='software':
-            self.save(phase=str(progress.get('phase','applying'))[:50],percent=progress.get('percent'),detail=str(progress.get('detail') or '')[:500])
+            phase=str(progress.get('phase','applying'))[:50]
+            if phase not in TERMINAL:
+                self.save(phase=phase,percent=progress.get('percent'),detail=str(progress.get('detail') or '')[:500])
 
     def enter_motion_gate(self,timeout=15):
         if self.motion_descriptor is not None or os.name!='posix':return
@@ -308,72 +421,111 @@ class Controller:
         if self.motion_descriptor is not None:
             os.close(self.motion_descriptor);self.motion_descriptor=None
 
+    def begin_mutation(self):
+        self.marker.write_text(self.job['id'])
+        self.marker.chmod(0o644)
+        self.enter_motion_gate()
+
+    def download(self):
+        if not self.candidate: raise UpdateError('validation','请先检查更新')
+        self.save(phase='downloading')
+        self.ready=False
+        with tempfile.TemporaryFile(dir=self.root) as stream:
+            size=self.candidate['size']
+            self.fetcher(self.candidate['url'],stream,size)
+            if stream.tell()!=size: raise UpdateError('network','下载大小与发布元信息不一致')
+            stream.seek(0)
+            self.stage(stream,expected_version=self.candidate['version'])
+
     def run(self,operation):
         try:
             if operation in MUTATIONS:
-                self.marker.parent.mkdir(parents=True,exist_ok=True,mode=0o755)
-                self.marker.write_text(self.job['id']); os.chmod(self.marker,0o644)
-                self.enter_motion_gate()
-            if operation=='check':
-                self.save(phase='checking'); self.refresh(); self.candidate=choose_release(self.catalog())
-                installed=(self.engine_status or {}).get('installed')
-                self.source_state='no_release' if not self.candidate else 'up_to_date' if installed and version_key(installed)>=version_key(self.candidate['version']) else 'available'
-                self.save(phase='completed',source_state=self.source_state)
-            elif operation=='download':
-                if not self.candidate: raise UpdateError('validation','请先检查更新')
-                self.save(phase='downloading'); self.ready=False
-                with tempfile.TemporaryFile(dir=self.root) as stream:
-                    size=self.fetcher(self.candidate['url'],stream,MAX_OUTER)
-                    if size!=self.candidate['size']: raise UpdateError('network','下载大小与发布元信息不一致')
-                    stream.seek(0); self.stage(stream)
-                self.marker.parent.mkdir(parents=True,exist_ok=True,mode=0o755)
-                self.marker.write_text(self.job['id']); os.chmod(self.marker,0o644)
-                self.enter_motion_gate()
+                self.begin_mutation()
+            if operation in {'check','check_auto'}:
+                if operation=='check': self.save(phase='checking')
+                self.refresh()
+                self.check_catalog()
+                if operation=='check': self.save(phase='completed',source_state=self.availability())
+            elif operation in {'download','online'}:
+                if operation=='online':
+                    self.refresh()
+                    self.require_online(self.job['version'])
+                self.download()
+                self.begin_mutation()
                 self.validate()
+                if operation=='online': self.validate(apply=True)
             elif operation in {'validate','install'}: self.validate(apply=operation=='install')
             elif operation=='rollback':
+                self.refresh()
                 self.save(phase='preflight'); self.preflight()
-                self.dispatched=True
-                self.finish_result(self.engine.call('update.rollback',{'component':'software'},self.progress))
+                self.mark_dispatch(None)
+                result=self.engine.call('update.rollback',{'component':'software'},self.progress)
                 self.dispatched=False
+                self.finish_result(result)
         except UpdateError as error:
             if self.dispatched:
                 self.save(phase='recovering',error='引擎连接中断，正在读取持久任务结果');self.recover(release=False)
-            elif operation in {'download','validate','install'} and error.code=='preflight':
+            elif operation in {'download','online','validate','install'} and error.code=='preflight':
                 self.ready=False
                 self.save(phase='waiting_validation',error=str(error))
-            else:
-                if operation=='check': self.source_state='network_error'
+            elif operation!='check_auto':
                 self.save(phase='failed',error=str(error)[:500],code=error.code)
         except Exception:
             if self.dispatched:
                 self.save(phase='recovering',error='引擎连接中断，正在读取持久任务结果');self.recover(release=False)
-            else:
-                if operation=='check': self.source_state='network_error'
+            elif operation!='check_auto':
                 self.save(phase='failed',error='更新服务未完成操作；请检查服务和网络后重试',code='service')
         finally:
-            self.refresh();self.leave_motion_gate();self.marker.unlink(missing_ok=True);self.busy=False;self.lock.release()
+            try:
+                if operation not in {'check','check_auto'}: self.refresh()
+                self.leave_motion_gate()
+                self.marker.unlink(missing_ok=True)
+            finally:
+                self.dispatched=False;self.busy=False;self.lock.release()
 
     def recover(self,release=True):
         # A controller crash cannot cancel updaterd. Reconcile only the engine's
         # durable attempt; never repeat an apply or infer completion by version.
         try:
+            if self.job.get('operation')=='check':
+                self.save(phase='interrupted',error='上次检查中断，请重新检查更新')
+                return
             self.marker.parent.mkdir(parents=True,exist_ok=True,mode=0o755)
             self.marker.write_text(self.job['id']);self.marker.chmod(0o644)
             self.enter_motion_gate(timeout=None)
             while True:
                 self.refresh(); state=self.engine_status
                 if state and state.get('phase')=='idle':
-                    attempt=state.get('last_attempt') or {}
-                    if attempt.get('at',0)>=int(self.job['started_at']):
-                        kind=(attempt.get('outcome') or {}).get('kind')
-                        if kind=='success': self.save(phase='completed',result={'outcome':'applied','to':attempt.get('to')},engine_attempt=attempt)
-                        elif kind=='rolled_back': self.save(phase='rolled_back',error=attempt['outcome'].get('reason','已恢复旧版'),engine_attempt=attempt)
-                        elif kind=='aborted': self.save(phase='failed',error=attempt['outcome'].get('reason','引擎拒绝更新'),engine_attempt=attempt)
-                        else: self.save(phase='interrupted',error='引擎任务已结束，请核对记录后重新验证',engine_attempt=attempt)
-                    else: self.save(phase='interrupted',error='更新请求曾中断；引擎当前空闲，未发现本次完成记录，请重新验证')
+                    self.reconcile(state.get('last_attempt'))
                     return
                 time.sleep(1)
         finally:
             if release:
                 self.leave_motion_gate();self.marker.unlink(missing_ok=True);self.busy=False;self.lock.release()
+
+    def matches_dispatch(self,attempt):
+        dispatch=self.job.get('dispatch')
+        if not isinstance(dispatch,dict) or not isinstance(attempt,dict) or not isinstance(attempt.get('outcome'),dict): return False
+        if type(dispatch.get('at')) is not int or type(attempt.get('at')) is not int or attempt['at']<dispatch['at']: return False
+        if attempt.get('component')!='software' or attempt.get('from')!=dispatch.get('from'): return False
+        before=dispatch.get('before')
+        if attempt==before: return False
+        if isinstance(before,dict) and type(before.get('run')) is int:
+            if type(attempt.get('run')) is not int or attempt['run']<=before['run']: return False
+        if self.job.get('operation')=='rollback':
+            return attempt.get('to') in dispatch.get('previous_versions',[])
+        return valid_version(dispatch.get('to')) and attempt.get('to')==dispatch['to']==self.job.get('version')
+
+    def reconcile(self,attempt):
+        if self.matches_dispatch(attempt):
+            outcome=attempt['outcome']
+            if outcome.get('kind')=='success' and self.installed==attempt['to']:
+                self.save(phase='completed',result={'outcome':'applied','to':attempt['to']},error=None,engine_attempt=attempt)
+                return
+            if outcome.get('kind')=='rolled_back' and self.installed==attempt['from']:
+                self.save(phase='rolled_back',error=outcome.get('reason','已恢复旧版'),engine_attempt=attempt)
+                return
+            if outcome.get('kind')=='aborted':
+                self.save(phase='failed',error=outcome.get('reason','引擎拒绝更新'),engine_attempt=attempt)
+                return
+        self.save(phase='interrupted',error='引擎当前空闲，无法确认本次更新结果，请核对已安装版本后重新验证')
