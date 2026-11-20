@@ -166,8 +166,12 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
     stop(e);
     if (!open) return;
     if (r.torque !== 1) { setHint(`${r.id} ${r.cn} 扭矩没开：点了舵机也不会动（先打开它的「保持」）`); return; }
+    if (!r.fresh || !Number.isInteger(r.raw)) {
+      setHint(`${r.id} ${r.cn} 正在等待当前位置回读，请稍后再微调`);
+      return;
+    }
     const steps = Math.max(1, Math.round((motion?.nudge ?? 1) * 4096 / 360));
-    const pos = Math.max(0, Math.min(4095, Math.round((drag ?? r.raw ?? 2048) + dir * steps)));
+    const pos = Math.max(0, Math.min(4095, Math.round((drag ?? r.raw) + dir * steps)));
     setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), 1200);
     op({ op: 'goal', id: r.id, pos }, 3000, true);
   };

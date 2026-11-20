@@ -79,6 +79,7 @@ await waitFor(`document.querySelectorAll('.sv-list .sv-num').length === 15`, '15
 out.inputs = await js(`document.querySelectorAll('.sv-list .sv-num').length`);
 
 log('没上力时输数字：不动，给提示');
+await waitFor(`!!${row(21)}?.querySelector('.sv-num')?.value && !${row(21)}.classList.contains('stale')`, '21 号有实际位置回读');
 const limp = await reading(21);
 await type(21, String(limp + 100), 'Enter');
 await sleep(600);
