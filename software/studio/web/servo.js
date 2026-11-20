@@ -161,7 +161,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
     setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), seconds * 1000 + 600);
     op({ op: 'move', goals: { [r.id]: pos }, seconds, mode: motion?.mode, acc: motion?.acc });
   };
-  // 点一下转一小格：小角度直接写目标（不走「用时」的慢过渡），从现在的目标往上加，连点会累加
+  // 直接写目标会取消平滑过渡，每次须从舵机最新实测位置起步。
   const nudge = (e, dir) => {
     stop(e);
     if (!open) return;
@@ -171,7 +171,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
       return;
     }
     const steps = Math.max(1, Math.round((motion?.nudge ?? 1) * 4096 / 360));
-    const pos = Math.max(0, Math.min(4095, Math.round((drag ?? r.raw) + dir * steps)));
+    const pos = Math.max(0, Math.min(4095, r.raw + dir * steps));
     setDrag(pos); clearTimeout(release.current); release.current = setTimeout(() => setDrag(null), 1200);
     op({ op: 'goal', id: r.id, pos }, 3000, true);
   };
@@ -183,7 +183,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
   const stop = (e) => e.stopPropagation();
   const c = r.comm || {};
   const reply = servoReplyStatus(r);
-  return html`<div class=${'sv-row' + (r.fresh ? '' : ' stale') + (selected ? ' sel ' + r.group : '')} onClick=${() => onSelect(selected ? null : r.id)}>
+  return html`<div class=${'sv-row' + (r.fresh ? '' : ' stale') + (selected ? ' sel ' + r.group : '')} data-position=${r.fresh ? r.raw : null} onClick=${() => onSelect(selected ? null : r.id)}>
     <span class=${'sv-id ' + r.group}>${r.id}</span>
     <span class="sv-name" title=${r.en}>${r.cn}</span>
     <input class="sv-slider" type="range" min="0" max="4095" step="1" value=${val} disabled=${!open}

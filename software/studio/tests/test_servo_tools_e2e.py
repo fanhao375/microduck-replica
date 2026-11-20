@@ -87,6 +87,10 @@ class ServoToolsE2E(unittest.TestCase):
     def test_plus_and_minus_buttons_step_one_degree(self):
         self.assertEqual(self.out["nudged"], self.out["typed"]["want"] + 11)
 
+    def test_nudge_after_unconfirmed_move_uses_encoder_position(self):
+        step = self.out["nudgeFromFeedback"]
+        self.assertEqual(step["requested"], min(4095, step["measured"] + 11))
+
     def test_out_of_range_number_is_clamped(self):
         self.assertEqual(self.out["clamped"], 4095)
 

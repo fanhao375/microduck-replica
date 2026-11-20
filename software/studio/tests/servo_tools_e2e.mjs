@@ -97,13 +97,14 @@ log('输数字 + 回车：转过去');
 const tuned = stand + 40;
 await type(21, String(tuned), 'Enter');
 await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} && document.activeElement?.className.indexOf('sv-num') < 0`, '21 号转到输入的数', 8000);
-await sleep(900);
+const atPosition = (n, value) => waitFor(`${row(n)}?.dataset.position === '${value}'`, `${n} 号实际到达 ${value}`);
+await atPosition(21, tuned);
 out.typed = { want: tuned, got: await reading(21) };
 
 log('点「+」两下、「−」一下：每下 1°（约 11 步），连点累加');
 const nudgeAt = (n, sign) => js(`(() => { const b = [...${row(n)}.querySelectorAll('.sv-nudge')][${sign > 0 ? 1 : 0}]; b.click(); return true; })()`);
-await nudgeAt(21, 1); await sleep(150); await nudgeAt(21, 1);
-await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} + 22`, '点两下 + 以后读数 +22', 8000);
+await nudgeAt(21, 1); await atPosition(21, tuned + 11); await nudgeAt(21, 1);
+await atPosition(21, tuned + 22);
 await nudgeAt(21, -1);
 await waitFor(`+(${row(21)}?.querySelector('.sv-num')?.value) === ${tuned} + 11`, '再点一下 − 以后读数 +11', 8000);
 await sleep(1500);
@@ -126,6 +127,28 @@ await shot('servo-typed.png');
 await type(32, String(head), 'Enter');                     // 转回去：后面只该挪 21 这一颗
 await waitFor(`+(${row(32)}?.querySelector('.sv-num')?.value) === ${head}`, '32 号转回去', 8000);
 await sleep(900);
+
+// Keep a far move request in the UI without sending it to the simulated servo.
+// A relative step must be based on encoder feedback, even before that move replies.
+await waitFor(`Number(${row(32)}.dataset.position) === ${head}`, '32 号回到原来的实测位置');
+await js(`(() => {
+  const send = WebSocket.prototype.send;
+  WebSocket.prototype.send = function(data) {
+    const message = JSON.parse(data);
+    if (message.name === 'servo.op') {
+      if (message.args.op === 'move') return;
+      if (message.args.op === 'goal') {
+        window.observedNudge = message.args.pos;
+        WebSocket.prototype.send = send;
+      }
+    }
+    return send.call(this, data);
+  };
+})()`);
+await type(32, String(head < 2048 ? 4000 : 100), 'Enter');
+await nudgeAt(32, 1);
+await waitFor('Number.isInteger(window.observedNudge)', '在未确认的目标后收到微调指令');
+out.nudgeFromFeedback = {measured: head, requested: await js('window.observedNudge')};
 
 log('新舵机编号：先用「改 ID」把 21 号改成出厂的 1 号，冒充一颗刚拆封的');
 const choose = (sel, value) => js(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return false;
