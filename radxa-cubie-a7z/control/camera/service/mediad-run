@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+ROOT=/opt/robot/gst-root
+LIB="$ROOT/usr/lib/aarch64-linux-gnu"
+LOADER="$LIB/ld-linux-aarch64.so.1"
+GST_SYS="$LIB/gstreamer-1.0"
+GST_EXTRA="$ROOT/usr/local/lib/gstreamer-1.0"
+export GST_PLUGIN_SYSTEM_PATH_1_0="$GST_SYS"
+export GST_PLUGIN_SCANNER_1_0=/usr/local/sbin/gst-plugin-scanner-a7z
+export GST_PLUGIN_SCANNER=/usr/local/sbin/gst-plugin-scanner-a7z
+export GST_PLUGIN_PATH="$GST_EXTRA:$GST_SYS"
+export GST_REGISTRY_1_0=/var/lib/mediad/registry.bin
+exec "$LOADER" --library-path "$LIB:$ROOT/lib/aarch64-linux-gnu" \
+  /opt/robot/feetech-ft5-r5/mediad \
+  --no-remote \
+  --config /etc/robot/mediad.toml \
+  --camera-device /dev/video0 \
+  --host 0.0.0.0 \
+  --port 8443 --capture-format I420

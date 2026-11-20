@@ -1,0 +1,5 @@
+#!/bin/sh
+ROOT=/opt/robot/gst-root
+LIB=$ROOT/usr/lib/aarch64-linux-gnu
+exec "$LIB/ld-linux-aarch64.so.1" --library-path "$LIB" \
+  "$LIB/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner" "$@"
