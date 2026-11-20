@@ -18,6 +18,18 @@ class SnapshotTests(unittest.TestCase):
                 audio.validate_status({'listening': True, 'music': True,
                     'rhythm': {'bpm': 120, 'confidence': .9, 'feel': 'lively', 'last_beat': 10., 'age': .1}, **change})
 
+    def test_voice_last_reason_is_validated(self):
+        base = {'listening': True, 'music': True,
+                'rhythm': {'bpm': 120, 'confidence': .9, 'feel': 'lively', 'last_beat': 10., 'age': .1}}
+        good = {**base, 'last': {'command': 'nod', 'accepted': False, 'age': 1.,
+                                 'seq': 3, 'reason': 'robot is sitting; stand up first'}}
+        self.assertEqual(audio.validate_status(good)['last']['reason'],
+                         'robot is sitting; stand up first')
+        for change in ({'reason': 5}, {'reason': 'x' * 201},
+                       {'command': 7}, {'seq': -1}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                audio.validate_status({**base, 'last': {**good['last'], **change}})
+
 
 class ClientTests(unittest.TestCase):
     def setUp(self):

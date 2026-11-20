@@ -203,7 +203,9 @@ function useCameraSession({ api, video, active = true, inline = false }) {
           return;
         }
       }
-      transport.start(info?.signaling_port ?? 8443);
+      // https 页面直连明文 8443 会被浏览器当混合内容挡掉，改走同域的 /media-ws（nginx 转给本机 8443）
+      const proxyPath = typeof location !== 'undefined' && location.protocol === 'https:' ? '/media-ws' : null;
+      transport.start(info?.signaling_port ?? 8443, proxyPath);
     };
     read();
     return () => { disposed = true; clearTimeout(retry); abort.abort(); transport.stop(); if (camera.current === transport) camera.current = null; };

@@ -16,7 +16,7 @@ def _number(value, lo, hi):
 
 
 def validate_status(value):
-    if not isinstance(value, dict) or set(value)-{'listening','music','rhythm','error','runtime_root','voice_ready'}:
+    if not isinstance(value, dict) or set(value)-{'listening','music','rhythm','error','runtime_root','voice_ready','last'}:
         raise ValueError('invalid audio status fields')
     if 'voice_ready' in value and type(value['voice_ready']) is not bool:
         raise ValueError('invalid voice readiness')
@@ -38,6 +38,24 @@ def validate_status(value):
     error = value.get('error')
     if error is not None and (not isinstance(error,str) or len(error)>240):
         raise ValueError('invalid audio error')
+    # 「最近一次认出的指令」（新版 duck-echo 才有）。只带指令名、成没成、失败原因、
+    # 多久之前、第几次：整句原话不落这里，所以校验也只放这几样
+    last = value.get('last')
+    if last is not None:
+        if not isinstance(last, dict) or set(last)-{'command','accepted','age','seq','reason'}:
+            raise ValueError('invalid voice result shape')
+        command = last.get('command')
+        if not isinstance(command, str) or not 0 < len(command) <= 32:
+            raise ValueError('invalid voice command')
+        accepted = last.get('accepted')
+        if accepted is not None and type(accepted) is not bool:
+            raise ValueError('invalid voice acceptance')
+        reason = last.get('reason')
+        if reason is not None and (not isinstance(reason, str) or len(reason) > 200):
+            raise ValueError('invalid voice reason')
+        _number(last.get('age'), 0, 1e9)
+        if type(last.get('seq')) is not int or last['seq'] < 0:
+            raise ValueError('invalid voice sequence')
     return copy.deepcopy(value)
 
 

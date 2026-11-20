@@ -19,7 +19,34 @@ export class CameraLink {
 
   update(patch) { this.state = { ...this.state, ...patch }; this.onState(this.state); }
 
-  start(port = 8443) {
+  // 把四个回调挂到一个刚建好的 WebSocket 上。label 只用在报错文案里（端口 8443 或 /media-ws）
+  _attach(ws, generation, label) {
+    this.chain = Promise.resolve();
+    this.queuedMessages = 0;
+    ws.onopen = () => { if (this.current(generation)) this.update({ state: 'signaling' }); };
+    ws.onmessage = event => {
+      if (!this.current(generation)) return;
+      if (typeof event.data !== 'string' || event.data.length > MAX_MESSAGE || ++this.queuedMessages > 256) {
+        this.fail('摄像头信令数据超出限制。'); return;
+      }
+      this.chain = this.chain.then(async () => {
+        if (this.current(generation)) await this.message(JSON.parse(event.data), generation);
+      }).catch(error => { if (this.current(generation)) this.fail(`摄像头协商失败：${error.message || '数据无效'}`); })
+        .finally(() => { if (this.current(generation)) this.queuedMessages--; });
+    };
+    ws.onerror = () => { if (this.current(generation)) this.fail(`连不上摄像头信令${label}，请检查 mediad 和局域网连接。`); };
+    ws.onclose = () => { if (this.current(generation)) this.fail('摄像头信令连接断开，请重新连接。'); };
+    this.lastFrameAt = this.startedAt = this.now();
+    this.watch(generation);
+  }
+
+  /**
+   * 连摄像头信令。默认直连 mediad 的端口（8443）；传了 path 就走「同域 + 同协议」的反代路径。
+   * 为什么还要 path：https 页面里连 ws://host:8443 是明文，浏览器会把它当混合内容直接挡掉，
+   * 所以 https 下必须走同域的 /media-ws（nginx 转发到本机 8443），画面才出得来。
+   */
+  start(port = 8443, path = null) {
+    if (path) return this.startProxy(path);
     this.stop();
     const generation = this.generation;
     this.state = { state: 'connecting', error: null, width: null, height: null, frames: 0, metadata: null, producer: null };
@@ -30,24 +57,21 @@ export class CameraLink {
       const hostname = this.location.hostname;
       const host = hostname.includes(':') && !hostname.startsWith('[') ? `[${hostname}]` : hostname;
       const scheme = this.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = this.ws = new this.WebSocket(`${scheme}://${host}:${port}`);
-      this.chain = Promise.resolve();
-      this.queuedMessages = 0;
-      ws.onopen = () => { if (this.current(generation)) this.update({ state: 'signaling' }); };
-      ws.onmessage = event => {
-        if (!this.current(generation)) return;
-        if (typeof event.data !== 'string' || event.data.length > MAX_MESSAGE || ++this.queuedMessages > 256) {
-          this.fail('摄像头信令数据超出限制。'); return;
-        }
-        this.chain = this.chain.then(async () => {
-          if (this.current(generation)) await this.message(JSON.parse(event.data), generation);
-        }).catch(error => { if (this.current(generation)) this.fail(`摄像头协商失败：${error.message || '数据无效'}`); })
-          .finally(() => { if (this.current(generation)) this.queuedMessages--; });
-      };
-      ws.onerror = () => { if (this.current(generation)) this.fail(`连不上摄像头信令端口 ${port}，请检查 mediad 和局域网连接。`); };
-      ws.onclose = () => { if (this.current(generation)) this.fail('摄像头信令连接断开，请重新连接。'); };
-      this.lastFrameAt = this.startedAt = this.now();
-      this.watch(generation);
+      this._attach(this.ws = new this.WebSocket(`${scheme}://${host}:${port}`), generation, `端口 ${port}`);
+    } catch (error) { this.fail(`摄像头连接失败：${error.message}`); }
+  }
+
+  /** 走同域的反代路径（不带端口），比如 /media-ws。http 和 https 下都能这么连 */
+  startProxy(path = '/media-ws') {
+    this.stop();
+    const generation = this.generation;
+    this.state = { state: 'connecting', error: null, width: null, height: null, frames: 0, metadata: null, producer: null };
+    this.update({});
+    if (!this.WebSocket || !this.RTCPeerConnection) return this.fail('这个浏览器不支持 WebRTC 预览。');
+    if (typeof path !== 'string' || !path.startsWith('/')) return this.fail('摄像头信令路径无效。');
+    try {
+      const scheme = this.location.protocol === 'https:' ? 'wss' : 'ws';
+      this._attach(this.ws = new this.WebSocket(`${scheme}://${this.location.host}${path}`), generation, path);
     } catch (error) { this.fail(`摄像头连接失败：${error.message}`); }
   }
 

@@ -32,9 +32,19 @@ class AudioControl:
         error = getattr(interaction, 'error', None)
         if self.audio.failed:
             error = 'microphone capture unavailable; enable listening to retry'
+        last = None
+        if voice is not None and hasattr(voice, 'last_view'):
+            try:
+                last = voice.last_view()
+                # 太久以前的指令不再往外说：手机页看到的是「刚刚听到了什么」，不是历史
+                if isinstance(last, dict) and last.get('age', 0) > 30:
+                    last = None
+            except Exception:
+                last = None
         return {'listening': bool(self.audio.active), 'music': bool(self.audio.music_mode),
                 'runtime_root':RUNTIME_ROOT,'voice_ready':voice_ready,
-                'rhythm': self.feel.snapshot(), 'error': str(error)[:240] if error else None}
+                'rhythm': self.feel.snapshot(), 'error': str(error)[:240] if error else None,
+                'last': last}
 
     def request(self, request):
         with self.lock:
