@@ -54184,7 +54184,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-20T02:44:40Z",
+  "checked_at_utc": "2026-11-20T03:51:05Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -54197,9 +54197,9 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-19T17:47:20Z",
-    "source_snapshot_utc": "2026-11-20T02:44:40Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-20T02:44:40Z",
+    "previous_substantive_review_utc": "2026-11-20T02:44:40Z",
+    "source_snapshot_utc": "2026-11-20T03:51:05Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-20T03:52:05Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
@@ -54208,7 +54208,7 @@
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Official four repo heads,formal/dev releases,PRs,models,blog and OS channels unchanged. Synced user commits74ef85b/0c96ff6: Nov10RC1,Nov12RC2/RC4 releases now drafts, same tags and asset metadata retained; RC1/RC3 were already drafts. Zero3W README points to public1104 while GitHubLatest stays1027. Added current publication observations without overwriting historical acceptance or source records. Documentation only; no tests/build/environment/device activity.",
+    "notes": "Official heads/formal/dev releases/PRs/models/blog/OS channels unchanged. New formal replica software2026.11.20 at1549c75 supports prepared stock1104 cards;5asset metadata,checksum list and README bytes checked. Original host preparation/reboot and separate native confirmation remain explicit; author ARM/browser report and pending ZERO3W recheck preserved. Tagged runtime source not ancestor of observed master; only user navigation/docs fast-forwarded. No tests/build/install/environment/device or0182 migration changes by tracker.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
@@ -54216,7 +54216,8 @@
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
     "official_os_development_channels_changed": false,
-    "replica_image_publication_changed": true
+    "replica_image_publication_changed": false,
+    "replica_public_software_changed": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -54870,161 +54871,138 @@
     }
   },
   "replica_public_software": {
-    "recorded_on": "2026-10-31",
-    "checked_at_utc": "2026-10-31T11:26:14.967287+00:00",
-    "release_tag": "microduck-software-v2026.10.3101",
-    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.10.3101",
-    "published_at_utc": "2026-10-31T10:57:26Z",
+    "recorded_on": "2026-11-20",
+    "checked_at_utc": "2026-11-20T03:51:05Z",
+    "release_tag": "microduck-software-v2026.11.20",
+    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20",
+    "release_id": 452238504,
+    "release_name": "2026.11.20 正式软件更新 · ZERO 3W 1104 原卡在线升级",
+    "published_at_utc": "2026-11-20T03:40:08Z",
+    "published_at_jst": "2026-11-20T12:40:08+09:00",
+    "release_updated_at_utc": "2026-11-20T03:40:08Z",
+    "draft": false,
     "prerelease": false,
-    "source_sha": "3952471a8394c8b720817d2160ffd95ce5a54456",
-    "tag_actual_sha": "3952471a8394c8b720817d2160ffd95ce5a54456",
-    "documentation_checkpoint_sha": "e6f0e44c47d63a9ac431cb8fa08b66b7cd37b2c0",
-    "software_version": "2026.10.3101",
+    "source_sha": "1549c752ea38e6b42aff31b4f1be9f7a3408d4b5",
+    "tag_actual_sha": "1549c752ea38e6b42aff31b4f1be9f7a3408d4b5",
+    "source_committed_at_utc": "2026-11-20T03:37:26Z",
+    "source_committed_at_jst": "2026-11-20T12:37:26+09:00",
+    "software_version": "2026.11.20",
+    "classification": "Formal replica software release for prepared ZERO3W/HD1910 stock1104 cards; separate tagged source, not official daemon/OS or0182 migration.",
+    "source_is_ancestor_of_observed_master": false,
+    "observed_master_sha": "a320a096aa0afb9676cef88f2b07e48230fac2e1",
     "image_rebuilt": false,
     "GitHub_latest_image_tag": "microduck-replica-image-20261027",
-    "features": [
-      "UI-only32head-yaw/34mouth diagram selection/highlight/leader mapping and old cache correction",
-      "Inherits31gamepad mapping, camera enlargement and SSHguide"
-    ],
-    "runtime_family": "0.15.1",
-    "robotd_api": 42,
-    "robotd_build": "0791fcd-feetech-qinmo-control.47",
-    "model_api": 2,
-    "padd_mapping_protocol": 1,
-    "native_inputs": {
-      "repository": "fanhao375/Microduck-kissqy",
-      "robotd": {
-        "source_commit": "931ce978f2efb27c157b7a583ee402793131a0d2",
-        "size": 5606976,
-        "sha256": "725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00",
-        "build": "0791fcd-feetech-qinmo-control.47",
-        "api": 42,
-        "model": 2
-      },
-      "padd": {
-        "source_commit": "665613ac628fdc9b1b71f324809f0c16ce2795f2",
-        "source_archive_sha256": "19d477da39233009377f6653dff317ba16457534e9e2436545adf40385b02f38",
-        "size": 3522648,
-        "sha256": "dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec",
-        "embedded_build_time": "2026-10-30T23:17:10+09:00",
-        "target": "aarch64-unknown-linux-gnu.2.31",
-        "maximum_glibc_symbol_version": "2.30",
-        "independent_builds_byte_identical": true,
-        "mapping_protocol": 1,
-        "linux_padd_tests_executed_passed": 113,
-        "actual_arm_process_and_status_under_qemu": true,
-        "hardware_acceptance": false
-      },
-      "public_source_export": {
-        "commit": "27d7921dbcb280bd7d6ba3e9937624f1e2e61d23",
-        "release_record_url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.10.3101/runtime-provenance.json",
-        "sole_parent_public_baseline": "e376346723e1670a649b2a00e4dcec0f3d2a46cd",
-        "historical_embedded_build_source": "665613ac628fdc9b1b71f324809f0c16ce2795f2",
-        "historical_build_commit_public_reachability_claimed": false,
-        "program_and_build_inputs_equal_historical_frozen_source": true,
-        "program_input_file_count": 1331,
-        "protected_console_changes_and_local_history_excluded": true,
-        "public_source_recipe_syntax_checked": true,
-        "public_source_rebuild_executed": false,
-        "frozen_binary_changed": false
-      }
-    },
-    "contract_note": "Build suffix .47 is not API47. This released0.15.1/API42 software/controller delivery is separate from local0.18.2/API47 migration and official0.18.3/API47 telemetry.",
+    "target_image": "microduck-replica-image-20261104",
+    "target_stock_source_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+    "stock_runtime_family": "0.15.1",
+    "stock_robotd_build": "replica-imu-verify-control.48",
+    "stock_robotd_api": 43,
     "asset_inventory": [
       {
-        "name": "2026.10.3101.manifest.json",
-        "size": 811,
-        "digest": "sha256:fa984f24d404db3f296c68fb658bc7bca33aa83ed075932ba4b9af5af60f907f"
+        "name": "2026.11.20.software-update.tar",
+        "size": 9779200,
+        "digest": "sha256:16c53bb5913b86e6633382df6410fd7a4c62809a7008f539a82c3fd1ffb16126"
       },
       {
-        "name": "2026.10.3101.manifest.json.minisig",
-        "size": 321,
-        "digest": "sha256:7ddeeb39c3d658e51a4f6c788312e530851d5bb8562d38166378228ee02be83e"
+        "name": "prepare-stock-1104-online.pyz.minisig",
+        "size": 324,
+        "digest": "sha256:8ccf9a00b36f7e479941639482a8af58b63e8a36fcb22be102a1d54ebd1636f8"
       },
       {
-        "name": "2026.10.3101.software-update.tar",
-        "size": 9287680,
-        "digest": "sha256:0502c452e7062aa29286f6a82c046ed4ceaaf8beecaa6d98958341a80c95ea77"
+        "name": "prepare-stock-1104-online.pyz",
+        "size": 227510,
+        "digest": "sha256:41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07"
       },
       {
-        "name": "2026.10.3101.software-update.tar.sha256",
-        "size": 99,
-        "digest": "sha256:fd1e32b3b32a0b8c7d64a00d9fab2fd36b597348481688e977b9ffebba53e7c5"
+        "name": "SHA256SUMS.txt",
+        "size": 378,
+        "digest": "sha256:ab8d9f65dee18da1e5d95df68b972f5f1e54e7af368119a8ffe78218e3848140"
       },
       {
-        "name": "LICENSE-Apache-2.0.txt",
-        "size": 11358,
-        "digest": "sha256:c95bae1d1ce0235ecccd3560b772ec1efb97f348a79f0fbe0a634f0c2ccefe2c"
-      },
-      {
-        "name": "README.txt",
-        "size": 1651,
-        "digest": "sha256:6a5e3c485f33718b84e40d578783de6f9c87dc760f6f3391487369e3b895599f"
-      },
-      {
-        "name": "bootstrap-README.txt",
-        "size": 2354,
-        "digest": "sha256:a4e1c12104d59fb0909c431a73bda5d2cb1588f2d154fd6144d08e424d194889"
-      },
-      {
-        "name": "microduck-bootstrap-2026.10.3101.tar.gz",
-        "size": 61426175,
-        "digest": "sha256:9e0e6e06ff8d7d1522afb67b8ea4fdd454fe15f6031cc2c602e915d30cec5da8"
-      },
-      {
-        "name": "microduck-bootstrap-2026.10.3101.tar.gz.sha256",
-        "size": 106,
-        "digest": "sha256:3017417ac9eb684fb3ebf0d453fad41aabf615ca02f94a1c62a1b32a67632fd4"
-      },
-      {
-        "name": "microduck-release-20261027.pub",
-        "size": 113,
-        "digest": "sha256:0878853a92b10c9196c5b63e02087664923c576e6bc2e064d3bbdcc1be056bf5"
-      },
-      {
-        "name": "runtime-provenance.json",
-        "size": 6849,
-        "digest": "sha256:f84986ae58922e6bd6e37a7b14640caecd367d0483b6f1c643886f8186f1749e"
+        "name": "README-1104.md",
+        "size": 4100,
+        "digest": "sha256:beeee381b882ee8ff692b283b11294f85cc427f958a9562dc18c988e42f1fe4b"
       }
     ],
     "software_package": {
-      "name": "2026.10.3101.software-update.tar",
-      "size": 9287680,
-      "sha256": "0502c452e7062aa29286f6a82c046ed4ceaaf8beecaa6d98958341a80c95ea77"
+      "name": "2026.11.20.software-update.tar",
+      "size": 9779200,
+      "sha256": "16c53bb5913b86e6633382df6410fd7a4c62809a7008f539a82c3fd1ffb16126",
+      "scope": "Outer signed software-update envelope metadata, not an inspected inner payload manifest."
     },
-    "JSON_review": {
-      "runtime-provenance.json": {
-        "size": 6849,
-        "digest": "sha256:f84986ae58922e6bd6e37a7b14640caecd367d0483b6f1c643886f8186f1749e"
+    "preparation_tool": {
+      "name": "prepare-stock-1104-online.pyz",
+      "size": 227510,
+      "sha256": "41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07",
+      "signature_attachment": "prepare-stock-1104-online.pyz.minisig",
+      "required_on_stock1104": true,
+      "reboot_required": true,
+      "executed_by_tracker": false,
+      "signature_verified_by_tracker": false,
+      "source_build_file": "software/updater/stock1104/build.py",
+      "factory_pin": "f215b658a4f24b669cf664b6381a559c61472009",
+      "readiness_fix_source": "a9ef4020a610fb7f4948ec49845e8d23c9fbb432",
+      "source_contract": "Builder pins factory/fix/current Git sources and signed suite-version digest; installer checks installed suite/files/original host units, stages three service drop-ins, and requires reboot. Neither preparation nor restore was executed here."
+    },
+    "metadata_attachment_verification": [
+      {
+        "name": "SHA256SUMS.txt",
+        "url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.11.20/SHA256SUMS.txt",
+        "size": 378,
+        "sha256": "ab8d9f65dee18da1e5d95df68b972f5f1e54e7af368119a8ffe78218e3848140",
+        "bytes_match_github_metadata": true
       },
-      "2026.10.3101.manifest.json": {
-        "size": 811,
-        "digest": "sha256:fa984f24d404db3f296c68fb658bc7bca33aa83ed075932ba4b9af5af60f907f"
+      {
+        "name": "README-1104.md",
+        "url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.11.20/README-1104.md",
+        "size": 4100,
+        "sha256": "beeee381b882ee8ff692b283b11294f85cc427f958a9562dc18c988e42f1fe4b",
+        "bytes_match_github_metadata": true
       }
+    ],
+    "metadata_crosschecks": {
+      "sha256sums_four_entries_match_asset_metadata": true,
+      "readme_attachment_matches_tagged_git_bytes": true,
+      "binary_payloads_downloaded": false,
+      "archive_unpacked": false,
+      "inner_manifest_inspected": false
     },
-    "manifest_scope": "Manifest describes inner9280453-byte compressed payload; provenance/GitHub software-update.tar describes outer9287680-byte envelope.",
+    "features": [
+      "Stable software notice in Studio overview; explicit selected-version online download/validate/install and durable reconnect outcome.",
+      "Health rollback and explicit engine refusal reporting; coordinator reconciles engine state after interrupted installation.",
+      "Release describes servo/IMU diagnostics,encoder-based nudges,mobile control,local voice,maintenance,and optional camera/ToF state checks."
+    ],
+    "actual_source_review": {
+      "coordinator": "software/updater/control.py selects non-draft/non-prerelease software tags from fixed repository, validates bounded HTTPS download, pins expected version and asks engine update.apply component=software target.exact. Preflight requires model idle and blocks unknown control state.",
+      "notice": "Final1549 source follows shared/slow catalog checks with bounded waiting; it does not start an install merely because a notice appears.",
+      "native_boundary": "Source keeps a separate native/controller transaction with explicit confirmation. Its declared companion target iscontrol.48/API43, not0.18.2/API47. Optional build-time native inputs cannot establish actual release binary contents without reading the package; those bytes were not fetched.",
+      "fixed_coordinator": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/updater/control.py",
+      "fixed_preparation": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/updater/stock1104/README.md",
+      "fixed_native_contract": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/studio/deploy/native_update.py"
+    },
     "reported_verification": {
-      "source": "Committed servo-patch publication record and public r1provenance; no rerun by heartbeat.",
-      "cad_three_cache_regressions": 23,
-      "related_python_regressions": 32,
-      "publisher_tests_run": 32,
-      "publisher_passed": 28,
-      "publisher_Windows_skips": 4,
-      "browser": "Actual browser/WebGL with synthetic device, ID32/34 fixtures; not physical servo movement.",
-      "original27_ARM_engine": "Committed actual ARM/QEMU isolated install/rollback/signature/hash/health/crash checks from27and31software baselines; recording service shims.",
-      "limitations": [
-        "No physical device installation in this task.",
-        "Controller hardware acceptance remains the separately documented31 limitation.",
-        "Bootstrap inputs are verified, not a new physical bootstrap install acceptance."
-      ]
+      "source": "Published release notes452238504 at observed timestamp; author-reported, not tracker reruns.",
+      "scope": "Original1104 ARM updater and browser coverage for online install,signature refusal,browser disconnect/result reread and rollback.",
+      "hardware": "Release explicitly says ZERO3W physical recheck remains pending.",
+      "source_limit": "No oldOctober31/0182/QEMU results relabelled as final1549-source reruns; no new numeric test counts inferred."
     },
     "hardware_acceptance": false,
     "independent_0182_acceptance_changed": false,
     "deployed_by_heartbeat": false,
-    "fixed_verification_url": "https://github.com/fanhao375/microduck-replica/blob/e6f0e44c47d63a9ac431cb8fa08b66b7cd37b2c0/docs/superpowers/verification/2026-10-31-servo-patch-release.md",
-    "operation_document": "docs/软件修订-20261031-r1.md",
-    "priority": "UI correction for current0.15software; native inputs unchanged. Independent0182Linux/consumer/ORT/ARM/device gates remain separate.",
-    "heartbeat_verification": "Read fixed published docs/source identity,11asset metadata and only2smallJSONsize/digests. Native hashes match31. No software/bootstrap archive download, signature rerun, build/tests/install/environment/robot/live-page operation.",
+    "package_signature_verified_by_tracker": false,
+    "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5",
+    "operation_document_url": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/updater/stock1104/README.md",
+    "impact": {
+      "HD1910": "Formal Studio/software update targets stock1104 Zero3W cards after exact-host preparation. Software update and separately confirmed native driver update remain distinct; physical recheck pending.",
+      "camera": "Release includes optional sensor/source checks and negotiated-view handling; no new physical camera calibration/ISP acceptance.",
+      "ToF": "Live stream/validity display and on-demand service use, not a new ranging geometry or avoidance policy.",
+      "model_management": "Preflight distinguishes motion-model takeover and unknown state; no new weights or model import contract certified.",
+      "training": "No new training recipe or weights.",
+      "motion": "Idle preflight and motion/control gating; GUI diagnostics/encoder adjustments do not certify gait or hardware movement.",
+      "sound": "Mobile/local voice updates are software delivery; actual phone microphone and acoustic/device recheck remain pending."
+    },
+    "priority": "High current software-provenance and1104 readiness review; physical adoption remains pending. Independent15-to18 migration stays disabled.",
+    "heartbeat_verification": "Read tagged source and two small text attachments; compared5asset metadata and hashes. No software/pyz download,signature execution,tests,build,install,service/environment,robot or preview-page operation.",
     "history": [
       {
         "recorded_on": "2026-10-31",
@@ -55184,15 +55162,172 @@
         "operation_document": "docs/功能软件升级-20261030.md",
         "priority": "For existing0.15 installations, use31 instructions and separate component/device acceptance. Continue the independent0.18.2 Linux/consumer/ORT/ARM/image/device checklist; do not replace it with these older-line results.",
         "heartbeat_verification": "Checked formal release/direct tag,11asset metadata entries, SHA256+size of only2smallJSONfiles, fixed public source/doc commit reachability and public Cargo0.15.1. No software/bootstrap archive download, signatures rerun, build, tests, install, WSL recovery, robot or live-page access."
+      },
+      {
+        "recorded_on": "2026-10-31",
+        "checked_at_utc": "2026-10-31T11:26:14.967287+00:00",
+        "release_tag": "microduck-software-v2026.10.3101",
+        "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.10.3101",
+        "published_at_utc": "2026-10-31T10:57:26Z",
+        "prerelease": false,
+        "source_sha": "3952471a8394c8b720817d2160ffd95ce5a54456",
+        "tag_actual_sha": "3952471a8394c8b720817d2160ffd95ce5a54456",
+        "documentation_checkpoint_sha": "e6f0e44c47d63a9ac431cb8fa08b66b7cd37b2c0",
+        "software_version": "2026.10.3101",
+        "image_rebuilt": false,
+        "GitHub_latest_image_tag": "microduck-replica-image-20261027",
+        "features": [
+          "UI-only32head-yaw/34mouth diagram selection/highlight/leader mapping and old cache correction",
+          "Inherits31gamepad mapping, camera enlargement and SSHguide"
+        ],
+        "runtime_family": "0.15.1",
+        "robotd_api": 42,
+        "robotd_build": "0791fcd-feetech-qinmo-control.47",
+        "model_api": 2,
+        "padd_mapping_protocol": 1,
+        "native_inputs": {
+          "repository": "fanhao375/Microduck-kissqy",
+          "robotd": {
+            "source_commit": "931ce978f2efb27c157b7a583ee402793131a0d2",
+            "size": 5606976,
+            "sha256": "725b74cd93660a312970a44879abe5b75e8becf108499a1b8798961e48ca5f00",
+            "build": "0791fcd-feetech-qinmo-control.47",
+            "api": 42,
+            "model": 2
+          },
+          "padd": {
+            "source_commit": "665613ac628fdc9b1b71f324809f0c16ce2795f2",
+            "source_archive_sha256": "19d477da39233009377f6653dff317ba16457534e9e2436545adf40385b02f38",
+            "size": 3522648,
+            "sha256": "dc1c7043a108964583fc09a11e3d6f87a25e259c346f7ce9154e77500a0881ec",
+            "embedded_build_time": "2026-10-30T23:17:10+09:00",
+            "target": "aarch64-unknown-linux-gnu.2.31",
+            "maximum_glibc_symbol_version": "2.30",
+            "independent_builds_byte_identical": true,
+            "mapping_protocol": 1,
+            "linux_padd_tests_executed_passed": 113,
+            "actual_arm_process_and_status_under_qemu": true,
+            "hardware_acceptance": false
+          },
+          "public_source_export": {
+            "commit": "27d7921dbcb280bd7d6ba3e9937624f1e2e61d23",
+            "release_record_url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.10.3101/runtime-provenance.json",
+            "sole_parent_public_baseline": "e376346723e1670a649b2a00e4dcec0f3d2a46cd",
+            "historical_embedded_build_source": "665613ac628fdc9b1b71f324809f0c16ce2795f2",
+            "historical_build_commit_public_reachability_claimed": false,
+            "program_and_build_inputs_equal_historical_frozen_source": true,
+            "program_input_file_count": 1331,
+            "protected_console_changes_and_local_history_excluded": true,
+            "public_source_recipe_syntax_checked": true,
+            "public_source_rebuild_executed": false,
+            "frozen_binary_changed": false
+          }
+        },
+        "contract_note": "Build suffix .47 is not API47. This released0.15.1/API42 software/controller delivery is separate from local0.18.2/API47 migration and official0.18.3/API47 telemetry.",
+        "asset_inventory": [
+          {
+            "name": "2026.10.3101.manifest.json",
+            "size": 811,
+            "digest": "sha256:fa984f24d404db3f296c68fb658bc7bca33aa83ed075932ba4b9af5af60f907f"
+          },
+          {
+            "name": "2026.10.3101.manifest.json.minisig",
+            "size": 321,
+            "digest": "sha256:7ddeeb39c3d658e51a4f6c788312e530851d5bb8562d38166378228ee02be83e"
+          },
+          {
+            "name": "2026.10.3101.software-update.tar",
+            "size": 9287680,
+            "digest": "sha256:0502c452e7062aa29286f6a82c046ed4ceaaf8beecaa6d98958341a80c95ea77"
+          },
+          {
+            "name": "2026.10.3101.software-update.tar.sha256",
+            "size": 99,
+            "digest": "sha256:fd1e32b3b32a0b8c7d64a00d9fab2fd36b597348481688e977b9ffebba53e7c5"
+          },
+          {
+            "name": "LICENSE-Apache-2.0.txt",
+            "size": 11358,
+            "digest": "sha256:c95bae1d1ce0235ecccd3560b772ec1efb97f348a79f0fbe0a634f0c2ccefe2c"
+          },
+          {
+            "name": "README.txt",
+            "size": 1651,
+            "digest": "sha256:6a5e3c485f33718b84e40d578783de6f9c87dc760f6f3391487369e3b895599f"
+          },
+          {
+            "name": "bootstrap-README.txt",
+            "size": 2354,
+            "digest": "sha256:a4e1c12104d59fb0909c431a73bda5d2cb1588f2d154fd6144d08e424d194889"
+          },
+          {
+            "name": "microduck-bootstrap-2026.10.3101.tar.gz",
+            "size": 61426175,
+            "digest": "sha256:9e0e6e06ff8d7d1522afb67b8ea4fdd454fe15f6031cc2c602e915d30cec5da8"
+          },
+          {
+            "name": "microduck-bootstrap-2026.10.3101.tar.gz.sha256",
+            "size": 106,
+            "digest": "sha256:3017417ac9eb684fb3ebf0d453fad41aabf615ca02f94a1c62a1b32a67632fd4"
+          },
+          {
+            "name": "microduck-release-20261027.pub",
+            "size": 113,
+            "digest": "sha256:0878853a92b10c9196c5b63e02087664923c576e6bc2e064d3bbdcc1be056bf5"
+          },
+          {
+            "name": "runtime-provenance.json",
+            "size": 6849,
+            "digest": "sha256:f84986ae58922e6bd6e37a7b14640caecd367d0483b6f1c643886f8186f1749e"
+          }
+        ],
+        "software_package": {
+          "name": "2026.10.3101.software-update.tar",
+          "size": 9287680,
+          "sha256": "0502c452e7062aa29286f6a82c046ed4ceaaf8beecaa6d98958341a80c95ea77"
+        },
+        "JSON_review": {
+          "runtime-provenance.json": {
+            "size": 6849,
+            "digest": "sha256:f84986ae58922e6bd6e37a7b14640caecd367d0483b6f1c643886f8186f1749e"
+          },
+          "2026.10.3101.manifest.json": {
+            "size": 811,
+            "digest": "sha256:fa984f24d404db3f296c68fb658bc7bca33aa83ed075932ba4b9af5af60f907f"
+          }
+        },
+        "manifest_scope": "Manifest describes inner9280453-byte compressed payload; provenance/GitHub software-update.tar describes outer9287680-byte envelope.",
+        "reported_verification": {
+          "source": "Committed servo-patch publication record and public r1provenance; no rerun by heartbeat.",
+          "cad_three_cache_regressions": 23,
+          "related_python_regressions": 32,
+          "publisher_tests_run": 32,
+          "publisher_passed": 28,
+          "publisher_Windows_skips": 4,
+          "browser": "Actual browser/WebGL with synthetic device, ID32/34 fixtures; not physical servo movement.",
+          "original27_ARM_engine": "Committed actual ARM/QEMU isolated install/rollback/signature/hash/health/crash checks from27and31software baselines; recording service shims.",
+          "limitations": [
+            "No physical device installation in this task.",
+            "Controller hardware acceptance remains the separately documented31 limitation.",
+            "Bootstrap inputs are verified, not a new physical bootstrap install acceptance."
+          ]
+        },
+        "hardware_acceptance": false,
+        "independent_0182_acceptance_changed": false,
+        "deployed_by_heartbeat": false,
+        "fixed_verification_url": "https://github.com/fanhao375/microduck-replica/blob/e6f0e44c47d63a9ac431cb8fa08b66b7cd37b2c0/docs/superpowers/verification/2026-10-31-servo-patch-release.md",
+        "operation_document": "docs/软件修订-20261031-r1.md",
+        "priority": "UI correction for current0.15software; native inputs unchanged. Independent0182Linux/consumer/ORT/ARM/device gates remain separate.",
+        "heartbeat_verification": "Read fixed published docs/source identity,11asset metadata and only2smallJSONsize/digests. Native hashes match31. No software/bootstrap archive download, signature rerun, build/tests/install/environment/robot/live-page operation.",
+        "revision_meaning": "2026-10-31 revision01; formal three-part version compatible with original27 catalog",
+        "native_binaries_changed_or_recompiled": false,
+        "inherited_controller_verification": {
+          "version": "2026.10.31",
+          "provenance_url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.10.31/runtime-provenance.json",
+          "note": "Native113 tests, A/B builds, genuine-systemd fixture and Linux controller checks are prior unchanged-controller evidence, not rerun for this UI-only revision."
+        }
       }
-    ],
-    "revision_meaning": "2026-10-31 revision01; formal three-part version compatible with original27 catalog",
-    "native_binaries_changed_or_recompiled": false,
-    "inherited_controller_verification": {
-      "version": "2026.10.31",
-      "provenance_url": "https://github.com/fanhao375/microduck-replica/releases/download/microduck-software-v2026.10.31/runtime-provenance.json",
-      "note": "Native113 tests, A/B builds, genuine-systemd fixture and Linux controller checks are prior unchanged-controller evidence, not rerun for this UI-only revision."
-    }
+    ]
   },
   "replica_public_prereleases": {
     "recorded_on": "2026-11-04",
@@ -58802,6 +58937,39 @@
       "formal_release_artifacts_available": true,
       "formal_release_assets_completed": false,
       "official_os_development_channels_changed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-19T17:47:20Z",
+      "source_snapshot_utc": "2026-11-20T02:44:40Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-20T02:44:40Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Official four repo heads,formal/dev releases,PRs,models,blog and OS channels unchanged. Synced user commits74ef85b/0c96ff6: Nov10RC1,Nov12RC2/RC4 releases now drafts, same tags and asset metadata retained; RC1/RC3 were already drafts. Zero3W README points to public1104 while GitHubLatest stays1027. Added current publication observations without overwriting historical acceptance or source records. Documentation only; no tests/build/environment/device activity.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "official_os_development_channels_changed": false,
+      "replica_image_publication_changed": true
     }
   ],
   "replica_public_image": {
