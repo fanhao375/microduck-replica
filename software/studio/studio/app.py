@@ -163,7 +163,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
               onboard=None, battery=None, tune=None, net=None, commit=None, ssh_home=None, models=None, sensors=None, updates=None,
               ca_cert=None):
     guard = OriginGuard(names=names)
-    ai = AiService(state_dir, robotd, pad)
+    ai = AiService(state_dir, robotd, pad, getattr(sensors, "camera_signaling_port", 8443))
     updates = updates or Updates()
     if pad is not None:
         pad.update_guard=updates.installing
@@ -178,7 +178,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             and native.get('phase')=='prepared' and isinstance(native_transaction,str)
             and native.get('transaction_id')==native_transaction)
         guarded=updates.marker.exists() or (updates.installing() and not own_prepared)
-        if (guarded or busy or (servo is not None and servo.state != 'closed')
+        ai_motion = any(task is not None and not task.done()
+                        for task in (ai.tools.task, ai.speech_motion.task))
+        if (guarded or busy or ai_motion or (servo is not None and servo.state != 'closed')
             or mapping_requests or (pad is not None and getattr(getattr(pad,'mapping',None),'blocked',False))
             or (motion is not None and (motion.state != 'idle' or motion.session is not None))
             or (imu is not None and (getattr(imu,'_redo_busy',False)
@@ -212,6 +214,16 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 or (imu is not None and (getattr(imu,'_redo_busy',False)
                     or getattr(imu,'blocks_updates',lambda:False)()))):
             raise MappingError('请先结束舵机、标定和模型更新会话，再重新映射手柄')
+    def ai_motion_interlocks():
+        from .pad_mapping import MappingError
+        if mapping_requests or updates.installing():
+            raise AiError('motion_blocked','手柄映射或软件更新进行中')
+        try:
+            mapping_readiness()
+        except MappingError:
+            raise AiError('motion_blocked','舵机、标定或模型更新会话进行中') from None
+
+    ai.tools.check_interlocks = ai_motion_interlocks
     if pad is not None:pad.mapping_guard=mapping_readiness
     # 舵机会话的标记（审查 D1）：没给 state 目录（测试）就不写
     marker = Path(state_dir) / SERVO_MARKER if state_dir and servo is not None else None   # 登录一个一个来：退避不会被并发绕过，scrypt 也不会同时吃掉几份 16 MB
@@ -1612,6 +1624,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         log.info(f"Studio {VERSION} 启动 · Python {platform.python_version()} · {platform.node()}", cat="系统",
                  dedup=False)
         yield
+        await ai.stop()
         await updates.stop_readiness()
         restore.cancel()
         watch.cancel()

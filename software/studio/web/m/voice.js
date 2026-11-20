@@ -20,7 +20,7 @@ import { link } from './link.js';
 import { parseUtterance, runAction, CMD_CN, openPadArea, setAudio } from './actions.js';
 
 // Keep a long press on the recording control from invoking text selection/callouts.
-if (!document.getElementById('m-voice-hold-style')) {
+if (typeof document !== 'undefined' && !document.getElementById('m-voice-hold-style')) {
   const style = document.createElement('style');
   style.id = 'm-voice-hold-style';
   style.textContent = `.m-mic-talk,.m-mic-talk *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.m-mic-talk{touch-action:none}.m-mic-talk *{pointer-events:none}`;
@@ -313,7 +313,7 @@ const KNOWN_WORDS = `走一小步 · ${BOARD_WORDS}`;
 
 export function VoicePage({ st, pad, live, name, say }) {
   const ai = useAiVoice();
-  const [mode, setMode] = useState('phone');      // board | phone
+  const [mode, setMode] = useState(modeOf);      // board | phone
   const [listening, setListening] = useState(false);  // 手机麦克风正在录
   const [boardBusy, setBoardBusy] = useState(false);
   const [heard, setHeard] = useState('');
@@ -335,7 +335,6 @@ export function VoicePage({ st, pad, live, name, say }) {
   const audio = pad?.audio || {};
   const boardOk = audio.available === true;
   const boardOn = audio.listening === true;
-  useEffect(()=>{if(ai.enabled && boardOn)setAudio(link,{listening:false}).catch(()=>{});},[ai.enabled,boardOn]);
   const phoneOk = SECURE && CAN_RECORD;
   // 手机这边拿不到麦克风时，给一句说清「为什么 + 怎么办」，别让人以为是坏了
   const phoneWhy = phoneOk ? null
@@ -426,6 +425,8 @@ export function VoicePage({ st, pad, live, name, say }) {
     setStage('');
     setIsInterim(false);
   }, [discardPhone]);
+
+  useEffect(() => { cancelPhone(); }, [ai.enabled, cancelPhone]);
 
   const startPhone = useCallback(async (turn) => {
     setErr(null); setHeard(''); setIsInterim(false); setSent(null); setAsk(null);
@@ -638,7 +639,7 @@ export function VoicePage({ st, pad, live, name, say }) {
       </div>` : null}
       <p class="m-tip">
         ${phoneOk
-          ? html`按住<b>别松手</b>，等按钮变成「<b>现在说</b>」再开口，说完松开（识别在板子上做，不联网）。`
+          ? html`按住<b>别松手</b>，等按钮变成「<b>现在说</b>」再开口，说完松开（录音在板上识别，${ai.enabled ? '识别出的文字会发给所选模型' : '本地解析固定口令'}）。`
           : html`${phoneWhy}这条路暂时走不通，但下面的输入框（配上<b>输入法的话筒键</b>听写）和板载麦克风都能用。`}
       </p>
       <p class="m-tip"><a href="/diag">长按还是没反应？点这里做一次自检 →</a></p>

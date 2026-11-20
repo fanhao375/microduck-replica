@@ -2,8 +2,6 @@ import {AiCameraPreview} from './ai-camera-preview.js';
 import { AiTools } from './settings-tools.js';
 import { TtsSettings } from './settings-tts.js';
 import { html, useEffect, useRef, useState } from './vendor/preact-htm.module.js';
-import { Maintenance } from './maintenance.js';
-import { CertificateDownload } from './certificate-download.js';
 import { ARK_URL, blankDraft, draftFrom, isDirty, missingFields, requestMessages } from './ai-ui-state.js';
 const CSS = `.ai-settings{padding:18px 20px;min-width:0}.ai-settings h2{margin:0 0 8px;font-size:20px}.ai-settings p{font-size:13px;line-height:1.65;color:var(--text-2);margin:8px 0}.ai-settings .ai-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.ai-settings label{display:flex;flex-direction:column;gap:5px;font-size:13px;min-width:0}.ai-settings input,.ai-settings select,.ai-settings textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line,#d2d2d7);border-radius:9px;background:var(--surface,#fff);color:inherit;padding:9px;font:inherit}.ai-settings .ai-wide{grid-column:1/-1}.ai-settings .ai-check{flex-direction:row;align-items:center}.ai-settings .ai-check input{width:auto}.ai-settings .btn{border:0;border-radius:999px;padding:9px 15px;min-height:38px;font:inherit;font-size:14px;background:#e9e9ee;color:#242428;cursor:pointer}.ai-settings .btn.primary{background:#007aff;color:white}.ai-settings .btn:disabled{opacity:.4;cursor:default}.ai-settings .btn:focus-visible{outline:2px solid #007aff;outline-offset:2px}.ai-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.ai-settings .ai-result{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.ai-settings .ai-chat{border-top:1px solid var(--line,#ddd);margin-top:18px;padding-top:12px}.ai-settings .ai-message{white-space:pre-wrap;overflow-wrap:anywhere;border-radius:9px;padding:9px 11px;margin:7px 0;background:var(--surface-2,#f1f2f5);font-size:14px}.ai-settings .ai-camera-image{display:block;width:25%;max-width:100%;height:auto;object-fit:contain;border-radius:6px;margin:4px 0 10px}.ai-settings .ai-message strong{font-size:12px;display:block;margin-bottom:3px}.ai-settings [role=alert]{color:var(--red,#b42318)}@media(max-width:480px){.ai-settings{padding:16px 12px}.ai-settings .ai-fields{grid-template-columns:1fr}.ai-settings .btn{max-width:100%;white-space:normal}}`;
 if (!document.getElementById('ai-settings-css')) {
@@ -13,9 +11,10 @@ export function AiSettings({ api }) {
   const [data,setData] = useState(null), [form,setForm] = useState(blankDraft);
   const [selected,setSelected] = useState(''), [busy,setBusy] = useState(false);
   const [error,setError] = useState(''), [notice,setNotice] = useState(''), [tested,setTested] = useState(false);
+  const [allowCamera,setAllowCamera] = useState(false);
   const [history,setHistory] = useState([]), [input,setInput] = useState('');
   const alive = useRef(false), controller = useRef(null), pending = useRef(false);
-  const clearConversation = () => {setHistory([]);setInput('');setTested(false);setNotice('');};
+  const clearConversation = () => {setAllowCamera(false);setHistory([]);setInput('');setTested(false);setNotice('');};
   const apply = (response, id) => {
     setData(response);setSelected(id || '');
     setForm(draftFrom(response.connections.find(item=>item.id === id)));
@@ -25,7 +24,7 @@ export function AiSettings({ api }) {
     pending.current = true;setBusy(true);setError('');
     const ctl = new AbortController();controller.current = ctl;
     try {
-      const response = await api('/api/ai',body,65000,ctl.signal);
+      const response = await api('/api/ai',body,body?.allow_camera ? 110000 : 65000,ctl.signal);
       if (!alive.current) return;
       if (!response.ok) {
         if (response.code === 'stale') clearConversation();
@@ -58,7 +57,8 @@ export function AiSettings({ api }) {
   const send = () => {
     const content = input.trim();if (!content || !ready) return;
     const messages = requestMessages(history,content);
-    run({op:'chat',id:selected,revision:saved.revision,messages:messages.map(({role,content})=>({role,content}))},response=>{
+    setAllowCamera(false);
+    run({op:'chat',id:selected,revision:saved.revision,allow_camera:allowCamera,messages:messages.map(({role,content})=>({role,content}))},response=>{
       if (response.id === selected && response.revision === saved.revision) {
         setHistory([...messages,{role:'assistant',content:response.text,...(response.camera_image ? {camera_image:response.camera_image} : {})}].slice(-10));setInput('');
         if(response.speech?.error)setError('文字回复已收到；语音：'+response.speech.error);
@@ -67,9 +67,6 @@ export function AiSettings({ api }) {
     });
   };
   return html`<section id="ai-settings" class="board ai-settings" data-ai-settings aria-label="AI 对话">
-    <h3>手机 HTTPS 证书</h3>
-    <${CertificateDownload} />
-    <${Maintenance} api=${api} />
     <h2>AI 对话</h2>
     <p>先保存提供商与模型配置，开通账号后再填写 Key。支持网页文字试聊与鸭子扬声器语音回复。可选择开启 AI 动作工具。</p>
     ${error ? html`<p role="alert">${error}</p>` : null}
@@ -105,10 +102,11 @@ export function AiSettings({ api }) {
     ${busy ? html`<p role="status">正在处理…</p>` : null}
     ${notice ? html`<p class="ai-result" role="status" data-ai-tested=${tested}>${tested ? '测试成功：' : ''}${notice}</p>` : null}
     <div class="ai-chat"><strong>文字试聊</strong><p>仅保留本页内存中的近期对话上下文（最多 5 轮、12000 字）；每条输入最多 2000 字。切换、修改连接或离开设置页会清空，不保存聊天记录。</p>
-      <${AiCameraPreview} api=${api} />
+      <label class="ai-check"><input type="checkbox" checked=${allowCamera} disabled=${!ready} onChange=${e=>setAllowCamera(e.currentTarget.checked)} />允许本次对话向所选模型发送摄像头画面</label>
+      ${allowCamera ? html`<${AiCameraPreview} api=${api} />` : null}
       <div aria-live="polite" data-ai-history>${history.map(message=>html`<div class="ai-message"><strong>${message.role === 'user' ? '你' : '模型'}</strong>${message.camera_image ? html`<img class="ai-camera-image" src=${message.camera_image} alt="本次传给模型的摄像头画面" loading="lazy" />` : null}${message.content}</div>`)}</div>
       <label>试聊内容<textarea aria-label="试聊内容" rows="3" maxlength="2000" disabled=${busy} value=${input} onInput=${e=>setInput(e.target.value)} placeholder="开通服务并测试后，可以在这里试聊" /></label>
-      <div class="ai-actions"><button class="btn primary" type="button" data-ai="send" disabled=${!ready || !input.trim()} onClick=${send}>发送</button><button class="btn" type="button" data-ai="clear" disabled=${busy || (!history.length && !input)} onClick=${()=>{setHistory([]);setInput('');}}>清空对话</button></div>
+      <div class="ai-actions"><button class="btn primary" type="button" data-ai="send" disabled=${!ready || !input.trim()} onClick=${send}>发送</button><button class="btn" type="button" data-ai="clear" disabled=${busy || (!history.length && !input)} onClick=${()=>{setAllowCamera(false);setHistory([]);setInput('');}}>清空对话</button></div>
     </div>
     <${TtsSettings} api=${api} />
     <${AiTools} api=${api} />`}

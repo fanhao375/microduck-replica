@@ -132,6 +132,32 @@ class AiHttp(unittest.IsolatedAsyncioTestCase):
             self.assertIn(status,(400,404,413))
             self.assertFalse(result['ok'])
 
+    async def test_camera_is_authorized_for_one_turn_and_checks_revision_before_upload(self):
+        item=(await self.save())['connections'][0]
+        body={'op':'chat','id':item['id'],'revision':item['revision'],'messages':[{'role':'user','content':'look'}]}
+        call={'function':{'name':'duck_camera','arguments':'{}'}}
+        with mock.patch('studio.ai_client.CompatibleClient.complete',return_value='hello') as model, \
+             mock.patch('studio.camera_capture.capture') as capture:
+            status,_,_=await self.call('POST','/api/ai',body,self.headers)
+            self.assertEqual(status,200)
+            self.assertNotIn('tools',model.call_args.kwargs)
+            capture.assert_not_called()
+            model.side_effect=[{'text':'looking','tool_calls':[call]},'seen']
+            capture.return_value='data:image/png;base64,TEST'
+            status,_,result=await self.call('POST','/api/ai',{**body,'allow_camera':True},self.headers)
+            self.assertEqual(status,200,result)
+            self.assertEqual(result['text'],'seen')
+            self.assertEqual(model.call_args.kwargs['camera_image'],capture.return_value)
+            self.assertEqual(capture.call_count,1)
+            status,_,_=await self.call('POST','/api/ai',{**body,'allow_camera':'yes'},self.headers)
+            self.assertEqual(status,400)
+            model.reset_mock();model.side_effect=[{'text':'looking','tool_calls':[call]}]
+            from studio.ai_connections import Connections
+            capture.side_effect=lambda *_:Connections(self.tmp.name).delete(item['id'])
+            status,_,result=await self.call('POST','/api/ai',{**body,'allow_camera':True},self.headers)
+            self.assertEqual((status,result['code']),(409,'stale'))
+            self.assertEqual(model.call_count,1)
+
     async def test_tts_preview_authorization_and_saved_key_privacy(self):
         with mock.patch('studio.tts.TtsService.preview', new_callable=mock.AsyncMock,
                         return_value={'mime':'audio/wav','data':'mock-audio'}) as preview:

@@ -6,7 +6,7 @@ class Cmd:
  def __init__(self):self.sent=[];self.mode='motion';self.change=False
  async def call(self,m,p,timeout=2):
   self.sent.append((m,p))
-  if m=='robot.busStatus':return {'mode':self.mode,'phase':'control','torque_state':'on','policy_motion_enabled':True,'homed':True}
+  if m=='robot.busStatus':return {'mode':self.mode,'phase':'control','torque_state':'on','native':{'torque_state_confirmed':True},'policy_motion_enabled':True,'homed':True}
   if m=='robot.policies':return {'mode':'walk','sitting':False}
   if m=='robot.skills':return {'skills':[{'name':'roulade','duration':.2},{'name':'kick_left'}],'built_in':['sit_toggle']}
   if m=='robot.move' and self.change:self.mode='commissioning'
@@ -18,6 +18,32 @@ class Tests(unittest.IsolatedAsyncioTestCase):
   self.r.pad=types.SimpleNamespace(_lk=threading.RLock(),clock=time.monotonic,_pad_attached=lambda n:(False,None),_lease_holder=lambda n:None)
  def tearDown(self):self.tmp.cleanup()
  def call(self,name,args):return {'function':{'name':name,'arguments':json.dumps(args)}}
+ async def test_studio_interlocks_block_direct_robot_output(self):
+  def busy():raise AiError('motion_blocked','calibration in progress')
+  self.r.check_interlocks=busy
+  await self.r.start([self.call('duck_sound',{'tag':'chirp'})],{},Tts());await self.r.task
+  self.assertEqual(self.r.status['state'],'error')
+  self.assertFalse(any(method=='robot.sound' for method,_ in self.cmd.sent))
+ async def test_torque_release_before_model_reply_blocks_late_plan(self):
+  self.r.pad._relax_at=2
+  with self.assertRaises(AiError) as error:
+   await self.r.start([self.call('duck_stand',{})],{},Tts(),relax_marker=1)
+  self.assertEqual(error.exception.code,'relaxed')
+  self.assertEqual(self.cmd.sent,[])
+ async def test_inactive_stop_does_not_interrupt_another_driver(self):
+  await self.r.stop()
+  self.assertEqual(self.cmd.sent,[])
+ async def test_conflicting_controller_and_torque_readback_block_actions(self):
+  ops=await self.power_fixture()
+  self.r.pad._pad_attached=lambda now:(True,'connected')
+  await self.r.start([self.call('duck_stand',{})],{},Tts());await self.r.task
+  self.assertEqual(ops,[])
+  self.r.pad._pad_attached=lambda now:(False,None)
+  async def stale_bus(method,params=None):
+   return {'mode':'motion','phase':'control','torque_state':'on','native':{'torque_state_confirmed':False}}
+  self.r.call=stale_bus
+  with self.assertRaises(AiError):await self.r.guard()
+
  async def test_shake_is_horizontal(self):
   await self.r.start([self.call('duck_shake',{'amplitude':.2,'seconds':.3})],{},Tts());await self.r.task
   heads=[p for m,p in self.cmd.sent if m=='robot.head']
@@ -76,7 +102,7 @@ class Tests(unittest.IsolatedAsyncioTestCase):
   self.r.power_tool=types.MethodType(RobotTools.power_tool,self.r)
   cmd=self.cmd;cmd.torque=False;cmd.policy=False;cmd.homed=False;cmd.sitting=False;old=cmd.call
   async def call(m,p,timeout=2):
-   if m=='robot.busStatus':return {'mode':cmd.mode,'phase':'control','torque_state':'on' if cmd.torque else 'off','homed':cmd.homed,'policy_enabled':cmd.policy}
+   if m=='robot.busStatus':return {'mode':cmd.mode,'phase':'control','torque_state':'on' if cmd.torque else 'off','native':{'torque_state_confirmed':cmd.torque},'homed':cmd.homed,'policy_enabled':cmd.policy}
    if m=='robot.policies':return {'sitting':cmd.sitting,'mode':getattr(cmd,'gait','walk')}
    return await old(m,p,timeout)
   cmd.call=call;ops=[]
@@ -199,11 +225,6 @@ class Tests(unittest.IsolatedAsyncioTestCase):
   t=types.SimpleNamespace(task=asyncio.create_task(asyncio.sleep(.1)),status={'state':'playing'})
   await self.r.start([self.call('duck_sit',{})],{},t);await self.r.task
   self.assertEqual(cleaned,[True]);self.assertEqual(ops,['sit'])
- async def test_passive_speech_never_stands_a_limp_duck(self):
-  ops=await self.power_fixture();self.assertFalse(await self.r.prepare_speech_head(0));self.assertEqual(ops,[])
- async def test_passive_speech_can_enable_an_already_powered_home_hold(self):
-  ops=await self.power_fixture();self.cmd.torque=True;self.cmd.homed=True
-  self.assertTrue(await self.r.prepare_speech_head(0));self.assertEqual(ops,['walk'])
  async def test_stand_waits_for_measured_home_not_just_ramp_timer(self):
   ops=await self.power_fixture();self.cmd.torque=True;self.cmd.homed=True;ready=asyncio.Event();old=self.cmd.call
   async def call(m,p,timeout=2):

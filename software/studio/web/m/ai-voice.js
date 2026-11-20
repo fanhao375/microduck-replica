@@ -1,3 +1,4 @@
+import {requestMessages} from '../ai-ui-state.js';
 import {AiCameraPreview} from '../ai-camera-preview.js';
 
 import {html,useEffect,useRef,useState} from '../vendor/preact-htm.module.js';
@@ -6,41 +7,41 @@ import {api} from './link.js';
 
 export function useAiVoice(){
 
- const [enabled,setEnabled]=useState(true),[data,setData]=useState(null),[selected,setSelected]=useState('');
+ const [enabled,setEnabled]=useState(false),[data,setData]=useState(null),[selected,setSelected]=useState('');
 
+ const [allowCamera,setAllowCamera]=useState(false);
  const [messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[error,setError]=useState('');
 
+ const connection=useRef(null);
  const [status,setStatus]=useState(null);const pending=useRef(false),alive=useRef(true),history=useRef([]),generation=useRef(0);
 
- useEffect(()=>{alive.current=true;let polling=false;
-
-  const load=async()=>{try{
-
-   let r=await api('/api/ai',undefined,5000);if(!alive.current)return;
-
-   if(!r.ok){setError(r.error||'请先登录并配置 AI 连接');return;}
-
-   const chosen=r.connections.find(c=>c.id===r.current_id&&c.ready)||r.connections.find(c=>c.ready);
-
-   if(chosen&&chosen.id!==r.current_id){
-
-    const saved=await api('/api/ai',{op:'select',id:chosen.id},5000);if(!alive.current)return;
-
-    if(saved.ok)r=saved;else setError(saved.error||'默认模型未能保存，本次仍可使用');
-
-   }
-
-   if(alive.current){setData(r);setSelected(chosen?.id||'');}
-
-  }catch{if(alive.current)setError('AI 设置读取失败');}};
-
-  const poll=async()=>{if(polling)return;polling=true;try{const r=await api('/api/ai',{op:'tts_get'},5000);if(alive.current&&r.ok)setStatus(r);}catch{}finally{polling=false;}};
-
-  load();poll();const id=setInterval(poll,1800);return()=>{alive.current=false;generation.current++;clearInterval(id);};
-
- },[]);
-
- const clear=()=>{generation.current++;history.current=[];setMessages([]);setError('');};
+ const clear=()=>{generation.current++;history.current=[];setAllowCamera(false);setMessages([]);setError('');};
+ const choose=(item)=>{
+  clear();
+  connection.current={id:item?.id||'',revision:item?.revision};
+  setSelected(connection.current.id);
+ };
+ useEffect(()=>{
+  if(!enabled)return;
+  let live=true,polling=false;
+  alive.current=true;
+  const poll=async()=>{
+   if(polling)return;
+   polling=true;
+   try{
+    const r=await api('/api/ai',undefined,5000);
+    if(!live)return;
+    if(!r.ok){setError(r.error||'请先登录并配置 AI 连接');return;}
+    setData(r);setStatus(r);
+    const current=connection.current;
+    const next=r.connections.find(c=>c.ready&&c.id===(current ? current.id : r.current_id));
+    if(!current || current.id!==(next?.id||'') || current.revision!==next?.revision) choose(next);
+   }catch{if(live)setError('AI 设置读取失败');}
+   finally{polling=false;}
+  };
+  poll();const id=setInterval(poll,1800);
+  return()=>{live=false;alive.current=false;generation.current++;clearInterval(id);};
+ },[enabled]);
 
  const send=async(text)=>{
 
@@ -52,13 +53,11 @@ export function useAiVoice(){
 
   const content=text.trim();if(!content||content.length>2000){setError('每次请说或输入1–2000字');return;}
 
-  const msgs=[...history.current.slice(-8),{role:'user',content}];
+  const msgs=requestMessages(history.current,content);
 
-  if(msgs.reduce((n,m)=>n+m.content.length,0)>12000){setError('对话过长，请清空后重试');return;}
+  setAllowCamera(false);pending.current=true;setBusy(true);setError('');setMessages(msgs);const gen=generation.current;
 
-  pending.current=true;setBusy(true);setError('');setMessages(msgs);const gen=generation.current;
-
-  try{const r=await api('/api/ai',{op:'chat',id:selected,revision:conn.revision,messages:msgs.map(({role,content})=>({role,content}))},90000);
+  try{const r=await api('/api/ai',{op:'chat',id:selected,revision:conn.revision,allow_camera:allowCamera,messages:msgs.map(({role,content})=>({role,content}))},allowCamera?110000:65000);
 
    if(!alive.current||gen!==generation.current)return;
 
@@ -76,7 +75,7 @@ export function useAiVoice(){
 
  const stop=async()=>{clear();try{const r=await api('/api/ai',{op:'tools_stop'},10000);if(!r.ok)setError(r.error||'停止未确认');}catch{setError('停止未确认，请使用顶部卸力');}};
 
- const toggle=()=>{clear();setEnabled(!enabled);};
+ const toggle=()=>{clear();connection.current=null;setSelected('');setData(null);setEnabled(!enabled);};
 
  const state=status?.tts?.status;const action=status?.tools;
 
@@ -86,7 +85,12 @@ export function useAiVoice(){
 
  ${enabled?html`
 
- <${AiCameraPreview} api=${api} portrait=${true} />
+ <label>模型连接<select aria-label="模型连接" value=${selected} disabled=${busy} onChange=${e=>choose(data.connections.find(c=>c.id===e.currentTarget.value))}>
+  <option value="">选择已配置的模型</option>${data?.connections.filter(c=>c.ready).map(c=>html`<option value=${c.id}>${c.name}</option>`)}
+ </select></label>
+ <p>手机录音在鸭子上识别。发送后，文字会交给所选模型。</p>
+ <label><input type="checkbox" checked=${allowCamera} disabled=${busy||!selected} onChange=${e=>setAllowCamera(e.currentTarget.checked)}/>允许本次对话向所选模型发送摄像头画面</label>
+ ${allowCamera?html`<${AiCameraPreview} api=${api} portrait=${true} />`:null}
 
  ${busy?html`<p role="status">鸭子正在思考…</p>`:null}
 

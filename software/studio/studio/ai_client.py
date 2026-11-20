@@ -146,8 +146,16 @@ class CompatibleClient:
             try:
                 data = json.loads(b''.join(parts))
                 message=data['choices'][0]['message']
+                if not isinstance(message,dict):raise ValueError()
                 calls=message.get('tool_calls',[]) if tools else []
                 if not isinstance(calls,list) or len(calls)>3:raise ValueError()
+                offered = {tool['function']['name'] for tool in tools or ()}
+                for call in calls:
+                    function = call.get('function') if isinstance(call,dict) else None
+                    if (not isinstance(function,dict) or function.get('name') not in offered
+                            or not isinstance(function.get('arguments'),str)
+                            or not isinstance(json.loads(function['arguments']),dict)):
+                        raise ValueError()
                 content=message.get('content')
                 if isinstance(content,list):
                     content=''.join(part.get('text','') for part in content if isinstance(part,dict) and part.get('type')=='text' and isinstance(part.get('text'),str))

@@ -100,6 +100,15 @@ class ClientTests(unittest.TestCase):
                 self.client.complete(self.config,[{'role':'user','content':'hello'}])
             self.assertEqual(caught.exception.code,code)
 
+    def test_provider_calls_must_match_the_tools_offered_this_turn(self):
+        tools = [{'type':'function','function':{'name':'duck_stop'}}]
+        for call in [None, {'function':{'name':'duck_camera','arguments':'{}'}},
+                     {'function':{'name':'duck_stop','arguments':'broken'}}]:
+            self.server.reply = (200,json.dumps({'choices':[{'message':{'content':'ok','tool_calls':[call]}}]}).encode())
+            with self.subTest(call=call), self.assertRaises(AiError) as caught:
+                self.client.complete(self.config,[{'role':'user','content':'hello'}],tools=tools)
+            self.assertEqual(caught.exception.code,'malformed')
+
     def test_network_classes_hide_exception_details(self):
         for exc, code in [(socket.gaierror('secret-123'),'dns'),(TimeoutError('secret-123'),'timeout'),
                           (ssl.SSLError('secret-123'),'tls')]:

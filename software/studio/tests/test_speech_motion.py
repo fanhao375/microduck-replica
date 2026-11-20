@@ -4,14 +4,31 @@ from studio.ai_tools import RobotTools
 from studio.speech_motion import SpeechMotion
 class Tests(unittest.IsolatedAsyncioTestCase):
  def make(self):
-  tools=types.SimpleNamespace(rd=True,pad=None,task=None,sent=[],speech_mouth_reserved=False,torque=True)
+  tools=types.SimpleNamespace(enabled=True,rd=True,pad=None,task=None,sent=[],speech_mouth_reserved=False,torque=True)
   async def call(m,p=None):
-   if m=='robot.busStatus':return {'mode':'motion','phase':'control','homed':True,'torque_state':'on' if tools.torque else 'off','policy_enabled':getattr(tools,'policy',True)}
+   if m=='robot.busStatus':return {'mode':'motion','phase':'control','homed':True,'torque_state':'on' if tools.torque else 'off','native':{'torque_state_confirmed':tools.torque},'policy_enabled':getattr(tools,'policy',True)}
    tools.sent.append((asyncio.get_running_loop().time(),m,p));return {}
   async def check():pass
   tools.call=call;tools.check_driver=check
   tts=types.SimpleNamespace(cancel=threading.Event(),playback=threading.Event(),task=None)
   return tools,tts,SpeechMotion(tools)
+ async def test_disabled_speech_never_commands_head_or_mouth(self):
+  tools,tts,motion=self.make();tools.enabled=False;tts.playback.set()
+  tts.task=asyncio.create_task(asyncio.sleep(.35))
+  await motion.start(tts);await tts.task
+  if motion.task:await motion.task
+  self.assertEqual(tools.sent,[])
+
+ async def test_disabling_during_playback_closes_only_the_owned_mouth(self):
+  tools,tts,motion=self.make();tts.playback.set()
+  tts.task=asyncio.create_task(asyncio.sleep(.3))
+  await motion.start(tts)
+  for _ in range(30):
+   if tools.sent:break
+   await asyncio.sleep(.005)
+  self.assertTrue(tools.sent)
+  tools.enabled=False;await motion.stop();await tts.task
+  self.assertEqual(tools.sent[-1][1:],('robot.mouth',{'open':0}))
  async def test_one_cycle_per_second_and_reset(self):
   tools,tts,motion=self.make();tts.task=asyncio.create_task(asyncio.sleep(2.2));tts.playback.set()
   with patch('studio.speech_motion.random.uniform',side_effect=lambda a,b:a):
@@ -35,7 +52,7 @@ class Tests(unittest.IsolatedAsyncioTestCase):
    async def call(m,p=None):
     if m=='robot.busStatus':return {'mode':'motion','phase':'control','torque_state':'on'}
     sent.append(m);return {}
-   r.call=call;tts=types.SimpleNamespace(task=asyncio.create_task(asyncio.sleep(.2)),started=threading.Event(),cancel=threading.Event(),status={'state':'playing'});tts.started.set()
+   r.call=call;r.check_driver=unittest.mock.AsyncMock();tts=types.SimpleNamespace(task=asyncio.create_task(asyncio.sleep(.2)),started=threading.Event(),cancel=threading.Event(),status={'state':'playing'});tts.started.set()
    await r.start([{'function':{'name':'duck_sound','arguments':json.dumps({'tag':'chirp'})}}],{},tts);await r.task
    self.assertIn('robot.sound',sent);self.assertTrue(tts.task.done())
  async def test_head_tool_does_not_block_speech_mouth(self):
@@ -49,12 +66,12 @@ class Tests(unittest.IsolatedAsyncioTestCase):
   tools,tts,motion=self.make();tts.task=asyncio.create_task(asyncio.sleep(.8));tts.playback.set()
   with patch('studio.speech_motion.random.uniform',side_effect=lambda a,b:a):await motion.start(tts);await tts.task;await motion.task
   self.assertTrue(any(m=='robot.head' and p['head_yaw']!=0 for _,m,p in tools.sent));self.assertTrue(any(m=='robot.mouth' and p['open']>0 for _,m,p in tools.sent))
- async def test_home_hold_head_is_prepared_before_expression(self):
+ async def test_passive_expression_never_starts_a_stopped_policy(self):
   tools,tts,motion=self.make();tools.policy=False;tools.enabled=True;prepared=[]
   async def prepare(marker):prepared.append(True);tools.policy=True;return True
   tools.prepare_speech_head=prepare;tts.task=asyncio.create_task(asyncio.sleep(.8));tts.playback.set()
   with patch('studio.speech_motion.random.uniform',side_effect=lambda a,b:a):await motion.start(tts);await tts.task;await motion.finish(tts)
-  self.assertEqual(prepared,[True]);self.assertTrue(any(m=='robot.head' and p['head_yaw']!=0 for _,m,p in tools.sent))
+  self.assertEqual(prepared,[]);self.assertFalse(any(m=='robot.head' for _,m,p in tools.sent))
  async def test_no_policy_never_sends_ineffective_head_frames(self):
   tools,tts,motion=self.make();tools.policy=False;tts.task=asyncio.create_task(asyncio.sleep(.8));tts.playback.set()
   await motion.start(tts);await tts.task;await motion.task

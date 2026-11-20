@@ -5,6 +5,8 @@ from studio.ai_connections import AiError
 class Response(io.BytesIO):status=200
 class Connection:
  lines=[]
+ sock=None
+ def connect(self):pass
  def __init__(self,*a,**kw):pass
  def request(self,*a,**kw):pass
  def getresponse(self):return Response(b''.join(json.dumps(v).encode()+b'\n' for v in self.lines))
@@ -38,6 +40,25 @@ class Tests(unittest.IsolatedAsyncioTestCase):
   await service.handle({'op':'test','id':'a'*24,'revision':1})
   service.tts.start.assert_not_called()
   with self.assertRaises(AiError):await service.handle({'op':'tts_preview','text':'unexpected'})
+ async def test_device_preview_is_audio_only(self):
+  self.configure()
+  self.s.on_start=AsyncMock()
+  with patch.object(self.s,'_stream'):
+   await self.s.start('test');await self.s.task
+  self.s.on_start.assert_not_awaited()
+ async def test_cancel_before_stream_worker_never_contacts_provider(self):
+  self.configure()
+  self.s.cancel.set()
+  with patch('studio.tts.http.client.HTTPSConnection') as network:
+   self.s._stream(self.s._read(),'queued',self.s.cancel)
+  network.assert_not_called()
+ async def test_optional_studio_state_does_not_prevent_startup(self):
+  from studio.ai_service import AiService
+  service=AiService(None)
+  self.assertFalse(service.tools.enabled)
+  with self.assertRaises(AiError) as err:
+   await service.handle({'op':'tts_get'})
+  self.assertEqual(err.exception.status,503)
  async def test_browser_preview_wav_without_device_player(self):
   from studio.ai_service import AiService
   service=AiService(self.tmp.name)

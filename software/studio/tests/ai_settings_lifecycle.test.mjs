@@ -35,7 +35,7 @@ test('a remote revision rejection clears earlier successful test and conversatio
     : {ok:false,code:'stale',error:'连接已更改'};
   const context = vm.createContext({...state,html,AbortController,
     TtsSettings:()=>null,AiTools:()=>null,AiCameraPreview:()=>null,
-    Maintenance:()=>null,CertificateDownload:()=>null,document:{getElementById:()=>true},
+    document:{getElementById:()=>true},
     useState(initial) {const index=cursor++; if (!(index in slots)) slots[index]=typeof initial === 'function' ? initial() : initial;
       return [slots[index],value=>{slots[index]=typeof value === 'function' ? value(slots[index]) : value;}];},
     useRef(initial) {const index=cursor++;return slots[index] ||= {current:initial};},

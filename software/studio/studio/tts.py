@@ -1,7 +1,6 @@
 """Doubao Seed TTS 2.0 and Agent Plan streaming PCM speech."""
 import asyncio
 import base64
-import binascii
 import http.client
 import io
 import json
@@ -17,6 +16,7 @@ import uuid
 import wave
 from pathlib import Path
 from .ai_connections import AiError
+from .ai_client import RequestControl
 
 DEFAULT_SPEAKER = 'zh_female_vv_uranus_bigtts'
 ENDPOINT = '/api/v3/plan/tts/unidirectional'
@@ -29,22 +29,26 @@ PREVIEW_TEXT = '你好，我是小鸭子。语音回复已经准备好了。'
 
 class TtsService:
     def __init__(self, state_dir):
-        self.path = Path(state_dir) / 'tts-settings.json'
+        self.path = Path(state_dir) / 'tts-settings.json' if state_dir else None
         self.lock = threading.RLock()
         self.cancel = threading.Event()
         self.task = None
         self.on_start = None
         self.playback = threading.Event()
         self.started = threading.Event()
-        self.connection = self.player = None
+        self.control = RequestControl()
+        self.player = None
         self.preview_busy = False
         self.status = {'state': 'idle', 'error': None, 'bytes': 0}
 
     def _read(self):
+        if self.path is None:
+            raise AiError('state','语音设置存储目录尚未配置',503)
         try:
             if not self.path.exists():
                 return {'enabled': False, 'speaker': DEFAULT_SPEAKER, 'api_key': '', 'provider': 'volcano_agent_plan'}
             v = json.loads(self.path.read_text(encoding='utf-8'))
+            if not isinstance(v,dict):raise ValueError()
             v.setdefault('provider', 'volcano_agent_plan')
             if (set(v) != {'enabled','speaker','api_key','provider'} or not isinstance(v['provider'], str)
                 or v['provider'] not in PROVIDERS or type(v['enabled']) is not bool
@@ -101,23 +105,25 @@ class TtsService:
             if self.task and not self.task.done():
                 raise AiError('tts_busy','正在播放，请先停止或等本段结束',409)
             self.cancel = threading.Event()
+            self.control = RequestControl()
             self.playback = threading.Event()
             self.started = threading.Event()
             self.status = {'state':'connecting','error':None,'bytes':0}
             self.task = asyncio.create_task(asyncio.to_thread(self._stream,config,text,self.cancel))
-        if self.on_start is not None:
+        if automatic and self.on_start is not None:
             await self.on_start(self)
         return {'started':True}
 
-    def stop(self):
+    def stop_playback(self):
         with self.lock:
             self.cancel.set()
             if self.player and self.player.poll() is None:
                 self.player.terminate()
-            if self.connection:
-                try:self.connection.close()
-                except OSError:pass
+            self.control.cancel()
             self.status['state']='stopping' if self.task and not self.task.done() else 'idle'
+
+    def stop(self):
+        self.stop_playback()
         return self.view()
 
     async def preview(self):
@@ -194,8 +200,12 @@ class TtsService:
         total = 0
         deadline = time.monotonic()+120
         try:
+            if cancel.is_set():
+                with self.lock:self.status['state']='idle'
+                return
             conn=http.client.HTTPSConnection('openspeech.bytedance.com',timeout=15,context=ssl.create_default_context())
-            with self.lock:self.connection=conn
+            conn.connect()
+            self.control.bind(conn.sock)
             payload={'req_params':{'text':text,'speaker':config['speaker'],
                                   'audio_params':{'format':'pcm','sample_rate':24000}}}
             conn.request('POST',PROVIDERS[config.get('provider', 'volcano_agent_plan')],body=json.dumps(payload).encode(),headers={
@@ -245,11 +255,11 @@ class TtsService:
                 while player.poll() is None and not cancel.wait(.1):
                     if time.monotonic()>deadline:raise AiError('tts_timeout','语音播放超时')
                 if not cancel.is_set() and player.returncode!=0:raise AiError('tts_audio','扬声器播放失败')
-            with self.lock:self.status={'state':'idle' if cancel.is_set() else 'done','error':None,'bytes':total}
+            with self.lock:self.status.update(state='idle' if cancel.is_set() else 'done',error=None,bytes=total)
         except Exception as error:
             # Never return provider bodies or exception strings containing credentials/text.
             message=str(error) if isinstance(error,AiError) else '语音连接或播放失败，请检查网络、Key 和声卡'
-            with self.lock:self.status={'state':'idle' if cancel.is_set() else 'error','error':None if cancel.is_set() else message,'bytes':total}
+            with self.lock:self.status.update(state='idle' if cancel.is_set() else 'error',error=None if cancel.is_set() else message,bytes=total)
         finally:
             self.playback.clear()
             if player:
@@ -257,5 +267,6 @@ class TtsService:
                 try:player.wait(timeout=2)
                 except subprocess.TimeoutExpired:player.kill();player.wait()
                 if player.stdin and not player.stdin.closed:player.stdin.close()
+            self.control.unbind()
             if conn:conn.close()
-            with self.lock:self.connection=self.player=None
+            with self.lock:self.player=None
