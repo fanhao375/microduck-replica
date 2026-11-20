@@ -24,7 +24,7 @@ index a029a11..9cae564 100644
      #[test]
      fn a_missing_file_streams_the_defaults() {
 diff --git a/microduck-hd1910/firmware/mediad/src/exposure.rs b/microduck-hd1910/firmware/mediad/src/exposure.rs
-index 0a0b7f4..f6bb13f 100644
+index 0a0b7f4..e015caf 100644
 --- a/microduck-hd1910/firmware/mediad/src/exposure.rs
 +++ b/microduck-hd1910/firmware/mediad/src/exposure.rs
 @@ -183,18 +183,35 @@ impl Ae {
@@ -74,6 +74,29 @@ index 0a0b7f4..f6bb13f 100644
  }
  
  /// Set when the daemon is going away, so the thread does not outlive the pipeline it steers.
+@@ -506,6 +523,21 @@ mod tests {
++    #[test]
++    fn planar_formats_meter_only_the_luma_plane() {
++        for format in ["I420", "NV12"] {
++            let mut planar = frame(64);
++            planar.format = format;
++            planar.width = 4;
++            planar.height = 4;
++            planar.data = vec![64; 16];
++            planar.data.extend([200; 8]);
++            assert_eq!(mean_luma(&planar), Some(64.0));
++            planar.data.truncate(15);
++            assert_eq!(mean_luma(&planar), None);
++        }
++    }
++
+     #[test]
+     fn a_format_we_cannot_read_is_not_guessed_at() {
+         let mut other = frame(64);
+-        other.format = "NV12";
++        other.format = "RGB";
+         assert_eq!(mean_luma(&other), None);
+     }
 diff --git a/microduck-hd1910/firmware/mediad/src/lib.rs b/microduck-hd1910/firmware/mediad/src/lib.rs
 index 42fe28b..1e88e16 100644
 --- a/microduck-hd1910/firmware/mediad/src/lib.rs

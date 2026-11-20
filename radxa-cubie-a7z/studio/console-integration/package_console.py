@@ -16,7 +16,7 @@ import tarfile
 import tempfile
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_RELEASE = '20261109-console1'
+DEFAULT_RELEASE = 'a7z-imx219-preview'
 
 # Share the installer's path and manifest rules instead of maintaining a second schema.
 _spec = importlib.util.spec_from_file_location('console_installer', HERE / 'install_console.py')

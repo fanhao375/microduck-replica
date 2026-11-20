@@ -64,10 +64,12 @@ node --test tests/models_ui_unit.mjs tests/ai_ui.test.mjs tests/ai_settings_life
 
 ## 导出与可复现打包
 
+当前前端包包含 IMX219 预览的四个变化文件。其中 `web/sensors.js` 由公开 preview1 镜像中的同名文件应用 PR #58 宽高比修正得到。在已安装 preview1 控制台的板上，按板级说明校验和更新这四个文件，并启用视频服务。[A7Z 摄像头启用步骤](../../control/camera/README.md)
+
 修改只发生在 `workspace/studio/web/` 时，导出变化并构建：
 
 ```sh
-python3.13 package_console.py --export --release 20261109-console1
+python3.13 package_console.py --export --release a7z-imx219-preview
 ```
 
 `--export` 比较 `workspace/baseline-web.json` 与工作区，仅把变化文件写入可版本化的 `web/`，同时写入本目录 `baseline-web.json`。它会替换上一次导出的稀疏 `web/`；不会修改工作区。模型、链接、隐藏文件、不支持的类型或工作区后端摘要变化会使导出失败。显式删除普通前端文件会记录在 `deleted-web.json`。
@@ -75,7 +77,7 @@ python3.13 package_console.py --export --release 20261109-console1
 后续在新检出目录，可直接用已版本化的前端与摘要构建，不依赖工作区或相邻上游仓库：
 
 ```sh
-python3.13 package_console.py --release 20261109-console1
+python3.13 package_console.py --release a7z-imx219-preview
 ```
 
 输出：
@@ -83,8 +85,8 @@ python3.13 package_console.py --release 20261109-console1
 ```text
 artifacts/bundle/manifest.json
 artifacts/bundle/payload/web/<变化文件>
-artifacts/console-web-20261109-console1.tar.gz
-artifacts/console-web-20261109-console1.tar.gz.sha256
+artifacts/console-web-a7z-imx219-preview.tar.gz
+artifacts/console-web-a7z-imx219-preview.tar.gz.sha256
 artifacts/install_console.py
 artifacts/install_console.py.sha256
 ```
@@ -99,11 +101,11 @@ manifest 格式与安装器共用校验代码。新文件的 `before_sha256` 为
 
 ```sh
 cd /tmp
-sha256sum -c console-web-20261109-console1.tar.gz.sha256
+sha256sum -c console-web-a7z-imx219-preview.tar.gz.sha256
 sha256sum -c install_console.py.sha256
-mkdir console-web-20261109-console1
-tar -xzf console-web-20261109-console1.tar.gz -C console-web-20261109-console1
-/opt/microduck-studio/python/bin/python3 install_console.py /tmp/console-web-20261109-console1/bundle --base /opt/microduck-studio/app
+mkdir console-web-a7z-imx219-preview
+tar -xzf console-web-a7z-imx219-preview.tar.gz -C console-web-a7z-imx219-preview
+/opt/microduck-studio/python/bin/python3 install_console.py /tmp/console-web-a7z-imx219-preview/bundle --base /opt/microduck-studio/app
 ```
 
 默认命令只验证包与当前前端摘要并列出变化，输出 `preview: true`、`readiness_checked: false`，不会查询或控制机器人。摘要不符时应先核对实际板端版本，不改 manifest 绕过。
@@ -111,7 +113,7 @@ tar -xzf console-web-20261109-console1.tar.gz -C console-web-20261109-console1
 真实应用前，在页面交还维护控制权，并由现场操作者确认卸力。安装器再独立只读检查：主控处于预期 motion 模式、策略关闭、扭矩确认关闭、无维护/恢复/IMU 验证任务；同时核对运行 PID、二进制、标定文件与上面三项后端摘要。未满足时拒绝发布，不发送卸力或运动命令。
 
 ```sh
-sudo /opt/microduck-studio/python/bin/python3 install_console.py /tmp/console-web-20261109-console1/bundle --base /opt/microduck-studio/app --apply
+sudo /opt/microduck-studio/python/bin/python3 install_console.py /tmp/console-web-a7z-imx219-preview/bundle --base /opt/microduck-studio/app --apply
 ```
 
 安装器备份完整 web，再以目录原子交换发布；不重启 Studio 或 robotd，不改变主控二进制、配置或标定。只删除已变更文件同名的旧 `.gz`/`.br` 缓存，模型及其压缩文件保留。发布前后核对指纹和完整 web，失败会尝试原子回滚。不支持原子目录交换的系统直接拒绝。

@@ -1,0 +1,11 @@
+--- a/studio/sensors.py
++++ b/studio/sensors.py
+@@ -168,7 +168,7 @@
+                   "source_basis": "config", "source_verified": False,
+                   "signaling_port": self.camera_signaling_port, "error": None}
+         try:
+-            config = tomllib.loads((self.root / "etc/robot/robotd.toml").read_text(encoding="utf-8"))
++            config = tomllib.loads((self.root / "etc/robot/mediad.toml").read_text(encoding="utf-8"))
+         except FileNotFoundError:
+             result["error"] = "未找到摄像头来源配置，仍可尝试连接视频"
+             return result
