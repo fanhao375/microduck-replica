@@ -245,7 +245,8 @@ class StockBridgeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             base=Path(temp)
             studio=base/'software/studio'
-            archive=subprocess.check_output(['git','-C',str(HERE.parents[1]),'archive','--format=zip',STOCK,STUDIO_DIR])
+            archive=subprocess.check_output(['git','-C',str(HERE.parents[1]),'-c','core.autocrlf=false',
+                                            'archive','--format=zip',STOCK,STUDIO_DIR])
             with zipfile.ZipFile(io.BytesIO(archive)) as original:
                 original.extractall(base)
             web=studio/'web'
