@@ -2,8 +2,7 @@
 
 为什么是 Studio 自己的密码，不用 Linux 的 orangepi 密码：
 - 拿 orangepi 密码校验，网页就成了 SSH 密码的猜测口，还绕开了 sshd 的 PerSourcePenalties；
-- 密码在安装器里设（经那一次 SSH 把哈希写过来），不在「第一次打开网页」时设，
-  免得局域网里谁先打开谁就成了管理员（DNS 重绑定也能替你设）。开发期用命令行：
+- 首次在可信网络中打开网页设置密码，设置完成后用网页登录。开发期也可用命令行：
       python -m studio.auth set-password --state-dir ./state
 
 会话：
@@ -30,6 +29,7 @@ import json
 import os
 import secrets
 import socket
+import tempfile
 import threading
 import time
 from pathlib import Path
@@ -55,11 +55,13 @@ def _write_private(path, data):
     """原子写、权限 0600：先写临时文件再改名，写一半断电也不会留下坏文件。"""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False)
-    os.replace(tmp, path)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        os.replace(tmp, path)
+    finally:
+        Path(tmp).unlink(missing_ok=True)
 
 
 class Auth:
@@ -98,13 +100,13 @@ class Auth:
         self._log("info", "管理员密码已更新，其他登录全部作废" if kept else "管理员密码已更新，旧的登录全部作废")
 
     def clear_password(self):
-        """清掉管理员密码，回到「同一网络里打开就能用」。跟 set_password 一样只动 Studio 自己的文件。"""
+        """清掉管理员密码和旧登录，回到首次设密页面。"""
         try:
             self.pw_path.unlink()
         except FileNotFoundError:
             pass
         self.revoke_all()
-        self._log("info", "管理员密码已清掉，Studio 回到不用登录的模式")
+        self._log("info", "管理员密码已清掉，请重新设置网页登录密码")
 
     def check_password(self, password):
         try:
@@ -126,7 +128,7 @@ class Auth:
                 wait = int(f["until"] - now) + 1
                 return None, f"输错太多次了，{wait} 秒后再试", wait
         if not self.has_password():
-            return None, "还没设管理员密码：用安装器设，或者在鸭子上运行 set-password", 0
+            return None, "还没设管理员密码，请打开 Studio 首次设置页面", 0
         # 先记一次失败、再算哈希：就算并发进来，每一次也都已经记在账上（成功了再清掉）
         with self._lock:
             if len(self._fails) > 1000:

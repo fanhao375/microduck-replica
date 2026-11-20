@@ -25,6 +25,7 @@ import io
 import json
 import os
 import platform
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -196,9 +197,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
     marker = Path(state_dir) / SERVO_MARKER if state_dir and servo is not None else None   # 登录一个一个来：退避不会被并发绕过，scrypt 也不会同时吃掉几份 16 MB
 
     dev_sess = {"csrf": "dev", "auth_at": time.time(), "remember": False}
-    # 用户 10-18：「不用设管理员密码，直接启动连就行」。没设密码 = 开放：同一个网络里打开就能用（跟 servo-web 一样）。
-    # 设了密码才要登录（设置里以后能加）。Host / Origin 校验照旧：别的网站没法借你的浏览器控制鸭子
-    open_sess = {"csrf": "open", "auth_at": time.time(), "remember": False}
+    setup_csrf = secrets.token_urlsafe(24)
     if dev_autologin:
         log.warn("开发模式：本机来的请求不用登录", cat="系统", hint="只在电脑上截图测试用，鸭子上不要开")
 
@@ -207,7 +206,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         if dev_autologin and conn.client and conn.client.host == "127.0.0.1":
             return token or "dev", dev_sess
         if not auth.has_password():
-            return token or "open", open_sess
+            return None, None
         return token, auth.session(token, touch=touch)
 
     def origin_ok(conn):
@@ -231,7 +230,6 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             return JSONResponse(data, status_code=status, headers={'Cache-Control':'no-store'})
         _, sess = session_of(request)
         local_dev = dev_autologin and request.client and request.client.host == '127.0.0.1'
-        # The general Studio open session is unsuitable for billable external requests.
         if not auth.has_password() and not local_dev:
             return response({'ok':False,'code':'password_required','error':'请先在设置中配置网页密码，再使用 AI 连接'},403)
         if not sess:
@@ -263,10 +261,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         return JSONResponse({"ok": True, "version": VERSION,"suite_version":SUITE_VERSION,"runtime_root":str(RUNTIME_ROOT)})
 
     async def api_session(request):
-        token, sess = session_of(request)
+        if not auth.has_password():
+            return JSONResponse({"ok": True, "has_password": False, "csrf": setup_csrf,
+                                 "duck": duck, "version": VERSION})
+        _, sess = session_of(request)
         if not sess:
-            return JSONResponse({"ok": False, "has_password": auth.has_password()}, status_code=401)
-        return JSONResponse({"ok": True, "has_password": auth.has_password(),
+            return JSONResponse({"ok": False, "has_password": True}, status_code=401)
+        return JSONResponse({"ok": True, "has_password": True,
                              "csrf": sess["csrf"], "duck": duck, "version": VERSION})
 
     async def api_login(request):
@@ -304,13 +305,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
 
     async def api_password(request):
         """在网页上设 / 改 / 清管理员密码。写的就是 run.py set-password 用的 password.json。"""
-        token, sess = session_of(request)
+        nonlocal setup_csrf
         if not origin_ok(request):
             return JSONResponse({"ok": False, "error": "请求来源不对"}, status_code=403)
-        if not sess:
-            return JSONResponse({"ok": False, "error": "先登录才能改密码"}, status_code=401)
-        if request.headers.get("x-csrf") != sess["csrf"]:
-            return JSONResponse({"ok": False, "error": "请求校验失败，刷新页面再试"}, status_code=403)
         try:
             body = await request.json()
         except ValueError:
@@ -318,35 +315,45 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         if not isinstance(body, dict):
             body = {}
         action = body.get("action", "set")
-        ip = request.client.host if request.client else "?"
-        if action == "clear":
-            if auth.has_password():
+        # Read the body before taking the gate. Recheck authorization inside it so two
+        # first-use forms cannot both become the owner while hashing runs in a thread.
+        async with login_gate:
+            had_password = auth.has_password()
+            token, sess = session_of(request)
+            if had_password and not sess:
+                return JSONResponse({"ok": False, "error": "先登录才能改密码"}, status_code=401)
+            expected_csrf = sess["csrf"] if had_password else setup_csrf
+            if request.headers.get("x-csrf") != expected_csrf:
+                return JSONResponse({"ok": False, "error": "请求校验失败，刷新页面再试"}, status_code=403)
+            if action == "clear":
+                if not had_password:
+                    return JSONResponse({"ok": False, "error": "首次使用请先设置登录密码"}, status_code=403)
+                setup_csrf = secrets.token_urlsafe(24)
                 await asyncio.to_thread(auth.clear_password)
                 log.info(f"管理员密码已清掉（{_client_desc(request)}）", cat="连接")
-            resp = JSONResponse({"ok": True, "has_password": False})
-            resp.delete_cookie(COOKIE, path="/")
+                resp = JSONResponse({"ok": True, "has_password": False})
+                resp.delete_cookie(COOKIE, path="/")
+                return resp
+            if action != "set":
+                return JSONResponse({"ok": False, "error": "不认识的操作"}, status_code=400)
+            pw = body.get("password")
+            confirm = body.get("confirm")
+            if not isinstance(pw, str) or len(pw) < 6:
+                return JSONResponse({"ok": False, "error": "密码至少 6 位"}, status_code=400)
+            if pw != confirm:
+                return JSONResponse({"ok": False, "error": "两次输入不一样"}, status_code=400)
+            try:
+                await asyncio.to_thread(auth.set_password, pw, token if had_password else None)
+            except ValueError as e:
+                return JSONResponse({"ok": False, "error": str(e)}, status_code=400)
+            resp = JSONResponse({"ok": True, "has_password": True})
+            if not had_password:
+                ip = request.client.host if request.client else "?"
+                new_token, _, _ = await asyncio.to_thread(auth.login, pw, ip, False)
+                if new_token:
+                    resp.set_cookie(COOKIE, new_token, httponly=True, samesite="lax", path="/")
+            log.info(f"管理员密码已{'设置' if not had_password else '修改'}（{_client_desc(request)}）", cat="连接")
             return resp
-        if action != "set":
-            return JSONResponse({"ok": False, "error": "不认识的操作"}, status_code=400)
-        pw = body.get("password")
-        confirm = body.get("confirm")
-        if not isinstance(pw, str) or len(pw) < 6:
-            return JSONResponse({"ok": False, "error": "密码至少 6 位"}, status_code=400)
-        if pw != confirm:
-            return JSONResponse({"ok": False, "error": "两次输入不一样"}, status_code=400)
-        had_password = auth.has_password()
-        keep = token if had_password and token and token != "open" else None
-        try:
-            await asyncio.to_thread(auth.set_password, pw, keep)
-        except ValueError as e:
-            return JSONResponse({"ok": False, "error": str(e)}, status_code=400)
-        resp = JSONResponse({"ok": True, "has_password": True})
-        if not had_password:
-            new_token, _, _ = await asyncio.to_thread(auth.login, pw, ip, False)
-            if new_token:
-                resp.set_cookie(COOKIE, new_token, httponly=True, samesite="lax", path="/")
-        log.info(f"管理员密码已{'设置' if not had_password else '修改'}（{_client_desc(request)}）", cat="连接")
-        return resp
 
     ssh_gate = asyncio.Lock()
     ssh_keys = SshKeys(ssh_home)        # Studio 以 orangepi 身份跑：~/.ssh/authorized_keys 是它自己的文件，不用小助手
