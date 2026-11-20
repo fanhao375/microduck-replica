@@ -13,6 +13,8 @@ Check the model printed on the board. **Radxa ZERO 3W** and **Radxa Cubie A7Z** 
 | **Radxa ZERO 3W** | [ZERO 3W · 20261104 image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [Previous stable image](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W flashing and setup](software/image/烧录和第一次使用.md) |
 | **Radxa Cubie A7Z** | [Cubie A7Z preview image](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [A7Z flashing and setup](radxa-cubie-a7z/image/README.md) |
 
+**Already using a ZERO 3W 1104 card?** Run the preparation tool once and reboot. Open **Studio → Settings → Software Update** and select **Update now** when a new version appears. The duck downloads and verifies the package. Reconnect to check the result. [Download the preparation tool](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) · [One-time setup guide (Chinese)](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.20/software/updater/stock1104/README.md)
+
 **The Feetech HD-1910 build has passed real hardware validation: standing, walking, a forward roll and standing back up.** Our main build uses **15 Feetech HD-1910 servos**. We provide a **ready-to-flash system image** and the **Microduck Studio web console** for Wi-Fi setup, calibration, and remote control from a phone or computer browser.
 
 **The first-use workflow has also been completed on real hardware:** flash the image → hotspot and Wi-Fi setup → servo and IMU calibration → gamepad pairing and e-stop test → stand and walk. [Real hardware validation records](docs/update-history.en.md#latest)
@@ -124,9 +126,21 @@ As of **2026-10-25**, **the Feetech replica, first-use workflow and robot motion
 
 ## 💻 Software · system image and Microduck Studio
 
-**Replica image 20261027: web software updates and local Mandarin posture commands.** Settings can check, download or upload signed software packages, with rollback on failed installation. Tap R3 to toggle listening for “sit down” and “stand up”; the Mandarin model is included and needs no cloud account. Web motion recording/playback, lively mode and model management are retained. Existing cards need one SSH bootstrap; routine software updates then use the browser without reflashing.
+<!-- Keep one row each for the current software and disk image. Put full release notes in the history, newest first. -->
+| Date | ZERO 3W release | When to use it |
+|---|---|---|
+| 2026-11-20 | [Stable software 2026.11.20](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) | Update Studio on an existing 1104 card for mobile control, offline voice commands, and servo and IMU diagnostics. |
+| 2026-11-04 | [Disk image 20261104](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) | Flash a new SD card. Includes standing IMU calibration and hotspot recovery after a Wi-Fi change. [Image notes (Chinese)](docs/更新说明-20261104.md) |
 
-The robot runtime, gait models and bus-ID-200 IMU autodetection are unchanged from 20261023c. Software, signed transactions, browser flows and read-only image checks passed; physical first boot, existing-card upgrades/rollback and live acoustics still need acceptance. Music-driven head/body motion remains unresolved, and spoken AI dialogue is not connected. [Image and checksums](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) · [Software package](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.10.27) · [Update and voice guide](docs/软件更新与语音使用说明-20261027.md) · [Verification scope](docs/superpowers/verification/2026-10-27-web-updates.md)
+<details>
+<summary>Earlier software releases</summary>
+
+- **2026-10-31** · [Mouth 34 and yaw 32 diagram correction](docs/软件修订-20261031-r1.md) · [Gamepad remapping, camera zoom and SSH guide](docs/功能软件升级-20261030.md) (Chinese)
+- **2026-10-30** · [IMU diagnostics with no servos connected](docs/仅接IMU的独立诊断与软件更新-20261030.md) (Chinese)
+
+[Full update history, downloads and verification notes](docs/update-history.en.md#software-and-image-releases)
+
+</details>
 
 <p align="center"><a href="software/studio/README.md"><img src="assets/studio-overview-20261025-demo.jpg" alt="Current Microduck Studio interface with simulated device readings" width="920"></a><br><sub>Studio interface demonstration with simulated device readings</sub></p>
 
