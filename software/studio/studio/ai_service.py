@@ -3,12 +3,14 @@ import asyncio
 
 from .ai_client import CompatibleClient, RequestControl, validate_messages
 from .ai_connections import Connections, AiError
+from .tts import TtsService, PREVIEW_TEXT
 
 
 class AiService:
     def __init__(self, state_dir):
         self.store = Connections(state_dir)
         self.client = CompatibleClient()
+        self.tts = TtsService(state_dir)
 
     async def view(self):
         return await asyncio.to_thread(self.store.view)
@@ -17,6 +19,16 @@ class AiService:
         if not isinstance(body, dict):
             raise AiError('validation', '请求须为 JSON 对象')
         op = body.get('op')
+        if op == 'tts_get' and set(body) == {'op'}:
+            return {'tts': await asyncio.to_thread(self.tts.view)}
+        if op == 'tts_save' and set(body) == {'op', 'settings'}:
+            return {'tts': await asyncio.to_thread(self.tts.save, body['settings'])}
+        if op == 'tts_test' and set(body) == {'op'}:
+            return {'speech': await self.tts.start(PREVIEW_TEXT)}
+        if op == 'tts_preview' and set(body) == {'op'}:
+            return {'audio': await self.tts.preview()}
+        if op == 'tts_stop' and set(body) == {'op'}:
+            return {'tts': await asyncio.to_thread(self.tts.stop)}
         fields = {'save':{'op','connection'}, 'select':{'op','id'}, 'delete':{'op','id'},
                   'test':{'op','id','revision'}, 'chat':{'op','id','revision','messages'}}
         if not isinstance(op, str) or op not in fields or set(body) != fields[op]:
@@ -48,4 +60,10 @@ class AiService:
             control.cancel()
             raise AiError('timeout','AI 请求超时，请稍后重试',504) from None
         result = await asyncio.to_thread(self.store.finish,generation,result)
+        if op == 'chat':
+            try:
+                speech = await self.tts.start(result, automatic=True)
+            except AiError as error:
+                speech = {'started': False, 'code': error.code, 'error': str(error)}
+            return {'id': ident, 'revision': config['revision'], 'text': result, 'speech': speech}
         return {'id':ident, 'revision':config['revision'], 'text':result}
