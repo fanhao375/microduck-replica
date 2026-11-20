@@ -791,8 +791,13 @@ class PadHttpTest(HttpTest):
         await c.open()
         await c.send({"t": "hb", "visible": True, "route": "/pad", "pad_visible": True})
         await c.send({"t": "cmd", "id": "open", "name": "pad.op", "args": {"op": "drive", "open": True}})
-        await c.pump(until=lambda: any(m.get("motion_studio", {}).get("idle_available", {}).get("ok")
-                                     for m in c.msgs) and self.rd.state.at is not None, timeout=4.)
+        # The general idle button can become available before the first walking
+        # frame, policies and physical pad status have all reached PadOps.
+        def music_ready():
+            return (any(m.get("motion_studio", {}).get("idle_available", {}).get("ok") for m in c.msgs)
+                    and self.pad.motion_studio._music_ready_why(time.monotonic()) is None)
+        await c.pump(until=music_ready, timeout=5.)
+        self.assertTrue(music_ready(), self.pad.motion_studio._music_ready_why(time.monotonic()))
         await c.send({"t": "cmd", "id": "music", "name": "pad.op", "args": {"op": "motion", "action": "idle_start", "kind": "music"}})
         await c.pump(until=lambda: any(m.get("id") == "music" for m in c.msgs), timeout=3.)
         result = next(m for m in c.msgs if m.get("id") == "music")
