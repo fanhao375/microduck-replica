@@ -5,6 +5,7 @@
 """
 import asyncio
 import http.client
+import hashlib
 import json
 import shutil
 import socket
@@ -269,6 +270,23 @@ class StudioBothSchemesTest(unittest.IsolatedAsyncioTestCase):
         secure = await asyncio.to_thread(self.page, True)
         self.assertEqual(plain[0], 200)
         self.assertEqual(secure, plain)
+
+    async def test_plain_updater_health_and_signed_asset_with_secure_mobile_page(self):
+        from studio.app import RUNTIME_ROOT, SUITE_VERSION
+        from urllib.request import urlopen
+
+        def check():
+            plain = f"http://127.0.0.1:{self.port}"
+            with urlopen(plain + "/healthz", timeout=3) as response:
+                status = json.load(response)
+            self.assertEqual(status["suite_version"], SUITE_VERSION)
+            self.assertEqual(status["runtime_root"], str(RUNTIME_ROOT))
+            with urlopen(plain + "/app.js", timeout=3) as response:
+                served = response.read(2 * 1024 * 1024)
+            self.assertEqual(hashlib.sha256(served).digest(), hashlib.sha256((WEB / "app.js").read_bytes()).digest())
+            with urlopen(f"https://127.0.0.1:{self.port}/m", timeout=3, context=self.trust) as response:
+                self.assertIn(b'm/app.js', response.read())
+        await asyncio.to_thread(check)
 
     async def test_each_page_is_told_addresses_in_its_own_scheme(self):
         plain = (await self.first_state(False))["net"]

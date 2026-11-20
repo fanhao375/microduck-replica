@@ -42,9 +42,9 @@ def http_call(port, method, path, body=None, headers=None):
     c = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
     h = {"Host": f"127.0.0.1:{port}"}
     h.update(headers or {})
-    data = json.dumps(body).encode() if body is not None else None
+    data = body if isinstance(body, bytes) else json.dumps(body).encode() if body is not None else None
     if data is not None:
-        h["Content-Type"] = "application/json"
+        h["Content-Type"] = "application/octet-stream" if isinstance(body, bytes) else "application/json"
     c.request(method, path, body=data, headers=h)
     r = c.getresponse()
     out = r.status, {k.lower(): v for k, v in r.getheaders()}, r.read()
@@ -192,6 +192,23 @@ class HttpTest(unittest.IsolatedAsyncioTestCase):
             self.assertLess(len(body), 1024)                     # 很小：每 2 秒探一次也不费事
         st, _, _ = await self.call("GET", "/probe.svg", headers={"Host": "evil.example.com"})
         self.assertEqual(st, 421)                                 # Host 校验照旧
+
+    async def test_mobile_entry_and_recording(self):
+        status, headers, _ = await self.call("GET", "/m")
+        self.assertEqual((status, headers["location"]), (307, "/m.html"))
+        for asset in ("/m.html", "/m/app.js", "/m/voice.js", "/m/pcm-tap.js"):
+            status, _, body = await self.call("GET", asset)
+            self.assertEqual(status, 200, asset)
+            self.assertTrue(body)
+        token, _ = await self.login()
+        headers = {"Origin": self.origin, "Cookie": f"studio_session={token}"}
+        result = {"text": "点头", "info": {"sec": 0.2}}
+        with unittest.mock.patch("studio.phone_bridge.transcribe_detail", return_value=result) as decode:
+            recording = bytes(6400)
+            status, _, body = await self.call("POST", "/api/asr", recording, headers)
+            self.assertEqual(status, 200, body)
+            self.assertEqual(json.loads(body)["data"], result)
+            decode.assert_called_once_with(recording, True)
 
     async def test_ca_cert_is_downloadable_before_login(self):
         """手机装证书要在登录之前完成：不登录也能下载，是 CA 证书 + 附件下载，且不缓存。"""

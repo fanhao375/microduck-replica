@@ -25,6 +25,9 @@ for d in /usr /usr/local /usr/local/sbin; do
     fi
 done
 
+install -o root -g root -m 0644 "$here/phone_tls.py" /usr/local/sbin/phone_tls.py
+install -o root -g root -m 0644 "$here/microduck-maintenance" /usr/local/sbin/microduck-maintenance   # 网页备份/恢复/关机用的固定小助手
+
 # 2. robotd 的保护 drop-in（第 1 步只有 Condition 旗；Environment 那行要到第 3 步验收后手动打开）
 install -d -o root -g root -m 0755 /etc/systemd/system/robotd.service.d
 install -o root -g root -m 0644 "$here/zzzz-studio-bus.conf" /etc/systemd/system/robotd.service.d/zzzz-studio-bus.conf
@@ -43,6 +46,6 @@ install -o root -g root -m 0440 "$tmp" /etc/sudoers.d/microduck-studio
 # 4. 核对
 echo "--- 核对 ---"
 systemctl show robotd -p DropInPaths
-ls -l /usr/local/sbin/microduck-helper /etc/sudoers.d/microduck-studio /etc/systemd/system/robotd.service.d/zzzz-studio-bus.conf
+ls -l /usr/local/sbin/microduck-helper /usr/local/sbin/microduck-maintenance /etc/sudoers.d/microduck-studio /etc/systemd/system/robotd.service.d/zzzz-studio-bus.conf
 echo "用 $user 试：echo '{}' | sudo -n /usr/local/sbin/microduck-helper bus-nope ; echo \$?   （应该是 2：动词不认识）"
 echo "装好了。robotd 没重启。"

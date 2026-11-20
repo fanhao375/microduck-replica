@@ -51,6 +51,7 @@ from .state import summarize
 from .pad import Refused as PadRefused, robot_view  # 手柄页
 from .ai_connections import AiError
 from .ai_service import AiService
+from .maintenance import make_handler
 from .updates import Updates, UpdateError, handle as handle_updates, safe_during_update
 
 VERSION = "0.1.0-dev"
@@ -1709,11 +1710,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             return JSONResponse({"ok": False, "error": "请求校验失败，刷新页面再试"}, 403, headers=no_store)
         if phone_bridge is None:
             return JSONResponse({"ok": False, "error": "这块板子没有装语音识别模块"}, 503, headers=no_store)
-        body = await request.body()
+        body = bytearray()
+        async for chunk in request.stream():
+            if len(body) + len(chunk) > 12 * 1024 * 1024:
+                return JSONResponse({"ok": False, "error": "这段录音太长了"}, 413, headers=no_store)
+            body.extend(chunk)
         if len(body) < 3200:          # 16 kHz / 16 bit：0.1 秒都不到，什么也认不出来
             return JSONResponse({"ok": False, "error": "这段太短了，再说一次"}, 400, headers=no_store)
-        if len(body) > 12 * 1024 * 1024:
-            return JSONResponse({"ok": False, "error": "这段录音太长了"}, 413, headers=no_store)
         # free=1：不用命令词表，走通用解码。自检页用它看「板子到底听到什么」，
         # 也用来区分「没听清」和「词不在词表里」。慢得多，只给排查用。
         free = (request.query_params.get("free") or "").lower() in ("1", "true", "yes")
@@ -1739,7 +1742,19 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         headers={"Content-Disposition": 'attachment; filename="Microduck-Local-CA.crt"',
                                  **no_store})
 
+    def maintenance_blocker():
+        # 软件更新、IMU 标定进行中，不让恢复配置或关机（不能把更新/标定拦腰截断）
+        if updates.installing() or updates.native_preparing():
+            return "正在更新软件，请更新完成后再操作"
+        job = getattr(imu, "job", None) if imu is not None else None
+        if ((job and not (job.get("done") or job.get("failed")))
+                or (imu is not None and getattr(imu, "blocks_updates", lambda: False)())):
+            return "IMU 标定进行中，请先完成或取消再操作"
+        return None
+
+    maintenance_handler = make_handler(auth, session_of, origin_ok, maintenance_blocker)
     routes = [
+        Route("/api/maintenance", maintenance_handler, methods=["GET", "POST"]),
         Route("/healthz", healthz),
         Route("/api/session", api_session),
         Route("/api/ai", api_ai, methods=["GET", "POST"]),

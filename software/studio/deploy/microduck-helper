@@ -74,7 +74,8 @@ import types
 VERSION = "0.8.0"
 VERBS = ("bus-take", "bus-give-back", "bus-abort", "pad-pair", "pad-forget",
          "wifi-hotspot-down", "wifi-hotspot-up", "calib-read", "calib-commit", "ssh-status", "ssh-password",
-         "imu-recalibrate", "robotd-update", "sensors-apply")
+         "imu-recalibrate", "robotd-update", "sensors-apply", "phone-tls",
+         "maintenance-export", "maintenance-preview", "maintenance-restore", "maintenance-shutdown")
 
 EXIT_OK, EXIT_ARGS, EXIT_STATE, EXIT_BUSY, EXIT_FAIL, EXIT_RETAKE = 0, 2, 3, 4, 5, 6
 
@@ -3452,6 +3453,29 @@ def run(argv, ctx):
             raise Stop(EXIT_ARGS, "bad_verb", f"只认这几个动词：{', '.join(VERBS)}（参数走 stdin 的 JSON）")
         if not ctx.is_root():
             raise Stop(EXIT_STATE, "not_root", "要用 root 跑（sudo -n /usr/local/sbin/microduck-helper …）")
+        if verb == "phone-tls" or verb.startswith("maintenance-"):
+            # The installed launcher points into a root-owned signed release. Resolve
+            # once so a concurrent switch cannot mix helpers from different releases.
+            if verb in ("maintenance-restore", "maintenance-shutdown"):
+                # The same locks also guard software/native updates and calibration.
+                # Keep them across exec and release them when the bounded child exits.
+                op.take_lock("维护")
+                os.set_inheritable(op.lock_handle, True)
+                for lock_path in (SERVICE_LOCK, "/run/microduck-updater/motion.lock"):
+                    if lock_path.endswith("motion.lock") and not exists(ctx, lock_path):
+                        continue  # legacy standalone Studio has no updater
+                    fd = ctx.lock(lock_path)
+                    if fd is None:
+                        raise Stop(EXIT_BUSY, "maintenance_busy", "更新、标定或总线操作进行中")
+                    os.set_inheritable(fd, True)
+                if exists(ctx, SOFTWARE_MARKER):
+                    raise Stop(EXIT_BUSY, "maintenance_busy", "软件正在更新")
+                native_update_conflict(op)
+                imu_redo_conflict(op)
+            deploy = os.path.dirname(os.path.realpath(__file__))
+            script = "phone_tls.py" if verb == "phone-tls" else "microduck-maintenance"
+            args = [] if verb == "phone-tls" else [verb.removeprefix("maintenance-")]
+            os.execve("/usr/bin/python3", ["/usr/bin/python3", "-IS", os.path.join(deploy, script), *args], CHILD_ENV)
         raw = ctx.stdin.read(STDIN_LIMIT + 1)
         if len(raw) > STDIN_LIMIT:
             raise Stop(EXIT_ARGS, "bad_args", "stdin 太长")

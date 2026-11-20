@@ -1,3 +1,4 @@
+import { ShutdownButton } from '../shutdown-button.js';
 // 手机中控的外壳：会话 → 连接 → 顶栏（鸭名 + 卸力）→ 页面 → 底栏。
 //
 // 跟桌面版的关系：同一个 Studio 进程、同一个 /ws、同一套 pad.op 命令，只是换了一副为竖屏手机做的壳。
@@ -51,16 +52,18 @@ function nickStored() {
 
 // ---------------- 顶栏 ----------------
 
-function Head({ name, dot, onEstop, busy }) {
+function Head({ name, dot, onEstop, busy, onNotice }) {
   return html`<header class="m-head">
     <div class="m-head-in">
+      <${ShutdownButton} api=${api} onNotice=${onNotice} />
       <div class="m-duck">
         <span class=${'m-dot ' + dot} aria-hidden="true"></span>
         <span class="m-duck-name">${name}</span>
       </div>
       <span class="m-head-gap"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
       <button class="m-estop" onClick=${onEstop} disabled=${busy}
-        aria-label="卸力：让所有舵机松掉力气">卸力</button>
+        aria-label="卸力：让所有舵机松掉力气">卸力</button></div>
     </div>
   </header>`;
 }
@@ -194,7 +197,7 @@ function App() {
   const go = (href) => { location.hash = '#' + href; };
 
   return html`<div class="m-app">
-    <${Head} name=${name} dot=${dot} onEstop=${doEstop} busy=${estopBusy} />
+    <${Head} name=${name} dot=${dot} onEstop=${doEstop} busy=${estopBusy} onNotice=${say} />
     <main class="m-main">
       ${conn !== 'open' ? html`<div class="m-banner bad">
         <span>${conn === 'closed' ? '和鸭子的连接断了' : '正在连鸭子…'}</span>

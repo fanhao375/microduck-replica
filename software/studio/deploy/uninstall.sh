@@ -21,7 +21,7 @@ fi
 rm -f /etc/sudoers.d/microduck-studio
 rm -f /etc/systemd/system/robotd.service.d/zzzz-studio-bus.conf
 systemctl daemon-reload
-rm -f /usr/local/sbin/microduck-helper
+rm -f /usr/local/sbin/microduck-helper /usr/local/sbin/microduck-maintenance /usr/local/sbin/phone_tls.py
 systemctl stop microduck-bus-hold 2>/dev/null || true
 rm -rf /run/microduck-helper /run/microduck-handover
 if [ "${1:-}" = "--purge" ]; then rm -rf /var/lib/microduck-helper; fi

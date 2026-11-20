@@ -11,7 +11,7 @@
 
 ## 一、手机说话（鸭子开热点）
 
-手机麦克风只在**安全上下文**（HTTPS）里才给浏览器用，所以这条路的地址是 `https://10.42.0.1:8000/m`。证书由鸭子第一次开机时自己生成（局部 CA + 服务器证书），位置：
+手机麦克风只在**安全上下文**（HTTPS）里才给浏览器用，所以这条路的地址是 `https://10.42.0.1:8000/m`。1104 安装软件更新后，Studio 首次启动会在本机生成证书（局部 CA + 服务器证书），位置：
 
 ```
 /etc/microduck/tls/ca.crt        # 让手机信任的证书（可以下载）
@@ -39,10 +39,7 @@
 
 以后换一台手机要重新装一次 CA；板载麦克风、实体手柄都不需要证书。
 
-> 已经有鸭子、但证书是旧的（只有一张自签 leaf、没有 `ca.crt`）的，在板子上运行
-> `sudo microduck-firstboot --tls-only` 重新生成，旧证书会自动备份成 `*.bak-<时间戳>`，
-> 然后 `sudo systemctl restart microduck-studio`。Studio 发现 `duck.crt` / `duck.key` 在，同一个 8000 端口就同时接 http 和 https（原来的 `http://` 地址照旧能用）。
-> 还没启用 HTTPS 的设备仍可用原来的 HTTP 地址打开控制台。手机麦克风需要先生成并信任证书。
+> 更新沿用本机已有的局部 CA。只有旧自签服务器证书的板子会把旧目录保存在 `/etc/microduck/tls.pre-phone-*`。Studio 的 8000 端口同时接受 HTTP 和 HTTPS。
 
 ### 从热点回家里 WiFi
 
@@ -84,8 +81,7 @@
 ## 四、相关命令（板子上，radxa 用户加 sudo）
 
 ```sh
-sudo microduck-firstboot --tls-only              # 只生成 / 迁移 HTTPS 证书
-sudo microduck-firstboot --tls-only --force      # 强制重建（旧证书自动备份）
+sudo /usr/local/sbin/microduck-helper phone-tls  # 检查本机证书，缺失时生成
 sudo systemctl restart microduck-studio          # 让 Studio 重新读证书
 openssl x509 -in /etc/microduck/tls/duck.crt -noout -subject -ext subjectAltName
 openssl verify -CAfile /etc/microduck/tls/ca.crt /etc/microduck/tls/duck.crt

@@ -122,6 +122,16 @@ def main(argv=None):
     # 首次开机生成的局部 CA 证书放这儿；没显式给 --tls-* 就自动用它（镜像不用额外 drop-in）
     tls_dir = "/etc/microduck/tls"
     auto_cert, auto_key = os.path.join(tls_dir, "duck.crt"), os.path.join(tls_dir, "duck.key")
+    if (not a.bench and not a.tls_cert and not a.tls_key
+            and ROOT == Path("/opt/microduck/software/current/studio").resolve()
+            and os.path.isfile("/usr/local/sbin/microduck-helper")):
+        import subprocess
+        try:
+            subprocess.run(["/usr/bin/sudo", "-n", "/usr/local/sbin/microduck-helper", "phone-tls"],
+                           stdin=subprocess.DEVNULL, capture_output=True, timeout=25, check=True)
+        except (OSError, subprocess.SubprocessError) as exc:
+            log.warn("手机 HTTPS 证书准备失败", cat="系统", raw=str(exc), dedup=False,
+                     hint="运行 sudo /usr/local/sbin/microduck-helper phone-tls 查看原因")
     if not a.tls_cert and not a.tls_key and os.path.isfile(auto_cert) and os.path.isfile(auto_key):
         a.tls_cert, a.tls_key = auto_cert, auto_key
         auto_tls = True
@@ -139,7 +149,7 @@ def main(argv=None):
                 raise SystemExit(f"证书用不了：{exc}")
             # 自动找到的证书坏了不能让网页起不来：照旧用 http 起，只是手机麦克风用不了
             log.warn("https 证书用不了，这次只用 http 起", cat="系统", raw=str(exc), dedup=False,
-                     hint="重新生成：sudo microduck-firstboot --tls-only --force，然后重启 Studio")
+                     hint="重新生成：sudo /usr/local/sbin/microduck-helper phone-tls，然后重启 Studio")
     ca_cert = os.path.join(tls_dir, "ca.crt")
     if not os.path.isfile(ca_cert):
         ca_cert = None
@@ -200,7 +210,7 @@ def main(argv=None):
         tls_host = socket.gethostname() if any_host else host
         log.info(f"同一个端口也接 https（手机在 https://{tls_host}:{port}/m 可以用麦克风说话）", cat="系统", dedup=False)
     elif not a.tls_cert:
-        log.info("没有 https 证书：现在用 http 起，手机麦克风用不了（想开：sudo microduck-firstboot --tls-only）",
+        log.info("没有 https 证书：现在用 http 起，手机麦克风用不了（想开：sudo /usr/local/sbin/microduck-helper phone-tls）",
                  cat="系统", dedup=False)
     if a.bench:
         import threading
