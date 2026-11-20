@@ -10,6 +10,7 @@ import sys
 
 STOCK = Path('/opt/microduck/software/releases/2026.11.4/studio')
 ASSETS = Path(__file__).resolve().parent
+STATIC = ('settings-updates.js', 'updates-ui-state.js')
 
 class LegacyModules(importlib.abc.MetaPathFinder, importlib.abc.Loader):
     def __init__(self, studio, assets):
@@ -29,6 +30,20 @@ class LegacyModules(importlib.abc.MetaPathFinder, importlib.abc.Loader):
         # Compile with the real release filename so /healthz retains the original
         # runtime root. Never write a bytecode cache into the release tree.
         exec(compile((self.assets / original.name).read_bytes(), str(original), 'exec'), module.__dict__)
+        if module.__name__ == 'studio.app':
+            module.AppStatic = self.static_class(module.AppStatic)
+
+    def static_class(self, base):
+        studio_web, assets = self.studio / 'web', self.assets
+
+        class PreparedStatic(base):
+            def lookup_path(self, path):
+                if path in STATIC and Path(self.directory).resolve() == studio_web:
+                    asset = assets / path
+                    return str(asset), asset.stat()
+                return super().lookup_path(path)
+
+        return PreparedStatic
 
 def select(studio, stock, assets):
     if studio != stock:
@@ -37,9 +52,12 @@ def select(studio, stock, assets):
     version = json.loads((studio.parent / 'suite-version.json').read_bytes())
     if version.get('source_revision') != manifest['stock'] or version.get('version') != manifest['version']:
         return None
-    for name in ('app.py','updates.py'):
-        if hashlib.sha256((studio/'studio'/name).read_bytes()).hexdigest() != manifest['originals'][name]:
+    for name in ('app.py','updates.py',*STATIC):
+        folder = 'web' if name in STATIC else 'studio'
+        if hashlib.sha256((studio/folder/name).read_bytes()).hexdigest() != manifest['originals'][name]:
             raise RuntimeError('Stock Studio source mismatch: ' + name)
+        if hashlib.sha256((assets/name).read_bytes()).hexdigest() != manifest['payload'][name]:
+            raise RuntimeError('Prepared Studio source mismatch: ' + name)
     return LegacyModules(studio, assets)
 
 if __name__ == '__main__':
