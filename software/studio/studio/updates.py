@@ -171,6 +171,8 @@ class Updates:
                 request=json.loads(raw)
                 if request=={'op':'readiness'}:
                     result=snapshot()
+                elif request=={'op':'software-readiness'}:
+                    result=snapshot(software=True)
                 elif (isinstance(request,dict) and set(request)=={'op','transaction_id'}
                         and request['op']=='native-recovery-readiness' and isinstance(request['transaction_id'],str)
                         and re.fullmatch('[0-9a-f]{32}',request['transaction_id'])):

@@ -269,10 +269,12 @@ class NativeHttp(unittest.IsolatedAsyncioTestCase):
         self.updates.marker.write_text('job-1',encoding='utf-8')
         self.assertTrue(callback()['ready'],'the software updater must pass its own preflight')
         self.servo.state='opening'
-        self.assertFalse(callback()['ready'],'real servo activity remains a refusal')
+        self.assertTrue(callback(software=True)['ready'],'an open servo page need not block a software swap')
+        self.assertFalse(callback()['ready'],'the native preflight still checks servo activity')
         self.servo.state='closed'
         self.native.update(active=True,phase='guarded')
         self.assertFalse(callback()['ready'],'a native update in progress still refuses')
+        self.assertFalse(callback(software=True)['ready'])
         self.native.update(active=False,phase='idle')
         self.assertFalse(callback(native_transaction='a'*32)['ready'],'native recovery still sees the software marker')
 
@@ -290,6 +292,9 @@ class NativeHttp(unittest.IsolatedAsyncioTestCase):
                 return json.loads(sock.recv(8192))
         self.updates.marker.write_text('job-1',encoding='utf-8')
         self.assertEqual(await asyncio.to_thread(ask,{'op':'readiness'}),{'ready':True})
+        self.servo.state='open'
+        self.assertEqual(await asyncio.to_thread(ask,{'op':'software-readiness'}),{'ready':True})
+        self.assertFalse((await asyncio.to_thread(ask,{'op':'readiness'}))['ready'])
         recovery=await asyncio.to_thread(ask,{'op':'native-recovery-readiness','transaction_id':'a'*32})
         self.assertFalse(recovery['ready'])
 

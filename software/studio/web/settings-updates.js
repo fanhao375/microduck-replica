@@ -40,7 +40,7 @@ export function UpdateSettings({api,csrf}){
     <h2>软件更新</h2>
     <h3>① 网页 / 语音软件</h3>
     <p>当前网页 / 语音版本：<strong data-update-installed>${data?.installed||'尚未登记'}</strong> · 包含网页控制台、匹配的小助手和本地坐站语音。</p>
-    <p>更新前请停下并按原流程站好，关闭策略、语音监听和音乐，结束舵机、标定、录制与回放会话，保持充足电量。</p>
+    <p>退出运动模型后即可更新，保持站姿或卸力都可以。安装时网页和语音服务会短暂重启。</p>
     <p>安装会短暂重启网页和语音服务。页面会自动重连并读取保存的任务结果。</p>
     ${!data&&!error?html`<p role="status">读取更新服务…</p>`:null}
     <p role="status" data-update-phase=${job?.phase||'idle'}>${updateMessage(data)}${typeof job?.percent==='number'?`（${job.percent}%）`:''}</p>

@@ -10,7 +10,7 @@ import os
 from unittest import mock
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from control import Controller, UpdateError, check_robot, choose_release,atomic_json
+from control import Controller, UpdateError, preflight, choose_release,atomic_json
 import test_packages
 
 class Engine:
@@ -21,11 +21,6 @@ class Engine:
         if method=='update.listInstalled': return [{'version':'2026.10.26','active':True}]
         if self.wait: self.wait.wait(2)
         return {'outcome':'dry_run_passed' if params.get('options',{}).get('dry_run') else 'applied','candidate':'2026.10.27','to':'2026.10.27'}
-
-def safe_bus():
-    return {'mode':'motion','phase':'control','homed':True,'policy_enabled':False,'fresh_sample':True,
-        'all_joints_fresh':True,'native':{'joints':[{'id':n,'feedback_fresh':True,'sample_age_ms':3,
-            'position_rad':0,'velocity_rad_s':0,'volts':7.8} for n in range(15)]}}
 
 class Control(unittest.TestCase):
     @unittest.skipUnless(os.name=='posix','Linux advisory lock contract')
@@ -43,15 +38,51 @@ class Control(unittest.TestCase):
                 fcntl.flock(voice,fcntl.LOCK_UN)
             result=self.finish(controller);self.assertTrue(entered.is_set());self.assertTrue(result['ready'])
 
-    def test_unknown_or_moving_refused_but_low_power_is_not(self):
-        check_robot(safe_bus(),{'battery':{'percent':70,'volts':7.8}},safe_bus())
-        for key,value in (('mode','commissioning'),('phase','moving'),('homed',None),('policy_enabled',True),('all_joints_fresh',False)):
-            bus=safe_bus(); bus[key]=value
-            with self.assertRaises(UpdateError): check_robot(bus,{'battery':{'percent':70,'volts':7.8}},safe_bus())
-        for health in ({},{'battery':{'percent':14,'volts':6.83}}):     # 11-18 duck-c84e 边充电边装时读到的
-            check_robot(safe_bus(),health,safe_bus())
-        moving=safe_bus(); moving['native']['joints'][0]['velocity_rad_s']=.4
-        with self.assertRaises(UpdateError): check_robot(moving,{'battery':{'percent':70,'volts':7.8}},safe_bus())
+    def probe(self, bus, *, free=1024**3, studio=None):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = {'marker': Path(tmp) / 'installing', 'state_dir': tmp,
+                      'robot_socket': 'robot', 'studio_socket': 'studio'}
+            def socket_reply(path, request):
+                self.assertEqual(path, 'studio', 'software preflight must not depend on audio mode')
+                return studio(request['op']) if studio else {'ready': True}
+            with (mock.patch('control.Engine') as engine,
+                  mock.patch('control.json_socket', side_effect=socket_reply),
+                  mock.patch('control.shutil.disk_usage', return_value=mock.Mock(free=free)),
+                  mock.patch('health.identities', return_value={})):
+                rpc = engine.return_value.call
+                if isinstance(bus, Exception):
+                    rpc.side_effect = bus
+                else:
+                    rpc.return_value = bus
+                preflight(config)
+                rpc.assert_called_once_with('robot.busStatus')
+
+    def test_software_only_needs_a_confirmed_inactive_policy(self):
+        for bus in ({'policy_enabled':False,'homed':True},
+                    {'policy_enabled':False,'homed':False,'native':{'torque_state_confirmed':False}},
+                    {'policy_enabled':False,'all_joints_fresh':False,'native':{'joints':[{'velocity_rad_s':.4}]}},
+                    {'mode':'commissioning','policy_motion_enabled':False}):
+            with self.subTest(bus=bus): self.probe(bus)
+
+    def test_active_ambiguous_or_unreachable_policy_refuses(self):
+        for bus in ({'policy_enabled':True},{'policy_enabled':False,'policy_motion_enabled':True},
+                    {},None,{'policy_enabled':0},{'policy_enabled':'false'},{'mode':'motion','policy_motion_enabled':False},
+                    {'mode':'commissioning','policy_enabled':None,'policy_motion_enabled':False}, ConnectionRefusedError()):
+            with self.subTest(bus=bus), self.assertRaises(UpdateError) as error: self.probe(bus)
+            self.assertEqual(error.exception.code,'preflight')
+
+    def test_legacy_studio_and_transaction_guards(self):
+        calls=[]
+        def old_studio(op):
+            calls.append(op)
+            return {'ready':True} if op=='readiness' else {'ready':False,'error':'不支持的内部请求'}
+        self.probe({'policy_enabled':False},studio=old_studio)
+        self.assertEqual(calls,['software-readiness','readiness'])
+        def locked(op):
+            self.assertEqual(op,'software-readiness')
+            return {'ready':False,'error':'其他更新正在进行'}
+        with self.assertRaisesRegex(UpdateError,'其他更新'): self.probe({'policy_enabled':False},studio=locked)
+        with self.assertRaisesRegex(UpdateError,'512 MiB'): self.probe({'policy_enabled':False},free=1)
 
     def test_catalog_only_formal_fixed_repo_assets(self):
         release={'tag_name':'microduck-software-v2026.10.27','draft':False,'prerelease':False,
@@ -82,6 +113,29 @@ class Control(unittest.TestCase):
             view=self.finish(controller)
             self.assertFalse(view['ready']); self.assertEqual(view['job']['phase'],'waiting_validation')
             self.assertFalse(any(m=='update.apply' for m,_ in engine.calls))
+
+    def test_model_retakes_control_after_validation_and_operator_can_retry(self):
+        import io
+        with tempfile.TemporaryDirectory() as tmp:
+            bus = {'policy_enabled': False}
+            engine = Engine()
+            controller = self.make(tmp, engine, lambda: self.probe(bus))
+            controller.upload(io.BytesIO(test_packages.Packages().outer()))
+            self.assertTrue(self.finish(controller)['ready'])
+            bus['policy_enabled'] = True
+            controller.start('install')
+            blocked = self.finish(controller)
+            self.assertFalse(blocked['ready'])
+            self.assertEqual(blocked['job']['phase'], 'waiting_validation')
+            self.assertIn('模型正在接管', blocked['job']['error'])
+            attempts = [p for m,p in engine.calls if m == 'update.apply']
+            self.assertEqual(len(attempts), 1)
+            self.assertTrue(attempts[0]['options']['dry_run'])
+            bus['policy_enabled'] = False
+            controller.start('validate')
+            self.assertTrue(self.finish(controller)['ready'])
+            controller.start('install')
+            self.assertEqual(self.finish(controller)['job']['phase'], 'completed')
 
     def test_engine_validation_pinned_cache_revalidated_apply_and_one_worker(self):
         with tempfile.TemporaryDirectory() as tmp:

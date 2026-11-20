@@ -1,7 +1,6 @@
 """Independent, bounded update coordinator. updaterd alone verifies and swaps releases."""
 import hashlib
 import json
-import math
 import os
 from pathlib import Path
 import shutil
@@ -72,43 +71,35 @@ class Engine:
                         return message['result']
                     if progress and isinstance(message.get('params'),dict): progress(message['params'])
 
-def numeric(value): return type(value) in (int,float) and math.isfinite(value)
-
-def check_robot(bus,health,previous):
-    if not isinstance(bus,dict) or not isinstance(previous,dict): raise UpdateError('preflight','无法确认主程序状态')
-    if (any(bus.get(key)!=value or previous.get(key)!=value for key,value in [('mode','motion'),('phase','control')])
-        or any(bus.get(key) is not value or previous.get(key) is not value for key,value in
-            [('policy_enabled',False),('fresh_sample',True),('all_joints_fresh',True)])
-        # 站好（HOME）或卸力都行（用户 11-18：卸力趴着更安全）；关节还要不动，下面逐颗查
-        or not all(sample.get('homed') is True or (sample.get('native') or {}).get('torque_state_confirmed') is False
-                   for sample in (bus,previous))):
-        raise UpdateError('preflight','请让鸭子站好或卸力、关闭走路模型，等关节反馈恢复')
-    rows=bus.get('native',{}).get('joints',[]); old=previous.get('native',{}).get('joints',[])
-    if len(rows)!=15 or len(old)!=15: raise UpdateError('preflight','缺少十五个关节的实时反馈')
-    old={row.get('id'):row for row in old}
-    if len(old)!=15 or len({row.get('id') for row in rows})!=15: raise UpdateError('preflight','关节反馈不完整')
-    for row in rows:
-        before=old.get(row.get('id'),{})
-        for sample in (row,before):
-            if (sample.get('feedback_fresh') is not True or not numeric(sample.get('sample_age_ms')) or sample['sample_age_ms']>250
-                or not numeric(sample.get('velocity_rad_s')) or abs(sample['velocity_rad_s'])>.08
-                or not numeric(sample.get('position_rad'))): raise UpdateError('preflight','关节尚未停稳或反馈过期')
-        if abs(row['position_rad']-before['position_rad'])>.02: raise UpdateError('preflight','检测到关节实际运动，请等待停稳')
-    # 不拦电量（用户 11-18）：边充电边装时读到的是带载电压，会被误拦；软件升级只重启中控和语音，不动主程序
+def require_model_idle(robot):
+    unknown = '暂时无法确认运动模型是否接管，请等主程序恢复后重新验证'
+    try:
+        bus = robot.call('robot.busStatus')
+    except (OSError, UpdateError, ValueError, KeyError, TypeError, AttributeError) as error:
+        raise UpdateError('preflight', unknown) from error
+    if not isinstance(bus, dict):
+        raise UpdateError('preflight', unknown)
+    if bus.get('policy_enabled') is True or bus.get('policy_motion_enabled') is True:
+        raise UpdateError('preflight', '运动模型正在接管，请退出模型后重新验证')
+    if 'policy_motion_enabled' in bus and bus['policy_motion_enabled'] is not False:
+        raise UpdateError('preflight', unknown)
+    if bus.get('policy_enabled') is False:
+        return
+    # 1104 的标定模式只上报 policy_motion_enabled，控制模式上报 policy_enabled。
+    if (bus.get('mode') == 'commissioning' and 'policy_enabled' not in bus
+            and bus.get('policy_motion_enabled') is False):
+        return
+    raise UpdateError('preflight', unknown)
 
 def preflight(config):
-    # The root marker is installed BEFORE this read: Studio refuses new commands
-    # while its existing command set is inspected over its private local socket.
-    studio=json_socket(config['studio_socket'],{'op':'readiness'})
-    if studio.get('ready') is not True: raise UpdateError('preflight',studio.get('error','网页控制会话尚未空闲'))
-    audio=json_socket(config['audio_socket'],{'method':'status'})
-    status=audio.get('status',{})
-    if audio.get('ok') is not True or status.get('listening') is not False or status.get('music') is not False:
-        raise UpdateError('preflight','请关闭语音监听和音乐律动后重试')
-    robot=Engine(config['robot_socket'])
-    previous=robot.call('robot.busStatus'); time.sleep(.3)
-    bus=robot.call('robot.busStatus'); health=robot.call('robot.health')
-    check_robot(bus,health,previous)
+    # The installing marker already prevents new Studio and voice actions.
+    studio = json_socket(config['studio_socket'], {'op':'software-readiness'})
+    if studio == {'ready':False, 'error':'不支持的内部请求'}:
+        # A previously installed Studio only implements the original, stricter check.
+        studio = json_socket(config['studio_socket'], {'op':'readiness'})
+    if studio.get('ready') is not True:
+        raise UpdateError('preflight', studio.get('error','网页控制服务尚未就绪'))
+    require_model_idle(Engine(config['robot_socket']))
     if shutil.disk_usage(config['state_dir']).free<512*1024*1024:
         raise UpdateError('preflight','可用磁盘空间不足 512 MiB')
     from health import identities
@@ -308,7 +299,7 @@ class Controller:
                 try:fcntl.flock(descriptor,fcntl.LOCK_EX|fcntl.LOCK_NB);break
                 except BlockingIOError:
                     if deadline is not None and time.monotonic()>deadline:
-                        raise UpdateError('preflight','语音动作尚未结束，请等待停稳后重试')
+                        raise UpdateError('preflight','语音正在执行动作，请等这条指令结束后重试')
                     time.sleep(.05)
             self.motion_descriptor=descriptor
         except Exception:os.close(descriptor);raise
@@ -348,7 +339,9 @@ class Controller:
         except UpdateError as error:
             if self.dispatched:
                 self.save(phase='recovering',error='引擎连接中断，正在读取持久任务结果');self.recover(release=False)
-            elif operation in {'download','validate'} and error.code=='preflight': self.save(phase='waiting_validation',error=str(error))
+            elif operation in {'download','validate','install'} and error.code=='preflight':
+                self.ready=False
+                self.save(phase='waiting_validation',error=str(error))
             else:
                 if operation=='check': self.source_state='network_error'
                 self.save(phase='failed',error=str(error)[:500],code=error.code)

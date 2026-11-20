@@ -353,18 +353,14 @@ def bootstrap(root,package,public_key,engine,engine_command=None,offline=False):
             # recorder/servo command can begin between readiness and the first swap.
             if (root/'var/lib/microduck-studio/servo-session.json').exists() or (root/'home/radxa/studio-dev/state/servo-session.json').exists():
                 raise ValueError('close the servo session before bootstrapping')
-            from control import Engine,check_robot,json_socket,atomic_json
+            from control import Engine,require_model_idle,atomic_json
             from health import identities
-            robot=Engine('/run/robotd.sock'); before=robot.call('robot.busStatus'); time.sleep(.3)
-            check_robot(robot.call('robot.busStatus'),robot.call('robot.health'),before)
-            audio=json_socket('/run/duck-echo/control.sock',{'method':'status'})
-            if audio.get('ok') is not True or any(audio.get('status',{}).get(key) is not False for key in ('listening','music')):
-                raise ValueError('turn off voice/music before bootstrapping')
+            robot=Engine('/run/robotd.sock')
+            require_model_idle(robot)
             atomic_json('/run/microduck-updater/protected-services.json',identities())
             stopped=True
             subprocess.run(['systemctl','stop','microduck-studio','duck-echo'],check=True)
-            before=robot.call('robot.busStatus');time.sleep(.3)
-            check_robot(robot.call('robot.busStatus'),robot.call('robot.health'),before)
+            require_model_idle(robot)
             legacy=root/'home/radxa/studio-dev/state'; destination=root/'var/lib/microduck-studio'
             if legacy.is_dir():
                 import pwd

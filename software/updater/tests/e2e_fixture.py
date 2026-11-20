@@ -37,7 +37,7 @@ class Fixture:
         self.engine=FixtureEngine()
         self.controller=Controller(self.root,self.engine,self.preflight,self.catalog,marker=marker,fetcher=self.download)
     def preflight(self):
-        if self.waiting:raise UpdateError('preflight','测试鸭子尚未停稳')
+        if self.waiting:raise UpdateError('preflight','测试鸭子的运动模型正在接管')
     def catalog(self):
         if self.no_release:return []
         if not self.package:raise UpdateError('network','本地发布源连接失败')
