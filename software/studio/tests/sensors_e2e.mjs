@@ -162,10 +162,11 @@ try {
     await js(`window.__sensorHidden=false;document.dispatchEvent(new Event('visibilitychange'))`);
   };
   writeFileSync(arg('control'), JSON.stringify({ mode:'missing',camera:'offline' })); await refreshBand();
-  await wait(`document.querySelector('.band-camera')?.dataset.state==='offline' && document.querySelector('.band-tof')?.dataset.state==='offline'`, 'offline sensors in band');
+  await wait(`document.querySelector('.band-camera')?.dataset.state==='offline' && document.querySelector('.band-tof .word')?.innerText==='服务在线'`, 'camera offline; tofd responding without a sensor');
   writeFileSync(arg('control'), JSON.stringify({ mode:'ready-real' }));
   writeFileSync(arg('camera-config'), '[media]\nsource="camera"\n'); await refreshBand();
   await wait(`document.querySelector('.band-camera')?.dataset.state==='online' && document.querySelector('.band-tof')?.dataset.state==='online'`, 'service and valid ToF online');
+  assert(await js(`document.querySelector('.band-tof .word').innerText==='350 mm'`), 'nearest valid range in overview');
   assert(await js(`document.querySelector('.band-camera .word').innerText==='服务在线'`), 'camera must not claim physical hardware verification');
   await js(`window.__sensorHidden=true;document.dispatchEvent(new Event('visibilitychange'))`);
   await sleep(250); const beforeHidden = countReads();

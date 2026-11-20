@@ -10,10 +10,11 @@ if (typeof document !== 'undefined' && !document.getElementById('sensors-css')) 
 
 const emptyTof = (state, reason, extra = {}) => ({ ...extra, state, reason, zones: [], valid_count: null, nearest_mm: null, farthest_mm: null });
 const finite = n => typeof n === 'number' && Number.isFinite(n);
+const TOF_FRESH_MS = 3000;
 
 export function tofSnapshot(data) {
   if (!data || !['ready', 'waiting', 'unavailable', 'error'].includes(data.state)) return emptyTof('error', 'ToF 返回的数据无效。');
-  const info = { sensor: typeof data.sensor === 'string' ? data.sensor : null, simulated: data.simulated === true,
+  const info = { sensor: typeof data.sensor === 'string' ? data.sensor : null, simulated: data.simulated === true, connected: data.connected === true,
     hz: finite(data.hz) ? data.hz : null, seq: data.seq, age_ms: data.age_ms };
   if (data.state !== 'ready') return emptyTof(data.state, data.reason || '', info);
   if (data.rows !== 8 || data.cols !== 8 || !Array.isArray(data.distance_mm) || data.distance_mm.length !== 64 ||
@@ -21,7 +22,7 @@ export function tofSnapshot(data) {
     !data.status.every(n => Number.isInteger(n) && n >= 0 && n <= 255) || !finite(data.age_ms) || data.age_ms < 0) {
     return emptyTof('error', 'ToF 帧格式无效，等待下一份完整的 8 × 8 读数。', info);
   }
-  if (data.age_ms >= 3000) return emptyTof('stale', '读数已过期，等待新的 ToF 帧。', info);
+  if (data.age_ms >= TOF_FRESH_MS) return emptyTof('stale', '读数已过期，等待新的 ToF 帧。', info);
   const zones = data.status.map((status, i) => {
     const raw_mm = data.distance_mm[i];
     const kind = status === 255 ? 'no_target' : (status === 5 || status === 9) && raw_mm > 0 ? 'range' : 'unusable';
@@ -38,6 +39,7 @@ export function cameraSource(config, producer) {
   return { label: simulated ? `${configured} · 运行端为模拟设备` : configured, verified: false,
     note: config?.source === 'test' ? '当前配置使用测试图案；视频播放成功也不代表真实摄像头已连接。'
       : simulated ? '运行端明确标记为模拟设备。'
+      : config?.auto?.camera_present === true ? '开机时内核已识别 IMX219，预览中可以确认实际画面。'
         : '来源依据只读配置；真实摄像头是否正常，需要查看实际画面确认。' };
 }
 
@@ -97,9 +99,14 @@ export function cameraBandStatus(data) {
 
 export function tofBandStatus(data) {
   const view = tofSnapshot(data);
-  if (view.state === 'ready') return view.simulated ? { state: 'simulated', word: '模拟数据', small: '点开查看距离图' }
-    : { state: 'online', word: '在线', small: '点开查看距离图' };
-  if (view.state === 'unavailable') return { state: 'offline', word: '未连接', small: '传感器或服务不可用' };
+  if (view.state === 'ready') {
+    if (view.simulated) return { state: 'simulated', word: '模拟数据', small: '点开查看距离图' };
+    if (!view.valid_count) return { state: 'waiting', word: '无有效距离', small: '已收到帧 · 0/64 有效' };
+    return { state: 'online', word: `${view.nearest_mm} mm`, small: `最近距离 · ${view.valid_count}/64 有效` };
+  }
+  if (view.state === 'unavailable') return view.connected
+    ? { state: 'waiting', word: '服务在线', small: '传感器暂无读数' }
+    : { state: 'offline', word: '未连接', small: 'ToF 服务未连接' };
   if (view.state === 'waiting') return { state: 'waiting', word: '等待数据', small: '服务已响应' };
   if (view.state === 'stale') return uncheckedBand('上次读数已过期');
   return { state: 'error', word: '读取失败', small: '点开查看详情' };
@@ -119,14 +126,21 @@ export function createSensorBandReader({ request, onValue, intervalMs = 10000, s
   };
   const readOne = async (kind, current) => {
     const controller = new AbortController(), started = now(); controllers.add(controller);
-    let value;
+    let value, expiresIn = staleMs;
     try {
       const result = await request(kind, controller.signal);
       if (!active || current !== generation) return;
       if (!result?.ok) throw Error('读取失败');
       const elapsed = Math.max(0, now() - started), data = result.data;
-      value = kind === 'camera' ? (elapsed >= staleMs ? uncheckedBand('检查结果已过期') : cameraBandStatus(data))
-        : tofBandStatus(finite(data?.age_ms) && data.age_ms >= 0 ? { ...data, age_ms: data.age_ms + elapsed } : data);
+      if (kind === 'camera') {
+        value = elapsed >= staleMs ? uncheckedBand('检查结果已过期') : cameraBandStatus(data);
+      } else {
+        const received = finite(data?.age_ms) && data.age_ms >= 0 ? { ...data, age_ms: data.age_ms + elapsed } : data;
+        value = tofBandStatus(received);
+        if (received?.state === 'ready' && finite(received.age_ms)) {
+          expiresIn = Math.max(0, Math.min(staleMs, TOF_FRESH_MS - received.age_ms));
+        }
+      }
     } catch {
       if (!active || current !== generation) return;
       value = { state: 'error', word: '读取失败', small: '点开查看详情' };
@@ -135,7 +149,7 @@ export function createSensorBandReader({ request, onValue, intervalMs = 10000, s
     clearTimeout(expiry.get(kind)); emit(kind, value);
     expiry.set(kind, setTimeout(() => {
       if (active && current === generation) emit(kind, uncheckedBand('状态已过期，等待检查'));
-    }, staleMs));
+    }, expiresIn));
   };
   const read = async current => {
     await Promise.allSettled(['camera', 'tof'].map(kind => readOne(kind, current)));
@@ -300,10 +314,10 @@ export function TofPage({ api }) {
   const range = Math.max(1, (value.farthest_mm || 0) - (value.nearest_mm || 0));
   return html`<section class="sensor-page tof-page" aria-labelledby="tof-title">
     <header class="sensor-heading"><div><h1 id="tof-title">ToF 距离</h1><p>8 × 8 分区距离，单位为毫米。按传感器原始行列显示，未与摄像头画面对齐。</p></div>
-      <span class="sensor-pill tof-status" role="status" data-state=${value.state}>${TOF_STATES[value.state]}</span></header>
+      <span class="sensor-pill tof-status" role="status" data-state=${value.state}>${ready && !value.valid_count ? '已收到帧，无有效距离' : TOF_STATES[value.state]}</span></header>
     <div class="board sensor-board tof-summary"><div><strong class="tof-sensor">${value.sensor || '传感器型号待确认'}</strong>
       ${value.simulated ? html`<span class="sensor-pill tof-simulated">模拟数据</span>` : null}</div>
-      <p class="tof-reason" role=${value.state === 'error' ? 'alert' : 'status'}>${value.reason || (ready ? '颜色按这一帧的有效距离分布显示；近处更深，远处更浅。' : '等待传感器读数。')}</p></div>
+      <p class="tof-reason" role=${value.state === 'error' ? 'alert' : 'status'}>${value.connected && !ready ? 'ToF 服务已连接。' : ''}${value.reason || (ready && !value.valid_count ? '这一帧的 64 个分区均未给出有效距离。' : ready ? '颜色按这一帧的有效距离分布显示，近处更深，远处更浅。' : '等待传感器读数。')}</p></div>
     <div class="tof-content"><div class="board sensor-board tof-visual">
       <div class="tof-grid" aria-label="ToF 8 × 8 距离分区" aria-busy=${!ready}>${zones.map((zone, i) => html`<button type="button" key=${i}
         class=${`tof-zone ${zone?.kind || 'empty'}`} data-zone=${i} data-kind=${zone?.kind || 'empty'} disabled=${!zone}

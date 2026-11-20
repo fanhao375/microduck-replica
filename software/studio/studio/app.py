@@ -1334,6 +1334,9 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         finally:
             for t in tasks:
                 t.cancel()
+            verification = getattr(imu, "home_verification_task", None)
+            if verification in cmd_tasks:
+                verification.cancel()
             log.unsubscribe(logq)
             clients.pop(ws, None)
             if pad is not None:
@@ -1623,7 +1626,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
 
     async def sensors_on_boot():
         try:
-            await sensor_auto.run("开机自动识别")
+            await sensor_auto.run_on_boot("开机自动识别")
         except asyncio.CancelledError:
             raise
         except Exception as e:  # noqa: BLE001

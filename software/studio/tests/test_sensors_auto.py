@@ -47,6 +47,8 @@ class SensorAutoTest(unittest.IsolatedAsyncioTestCase):
             (units / "tofd.service").write_text("[Unit]\n", encoding="utf-8")
         if tofd_enabled:
             (units / "multi-user.target.wants/tofd.service").write_text("", encoding="utf-8")
+            (self.root / "run/tofd").mkdir(parents=True, exist_ok=True)
+            (self.root / "run/tofd/tof.sock").touch()
 
     def auto(self):
         def apply(by, camera, tof):
@@ -60,7 +62,7 @@ class SensorAutoTest(unittest.IsolatedAsyncioTestCase):
         last = await self.auto().run("开机")
         self.assertEqual(self.calls, [("camera", False)])
         self.assertEqual((last["state"], last["source"], last["camera_present"]), ("ok", "camera", True))
-        self.assertIn("已切到真实画面", last["note"])
+        self.assertIn("已选择摄像头来源", last["note"])
 
     async def test_no_camera_puts_real_back_to_test_picture(self):
         self.duck(source="camera", camera=False, tofd_enabled=True)
@@ -83,10 +85,40 @@ class SensorAutoTest(unittest.IsolatedAsyncioTestCase):
         await self.auto().run("开机")
         self.assertEqual(self.calls, [(None, True)])
 
+    async def test_installed_enabled_tofd_is_started_if_no_socket_appeared(self):
+        self.duck(source="test", camera=False, tofd_enabled=True)
+        (self.root / "run/tofd/tof.sock").unlink()
+        await self.auto().run("开机")
+        self.assertEqual(self.calls, [(None, True)])
+
     async def test_camera_and_tof_go_in_one_call(self):
         self.duck(source="test", camera=True, tofd_enabled=False)
         await self.auto().run("开机")
         self.assertEqual(self.calls, [("camera", True)])
+
+    async def test_failed_tof_does_not_prevent_camera_startup(self):
+        self.duck(source="test", camera=True)
+        auto = self.auto()
+        def apply(by, camera, tof):
+            self.calls.append((camera, tof))
+            return (False, "tof_failed", {}) if tof else self.reply
+        auto.apply = apply
+        last = await auto.run("开机")
+        self.assertEqual(self.calls, [("camera", True), ("camera", False)])
+        self.assertEqual((last["state"], last["source"]), ("ok", "camera"))
+
+    async def test_boot_rechecks_for_a_late_camera_after_initial_fallback(self):
+        self.duck(source="camera", camera=False, tofd_enabled=True)
+        auto = self.auto()
+        auto.settle = 0
+        def apply(by, camera, tof):
+            self.calls.append((camera, tof))
+            self.duck(source=camera, camera=True, tofd_enabled=True)
+            return self.reply
+        auto.apply = apply
+        last = await auto.run_on_boot("开机", late_settle=.1)
+        self.assertEqual(self.calls, [("test", False), ("camera", False)])
+        self.assertEqual(last["source"], "camera")
 
     async def test_duck_without_tofd_installed_is_not_asked_to_enable_it(self):
         self.duck(source="test", camera=False, tofd=False)

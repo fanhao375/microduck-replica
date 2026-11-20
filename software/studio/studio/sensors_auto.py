@@ -4,9 +4,9 @@
   认到了、配置还是测试画面 → 让小助手切成真实画面；
   没认到、配置是真实画面   → 切回测试画面（不然视频服务每 5 秒重启一次，网页上的视频和遥控都没了）。
   切成真实画面以后视频服务起不来，小助手自己退回测试画面，这里只把话说清楚。
-ToF：tofd 没接传感器时自己安静地等、接上就工作，所以只管把它设成开机启动。
+ToF：启动已安装的 tofd。有效距离由订阅到的帧和各分区状态判定。
 
-每次 Studio 起来做一次，没有要改的就什么都不动。想关掉：在 Studio 的 state 目录放一个 sensors-auto-off 文件。
+每次 Studio 启动时检查。摄像头驱动较晚就绪时再尝试一次。放置 state/sensors-auto-off 可关闭。
 """
 import asyncio
 import os
@@ -37,10 +37,11 @@ def media_source(root="/"):
 
 
 def tof_pending(root="/"):
-    """tofd 装了、还没设成开机启动。"""
+    """已安装 tofd，开机启动链接或服务端点还没出现。"""
     root = Path(root)
     return (any((root / unit).is_file() for unit in TOF_UNITS)
-            and not os.path.lexists(root / "etc/systemd/system/multi-user.target.wants/tofd.service"))
+            and (not os.path.lexists(root / "etc/systemd/system/multi-user.target.wants/tofd.service")
+                 or not (root / "run/tofd/tof.sock").exists()))
 
 
 class SensorAuto:
@@ -59,15 +60,24 @@ class SensorAuto:
         self.last = {"state": state, "note": note, **extra}
         return self.last
 
-    async def _camera_seen(self):
+    async def _camera_seen(self, timeout):
         """认到了马上回；没认到等一会儿再看，开机早的时候驱动还没认完。"""
-        end = asyncio.get_running_loop().time() + self.settle
+        loop = asyncio.get_running_loop()
+        end = loop.time() + timeout
         while True:
             if camera_present(self.root):
                 return True
-            if asyncio.get_running_loop().time() >= end:
+            remaining = end - loop.time()
+            if remaining <= 0:
                 return False
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(min(0.5, remaining))
+
+    async def run_on_boot(self, by, late_settle=60.0):
+        initial = await self.run(by)
+        if (initial["state"] == "ok" and initial.get("camera_present") is False
+                and initial.get("source") == "test" and await self._camera_seen(late_settle)):
+            return await self.run(by)
+        return initial
 
     async def run(self, by):
         if self.off is not None and self.off.exists():
@@ -77,7 +87,7 @@ class SensorAuto:
             # 读不懂配置就不碰摄像头；ToF 照样管
             present, want = None, None
         else:
-            present = await self._camera_seen()
+            present = await self._camera_seen(self.settle)
             want = "camera" if present and source == "test" else "test" if not present and source == "camera" else None
         tof = tof_pending(self.root)
         if want is None and not tof:
@@ -88,12 +98,16 @@ class SensorAuto:
             self.log.info("软件正在更新：这次开机不自动设摄像头和 ToF", cat="传感器")
             return self._done("busy", None, camera_present=present, source=source)
         ok, result, detail = await asyncio.to_thread(self.apply, by, want, tof)
+        if not ok and result == "tof_failed" and want is not None:
+            # The helper exits before touching the camera if tofd cannot start.
+            self.log.warn("ToF 服务启动失败，继续设置摄像头", cat="传感器", raw=str(detail)[:400])
+            ok, result, detail = await asyncio.to_thread(self.apply, by, want, False)
         detail = detail if isinstance(detail, dict) else {}
         if tof and detail.get("tof") == "enabled":
-            self.log.info("ToF 服务设成开机启动（没接传感器它自己等着，接上就有读数）", cat="传感器", dedup=False)
+            self.log.info("已为 ToF 服务启用开机启动，测距状态可在 ToF 页查看", cat="传感器", dedup=False)
         if ok and want == "camera":
-            self.log.info("认到了摄像头：视频来源切成真实画面", cat="传感器", dedup=False)
-            return self._done("ok", "开机认到了摄像头，已切到真实画面。", camera_present=True, source="camera")
+            self.log.info("内核已识别 IMX219，视频来源已设为摄像头", cat="传感器", dedup=False)
+            return self._done("ok", "已选择摄像头来源，视频服务已启动。", camera_present=True, source="camera")
         if ok and want == "test":
             self.log.info("没认到摄像头：视频来源切回测试画面", cat="传感器", dedup=False,
                           hint="接了摄像头的话：关机检查排线方向和有没有插到底，再开机")

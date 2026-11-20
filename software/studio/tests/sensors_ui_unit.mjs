@@ -54,6 +54,9 @@ test('source labels never promote configuration or a test image to hardware proo
   assert.match(ui.cameraSource({ source: 'camera' }, { simulated: 'true' }).label, /模拟/);
   assert.match(ui.cameraSource({ source: 'unknown' }, {}).label, /未知/);
   assert.equal(ui.cameraSource({ source: 'camera' }, {}).verified, false);
+  const detected = ui.cameraSource({ source: 'camera', auto: { camera_present: true } }, {});
+  assert.match(detected.note, /已识别 IMX219/);
+  assert.equal(detected.verified, false);
 });
 
 function clock() {
@@ -74,9 +77,11 @@ test('status cards distinguish hardware data, simulation and camera service evid
   assert.equal(ui.cameraBandStatus({ source: 'camera', service_state: 'online' }).word, '服务在线');
   assert.equal(ui.cameraBandStatus({ source: 'test', service_state: 'online' }).word, '测试画面');
   assert.equal(ui.cameraBandStatus({ source: 'test', service_state: 'offline' }).state, 'offline');
-  assert.equal(ui.tofBandStatus(frame()).word, '在线');
+  assert.equal(ui.tofBandStatus(frame()).word, '500 mm');
+  assert.equal(ui.tofBandStatus({ ...frame(), status: Array(64).fill(255) }).word, '无有效距离');
   assert.equal(ui.tofBandStatus({ ...frame(), simulated: true }).word, '模拟数据');
-  assert.equal(ui.tofBandStatus({ ...frame(), state: 'unavailable', connected: true }).state, 'offline');
+  assert.equal(ui.tofBandStatus({ ...frame(), state: 'unavailable', connected: true }).word, '服务在线');
+  assert.equal(ui.tofBandStatus({ state: 'unavailable', connected: false }).state, 'offline');
   assert.equal(ui.tofBandStatus({ state: 'waiting', connected: true }).word, '等待数据');
   assert.equal(ui.tofBandStatus({ ...frame(), age_ms: 5000 }).state, 'unknown');
   assert.equal(ui.tofBandStatus({ ...frame(), status: [5] }).state, 'error');
@@ -92,8 +97,9 @@ test('band reader checks once per ten seconds and cancels both independent reque
   reader.start(); await tick();
   assert.equal(calls.length, 2);
   assert.equal(values.at(-1).camera.word, '测试画面');
-  assert.equal(values.at(-1).tof.word, '在线');
-  c.advance(9999); await tick(); assert.equal(calls.length, 2);
+  assert.equal(values.at(-1).tof.word, '500 mm');
+  c.advance(3000); await tick(); assert.equal(values.at(-1).tof.state, 'unknown');
+  c.advance(6999); await tick(); assert.equal(calls.length, 2);
   c.advance(1); await tick(); assert.equal(calls.length, 4);
   reader.stop(); assert.equal(c.count, 0);
   c.advance(20000); await tick(); assert.equal(calls.length, 4);

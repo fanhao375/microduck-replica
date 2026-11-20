@@ -557,7 +557,11 @@ class FakeRobotd:
         top = self.calib.get("imu_mount")
         if isinstance(top, dict) and (self.calib.get("imu_source") in (None, src)):
             top["quat"], top["verified"] = quat, True
-        return {"accepted": True, "source": src, "mount_wxyz": quat}, None
+        # The scripted upright → 20° nose-down sequence above emulates the
+        # commissioning daemon's independent check; Studio validates this reply.
+        return {"accepted": True, "source": src, "mount_wxyz": quat,
+                "imu_check": {"upright": {"imu_source": src}, "residual_tilt_deg": 0.0,
+                              "nose_down": {"tilt_from_upright_deg": 20.0, "lean_heading_deg": 0.0}}}, None
 
     async def dispatch(self, method, params):
         self.calls.append((time.monotonic(), method))
