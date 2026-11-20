@@ -4,7 +4,7 @@ const shots = arg('shots'); mkdirSync(shots, { recursive: true });
 const target = await (await fetch(`http://127.0.0.1:${arg('cdp')}/json/new?about:blank`, { method: 'PUT' })).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise(resolve => ws.addEventListener('open', resolve, { once: true }));
-let nextId = 0; const pending = new Map(), errors = [];
+let nextId = 0, receiveViewportFrame = null; const pending = new Map(), errors = [];
 const send = (method, params = {}, timeout = 15000) => new Promise((resolve, reject) => {
   const id = ++nextId, timer = setTimeout(() => { pending.delete(id); reject(Error(`CDP timeout: ${method}`)); }, timeout);
   pending.set(id, message => { clearTimeout(timer); message.error ? reject(Error(JSON.stringify(message.error))) : resolve(message.result); });
@@ -12,6 +12,7 @@ const send = (method, params = {}, timeout = 15000) => new Promise((resolve, rej
 });
 ws.addEventListener('message', event => {
   const message = JSON.parse(event.data);
+  if (message.method === 'Page.screencastFrame') receiveViewportFrame?.(message.params);
   if (pending.has(message.id)) { pending.get(message.id)(message); pending.delete(message.id); }
   if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.exception?.description || message.params.exceptionDetails.text);
   if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') errors.push(message.params.args.map(a => a.value || a.description).join(' '));
@@ -38,8 +39,43 @@ const click = async selector => {
   await js(`document.querySelector(${JSON.stringify(selector)}).click()`);
 };
 const assert = (value, message) => { if (!value) throw Error(message); };
+// Headless Edge can stall Page.captureScreenshot with a live video surface in
+// mobile emulation. Its compositor still emits the actual visible viewport.
+const captureVideoViewport = async ({ width, height }) => {
+  let timer;
+  try {
+    const frame = await new Promise((resolve, reject) => {
+      let frames = 0, lastSize = '';
+      timer = setTimeout(() => reject(Error(`Expected ${width}×${height} viewport, received ${frames} frames (latest ${lastSize})`)), 15000);
+      let first = true;
+      receiveViewportFrame = sample => {
+        // Edge may send a cached surface (even at the previous viewport size)
+        // first. Wait for a subsequent paint of the requested mobile viewport.
+        const header = Buffer.from(sample.data.slice(0, 32), 'base64');
+        frames++;
+        lastSize = `${header.readUInt32BE(16)}×${header.readUInt32BE(20)}`;
+        if (!first && header.readUInt32BE(16) === width && header.readUInt32BE(20) === height) {
+          resolve(sample);
+          return;
+        }
+        first = false;
+        send('Page.screencastFrameAck', { sessionId: sample.sessionId }).catch(reject);
+      };
+      send('Page.startScreencast', { format: 'png' }).catch(reject);
+    });
+    await send('Page.screencastFrameAck', { sessionId: frame.sessionId });
+    return frame;
+  } finally {
+    clearTimeout(timer); receiveViewportFrame = null;
+    await send('Page.stopScreencast');
+  }
+};
 const shot = async name => {
-  const response = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, 45000)
+  const mobileVideo = await js(`innerWidth<=390 && [...document.querySelectorAll('video')].some(v=>v.srcObject && !v.paused)
+    ? {width:Math.round(visualViewport.width*visualViewport.scale*devicePixelRatio),
+       height:Math.round(visualViewport.height*visualViewport.scale*devicePixelRatio)} : null`);
+  const response = await (mobileVideo ? captureVideoViewport(mobileVideo) :
+    send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, 45000))
     .catch(error => { throw Error(`Screenshot ${name}: ${error.message}`); });
   writeFileSync(`${shots}/${name}.png`, Buffer.from(response.data, 'base64'));
 };
@@ -225,9 +261,11 @@ try {
   await assertCompactFrame(90, 'desktop portrait after reconnect');
   for (const [width,height] of [[1440,900],[1101,900],[1440,800],[1440,768]]) {
     await send('Emulation.setDeviceMetricsOverride', { width,height,deviceScaleFactor:1,mobile:false });
-    await js(`document.querySelector('.inline-camera').scrollIntoView({block:'center'})`); await sleep(150);
-    const layout = await js(`(() => { const d=document.querySelector('.pd-3d').getBoundingClientRect(), c=document.querySelector('.inline-camera').getBoundingClientRect(), left=document.querySelector('.pd-left'), css=getComputedStyle(left);
-      return {below:c.top>=d.bottom, bottom:c.bottom, fits:left.getBoundingClientRect().height+parseFloat(css.top)+16<=innerHeight, sticky:css.position}; })()`);
+    await js(`document.querySelector('.inline-camera').scrollIntoView({block:'center'})`);
+    const layout = await wait(`(() => { const d=document.querySelector('.pd-3d').getBoundingClientRect(), c=document.querySelector('.inline-camera').getBoundingClientRect(), left=document.querySelector('.pd-left'), css=getComputedStyle(left);
+      const fits=left.getBoundingClientRect().height+parseFloat(css.top)+16<=innerHeight;
+      if (innerHeight!==${height} || css.position!==(innerHeight>840 && fits?'sticky':'static')) return false;
+      return {below:c.top>=d.bottom, bottom:c.bottom, fits, sticky:css.position}; })()`, `resized sticky stack at ${width}×${height}`);
     assert(layout.below, `camera never overlaps posture at ${width}x${height}`);
     if (height>840 && layout.fits) assert(layout.sticky==='sticky' && layout.bottom<=height-4, `whole left stack fits ${width}x${height}: ${JSON.stringify(layout)}`);
     else assert(layout.sticky==='static', 'short or crowded screens scroll rather than pin a clipped preview');
