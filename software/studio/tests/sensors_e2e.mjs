@@ -5,8 +5,8 @@ const target = await (await fetch(`http://127.0.0.1:${arg('cdp')}/json/new?about
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise(resolve => ws.addEventListener('open', resolve, { once: true }));
 let nextId = 0; const pending = new Map(), errors = [];
-const send = (method, params = {}) => new Promise((resolve, reject) => {
-  const id = ++nextId, timer = setTimeout(() => { pending.delete(id); reject(Error(`CDP timeout: ${method}`)); }, 15000);
+const send = (method, params = {}, timeout = 15000) => new Promise((resolve, reject) => {
+  const id = ++nextId, timer = setTimeout(() => { pending.delete(id); reject(Error(`CDP timeout: ${method}`)); }, timeout);
   pending.set(id, message => { clearTimeout(timer); message.error ? reject(Error(JSON.stringify(message.error))) : resolve(message.result); });
   ws.send(JSON.stringify({ id, method, params }));
 });
@@ -24,9 +24,13 @@ const js = async expression => {
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const wait = async (expression, what, timeout = 16000) => {
   const end = Date.now() + timeout;
-  while (Date.now() < end) { if (await js(expression)) return; await sleep(100); }
-  await shot('timeout');
+  while (Date.now() < end) {
+    const value = await js(expression);
+    if (value) return value;
+    await sleep(100);
+  }
   const layout = await js(`(() => { const p=document.querySelector('#pad-block'), c=document.querySelector('.inline-camera'); return {url:location.hash,scroll:scrollY,pad:p?.getBoundingClientRect().toJSON(),margin:p&&getComputedStyle(p).scrollMarginTop,card:c?.getBoundingClientRect().toJSON(),state:document.querySelector('.inline-camera-status')?.dataset.state}; })()`);
+  await shot('timeout').catch(error => console.error(`Timeout screenshot for "${what}": ${error.message}`));
   throw Error(`Timeout: ${what}\nLayout: ${JSON.stringify(layout)}\n${await js('document.body.innerText.slice(0,4500)')}\nBrowser errors: ${JSON.stringify(errors)}\nFixture: ${JSON.stringify(await js(`window.__sensorFixture && {sockets:__sensorFixture.sockets.length,states:__sensorFixture.sockets.map(s=>s.readyState),signals:__sensorFixture.signals,rpc:__sensorFixture.rpc,pcs:__sensorFixture.pcs.length}`))}`);
 };
 const click = async selector => {
@@ -35,18 +39,27 @@ const click = async selector => {
 };
 const assert = (value, message) => { if (!value) throw Error(message); };
 const shot = async name => {
-  const response = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  const response = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }, 45000)
+    .catch(error => { throw Error(`Screenshot ${name}: ${error.message}`); });
   writeFileSync(`${shots}/${name}.png`, Buffer.from(response.data, 'base64'));
 };
 const countReads = () => readFileSync(arg('record'), 'utf8').split('\n').filter(Boolean).length;
 const assertCompactFrame = async (rotation, label) => {
-  const geometry = await js(`(() => {
-    const s=document.querySelector('.inline-camera .camera-screen').getBoundingClientRect();
+  const geometry = await wait(`(() => {
+    const screen=document.querySelector('.inline-camera .camera-screen');
     const v=document.querySelector('.inline-camera-video');
+    const peer=__sensorFixture.pcs.at(-1);
+    const metadata=peer?.channel?.deliveredMetadata;
+    if (peer?.connectionState!=='connected' || metadata?.rotate!==${rotation} ||
+        screen?.dataset.playing!=='true' || !v || v.srcObject!==peer.stream ||
+        v.readyState<HTMLMediaElement.HAVE_CURRENT_DATA || v.paused ||
+        v.videoWidth!==metadata.width || v.videoHeight!==metadata.height ||
+        !v.style.transform.includes('rotate(${rotation}deg)')) return false;
+    const s=screen.getBoundingClientRect();
     const c=document.querySelector('.inline-camera').getBoundingClientRect();
     return {width:s.width,height:s.height,center:s.left+s.width/2,cardCenter:c.left+c.width/2,
       rawWidth:v.videoWidth,rawHeight:v.videoHeight};
-  })()`);
+  })()`, `current decoded frame and applied media.video rotation (${label})`);
   const sideways = rotation===90 || rotation===270;
   const expected = sideways ? geometry.rawHeight/geometry.rawWidth : geometry.rawWidth/geometry.rawHeight;
   assert(Math.abs(geometry.width/geometry.height-expected)<.01,
@@ -83,9 +96,15 @@ function installVideoFixture() {
     constructor() { this.readyState = 'open'; }
     send(raw) {
       const request = JSON.parse(raw); fixture.rpc.push(request);
-      if (request.method === 'media.video') queueMicrotask(() => this.onmessage?.({ data: JSON.stringify({
-        jsonrpc: '2.0', id: request.id, result: { width: 640, height: 480, rotate: fixture.rotate, mono_ns: 1, real_ns: 1 },
-      }) }));
+      if (request.method === 'media.video') {
+        const metadata = { width: 640, height: 480, rotate: fixture.rotate, mono_ns: 1, real_ns: 1 };
+        // WebRTC video and the media.video reply arrive on separate channels.
+        setTimeout(() => {
+          if (this.readyState !== 'open') return;
+          this.deliveredMetadata = metadata;
+          this.onmessage?.({ data: JSON.stringify({ jsonrpc: '2.0', id: request.id, result: metadata }) });
+        }, 1800);
+      }
     }
     close() { this.readyState = 'closed'; }
   }
@@ -199,12 +218,11 @@ try {
   await js(`document.querySelector('.inline-camera').scrollIntoView({block:'center'})`); await sleep(100);
   await shot('inline-camera-live-desktop');
   await js('__sensorFixture.rotate=0'); await click('.inline-camera-retry');
-  await wait(`document.querySelector('.inline-camera-status')?.dataset.state==='playing'`, 'landscape preview plays');
-  await sleep(150); await assertCompactFrame(0, 'desktop landscape');
+  await assertCompactFrame(0, 'desktop landscape');
   await exerciseInlineZoom('landscape-desktop');
   await shot('inline-camera-landscape-desktop');
   await js('__sensorFixture.rotate=90'); await click('.inline-camera-retry');
-  await wait(`document.querySelector('.inline-camera-status')?.dataset.state==='playing'`, 'portrait preview returns');
+  await assertCompactFrame(90, 'desktop portrait after reconnect');
   for (const [width,height] of [[1440,900],[1101,900],[1440,800],[1440,768]]) {
     await send('Emulation.setDeviceMetricsOverride', { width,height,deviceScaleFactor:1,mobile:false });
     await js(`document.querySelector('.inline-camera').scrollIntoView({block:'center'})`); await sleep(150);
