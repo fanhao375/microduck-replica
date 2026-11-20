@@ -46,7 +46,21 @@ class Updates:
         self.native_gate=asyncio.Lock()
         self.native_error=None
 
-    def installing(self): return self.marker.exists() or self.native_state().get('active') is True
+    def motion_locked(self):
+        if os.name != 'posix':
+            return False
+        import fcntl
+        try:
+            with (self.marker.parent/'motion.lock').open('rb') as gate:
+                fcntl.flock(gate, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except FileNotFoundError:
+            return False
+        except OSError:
+            return True
+        return False
+
+    def installing(self):
+        return self.marker.exists() or self.motion_locked() or self.native_state().get('active') is True
 
     def native_preparing(self): return self.native_gate.locked() or (self.native_task is not None and not self.native_task.done())
 

@@ -1,18 +1,21 @@
 #!/usr/bin/python3
 """Fixed-scope maintenance helper. No user-selected paths or shell commands."""
 
+from contextlib import contextmanager
 import datetime
 import hashlib
 import io
 import json
 import os
 import pathlib
+import re
 import shutil
 import socket
 import stat
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 import zipfile
 
@@ -238,15 +241,136 @@ def off():
         )
     ):
         return False
-    top = b.get("torque_state")
-    confirmed = (b.get("native") or {}).get("torque_state_confirmed")
-    if top is not None and top != "off" or confirmed is True:
+    native = b.get("native", {})
+    if not isinstance(native, dict):
         return False
-    # 1104 motion mode reports the native confirmation. Commissioning reports
-    # the top-level state instead. Unknown state must never authorize poweroff.
-    return top == "off" or (
-        b.get("mode") == "motion" and b.get("phase") == "control" and confirmed is False
-    )
+    top = b.get("torque_state")
+    confirmed = native.get("torque_state_confirmed")
+    if b.get("mode") == "commissioning":
+        return b.get("phase") == "ready" and top == "off" and confirmed is not True
+    hd = native.get("hd1910")
+    return (b.get("mode") == "motion" and b.get("phase") == "control"
+            and b.get("policy_enabled") is False and top in (None, "off")
+            and confirmed is False and isinstance(hd, dict)
+            and hd.get("restore_pending") is False and hd.get("temporary_gains_applied") is False)
+
+
+INPUT_SERVICES = ("padd.service", "gamesir-xboxd.service")
+UPDATING = pathlib.Path("/run/microduck-updater/installing")
+
+
+def systemctl(*args):
+    subprocess.run(["/bin/systemctl", *args], check=True, stdout=subprocess.DEVNULL)
+
+
+def unit_state(unit):
+    proc = subprocess.run(["/bin/systemctl", "show", unit, "-p", "LoadState",
+                           "-p", "ActiveState", "-p", "SubState"], capture_output=True, text=True)
+    values = dict(line.split("=", 1) for line in proc.stdout.splitlines() if "=" in line)
+    state = tuple(values.get(name) for name in ("LoadState", "ActiveState", "SubState"))
+    if unit == "robotd.service" and state == ("loaded", "activating", "auto-restart"):
+        return "retrying"
+    if state == ("not-found", "inactive", "dead"):
+        return "absent"
+    if proc.returncode == 0 and state in (("loaded", "active", "running"),
+                                         ("loaded", "inactive", "dead"), ("loaded", "failed", "failed")):
+        return state[1]
+    raise ValueError("控制服务状态未确认：" + unit)
+
+
+def studio_ready():
+    # The exclusive motion lock already blocks new Studio and voice commands.
+    # Finish only after commands admitted before that lock have drained.
+    with socket.socket(socket.AF_UNIX) as conn:
+        conn.settimeout(3)
+        conn.connect("/run/microduck-studio/update.sock")
+        conn.sendall(b'{"op":"readiness"}\n')
+        with conn.makefile("rb") as stream:
+            reply = stream.readline(8193)
+    if len(reply) > 8192 or not reply.endswith(b"\n") or json.loads(reply).get("ready") is not True:
+        raise ValueError("网页控制、录制或标定仍在运行")
+
+
+class RecoveryUnconfirmed(ValueError):
+    """Configuration is back on disk but the old robotd was not verified."""
+
+
+def verify_restarted(timeout=15):
+    # On 1104 Type=exec returns before robotd parses its configuration.
+    # Two affirmative RPC replies also permit a board awaiting its hardware.
+    deadline = time.monotonic() + timeout
+    good_since = None
+    while True:
+        try:
+            bus = rpc("robot.busStatus")
+            ready = (isinstance(bus, dict) and bus.get("mode") in ("motion", "commissioning")
+                     and bus.get("phase") in ("configuring_bus", "waiting_for_bus", "control", "ready",
+                                              "holding", "moving", "power_pending", "read_error",
+                                              "stop_unconfirmed")
+                     and unit_state("robotd.service") == "active")
+        except (OSError, TypeError, KeyError, ValueError):
+            ready = False
+        now = time.monotonic()
+        if ready and good_since is not None and now - good_since >= 0.5:
+            return
+        good_since = (good_since if good_since is not None else now) if ready else None
+        if now >= deadline:
+            raise ValueError("重启后主程序未能连续报告运行状态")
+        time.sleep(0.25)
+
+
+@contextmanager
+def paused_inputs(poweroff):
+    stopped = []
+    submitted = False
+    unsafe = False
+    try:
+        studio_ready()
+        for unit in INPUT_SERVICES:
+            if unit_state(unit) == "active":
+                stopped.append(unit)
+                systemctl("stop", unit)
+        yield
+        submitted = True
+    except RecoveryUnconfirmed:
+        unsafe = True
+        raise
+    finally:
+        if stopped and not unsafe and not (poweroff and submitted):
+            systemctl("start", *stopped)
+
+
+def final_check():
+    # An updater waiting on our lock may already have published its intent.
+    if UPDATING.exists() or any(unit_state(u) == "active" for u in INPUT_SERVICES):
+        raise ValueError("更新或手柄控制已启动，维护操作已取消")
+    if not off():
+        raise ValueError("主程序未确认卸力和临时增益恢复，维护操作已取消")
+
+
+def new_metadata(name, path):
+    if name == "config/var/lib/padd/mappings.json":
+        import pwd
+        account = pwd.getpwnam("padd")
+        try:
+            path.parent.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        else:
+            os.chown(path.parent, account.pw_uid, account.pw_gid)
+        info = path.parent.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != account.pw_uid or info.st_mode & 0o022:
+            raise ValueError("手柄映射目录的身份或权限不正确")
+        return 0o600, (account.pw_uid, account.pw_gid)
+    if path.parent == STATE:
+        info = STATE.stat()
+        return 0o600, (info.st_uid, info.st_gid)
+    if name.startswith("config/etc/robot/"):
+        import grp
+        return 0o644, (0, grp.getgrnam("robot").gr_gid)
+    if name == TOF:
+        return 0o644, (0, 0)
+    raise ValueError("缺少恢复目标的权限配置")
 
 
 def main():
@@ -273,117 +397,133 @@ def main():
                 )
             )
             return
-        if not off():
-            raise ValueError("请先扶稳鸭子并卸力，再导入备份")
-        b = pathlib.Path(
-            tempfile.mkdtemp(
-                prefix="microduck-import-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S-"),
-                dir="/var/backups",
+        with paused_inputs(poweroff=False):
+            if not off():
+                raise ValueError("请先扶稳鸭子并卸力，再导入备份")
+            b = pathlib.Path(
+                tempfile.mkdtemp(
+                    prefix="microduck-import-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S-"),
+                    dir="/var/backups",
+                )
             )
-        )
-        originals = {}
-        for n in files:
-            p = CONFIG[n]
-            try:
-                d, st = read_config(p)
-            except FileNotFoundError:
-                continue
-            originals[n] = (d, st)
-            old = b / n
-            old.parent.mkdir(parents=True, exist_ok=True)
-            atomic(old, d)
-        written = []
-        try:
-            for n, d in files.items():
+            originals = {}
+            for n in files:
                 p = CONFIG[n]
-                if n in originals:
-                    st = originals[n][1]
-                    owner = (st.st_uid, st.st_gid)
-                    mode = stat.S_IMODE(st.st_mode) & 0o777
-                else:
-                    st = STATE.stat() if p.parent == STATE else None
-                    owner = (st.st_uid, st.st_gid) if st else None
-                    mode = 0o644 if n == TOF else 0o600
-                atomic(p, d, mode, owner)
-                written.append(n)
-            os.sync()
-            if TOF in files:
-                subprocess.run(["systemctl", "daemon-reload"], check=True)
-            services = ["robotd.service", "padd.service", "microduck-studio.service"]
-            if TOF in files:
-                services.append("tofd.service")
-            subprocess.run(
-                [
-                    "systemd-run",
-                    "--unit=microduck-import-reload-" + str(os.getpid()),
-                    "--on-active=4s",
-                    "/bin/systemctl",
-                    "restart",
-                    *services,
-                ],
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            for n in reversed(written):
-                if n in originals:
-                    d, st = originals[n]
-                    atomic(CONFIG[n], d, stat.S_IMODE(st.st_mode) & 0o777, (st.st_uid, st.st_gid))
-                else:
-                    CONFIG[n].unlink(missing_ok=True)
-            if TOF in written:
-                subprocess.run(["systemctl", "daemon-reload"], check=False)
-            os.sync()
-            raise
+                try:
+                    d, st = read_config(p)
+                except FileNotFoundError:
+                    continue
+                originals[n] = (d, st)
+                old = b / n
+                old.parent.mkdir(parents=True, exist_ok=True)
+                atomic(old, d)
+            written = []
+            interrupted_services = False
+            try:
+                for n, d in files.items():
+                    p = CONFIG[n]
+                    if n in originals:
+                        st = originals[n][1]
+                        owner = (st.st_uid, st.st_gid)
+                        mode = stat.S_IMODE(st.st_mode) & 0o777
+                    else:
+                        mode, owner = new_metadata(n, p)
+                    atomic(p, d, mode, owner)
+                    written.append(n)
+                os.sync()
+                if TOF in files:
+                    subprocess.run(["systemctl", "daemon-reload"], check=True)
+                final_check()
+                # This worker lives outside Studio. Wait for the *actual* robotd
+                # restart, with both physical and software inputs still excluded.
+                interrupted_services = True
+                systemctl("restart", "robotd.service", *(["tofd.service"] if TOF in files else []))
+                verify_restarted()
+                systemctl("restart", "microduck-studio.service")
+            except Exception:
+                for n in reversed(written):
+                    if n in originals:
+                        d, st = originals[n]
+                        atomic(CONFIG[n], d, stat.S_IMODE(st.st_mode) & 0o777, (st.st_uid, st.st_gid))
+                    else:
+                        CONFIG[n].unlink(missing_ok=True)
+                if TOF in written:
+                    subprocess.run(["systemctl", "daemon-reload"], check=False)
+                os.sync()
+                if interrupted_services:
+                    # Config is back on disk. Reload it only from a confirmed safe
+                    # state, or start the old config if robotd is already stopped.
+                    try:
+                        state = unit_state("robotd.service")
+                        if state == "active":
+                            final_check()
+                        elif state not in ("inactive", "failed", "retrying"):
+                            raise ValueError("主程序状态未知")
+                        systemctl("restart", "robotd.service", *(["tofd.service"] if TOF in files else []))
+                        verify_restarted()
+                        systemctl("restart", "microduck-studio.service")
+                    except Exception as recovery:
+                        raise RecoveryUnconfirmed("原配置已写回，主程序恢复未确认。手柄仍暂停，请检查主程序日志。") from recovery
+                raise
         try:
             prune_imports(2)
         except Exception:
             pass
-        print(
-            json.dumps(
-                {
-                    "ok": True,
-                    "backup": str(b),
-                    "restored": len(files),
-                    "skipped": skipped,
-                    "reboot_required": False,
-                }
-            )
-        )
-        return
+        return {"ok": True, "backup": str(b), "restored": len(files), "skipped": skipped,
+                "reboot_required": False}
     if op == "shutdown":
-        rpc("robot.stop")
-        rpc("robot.relax")
-        import time
-
-        for _ in range(30):
-            if off():
-                break
-            time.sleep(0.1)
-        else:
-            raise ValueError("卸力未确认，尚未安排关机")
-        os.sync()
-        subprocess.run(
-            [
-                "systemd-run",
-                "--unit=microduck-web-poweroff-" + str(os.getpid()),
-                "--on-active=4s",
-                "/bin/systemctl",
-                "poweroff",
-            ],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        with paused_inputs(poweroff=True):
+            rpc("robot.stop")
+            rpc("robot.relax")
+            deadline = time.monotonic() + 8
+            while not off():
+                if time.monotonic() >= deadline:
+                    raise ValueError("卸力或增益恢复未确认，尚未安排关机")
+                time.sleep(0.1)
+            os.sync()
+            final_check()
+            systemctl("--no-block", "poweroff")
         print(json.dumps({"ok": True, "scheduled": True}))
         return
     raise ValueError("操作不支持")
 
 
+RESULTS = pathlib.Path("/var/lib/microduck-maintenance-results")
+
+
+def restore_with_receipt():
+    raw = sys.stdin.buffer.readline(34)
+    if not re.fullmatch(b"[0-9a-f]{32}\n", raw):
+        raise ValueError("缺少有效的恢复编号")
+    request_id = raw[:-1].decode("ascii")
+    RESULTS.mkdir(mode=0o755, exist_ok=True)
+    RESULTS.chmod(0o755)  # web service can read receipts under a restrictive unit UMask
+    target = RESULTS / (request_id + ".json")
+    if target.exists():
+        raise ValueError("这个恢复编号已经使用过，请读取原来的恢复结果")
+    for old in sorted(RESULTS.glob("*.json"), key=lambda p: p.stat().st_mtime_ns)[:-19]:
+        old.unlink()
+
+    def save(phase, **values):
+        receipt = {"id": request_id, "phase": phase, **values}
+        atomic(target, json.dumps(receipt, ensure_ascii=False).encode(), 0o644)
+        return receipt
+
+    save("running")
+    try:
+        result = main()
+    except Exception as exc:
+        save("failed", ok=False, error=str(exc)[:300] if isinstance(exc, ValueError) else "恢复未完成，请查看维护日志")
+        raise
+    return save("completed", **result)
+
+
 if __name__ == "__main__":
     try:
-        main()
+        if sys.argv[1:] == ["restore"]:
+            print(json.dumps(restore_with_receipt()))
+        else:
+            main()
     except Exception as e:
         print(
             json.dumps(

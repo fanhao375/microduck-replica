@@ -3459,17 +3459,32 @@ def run(argv, ctx):
             if verb in ("maintenance-restore", "maintenance-shutdown"):
                 # The same locks also guard software/native updates and calibration.
                 # Keep them across exec and release them when the bounded child exits.
+                # Restore restarts Studio itself. A separate transient unit owns this
+                # transaction so stopping Studio's cgroup cannot interrupt rollback.
+                if ctx.env.get("MICRODUCK_MAINTENANCE_WORKER") != "1":
+                    runner = "/usr/bin/systemd-run"
+                    os.execve(runner, [runner, "--quiet", "--pipe", "--wait", "--collect",
+                                       "--service-type=exec", "--setenv=MICRODUCK_MAINTENANCE_WORKER=1",
+                                       SELF_PATH, verb], CHILD_ENV)
+                import fcntl
                 op.take_lock("维护")
                 os.set_inheritable(op.lock_handle, True)
-                for lock_path in (SERVICE_LOCK, "/run/microduck-updater/motion.lock"):
-                    if lock_path.endswith("motion.lock") and not exists(ctx, lock_path):
-                        continue  # legacy standalone Studio has no updater
-                    fd = ctx.lock(lock_path)
-                    if fd is None:
-                        raise Stop(EXIT_BUSY, "maintenance_busy", "更新、标定或总线操作进行中")
-                    os.set_inheritable(fd, True)
-                if exists(ctx, SOFTWARE_MARKER):
-                    raise Stop(EXIT_BUSY, "maintenance_busy", "软件正在更新")
+                service_fd = ctx.lock(SERVICE_LOCK)
+                if service_fd is None:
+                    raise Stop(EXIT_BUSY, "maintenance_busy", "标定或总线操作进行中")
+                os.set_inheritable(service_fd, True)
+                # Never create a substitute for the updater's fixed motion gate.
+                fd = os.open(ctx.p("/run/microduck-updater/motion.lock"), os.O_RDWR | os.O_NOFOLLOW)
+                info = os.fstat(fd)
+                if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o022:
+                    raise Stop(EXIT_STATE, "maintenance_busy", "运动锁身份未确认")
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise Stop(EXIT_BUSY, "maintenance_busy", "更新或语音动作进行中")
+                os.set_inheritable(fd, True)
+                if exists(ctx, SOFTWARE_MARKER) or exists(ctx, FLAG) or exists(ctx, MARKER):
+                    raise Stop(EXIT_BUSY, "maintenance_busy", "更新或舵机总线交接进行中")
                 native_update_conflict(op)
                 imu_redo_conflict(op)
             deploy = os.path.dirname(os.path.realpath(__file__))

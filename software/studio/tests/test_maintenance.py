@@ -54,9 +54,9 @@ class HandlerTest(unittest.IsolatedAsyncioTestCase):
             response=await self.call_with({'op':'restore','archive':archive,'confirmed':True,'password':'wrong'},check_password=False)
             self.assertEqual(response.status_code,400)
             run.assert_not_called()
-            response=await self.call_with({'op':'restore','archive':archive,'confirmed':True,'password':'right'})
+            response=await self.call_with({'op':'restore','archive':archive,'confirmed':True,'password':'right','request_id':'a'*32})
             self.assertEqual(response.status_code,200)
-            run.assert_called_once_with('restore',b'zip')
+            run.assert_called_once_with('restore',b'a'*32+b'\nzip')
 
     async def test_update_or_calibration_blocks_restore_and_shutdown(self):
         archive=base64.b64encode(b'zip').decode()
@@ -92,12 +92,18 @@ class ArchiveTest(unittest.TestCase):
             with self.assertRaises((ValueError,KeyError)):self.helper.load(archive)
 
     def test_torque_must_be_off_without_conflicting_or_pending_feedback(self):
-        cases=[({'torque_state':'off'},True),({'torque_state':'on','native':{'torque_state_confirmed':False}},False),
-               ({'torque_state':'off','native':{'torque_state_confirmed':True}},False),
-               ({'torque_state':'off','power_pending':True},False),
-               ({'mode':'motion','phase':'control','policy_enabled':False,'native':{'torque_state_confirmed':False}},True),
-               ({'mode':'motion','phase':'control','policy_enabled':True,'native':{'torque_state_confirmed':False}},False),
-               ({'mode':'motion','phase':'control','native':{'torque_state_confirmed':None}},False),({},False)]
+        hd = {'restore_pending':False,'temporary_gains_applied':False}
+        native = {'torque_state_confirmed':False,'hd1910':hd}
+        motion = {'mode':'motion','phase':'control','policy_enabled':False,'native':native}
+        commissioning = {'mode':'commissioning','phase':'ready','torque_state':'off'}
+        cases = [(motion, True), (commissioning, True), ({'torque_state':'off'}, False),
+                 ({**commissioning, 'phase':'stop_unconfirmed'}, False),
+                 ({**commissioning, 'power_pending':True}, False), ({},False),
+                 ({**motion,'torque_state':'on'},False), ({**motion,'policy_enabled':True},False),
+                 ({**motion,'torque_state':'off','native':{}},False)]
+        for flag in hd:
+            for value in (True, None, 0):
+                cases.append(({**motion,'native':{**native,'hd1910':{**hd,flag:value}}}, False))
         for bus,expected in cases:
             with self.subTest(bus=bus),mock.patch.object(self.helper,'rpc',return_value=bus):
                 self.assertEqual(self.helper.off(),expected)
@@ -145,3 +151,163 @@ class ArchiveTest(unittest.TestCase):
             maintenance.run('preview',b'data')
             self.assertEqual(command.call_args.args[0],['/usr/bin/sudo','-n','/usr/local/sbin/microduck-helper','maintenance-preview'])
             self.assertEqual(command.call_args.kwargs['input'],b'data')
+
+    def test_final_safety_recheck_and_dispatch_failure_restore_original_config(self):
+        from contextlib import ExitStack
+        import types
+        name='config/var/lib/microduck-studio/battery-settings.json'
+        for failure in ('off', 'restart', 'studio', 'update', 'health'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as temp, ExitStack() as mocks:
+                root=Path(temp); backups=root/'backup';backups.mkdir()
+                config=root/'battery.json';config.write_bytes(b'{"old":true}')
+                applied=b'{"new":true}'
+                archive=self.archive(name,applied)
+                stdin=types.SimpleNamespace(buffer=io.BytesIO(archive))
+                stopped=set();jobs=[]
+                def unit_state(unit):
+                    if unit=='gamesir-xboxd.service':return 'absent'
+                    return 'inactive' if unit in stopped else 'active'
+                def systemctl(*args):
+                    jobs.append((args,config.read_bytes()))
+                    if args[0]=='stop':stopped.add(args[1])
+                    if args[0]=='start':stopped.discard(args[1])
+                    if args==('restart','robotd.service') and failure=='restart' and config.read_bytes()==applied:
+                        raise OSError('restart rejected')
+                    if args==('restart','microduck-studio.service') and failure=='studio' and config.read_bytes()==applied:
+                        raise OSError('studio restart rejected')
+                def healthy():
+                    if failure=='health' and config.read_bytes()==applied:raise ValueError('unhealthy robotd')
+                marker=root/'installing'
+                def sync():
+                    if failure=='update':marker.touch()
+                m=self.helper
+                for attr,val in [('UPDATING',marker),('studio_ready',lambda: None),('unit_state',unit_state),
+                                 ('systemctl',systemctl),('verify_restarted',healthy),('CONFIG',{name:config})]:
+                    mocks.enter_context(mock.patch.object(m,attr,val))
+                mocks.enter_context(mock.patch.object(m.os,'sync',sync))
+                mocks.enter_context(mock.patch.object(m.sys,'stdin',stdin))
+                mocks.enter_context(mock.patch.object(m.sys,'argv',['helper','restore']))
+                tempdir=tempfile.mkdtemp
+                mocks.enter_context(mock.patch.object(m.tempfile,'mkdtemp',side_effect=lambda prefix,dir:tempdir(prefix=prefix,dir=backups)))
+                mocks.enter_context(mock.patch.object(m,'off',side_effect=[True, failure!='off', True]))
+                with self.assertRaises((OSError,ValueError)):m.main()
+                self.assertEqual(config.read_bytes(),b'{"old":true}')
+                self.assertEqual(stopped,set())
+                restarts=[item for item in jobs if item[0][0]=='restart']
+                if failure in ('off','update'):self.assertEqual(restarts,[])
+                else:self.assertIn((('restart','robotd.service'),b'{"old":true}'),restarts)
+
+    def test_shutdown_checks_again_after_sync_and_restores_controller_on_rejection(self):
+        from contextlib import ExitStack
+        for final,accepted in [(False,False),(True,True)]:
+            with self.subTest(final=final), tempfile.TemporaryDirectory() as tmp, ExitStack() as mocks:
+                m=self.helper
+                stopped=set();ops=[]
+                def ctl(*args):
+                    ops.append(args)
+                    if args[0]=='stop':stopped.update(args[1:])
+                    if args[0]=='start':stopped.difference_update(args[1:])
+                    if args[-1]=='poweroff':
+                        self.assertEqual(stopped,{'padd.service'})
+                        self.assertEqual(probe.call_count,2)
+                def state(unit):
+                    if unit=='gamesir-xboxd.service':return 'absent'
+                    return 'inactive' if unit in stopped else 'active'
+                for attr,val in [('UPDATING',Path(tmp)/'installing'),('systemctl',ctl),('unit_state',state),
+                                 ('studio_ready',lambda: None),('rpc',lambda method: {})]:
+                    mocks.enter_context(mock.patch.object(m,attr,val))
+                mocks.enter_context(mock.patch.object(m.os,'sync'))
+                mocks.enter_context(mock.patch.object(m.sys,'argv',['helper','shutdown']))
+                probe=mocks.enter_context(mock.patch.object(m,'off',side_effect=[True,final]))
+                if accepted:
+                    with mock.patch('builtins.print'):m.main()
+                    self.assertEqual(ops[-1],('--no-block','poweroff'))
+                else:
+                    with self.assertRaises(ValueError):m.main()
+                    self.assertNotIn(('--no-block','poweroff'),ops)
+                    self.assertEqual(stopped,set())
+
+    @unittest.skipUnless(os.name=='posix','requires flock')
+    def test_held_root_motion_lock_blocks_studio_until_release(self):
+        import fcntl
+        from studio.updates import Updates
+        with tempfile.TemporaryDirectory() as tmp:
+            updates=Updates(marker=Path(tmp)/'installing',native_state=lambda:{})
+            with (Path(tmp)/'motion.lock').open('wb') as gate:
+                self.assertFalse(updates.installing())
+                fcntl.flock(gate,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                self.assertTrue(updates.installing())
+            self.assertFalse(updates.installing())
+
+    @unittest.skipUnless(os.name=='posix','Linux service users')
+    def test_new_files_are_readable_by_the_stock_consumers(self):
+        import grp,pwd,types
+        robot_gid=981;padd_uid=os.getuid();padd_gid=os.getgid()
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(grp,'getgrnam',return_value=types.SimpleNamespace(gr_gid=robot_gid)), mock.patch.object(pwd,'getpwnam',return_value=types.SimpleNamespace(pw_uid=padd_uid,pw_gid=padd_gid)):
+            profile=Path(tmp)/'padd'/'mappings.json'
+            self.assertEqual(self.helper.new_metadata('config/var/lib/padd/mappings.json',profile),(0o600,(padd_uid,padd_gid)))
+            self.assertEqual(profile.parent.stat().st_uid,padd_uid)
+            for name in ('hd1910-calibration.toml','hd1910-calibration.saved.toml','pad-settings.json'):
+                path=Path('/etc/robot/feetech-ft5')/name
+                self.assertEqual(self.helper.new_metadata('config'+str(path),path),(0o644,(0,robot_gid)))
+
+    def test_receipt_survives_web_restart_and_refuses_replay(self):
+        import types
+        key=b'a'*32
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(self.helper,'RESULTS',Path(tmp)/'receipts'):
+            def call():
+                with mock.patch.object(self.helper.sys,'stdin',types.SimpleNamespace(buffer=io.BytesIO(key+b'\n'))):
+                    return self.helper.restore_with_receipt()
+            path=Path(tmp)/'receipts'/(key.decode()+'.json')
+            def restarted():
+                self.assertEqual(json.loads(path.read_bytes())['phase'],'running')
+                return {'ok':True,'restored':1,'backup':'/var/backups/example'}
+            with mock.patch.object(self.helper,'main',side_effect=restarted) as action:
+                mask=os.umask(0o077)
+                try:self.assertEqual(call()['phase'],'completed')
+                finally:os.umask(mask)
+                if os.name=='posix':
+                    self.assertEqual(path.parent.stat().st_mode&0o777,0o755)
+                    self.assertEqual(path.stat().st_mode&0o777,0o644)
+                with self.assertRaises(ValueError):call()
+                self.assertEqual(action.call_count,1)
+            self.assertEqual(json.loads(path.read_bytes())['restored'],1)
+            path.unlink()
+            with mock.patch.object(self.helper,'main',side_effect=ValueError('dispatch failed')):
+                with self.assertRaises(ValueError):call()
+            self.assertEqual(json.loads(path.read_bytes())['phase'],'failed')
+
+    def test_status_query_reads_authenticated_matching_receipt(self):
+        import asyncio
+        from studio import maintenance
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(maintenance,'RESULTS',Path(tmp)):
+            token='e'*32
+            (Path(tmp)/(token+'.json')).write_text(json.dumps({'id':token,'phase':'completed','restored':2}))
+            auth=mock.Mock()
+            handler=maintenance.make_handler(auth,lambda r:(None,{'csrf':'ok'}),lambda r:True)
+            def query(key):
+                return asyncio.run(handler(Request({'type':'http','method':'GET','headers':[],'query_string':('restore='+key).encode()})))
+            auth.has_password.return_value=False
+            self.assertEqual(query(token).status_code,401)
+            auth.has_password.return_value=True
+            self.assertEqual(json.loads(query(token).body)['restored'],2)
+            self.assertEqual(json.loads(query('f'*32).body)['phase'],'unknown')
+            self.assertEqual(query('../x').status_code,400)
+
+    def test_restart_transport_loss_keeps_receipt_lookup_available(self):
+        import asyncio
+        from studio import maintenance
+        for code,payload in [(-15,b''),(1,b''),(1,b'helper disconnected')]:
+            with self.subTest(code=code), mock.patch.object(maintenance.subprocess,'run') as command:
+                command.return_value.returncode=code;command.return_value.stdout=payload
+                with self.assertRaises(ConnectionError):maintenance.run('restore',b'queued')
+
+
+    def test_post_restart_requires_live_bus_rpc_but_never_requires_attached_hardware(self):
+        m=self.helper
+        with mock.patch.object(m,'unit_state',return_value='active'), mock.patch.object(m.time,'sleep'), mock.patch.object(m.time,'monotonic',side_effect=[0,0.1,0.8]), mock.patch.object(m,'rpc',return_value={'mode':'motion','phase':'waiting_for_bus'}) as rpc:
+            m.verify_restarted(timeout=5)
+            self.assertEqual(rpc.call_count,2)
+        for bad in ({'mode':'motion','phase':'configuration_error'},{}):
+            with self.subTest(bus=bad), mock.patch.object(m,'rpc',return_value=bad):
+                with self.assertRaises(ValueError):m.verify_restarted(timeout=0)
