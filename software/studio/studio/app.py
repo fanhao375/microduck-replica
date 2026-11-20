@@ -1701,7 +1701,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         headers={"Content-Disposition": 'attachment; filename="Microduck-Local-CA.crt"',
                                  **no_store})
 
-    maintenance_handler = make_handler(auth, session_of, origin_ok)
+    maintenance_handler = make_handler(auth, origin_ok, update_readiness)
     routes = [
         Route("/api/maintenance", maintenance_handler, methods=["GET", "POST"]),
         Route("/healthz", healthz),
