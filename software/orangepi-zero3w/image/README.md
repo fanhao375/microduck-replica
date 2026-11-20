@@ -16,9 +16,36 @@ gzip -dk microduck-orangepi-zero3w-studio-20261112-r2.img.gz
 shasum -a 256 -c IMG-SHA256SUMS
 ```
 
-Linux 也可使用 `sha256sum -c IMG-SHA256SUMS`。用镜像烧录工具把 `.img` 写入至少 8 GB 的 SD 卡，插入 Orange Pi Zero 3W 后通电。
+Linux 也可使用 `sha256sum -c IMG-SHA256SUMS`。用镜像烧录工具把 `.img` 写入至少 8 GB 的 SD 卡。下载的 R2 镜像早于主线的首次设密修正，请先完成下面的新卡更新。
 
 本版压缩文件大小为 999,648,791 字节，SHA-256 为 `054c66a3b1dbc2637f3eb93935adb41e62803f55aafbb7cbcc165958118716ef`；未压缩镜像为 6 GiB，SHA-256 为 `566f00c37d6675d625d1d1b5fbcdd84e38d798a8d6be0f41900d6f6657ef3710`。gzip CRC 和解压后的原始摘要均已核对。
+
+### R2 新卡更新
+
+主线 Studio 把首次设密与设备控制分开，设密前仅允许办理首次设置，同时提交两份设密表单也只会创建一个管理员会话。贡献者发布的 R2 镜像和运行包早于这次修正。
+
+下列步骤适用于刚烧录的 R2 新卡。在 Linux 电脑上将卡的**根分区**挂载到 `/mnt/orangepi`，进入本仓库最新源码的根目录，运行以下命令。命令会核对板型，并从仓库复制两个 Studio 文件。
+
+```sh
+(
+  set -eu
+  card=/mnt/orangepi
+  src=software/orangepi-zero3w/migration/studio/payload/opt/microduck-studio/app/studio
+  dst="$card/opt/microduck-studio/app/studio"
+  mountpoint -q "$card"
+  grep -qx 'BOARD=orangepizero3w' "$card/etc/orangepi-release"
+  test -f "$dst/app.py" && test -f "$dst/auth.py" || exit 1
+  for f in app.py auth.py; do
+    sudo install -m 0644 "$src/$f" "$dst/$f"
+    cmp "$src/$f" "$dst/$f"
+  done
+  sync -f "$card"
+)
+```
+
+命令成功后安全卸载 SD 卡，插入 Orange Pi Zero 3W 再通电。用下方构建流程配合原 R2 运行包制成的新卡，同样适用这一步。
+
+### 配网并进入 Studio
 
 1. 手机连接开放热点 `OrangePi_XXXXXX`，访问 `http://10.42.0.1/` 完成 Wi-Fi 配网。
 2. 手机回到设备所在局域网，打开 `http://<设备当前 IP>:8000/`。

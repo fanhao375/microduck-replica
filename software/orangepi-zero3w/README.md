@@ -6,6 +6,8 @@
 
 下载贡献者 fork 的 [Release：orangepi-zero3w-20261112-r2](https://github.com/Liangjin5437/microduck-replica/releases/tag/orangepi-zero3w-20261112-r2) 中的 `microduck-orangepi-zero3w-studio-20261112-r2.img.gz` 和 `IMG-SHA256SUMS`。按[镜像说明](image/README.md)解压、校验后，将 `.img` 烧录到至少 8 GB 的 SD 卡。
 
+R2 发布后，主线补上了 Studio 首次设密的服务端权限检查。使用下载的 R2 镜像时，请在首次开机前按[新卡更新步骤](image/README.md#r2-新卡更新)应用修正。
+
 1. 插卡通电，手机连接开放热点 `OrangePi_XXXXXX`；若未自动弹出页面，打开 `http://10.42.0.1/`。
 2. 选择家庭 Wi-Fi 并连接，再让手机回到同一局域网。
 3. 打开 `http://<设备当前 IP>:8000/`。设备地址可从路由器的 DHCP 设备列表查看。

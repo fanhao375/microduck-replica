@@ -6,14 +6,15 @@
 
 ## 按主板下载镜像
 
-先看主板丝印。**Radxa ZERO 3W** 和 **Radxa Cubie A7Z** 用不同的镜像，烧卡前请核对下载页和主板上的完整型号。
+先看主板丝印，再下载对应镜像。**Radxa ZERO 3W（瑞莎）** 和 **Orange Pi Zero 3W（香橙派 A733）** 名称相近，各用各的 SD 卡镜像。
 
 | 主板 | 镜像下载 | 首次使用 |
 |---|---|---|
 | **Radxa ZERO 3W** | [ZERO 3W · 20261104 镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) · [旧版正式镜像](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027) | [ZERO 3W 烧录与配网](software/image/烧录和第一次使用.md) |
-| **Radxa Cubie A7Z** | [Cubie A7Z 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [A7Z 烧录与配网](radxa-cubie-a7z/image/README.md) |
+| **Radxa Cubie A7Z** | [A7Z preview1 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [烧录与配网](radxa-cubie-a7z/image/README.md) · [IMX219 相机适配源码（晚于 preview1）](radxa-cubie-a7z/control/camera/README.md) |
+| **Orange Pi Zero 3W（香橙派 A733）** | [香橙派 R2 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/orangepi-zero3w-20261112-r2) | [首次开机与 Studio 设密](software/orangepi-zero3w/image/README.md) · 主控默认只读，实板 SD 卡首启待验证。 |
 
-**已经在用 ZERO 3W 的 1104 卡？** 第一次先运行准备工具并重启。打开 **Studio → 设置 → 软件更新**，看到新版本后点 **立即更新**。鸭子会下载并验签，重连后可查看安装结果。[下载准备工具](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) · [首次准备步骤](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.20/software/updater/stock1104/README.md)
+**已经在用 Radxa ZERO 3W 的 1104 卡？** 第一次先运行准备工具并重启。打开 **Studio → 设置 → 软件更新**，看到新版本后点 **立即更新**。鸭子会下载并验签，重连后可查看安装结果。[下载准备工具](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) · [首次准备步骤](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.20/software/updater/stock1104/README.md)
 
 **飞特 HD-1910 版本已完成整机实机验证：站立、行走、前滚翻后起身均已跑通。** 主线使用 **15 颗飞特 HD-1910 舵机**，提供可烧录的**复刻镜像**和 **Microduck Studio 网页中控**，通过手机或电脑浏览器完成配网、标定和遥控。
 
@@ -50,6 +51,7 @@
 
 - **飞特 HD-1910 + Radxa Zero 3W**：使用本仓复刻镜像和 Studio 网页中控。
 - **飞特 HD-1910 + Radxa Cubie A7Z（预览）**：[适配源码与说明](radxa-cubie-a7z/README.md) · [按主板下载镜像](#按主板下载镜像)。预览镜像的实机验收范围见发布页。
+- **香橙派 Orange Pi Zero 3W（A733）**：社区移植提供热点配网和 Studio，运动能力待实板验证。[适配源码与说明](software/orangepi-zero3w/README.md)
 - **Dynamixel XL330**：提供对应 CAD 与装配资料，需使用匹配的运行软件。
 
 [选择打印件与采购清单](#打印件与采购清单) · [查看舵机详细对比](docs/执行器选型.md)
@@ -239,7 +241,7 @@
 | [@yoyojacky](https://github.com/yoyojacky) | **Rust 版飞特舵机测试工具**（[PR #27](https://github.com/fanhao375/microduck-replica/pull/27)，已合并）。自己实现的最小 STS/SCS 协议（帧打包、校验和、ping、读写寄存器、状态解析），命令行可以扫描总线（带进度条）、读状态、转到指定位置、单颗测试和批量测试，输出位置偏差、峰值电流、峰值负载、电压温度并判定 PASS/FAIL。台架验收一条命令出汇总表 → [`tools/sts3215Servo_testtool/`](tools/sts3215Servo_testtool/) |
 | [@Abo1ish](https://github.com/Abo1ish) | **IMU 小板固件 + 调试台姿态显示**（[PR #32](https://github.com/fanhao375/microduck-replica/pull/32)，已合并）。给官方没开源的那块 imu_to_dxl 写了 STM32G031 固件底子，在实板上验证过，带主机端测试和一份写清楚边界的 [`VALIDATION.md`](hardware/imu_to_dxl/firmware/VALIDATION.md) → [`hardware/imu_to_dxl/firmware/`](hardware/imu_to_dxl/firmware/)；再用 J-Link 把 IMU 姿态实时读出来并进了网页调试台，3D 鸭子的躯干跟着真板子转（`--imu-jlink`，没板子也能用 `--imu-demo` 先看效果）→ [`tools/servo-web/`](tools/servo-web/) |
 | [@yansis2026](https://github.com/yansis2026) | **手机版中控与离线语音**（[PR #52](https://github.com/fanhao375/microduck-replica/pull/52)，已合并）。在 `/m` 提供手机手柄、模型管理和摄像头画面。手机麦克风通过 HTTPS 把语音送到鸭子，由板载 Vosk 识别，连鸭子热点就能离线使用。贡献者在自己的鸭子上跑通了这套流程，合并版已通过软件回归，待实机复测。见[手机与离线使用指南](software/studio/deploy/OFFLINE.md)。 |
-| [@Liangjin5437](https://github.com/Liangjin5437) | **Radxa Cubie A7Z 适配与预览镜像**（[PR #54](https://github.com/fanhao375/microduck-replica/pull/54)，已合并）。为飞特 HD-1910 舵机和总线 IMU 提供 A7Z 的热点配网、UART 总线与分组读取、Studio 适配、温控和镜像构建工具。贡献者已在自己的 A7Z 鸭子上验证适配。现有预览镜像早于合并修复，更新版待重新打包和上板验收。见 [A7Z 适配与下载说明](radxa-cubie-a7z/README.md)。 |
+| [@Liangjin5437](https://github.com/Liangjin5437) | **两款主板适配**。为 Cubie A7Z 适配飞特 HD-1910 和总线 IMU，提供热点配网、UART 分组读取、Studio、温控和镜像工具（[#54](https://github.com/fanhao375/microduck-replica/pull/54)），并在自己的 A7Z 上验证了 [IMX219 的 4:3 画面](radxa-cubie-a7z/control/camera/README.md)（[#58](https://github.com/fanhao375/microduck-replica/pull/58)）。为[香橙派 Zero 3W（A733）](software/orangepi-zero3w/README.md)提供预装 Studio、首次网页设密和只读主控（[#55](https://github.com/fanhao375/microduck-replica/pull/55)）。 |
 | 微信群的鸭友 | **Radxa Zero 3W V1.12J 的启动方案**。这批板子（WiFi 换成 AIC8800DS2）光换瑞莎引导还是起不来，他实测出设备树也得换成瑞莎 B1 的：**B1 引导 + B1 DTB + Armbian 6.1.115 内核 + Trixie 系统**，跑通了 → 写进了[踩坑记录](踩坑记录.md#软件)和[镜像使用说明](tools/radxa/镜像使用说明.md#6-如果你的板子不是这一批) |
 
 ---

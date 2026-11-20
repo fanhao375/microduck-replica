@@ -6,7 +6,7 @@ R2 完整镜像预装真实 Studio 后端、`20261109-console1` 中控前端、W
 
 手机完成热点 Wi-Fi 配网后，打开 `http://<设备当前 IP>:8000/`。没有网页密码时直接显示“设一个登录密码”，两次输入并保存后进入中控。无需先 SSH 登录或手动运行安装器。
 
-首次页面复用现有 `PasswordSettings` 和 `/api/password`，仍校验同源 Origin 和 open session 的 CSRF。保存后服务器创建自己的登录 Cookie，前端重新获取会话，再挂载中控和 WebSocket。未启用 `--dev-autologin`，首次表单也不使用模拟数据。
+首次页面复用现有 `PasswordSettings` 和 `/api/password`，校验同源 Origin。主线修正后，首次页面使用仅供设密的 CSRF 凭据，设备控制 API 和 WebSocket 均需登录。已发布的 R2 镜像需先按[新卡更新步骤](../../image/README.md#r2-新卡更新)应用修正。保存后服务器创建自己的登录 Cookie，前端重新获取会话，再挂载中控和 WebSocket。未启用 `--dev-autologin`，首次表单也不使用模拟数据。
 
 出厂 `/var/lib/microduck-studio` 为空、模式 `0700`、归 `orangepi` 所有，不含网页密码、会话或旧板标定。网页密码独立于 Linux 登录。Linux 账户默认锁定不影响 systemd 启动服务；需要 SSH 时可在“系统设置 → 账号与 SSH”另行设置自己的登录方式。
 

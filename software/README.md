@@ -22,7 +22,7 @@
 
 ## Orange Pi Zero 3W 移植
 
-A733 主板的 [Orange Pi Zero 3W 完整镜像与源码](orangepi-zero3w/)预装 Studio、只读主控、模型、独立 Python、系统依赖和热点配网。烧卡 → 手机配网 → 打开 `http://设备IP:8000/` → 首次页面设置网页密码即可进入中控，无需先 SSH 安装。旧配网版及其运行包已撤下，由 R2 取代；与 Radxa Zero 3W 主线镜像不能互刷。本轮通过最终镜像独立副本的真实 ARM64 后端、Chrome 首次设密/登录/3D 渲染、全部 10 份模型加载及 110 项自动测试；没有可用实板，板级启动与运动仍未验收。
+[香橙派 Zero 3W（Allwinner A733）](orangepi-zero3w/)有独立的 R2 预览镜像，预装 Studio、只读主控和热点配网。使用这款板子请看[烧录、首次设密修正与配网](orangepi-zero3w/image/README.md)。贡献者已在 ARM64 环境验证 Studio，A733 实板烧卡首启和运动待验。
 
 ## HD1910 仿真训练
 
