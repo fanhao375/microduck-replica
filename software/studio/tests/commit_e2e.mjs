@@ -251,6 +251,21 @@ if (PHASE === 'mark') {
 }
 
 if (PHASE === 'imu-redo') {
+  // Recover a session opened by a legacy client through the supported Studio RPC.
+  // The 1104 UI opens read-only HOME collection before a mode switch is needed.
+  const startLegacySession = () => js(`new Promise((resolve, reject) => {
+    const socket = new WebSocket('ws://' + location.host + '/ws');
+    socket.onopen = () => socket.send(JSON.stringify({ t: 'cmd', id: 'legacy-redo',
+      name: 'imu.op', args: { op: 'redo-start', confirmed: true } }));
+    socket.onerror = () => reject(Error('legacy client disconnected'));
+    socket.onmessage = e => {
+      const reply = JSON.parse(e.data);
+      if (reply.t !== 'result' || reply.id !== 'legacy-redo') return;
+      socket.close();
+      if (reply.ok) resolve(true);
+      else reject(Error(reply.reason || 'legacy redo-start failed'));
+    };
+  })`);
   await js(`location.hash = '#/imu'`);
   await waitFor(`!![...document.querySelectorAll('.imu-coarse button')].find((b) => b.textContent.trim() === '重新标定方向' && !b.disabled)`,
     '已保存的 IMU 仍有重新标定方向入口', 10000);
@@ -262,6 +277,10 @@ if (PHASE === 'imu-redo') {
   await waitFor(`!!document.querySelector('.imu-coarse .two-step-ask')`, '重新标定需第二次确认', 5000);
   await sleep(900);
   await js(`document.querySelector('.imu-coarse .two-step-ask').click()`);
+  await waitFor(`!!document.querySelector('.imu-coarse-steps')`, '打开 HOME 采集');
+  out.entryCommands = await js(`(window.__sent || []).filter(m => m.name === 'imu.op')`);
+  out.entryMode = (await fakeRpc('robot.busStatus', {})).mode;
+  await startLegacySession();
   await waitFor(`/重标定未结束/.test(document.querySelector('.imu-coarse')?.innerText || '') &&
     !![...document.querySelectorAll('.imu-coarse button')].find((b) => b.textContent.includes('采静止') && !b.disabled)`, '回到标定模式原粗校流程', 15000);
   out.active = await stance();
@@ -290,9 +309,7 @@ if (PHASE === 'imu-redo') {
   out.motionCommands = await js(`(window.__sent || []).filter((m) => m.name === 'pad.op' || m.name === 'init' || (m.name === 'imu.op' && m.args.op === 'hold'))`);
   await shot('imu-redo-complete.png');
   // A second revalidation can be cancelled and must restore exactly that saved calibration.
-  await clickExact('.imu-coarse button', '重新标定方向');
-  await sleep(900);
-  await js(`document.querySelector('.imu-coarse .two-step-ask').click()`);
+  await startLegacySession();
   await waitFor(`/重标定未结束/.test(document.querySelector('.imu-coarse')?.innerText || '')`, '可以再次开始重标定', 15000);
   await waitFor(`!![...document.querySelectorAll('.imu-coarse button')].find((b) => b.textContent === '取消并恢复原参数' && !b.disabled)`, '取消按钮就绪');
   if (!await clickExact('.imu-coarse button', '取消并恢复原参数')) throw new Error('取消未发出');
@@ -303,9 +320,7 @@ if (PHASE === 'imu-redo') {
   out.cancelled = await fakeRpc('robot.busCommand', { action: 'calibration-status' });
   out.recoveredPhases = [];
   for (const phase of ['entering', 'finishing', 'cancelling']) {
-    await clickExact('.imu-coarse button', '重新标定方向');
-    await sleep(900);
-    await js(`document.querySelector('.imu-coarse .two-step-ask').click()`);
+    await startLegacySession();
     await waitFor(`/重标定未结束/.test(document.querySelector('.imu-coarse')?.innerText || '') &&
       !![...document.querySelectorAll('.imu-coarse button')].find((b) => b.textContent.includes('采静止') && !b.disabled)`, '重标定已进入');
     writeFileSync(CONTROL, JSON.stringify({ outcome: 'ok', redo_phase: phase }));

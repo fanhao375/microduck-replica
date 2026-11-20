@@ -363,12 +363,14 @@ class CommitE2E(unittest.TestCase):
         self.outcome_file.write_text(json.dumps({"outcome": "ok"}), encoding="utf-8")
 
     def test_03c_verified_imu_can_be_recalibrated(self):
-        """保存过方向后仍可重新粗校；进入前需第二次确认，取消能恢复原运动模式。"""
+        """HOME 入口保留运动模式；旧客户端打开的重标定会话可以继续、取消和恢复。"""
         self.fake_set({"mode": "motion", "calib": "seed", "posture": "limp", "imu_pose": "upright"})
         result = self.node("imu-redo")
         self.assertTrue(result["entryVisible"], result)
         self.assertEqual(result["beforeConfirm"], [], result)
-        self.assertTrue(result["active"]["stand"]["disabled"], result)
+        self.assertEqual(result["entryMode"], "motion", result)
+        self.assertEqual(result["entryCommands"], [], result)
+        self.assertFalse(result["active"]["stand"]["disabled"], result)
         self.assertFalse(result["active"]["relax"]["disabled"], result)
         self.assertIn("点击验证前，先把实物回正", result["verifyInstruction"])
         self.assertEqual(result["original"]["calibration"]["joints"], result["after"]["calibration"]["joints"])
