@@ -54184,7 +54184,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-19T17:47:20Z",
+  "checked_at_utc": "2026-11-20T02:44:40Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -54197,9 +54197,9 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-19T16:46:47Z",
-    "source_snapshot_utc": "2026-11-19T17:47:20Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-19T17:47:20Z",
+    "previous_substantive_review_utc": "2026-11-19T17:47:20Z",
+    "source_snapshot_utc": "2026-11-20T02:44:40Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-20T02:44:40Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
@@ -54208,14 +54208,15 @@
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Yocto source unchanged ataaa629. Beta and face-board-v1 image builds and OS-update publication succeeded, release attachment skipped. Four dev/candidate and fixed build manifests now point toaaa629 rather than6342999; stable stays1.4.2/635c411. PR147QEMU/candidate gate remains unmerged and absent from these jobs; no test or hardware results inferred. Core heads/formal/dev releases/PRs/models/blog/replica delivery unchanged; documentation only.",
+    "notes": "Official four repo heads,formal/dev releases,PRs,models,blog and OS channels unchanged. Synced user commits74ef85b/0c96ff6: Nov10RC1,Nov12RC2/RC4 releases now drafts, same tags and asset metadata retained; RC1/RC3 were already drafts. Zero3W README points to public1104 while GitHubLatest stays1027. Added current publication observations without overwriting historical acceptance or source records. Documentation only; no tests/build/environment/device activity.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
     "merged_previously_tracked_pull_requests": {},
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
-    "official_os_development_channels_changed": true
+    "official_os_development_channels_changed": false,
+    "replica_image_publication_changed": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -58769,6 +58770,38 @@
       "formal_release_artifacts_available": true,
       "formal_release_assets_completed": false,
       "official_os_development_channels_changed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-19T16:46:47Z",
+      "source_snapshot_utc": "2026-11-19T17:47:20Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-19T17:47:20Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {},
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "Yocto source unchanged ataaa629. Beta and face-board-v1 image builds and OS-update publication succeeded, release attachment skipped. Four dev/candidate and fixed build manifests now point toaaa629 rather than6342999; stable stays1.4.2/635c411. PR147QEMU/candidate gate remains unmerged and absent from these jobs; no test or hardware results inferred. Core heads/formal/dev releases/PRs/models/blog/replica delivery unchanged; documentation only.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "official_os_development_channels_changed": true
     }
   ],
   "replica_public_image": {
@@ -59161,7 +59194,25 @@
       "commit_count": 16
     },
     "review": "RC4 ships the overview diagnostics for 15 servos and IMU. Visible viewers read IPC cache at 10 Hz without changing UART reads or disconnected backoff. RC4 has different robotd bytes at control.51/API44 and the same padd bytes as RC2. The signed-image and offline reports cover factory defaults, diagnostics wiring, read order, ARM64 and mobile offline checks. Real card boot, servo statistics, phone recording, camera and motion remain open.",
-    "priority": "High for current image tracking and hardware acceptance. Independent of official API56 and the local 0.18.2/API47 candidate."
+    "priority": "High for current image tracking and hardware acceptance. Independent of official API56 and the local 0.18.2/API47 candidate.",
+    "current_publication_status": "withdrawn_to_draft",
+    "publication_observation": {
+      "checked_at_utc": "2026-11-20T02:44:40Z",
+      "tag": "microduck-replica-image-zero3w-20261112-rc4",
+      "release_id": 442696724,
+      "currently_draft": true,
+      "prerelease": true,
+      "historical_published_at_utc": "2026-11-12T09:39:49Z",
+      "release_updated_at_utc": "2026-11-20T02:10:48Z",
+      "tag_actual_sha": "cbf06567c136c49c36babbd5fbd069db4979e1bc",
+      "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/cbf06567c136c49c36babbd5fbd069db4979e1bc",
+      "asset_metadata_count_authenticated": 9,
+      "asset_metadata_unchanged_since_archived": true,
+      "public_download_available": false,
+      "release_updated_at_jst": "2026-11-20T11:10:48+09:00",
+      "publication_state": "withdrawn_to_draft",
+      "historical_fields_retained": true
+    }
   },
   "official_os_release": {
     "recorded_on": "2026-11-13",
@@ -62989,5 +63040,100 @@
         ]
       }
     ]
+  },
+  "replica_image_publication_status": {
+    "checked_at_utc": "2026-11-20T02:44:40Z",
+    "withdrawn": [
+      {
+        "tag": "microduck-replica-image-20261110rc1",
+        "release_id": 440037934,
+        "currently_draft": true,
+        "prerelease": true,
+        "historical_published_at_utc": "2026-11-10T07:22:31Z",
+        "release_updated_at_utc": "2026-11-20T02:10:37Z",
+        "tag_actual_sha": "3c187f1fb88980c2499e9e64506a2249e7ed69bb",
+        "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/3c187f1fb88980c2499e9e64506a2249e7ed69bb",
+        "asset_metadata_count_authenticated": 8,
+        "asset_metadata_unchanged_since_archived": true,
+        "public_download_available": false,
+        "release_updated_at_jst": "2026-11-20T11:10:37+09:00",
+        "publication_state": "withdrawn_to_draft"
+      },
+      {
+        "tag": "microduck-replica-image-zero3w-20261112-rc2",
+        "release_id": 442613888,
+        "currently_draft": true,
+        "prerelease": true,
+        "historical_published_at_utc": "2026-11-12T08:05:48Z",
+        "release_updated_at_utc": "2026-11-20T02:10:47Z",
+        "tag_actual_sha": "a7dbda3bf955cfada41c654eca5172734bc8d9a7",
+        "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/a7dbda3bf955cfada41c654eca5172734bc8d9a7",
+        "asset_metadata_count_authenticated": 9,
+        "asset_metadata_unchanged_since_archived": true,
+        "public_download_available": false,
+        "release_updated_at_jst": "2026-11-20T11:10:47+09:00",
+        "publication_state": "withdrawn_to_draft"
+      },
+      {
+        "tag": "microduck-replica-image-zero3w-20261112-rc4",
+        "release_id": 442696724,
+        "currently_draft": true,
+        "prerelease": true,
+        "historical_published_at_utc": "2026-11-12T09:39:49Z",
+        "release_updated_at_utc": "2026-11-20T02:10:48Z",
+        "tag_actual_sha": "cbf06567c136c49c36babbd5fbd069db4979e1bc",
+        "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/cbf06567c136c49c36babbd5fbd069db4979e1bc",
+        "asset_metadata_count_authenticated": 9,
+        "asset_metadata_unchanged_since_archived": true,
+        "public_download_available": false,
+        "release_updated_at_jst": "2026-11-20T11:10:48+09:00",
+        "publication_state": "withdrawn_to_draft"
+      }
+    ],
+    "recommended_download": {
+      "tag": "microduck-replica-image-20261104",
+      "release_id": 433776261,
+      "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+      "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+      "draft": false,
+      "prerelease": false,
+      "asset_count": 13,
+      "asset_inventory_unchanged": true,
+      "navigation_commit": "74ef85b41eb7834d084b0415293f819f1fc97828",
+      "navigation_committed_at_utc": "2026-11-20T02:14:16Z",
+      "historical_link_cleanup_commit": "0c96ff6b07b96daffe3898706e20ea109c5d4dfe",
+      "historical_link_cleanup_committed_at_utc": "2026-11-20T02:35:18Z"
+    },
+    "github_latest_unchanged": "microduck-replica-image-20261027",
+    "already_draft_not_new_failures": [
+      {
+        "tag": "microduck-replica-image-zero3w-20261112-rc1",
+        "draft": true,
+        "published_at": null
+      },
+      {
+        "tag": "microduck-replica-image-zero3w-20261112-rc3",
+        "draft": true,
+        "published_at": null
+      }
+    ],
+    "recorded_on": "2026-11-20",
+    "classification": "Replica public-download availability change, already documented by user commits; no new image build or runtime integration.",
+    "time_scope": "release_updated_at is the raw API last-update time, not proof of exact draft-transition time. The current draft flag and committed navigation changes establish withdrawal.",
+    "historical_record_scope": "Preserve original source SHAs, asset inventories and historical verification URLs as past evidence. Authenticated draft asset metadata is not public download availability or a fresh package verification.",
+    "fixed_navigation_sources": [
+      "https://github.com/fanhao375/microduck-replica/blob/74ef85b41eb7834d084b0415293f819f1fc97828/README.md",
+      "https://github.com/fanhao375/microduck-replica/commit/0c96ff6b07b96daffe3898706e20ea109c5d4dfe"
+    ],
+    "impact": {
+      "HD1910": "Zero3W README download returns to1104; withdrawn RC4/control.51/API44 is historical, not a current public image or new physical acceptance.",
+      "camera": "No new capture or calibration validation.",
+      "ToF": "No sensor/geometry validation change.",
+      "model_management": "No model replacement or management contract change.",
+      "training": "No training or weights change.",
+      "motion": "No new motion validation; old RC and1104 records retain their distinct source/acceptance scope.",
+      "sound": "No new recording/playback validation."
+    },
+    "priority": "Medium for public image provenance and navigation; no runtime or migration deployment."
   }
 }
