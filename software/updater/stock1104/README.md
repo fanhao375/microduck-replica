@@ -2,21 +2,31 @@
 
 适用于已安装公开原版 `2026.11.4`（来源 `f215b65`）且能正常进入 Studio 的 ZERO 3W。先让鸭子退出模型，结束舵机调试、IMU 标定和进行中的更新。准备会在下次正常启动时生效，现有标定、用户数据与签名软件目录保持原样。
 
-1. 从本次发布中取得 `prepare-stock-1104.pyz` 和同名的 `.minisig`。把两份文件复制到板上同一目录。
-2. 在 SSH 终端将文件复制到 root 私有目录，用板上原有的发布公钥验证。验证成功后执行检查、暂存，再正常重启。
+1. 把本次交付的 `prepare-stock-1104.pyz` 和 `prepare-stock-1104.pyz.minisig` 放在电脑的同一目录。通过 SSH/SCP 从这张 1104 卡复制 `/etc/microduck-updater/trusted_keys/release.pub` 到该目录，文件名保留为 `release.pub`。
+2. 原版镜像未预装 minisign。在装有 minisign 的电脑上进入该目录验签，记录验签成功的文件摘要。Windows 上也可在装有 minisign 的 WSL 终端执行以下两行。
+
+```sh
+minisign -Vm prepare-stock-1104.pyz -p release.pub
+sha256sum prepare-stock-1104.pyz
+```
+
+3. 验签通过后，把准备工具复制到板上。通过 SSH 登录这台鸭子，在文件所在目录执行以下命令，并将最后一行的摘要与电脑上的结果逐字核对。
 
 ```sh
 sudo install -d -m 0700 /root/stock1104
-sudo install -m 0600 prepare-stock-1104.pyz prepare-stock-1104.pyz.minisig /root/stock1104/
-sudo minisign -Vm /root/stock1104/prepare-stock-1104.pyz -p /etc/microduck-updater/trusted_keys/release.pub &&
+sudo install -m 0600 prepare-stock-1104.pyz /root/stock1104/
+sudo sha256sum /root/stock1104/prepare-stock-1104.pyz
+```
+
+4. 两端摘要一致后，在板上检查原版文件并暂存修复。
+
+```sh
 sudo /usr/bin/python3 -I /root/stock1104/prepare-stock-1104.pyz --check &&
 sudo /usr/bin/python3 -I /root/stock1104/prepare-stock-1104.pyz
 ```
 
-如果板上没有 minisign，可将板上原有的 `/etc/microduck-updater/trusted_keys/release.pub` 复制到电脑，在电脑上运行 `minisign -Vm prepare-stock-1104.pyz -p release.pub`。验证成功后用 `sha256sum` 或 PowerShell 的 `Get-FileHash` 计算已验证文件的 SHA-256，与板上的 `sudo sha256sum /root/stock1104/prepare-stock-1104.pyz` 对照，完全相同后执行上面最后两条 Python 命令。发布包里单独提供的摘要可用于检查传输。
-
-3. 看到“主机准备已暂存”后，确认机器人仍在安全静止状态，执行 `sudo systemctl reboot`。重连后再次执行上面的 `--check` 命令，应看到“主机修复已生效”。
-4. 打开 Studio → 设置 → 软件更新，上传本次发布的 `.software-update.tar`，验证通过后点击安装。更新器会再次核对模型接管状态，按原有签名和健康检查流程安装。板子若仍停在原版，可重复运行同一份准备工具。
+5. 看到“主机准备已暂存”后，确认鸭子已放稳、运动已停止，再执行 `sudo systemctl reboot`。重连后再次执行 `--check`，应看到“主机修复已生效”。
+6. 打开 Studio → 设置 → 软件更新，上传同目录的 `.software-update.tar` 文件，验证通过后点击安装。刷新并确认已安装版本号。若准备工具提示文件或服务配置与原版不同，请保留提示并核对卡的来源。
 
 **撤销准备。** 仍在原版 1104 时，用同一份已验证的工具运行 `sudo /usr/bin/python3 -I /root/stock1104/prepare-stock-1104.pyz --restore-stock`，然后正常重启。撤销只移除这个工具写的三个 systemd 配置文件。已暂存的 root 只读程序文件可保留；原有主机文件一直保存在原位。
 
