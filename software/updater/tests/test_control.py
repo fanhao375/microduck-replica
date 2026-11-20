@@ -1,5 +1,6 @@
 import copy
 import json
+import socket
 from pathlib import Path
 import sys
 import tempfile
@@ -204,6 +205,48 @@ class Control(unittest.TestCase):
             engine=Lost();controller=self.make(tmp,engine);controller.upload(io.BytesIO(test_packages.Packages().outer()));self.finish(controller)
             controller.start('install');result=self.finish(controller)
             self.assertEqual(result['job']['phase'],'completed');self.assertEqual(result['installed'],'2026.10.27')
+
+    @unittest.skipUnless(hasattr(socket,'AF_UNIX'),'updaterd uses Unix-domain sockets')
+    def test_final_engine_error_is_reported_but_eof_still_reconciles(self):
+        from control import Engine as SocketEngine
+
+        reason='签名\x00验证失败。\n请更换软件包'
+        rejection={'jsonrpc':'2.0','id':1,'error':{'code':-32000,'message':reason}}
+        for reply in (rejection,None):
+            with self.subTest(reply=reply is not None), tempfile.TemporaryDirectory() as tmp:
+                address=str(Path(tmp)/'engine.sock')
+                received=[]
+                with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as server:
+                    server.bind(address)
+                    server.listen(1)
+                    def answer():
+                        conn,_=server.accept()
+                        with conn,conn.makefile('rb') as reader:
+                            received.append(json.loads(reader.readline()))
+                            if reply is not None:
+                                conn.sendall(json.dumps(reply).encode()+b'\n')
+                    responder=threading.Thread(target=answer,daemon=True)
+                    responder.start()
+                    class Local(Engine):
+                        def call(self,method,params=None,progress=None):
+                            if method=='update.apply' and not params.get('options',{}).get('dry_run'):
+                                return SocketEngine(address).call(method,params,progress)
+                            return super().call(method,params,progress)
+                    controller=self.online_controller(tmp,engine=Local())
+                    controller.start('check'); self.finish(controller)
+                    with mock.patch.object(controller,'recover',wraps=controller.recover) as recover:
+                        controller.start('online:2026.10.27')
+                        result=self.finish(controller)['job']
+                        if reply is None:
+                            self.assertEqual(result['phase'],'interrupted')
+                            recover.assert_called_once()
+                        else:
+                            self.assertEqual(result['phase'],'failed')
+                            self.assertEqual(result['error'],'签名验证失败。 请更换软件包')
+                            self.assertEqual(result['code'],'engine')
+                            recover.assert_not_called()
+                    responder.join(1)
+                    self.assertEqual([request['method'] for request in received],['update.apply'])
 
     def test_fixed_release_detail_retry_when_list_omits_assets(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -450,6 +493,61 @@ class Control(unittest.TestCase):
                 result=self.finish(self.make(tmp,engine))
                 self.assertEqual(result['job']['phase'],'interrupted')
                 self.assertFalse(any(m=='update.apply' for m,_ in engine.calls))
+
+    def test_interrupted_online_validation_releases_motion_with_engine_offline(self):
+        for phase in ('downloading','verifying'):
+            with self.subTest(phase=phase), tempfile.TemporaryDirectory() as tmp:
+                offline=threading.Event()
+                offline.set()
+                class Unavailable(Engine):
+                    def call(self,method,params=None,progress=None):
+                        if offline.is_set():
+                            self.calls.append((method,params))
+                            raise OSError('offline')
+                        return super().call(method,params,progress)
+                engine=Unavailable()
+                atomic_json(Path(tmp)/'job.json',{'id':'before-dispatch','operation':'online','version':'2026.10.27',
+                                                  'phase':phase,'started_at':time.time()})
+                marker=Path(tmp)/'installing'
+                marker.write_text('before-dispatch')
+                controller=self.make(tmp,engine)
+                try:
+                    deadline=time.monotonic()+.5
+                    while controller.busy and time.monotonic()<deadline:time.sleep(.005)
+                    self.assertFalse(controller.busy)
+                    self.assertFalse(marker.exists())
+                    self.assertEqual(controller.view()['job']['phase'],'interrupted')
+                    self.assertEqual(engine.calls,[])
+                finally:
+                    offline.clear()
+                    self.finish(controller)
+
+    def test_catalog_checking_identifies_manual_and_auto_checks_across_clients(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            entered=threading.Event()
+            resume=threading.Event()
+            def catalog():
+                entered.set()
+                if not resume.wait(2):raise TimeoutError()
+                return []
+            previous={'id':'operator-result','operation':'online','version':'2026.10.26','phase':'completed'}
+            atomic_json(Path(tmp)/'job.json',previous)
+            controller=self.online_controller(tmp,catalog=catalog)
+            self.assertIs(controller.view().get('catalog_checking'),False)
+            for operation in ('check_auto','check'):
+                entered.clear(); resume.clear()
+                controller.start(operation)
+                try:
+                    self.assertTrue(entered.wait(1))
+                    self.assertIs(controller.view()['catalog_checking'],True)
+                    if operation=='check_auto':
+                        self.assertEqual(controller.view()['job'],previous)
+                    self.assertIs(controller.start('check_auto')['catalog_checking'],True)
+                finally:
+                    resume.set()
+                    end=self.finish(controller)
+                self.assertIs(end['catalog_checking'],False)
+            self.assertIs(controller.start('check_auto')['catalog_checking'],False)
 
     def test_lost_rollback_reply_requires_new_journal_entry_for_previous_install(self):
         class LostRollback(Engine):

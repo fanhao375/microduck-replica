@@ -25,6 +25,12 @@ TERMINAL={'completed','rolled_back','failed','waiting_validation','interrupted'}
 class UpdateError(Exception):
     def __init__(self,code,message): super().__init__(message); self.code=code
 
+class EngineRejected(UpdateError):
+    """The engine returned a final JSON-RPC error for the submitted request."""
+    def __init__(self,message):
+        printable=''.join(char for char in message if char.isprintable() or char.isspace())
+        super().__init__('engine',' '.join(printable.split())[:500] or '升级引擎拒绝请求')
+
 def atomic_json(path,data):
     path=Path(path); path.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
     fd,name=tempfile.mkstemp(prefix='.state-',dir=path.parent)
@@ -68,7 +74,12 @@ class Engine:
                     if len(raw)>1024*1024 or not raw.endswith(b'\n'): raise UpdateError('engine','升级引擎连接中断')
                     message=json.loads(raw)
                     if message.get('id')==1:
-                        if 'error' in message: raise UpdateError('engine',str(message['error'].get('message','升级引擎拒绝请求'))[:500])
+                        if 'error' in message:
+                            error=message['error']
+                            if (message.get('jsonrpc')=='2.0' and type(message['id']) is int and 'result' not in message
+                                    and isinstance(error,dict) and type(error.get('code')) is int and isinstance(error.get('message'),str)):
+                                raise EngineRejected(error['message'])
+                            raise UpdateError('protocol','升级引擎返回了无效的错误回包')
                         return message['result']
                     if progress and isinstance(message.get('params'),dict): progress(message['params'])
 
@@ -180,7 +191,7 @@ class Controller:
         os.close(descriptor)
         self.lock=threading.Lock(); self.state_lock=threading.RLock(); self.refresh_lock=threading.Lock(); self.busy=False
         self.job=read_json(self.root/'job.json'); self.staged=read_json(self.root/'staged.json')
-        self.ready=False; self.engine_status=None; self.installed=None; self.dispatched=False
+        self.ready=False; self.engine_status=None; self.installed=None; self.dispatched=False; self.catalog_checking=False
         cached=read_json(self.root/'catalog.json') or {}
         self.candidate=cached.get('candidate')
         self.catalog_checked_at=cached.get('checked_at')
@@ -272,7 +283,7 @@ class Controller:
     def view(self):
         with self.state_lock:
             return {'available':True,'busy':self.busy,'ready':self.ready,'online_update':True,
-                'channel':'stable','catalog_checked_at':self.catalog_checked_at,
+                'channel':'stable','catalog_checked_at':self.catalog_checked_at,'catalog_checking':self.catalog_checking,
                 'installed':self.installed,'engine_available':self.engine_status is not None,
                 'can_rollback':bool(self.previous_versions),
                 'source_state':self.availability(),'candidate':{key:value for key,value in (self.candidate or {}).items() if key!='url'} or None,
@@ -303,12 +314,13 @@ class Controller:
                     if version: self.job['version']=version
                     self.save()
                 self.busy=True
+                self.catalog_checking=operation in {'check','check_auto'}
                 threading.Thread(target=self.run,args=(operation,),daemon=True).start()
                 started=True
                 return self.view()
         finally:
             if not started:
-                self.busy=False
+                self.busy=False; self.catalog_checking=False
                 self.lock.release()
 
     def upload(self,source):
@@ -463,7 +475,7 @@ class Controller:
                 self.dispatched=False
                 self.finish_result(result)
         except UpdateError as error:
-            if self.dispatched:
+            if self.dispatched and not isinstance(error,EngineRejected):
                 self.save(phase='recovering',error='引擎连接中断，正在读取持久任务结果');self.recover(release=False)
             elif operation in {'download','online','validate','install'} and error.code=='preflight':
                 self.ready=False
@@ -481,7 +493,9 @@ class Controller:
                 self.leave_motion_gate()
                 self.marker.unlink(missing_ok=True)
             finally:
-                self.dispatched=False;self.busy=False;self.lock.release()
+                with self.state_lock:
+                    self.dispatched=False; self.catalog_checking=False; self.busy=False
+                self.lock.release()
 
     def recover(self,release=True):
         # A controller crash cannot cancel updaterd. Reconcile only the engine's
@@ -489,6 +503,9 @@ class Controller:
         try:
             if self.job.get('operation')=='check':
                 self.save(phase='interrupted',error='上次检查中断，请重新检查更新')
+                return
+            if self.job.get('operation')=='online' and 'dispatch' not in self.job:
+                self.save(phase='interrupted',error='更新在提交安装前中断，请重新检查更新')
                 return
             self.marker.parent.mkdir(parents=True,exist_ok=True,mode=0o755)
             self.marker.write_text(self.job['id']);self.marker.chmod(0o644)
