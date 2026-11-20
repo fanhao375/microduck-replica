@@ -41,7 +41,7 @@
 
 > 已经有鸭子、但证书是旧的（只有一张自签 leaf、没有 `ca.crt`）的，在板子上运行
 > `sudo microduck-firstboot --tls-only` 重新生成，旧证书会自动备份成 `*.bak-<时间戳>`，
-> 然后 `sudo systemctl restart microduck-studio`。Studio 发现 `duck.crt` / `duck.key` 在就会自动用 HTTPS 起。
+> 然后 `sudo systemctl restart microduck-studio`。Studio 发现 `duck.crt` / `duck.key` 在，同一个 8000 端口就同时接 http 和 https（原来的 `http://` 地址照旧能用）。
 > 还没启用 HTTPS 的设备仍可用原来的 HTTP 地址打开控制台。手机麦克风需要先生成并信任证书。
 
 ### 从热点回家里 WiFi

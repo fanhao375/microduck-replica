@@ -707,6 +707,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             return
         await ws.accept()
         by = _client_desc(ws)
+        # 同一个端口 http、https 都接：给这个页面的地址跟它自己的协议走
+        my_net = net.for_scheme("https" if ws.url.scheme == "wss" else "http") if net is not None else None
         pad_conn = pad.new_conn() if pad is not None else None
         me = {"visible": True, "by": by, "hb_at": time.monotonic(), "route": None,
               "pad_visible": None, "diagnostics_visible": False}
@@ -751,7 +753,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     me["visible"] = False          # 没心跳了：先当看不见，别让 robotd 白组帧
                     update_viewers()
                 if me["visible"]:
-                    st = summarize(robotd, duck, servo, ob=onboard, bat=battery, net=net, commit=commit, auth=auth)
+                    st = summarize(robotd, duck, servo, ob=onboard, bat=battery, net=my_net, commit=commit, auth=auth)
                     # 上手清单一份 1 KB 左右：没变就不每帧带（页面沿用上一份），每秒还是整份带一次（代码审查 C5，
                     # 跟手柄快照的长列表一个办法）
                     state_tick += 1

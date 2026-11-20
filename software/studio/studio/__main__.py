@@ -115,21 +115,31 @@ def main(argv=None):
         log.info("没设密码：同一个网络里打开网页就能用（想加密码：更多 → 登录密码）", cat="系统",
                  hint=f"网页里设，或者用 radxa 用户运行：python3 -I {ROOT / 'run.py'} set-password（别用 sudo）")
     host, _, port = a.listen.rpartition(":")
+    # 地址一律按 http 报：同一个端口两种都接（dual_listen），https 只是手机麦克风要用
     scheme = "http"
-    tls = {}
+    tls = None
+    auto_tls = False
     # 首次开机生成的局部 CA 证书放这儿；没显式给 --tls-* 就自动用它（镜像不用额外 drop-in）
     tls_dir = "/etc/microduck/tls"
     auto_cert, auto_key = os.path.join(tls_dir, "duck.crt"), os.path.join(tls_dir, "duck.key")
     if not a.tls_cert and not a.tls_key and os.path.isfile(auto_cert) and os.path.isfile(auto_key):
         a.tls_cert, a.tls_key = auto_cert, auto_key
+        auto_tls = True
     if bool(a.tls_cert) != bool(a.tls_key):
         raise SystemExit("--tls-cert 和 --tls-key 要给就两个都给")
     if a.tls_cert and a.tls_key:
         for path in (a.tls_cert, a.tls_key):
             if not os.path.isfile(path):
                 raise SystemExit(f"证书文件不存在：{path}")
-        tls = {"ssl_certfile": a.tls_cert, "ssl_keyfile": a.tls_key}
-        scheme = "https"
+        from .dual_listen import load_tls
+        try:
+            tls = load_tls(a.tls_cert, a.tls_key)
+        except OSError as exc:      # 读不了、证书和私钥对不上（ssl.SSLError 也是 OSError）
+            if not auto_tls:
+                raise SystemExit(f"证书用不了：{exc}")
+            # 自动找到的证书坏了不能让网页起不来：照旧用 http 起，只是手机麦克风用不了
+            log.warn("https 证书用不了，这次只用 http 起", cat="系统", raw=str(exc), dedup=False,
+                     hint="重新生成：sudo microduck-firstboot --tls-only --force，然后重启 Studio")
     ca_cert = os.path.join(tls_dir, "ca.crt")
     if not os.path.isfile(ca_cert):
         ca_cert = None
@@ -184,13 +194,12 @@ def main(argv=None):
     app = build_app(auth=auth, robotd=rd, log=log, web_dir=a.web_dir, duck=duck, names=names, state_dir=state_dir,
                     dev_autologin=a.dev_autologin, servo=servo, imu=imu, pad=pad, onboard=onboard, battery=battery,
                     tune=tune, net=net, commit=commit, models=models, sensors=sensors, sensor_auto=sensor_auto, ca_cert=ca_cert)
-    display_host = host
-    if host in ("0.0.0.0", ""):
-        display_host = socket.gethostname() if tls else "<鸭子 IP>"
-    log.info(f"网页地址：{scheme}://{display_host}:{port}/", cat="系统", dedup=False)
+    any_host = host in ("0.0.0.0", "")
+    log.info(f"网页地址：{scheme}://{'<鸭子 IP>' if any_host else host}:{port}/", cat="系统", dedup=False)
     if tls:
-        log.info(f"已启用 HTTPS（手机可以在 https://{display_host}:{port}/m 用麦克风说话）", cat="系统", dedup=False)
-    else:
+        tls_host = socket.gethostname() if any_host else host
+        log.info(f"同一个端口也接 https（手机在 https://{tls_host}:{port}/m 可以用麦克风说话）", cat="系统", dedup=False)
+    elif not a.tls_cert:
         log.info("没有 https 证书：现在用 http 起，手机麦克风用不了（想开：sudo microduck-firstboot --tls-only）",
                  cat="系统", dedup=False)
     if a.bench:
@@ -200,8 +209,19 @@ def main(argv=None):
         log.info(f"台架模式：不连主程序，浏览器打开 {url}，在舵机页选 COM 口连接", cat="系统", dedup=False)
         threading.Timer(1.5, webbrowser.open, args=(url,)).start()
     from .ws_protocol import MusicWebSocketProtocol
-    uvicorn.run(app, host=host or "0.0.0.0", port=int(port), ws=MusicWebSocketProtocol, http="h11", lifespan="on",
-                log_level="warning", server_header=False, proxy_headers=False, access_log=False, **tls)
+    serve = dict(host=host or "0.0.0.0", port=int(port), ws=MusicWebSocketProtocol, http="h11", lifespan="on",
+                 log_level="warning", server_header=False, proxy_headers=False, access_log=False)
+    if tls is None:
+        uvicorn.run(app, **serve)
+        return
+    from .dual_listen import DualServer
+    server = DualServer(uvicorn.Config(app, **serve), tls)
+    try:
+        server.run()
+    except KeyboardInterrupt:
+        pass
+    if not server.started:
+        sys.exit(3)                 # 跟 uvicorn.run 一样：没起来就非零退出，systemd 会重启
 
 
 if __name__ == "__main__":

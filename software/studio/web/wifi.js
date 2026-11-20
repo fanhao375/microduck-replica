@@ -112,7 +112,7 @@ export const FIND_PROBE_MS = 6000;           // 一次探测最多等这么久�
 export const FIND_SILENT_MS = 5000;          // 这么久没收到 Studio 的任何消息也算断了（WebSocket 有时不马上报断）
 
 /** 要找的地址：<proto>://<hostname>:<端口>/ 和 <proto>://<hostname>.local:<端口>/（net.json 的 hostname，端口跟 --listen 一致）。
- *  proto 跟当前页面一致：Studio 开了 https 就不要再探 http（80/8000 上没人应答）。 */
+ *  proto 跟当前页面一致：https 页面去探 http 地址会被浏览器当混合内容挡掉。 */
 export function findUrls(net) {
   const host = (net && net.hostname) || 'duck-xxxx';
   const proto = typeof location !== 'undefined' && location.protocol === 'https:' ? 'https' : 'http';

@@ -141,6 +141,16 @@ def _rpc_error(e, what):
     return f"连不上 configd：{e}"
 
 
+class _SchemeView:
+    """只给 summarize 用：它只调 view()。"""
+
+    def __init__(self, net, scheme):
+        self.net, self.scheme = net, scheme
+
+    def view(self, now=None):
+        return self.net.view(now, scheme=self.scheme)
+
+
 class Net:
     """配网状态 + 操作。start() 起两个循环：2 秒读 net.json、5 秒问 configd net.status（只在文件在时）。"""
 
@@ -257,8 +267,14 @@ class Net:
     def mode(self):
         return self.info.get("mode") if isinstance(self.info, dict) else None
 
-    def view(self, now=None):
+    def for_scheme(self, scheme):
+        """这条连接专用的视图：地址跟着页面自己的 http / https 走（同一个端口两种都接）。
+        https 页面上给 http 地址，换网后的自动找鸭子会被浏览器当混合内容挡掉。"""
+        return _SchemeView(self, scheme)
+
+    def view(self, now=None, scheme=None):
         """推给页面的 net 字段。文件不在 / 坏了 = {"known": false}。"""
+        scheme = scheme if scheme in ("http", "https") else self.scheme
         if not isinstance(self.info, dict):
             return {"known": False}
         now = time.monotonic() if now is None else now
@@ -283,10 +299,10 @@ class Net:
             "ip4": ip4,
             "ip_now": ip_now,
             "hostname": host,
-            "url_local": f"{self.scheme}://{host}.local:{self.port}/",
-            "url_host": f"{self.scheme}://{host}:{self.port}/",
-            "url_hotspot": f"{self.scheme}://{hotspot_ip}:{self.port}/m",
-            "urls": addresses(host, ip_now, self.port, self.scheme),
+            "url_local": f"{scheme}://{host}.local:{self.port}/",
+            "url_host": f"{scheme}://{host}:{self.port}/",
+            "url_hotspot": f"{scheme}://{hotspot_ip}:{self.port}/m",
+            "urls": addresses(host, ip_now, self.port, scheme),
             "hotspot": {"ssid": self.info.get("hotspot_ssid"), "ip": hotspot_ip,
                         "psk": self.info.get("hotspot_psk")},
             "last_try": last,

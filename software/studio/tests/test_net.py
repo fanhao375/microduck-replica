@@ -152,6 +152,22 @@ class StateFileTest(Base):
         self.assertEqual([u["url"] for u in v["urls"]],
                          ["https://10.42.0.1:8000/", "https://duck-c51b:8000/", "https://duck-c51b.local:8000/"])
 
+    def test_each_page_gets_addresses_in_its_own_scheme(self):
+        """同一个端口 http、https 都接：http 页面看到 http 地址（含路由器分的 IP），https 页面看到 https 地址。"""
+        self.write_state(mode="wifi")
+        self.net._read_once()
+        self.net.status = {"state": "connected", "ssid": "Home", "ip4": "192.168.1.50"}
+        self.net.status_at = time.monotonic()
+        plain, secure = self.net.for_scheme("http").view(), self.net.for_scheme("https").view()
+        self.assertEqual(plain, self.net.view())
+        self.assertEqual([u["url"] for u in plain["urls"]],
+                         ["http://192.168.1.50:8000/", "http://duck-c51b:8000/", "http://duck-c51b.local:8000/"])
+        self.assertEqual(secure["url_host"], "https://duck-c51b:8000/")
+        self.assertEqual(secure["url_hotspot"], "https://10.42.0.1:8000/m")
+        self.assertEqual([u["url"] for u in secure["urls"]],
+                         ["https://duck-c51b:8000/", "https://duck-c51b.local:8000/"])
+        self.assertEqual(self.net.for_scheme("ftp").view(), plain)
+
     def test_unknown_scheme_falls_back_to_http(self):
         net = N.Net("tcp:127.0.0.1:1", self.state, self.dir / "state", self.log, dev_mode=False,
                     hostname="duck-c51b", scheme="ftp")
