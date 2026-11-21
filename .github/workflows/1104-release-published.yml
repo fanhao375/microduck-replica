@@ -1,0 +1,18 @@
+name: Stable Microduck software published
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  signal:
+    if: >-
+      github.repository == 'fanhao375/microduck-replica' &&
+      !github.event.release.draft && !github.event.release.prerelease &&
+      startsWith(github.event.release.tag_name, 'microduck-software-v')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Wake the default branch image workflow
+        run: echo 'The default branch workflow will check the latest stable software release.'

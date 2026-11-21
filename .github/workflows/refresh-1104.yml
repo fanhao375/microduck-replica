@@ -1,0 +1,112 @@
+name: Refresh public 1104 factory image
+
+on:
+  workflow_run:
+    workflows: [Stable Microduck software published]
+    types: [completed]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish-official-1104-factory
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      github.repository == 'fanhao375/microduck-replica' &&
+      github.ref == 'refs/heads/master' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.event == 'release' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.conclusion == 'success'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.select.outputs.version }}
+      transfer_id: ${{ steps.transfer.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Select the newest published stable software
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(python3 -I software/image/refresh1104/publish.py candidate)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Install Linux image tools
+        if: steps.select.outputs.version != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y qemu-user-static minisign xz-utils zstd e2fsprogs util-linux iproute2
+      - name: Download original factory image and signed inputs
+        if: steps.select.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.select.outputs.version }}
+        run: |
+          mkdir "$RUNNER_TEMP/inputs"
+          cd "$RUNNER_TEMP/inputs"
+          gh release download microduck-replica-image-20261104 -R "$GITHUB_REPOSITORY" -p factory-1104-source.xz
+          gh release download microduck-software-v2026.11.20 -R "$GITHUB_REPOSITORY" \
+            -p prepare-stock-1104-online.pyz -p prepare-stock-1104-online.pyz.minisig
+          gh release download "microduck-software-v$VERSION" -R "$GITHUB_REPOSITORY" -p "$VERSION.software-update.tar"
+      - name: Build and verify the offline factory image
+        if: steps.select.outputs.version != ''
+        env:
+          VERSION: ${{ steps.select.outputs.version }}
+        run: |
+          sudo python3 -I software/image/refresh1104/build.py \
+            --base "$RUNNER_TEMP/inputs/factory-1104-source.xz" \
+            --prepare "$RUNNER_TEMP/inputs/prepare-stock-1104-online.pyz" \
+            --package "$RUNNER_TEMP/inputs/$VERSION.software-update.tar" \
+            --version "$VERSION" --out "$RUNNER_TEMP/out" --work "$RUNNER_TEMP/image-work"
+      - name: Match outputs to the public software package
+        if: steps.select.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.select.outputs.version }}
+        run: python3 -I software/image/refresh1104/publish.py check --version "$VERSION" --out "$RUNNER_TEMP/out"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        id: transfer
+        if: steps.select.outputs.version != ''
+        with:
+          name: verified-factory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/out/microduck-replica-20261104.img.xz
+            ${{ runner.temp }}/out/microduck-replica-20261104.img.xz.sha256
+            ${{ runner.temp }}/out/1104-build.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 5
+
+  publish:
+    needs: build
+    if: needs.build.outputs.version != '' && needs.build.outputs.transfer_id != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          artifact-ids: ${{ needs.build.outputs.transfer_id }}
+          path: ${{ runner.temp }}/out
+          merge-multiple: true
+      - name: Promote verified files to the fixed 1104 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: python3 -I software/image/refresh1104/publish.py promote --version "$VERSION" --out "$RUNNER_TEMP/out"
