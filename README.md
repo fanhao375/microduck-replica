@@ -131,8 +131,8 @@
 <!-- 首页各保留一行当前软件和烧卡镜像，完整版本说明按日期倒序写入历史更新。 -->
 | 日期 | ZERO 3W 版本 | 用途 |
 |---|---|---|
-| 2026-11-20 | [正式软件 2026.11.20](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) | 在现有 1104 卡上更新 Studio，使用手机遥控、离线语音和舵机 / IMU 诊断。 |
-| 2026-11-04 | [烧卡镜像 20261104](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) | 给新 SD 卡安装系统。包含站姿 IMU 标定和更换 Wi-Fi 后的热点恢复。[镜像说明](docs/更新说明-20261104.md) |
+| 2026-11-22 | [正式软件 2026.11.23](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.23) | 已有卡在 Studio 里检查更新。跳过舵机标定会沿用各自的中位，IMU 页支持导入安装方向。 |
+| 2026-11-04 | [烧卡镜像 20261104](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) | 给新 SD 卡安装系统。发布页列出当前预装的软件版本和镜像校验值。[烧录说明](docs/更新说明-20261104.md) |
 
 <details>
 <summary>展开旧版软件记录</summary>
