@@ -1040,16 +1040,18 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, liveVerify, needsUn
 // 后端记成「待写入的方向」，上手清单第 3 步「写进主程序」才生效。
 const IMPORT_MAX_BYTES = 256 * 1024;
 function mountFromFile(doc) {
-  const one = (m) => (m && typeof m === 'object' && typeof m.source === 'string' && Array.isArray(m.quat) ? { source: m.source, quat: m.quat } : null);
   if (!doc || typeof doc !== 'object') throw new Error('文件内容不是方向文件');
-  const direct = one(doc) || one(doc.imu) || one(doc.mount);
-  if (direct) return direct;
-  if (Array.isArray(doc.records)) {
-    const found = doc.records.map((r) => one(r?.imu)).filter(Boolean);
-    if (found.length === 1) return found[0];
-    if (found.length > 1) throw new Error(`文件里有 ${found.length} 份方向：请用只含一份方向的文件`);
+  const records = Array.isArray(doc.records) ? doc.records.map(r => r?.imu) : [];
+  const found = [doc, doc.imu, doc.mount, ...records].filter(m => m && typeof m === 'object' && 'quat' in m);
+  if (!found.length) throw new Error('文件里没找到 IMU 方向');
+  if (found.length > 1) throw new Error(`文件里有 ${found.length} 份方向：请用只含一份方向的文件`);
+  const { source, quat } = found[0];
+  if (!['bus', 'bno08x', 'lsm6dsv16x'].includes(source)) throw new Error('文件里没写清是哪种 IMU 的方向');
+  if (!Array.isArray(quat) || quat.length !== 4 || !quat.every(Number.isFinite)) {
+    throw new Error('方向需要四个有限数');
   }
-  throw new Error('文件里没找到 IMU 方向');
+  if (Math.abs(Math.hypot(...quat) - 1) > 1e-3) throw new Error('文件里的方向不是单位四元数');
+  return { source, quat };
 }
 function ImportCard({ link, live }) {
   const [busy, setBusy] = useState(false);

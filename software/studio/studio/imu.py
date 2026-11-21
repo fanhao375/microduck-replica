@@ -865,6 +865,7 @@ class ImuBackend:
         记成「待写入的方向」（跟站着校完同一处 imu-pending.json），上手清单第 3 步「写进主程序」才往鸭子写；
         这里不往鸭子写任何东西。"""
         from .commit import CHIP_CN, IMU_SOURCES, save_pending
+        from .commit import Refused as CommitRefused
         view = self.view()
         if view.get("profile_error"):
             raise Refused(view["profile_error"])
@@ -874,18 +875,24 @@ class ImuBackend:
         if helper.imu_redo_state(root=self.root).get("active"):
             raise Refused("重新标定正在进行：先取消重新标定，再导入")
         source, quat = args.get("source"), args.get("quat")
-        if source not in IMU_SOURCES:
+        if not isinstance(source, str) or source not in IMU_SOURCES:
             raise Refused("文件里没写清是哪种 IMU 的方向")
         if source != current:
             raise Refused(f"文件里是「{CHIP_CN[source]}」的方向，这只鸭子现在用的是「{CHIP_CN[current]}」：不能导入")
         if (not isinstance(quat, list) or len(quat) != 4
-                or any(isinstance(c, bool) or not isinstance(c, (int, float)) or not math.isfinite(c) for c in quat)):
+                or any(isinstance(c, bool) or not isinstance(c, (int, float)) or abs(c) > 2 or not math.isfinite(c) for c in quat)):
             raise Refused("文件里的方向不是四个数")
         norm = math.sqrt(sum(c * c for c in quat))
         if abs(norm - 1.0) > 1e-3:
             raise Refused("文件里的方向不是单位四元数")
-        row = save_pending(self.state_dir, source, [float(c) / norm for c in quat], {"imported": True}, by,
-                           imu_bus=view.get("imu_bus"))
+        unit = [c / norm for c in quat]
+        if self.commit is None:
+            row = save_pending(self.state_dir, source, unit, {"imported": True}, by, imu_bus=view.get("imu_bus"))
+        else:
+            try:
+                row = self.commit.stage_import(source, unit, by, view.get("imu_bus"))
+            except CommitRefused as exc:
+                raise Refused(str(exc)) from exc
         self.last_result = None                 # 页面上没写入的那次计算结果不再算数：现在待写入的是导入的这份
         self._result_basis = None
         self.log.info("导入了 IMU 安装方向（还没写进主程序）", cat="IMU", raw=json.dumps(row["quat"]),

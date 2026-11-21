@@ -77,7 +77,7 @@ STAND = ("holding", "policy", "walking")
 CALIB_ERR = re.compile(r"calibrat|motion_enabled|calibration file|IMU mounting", re.I)
 
 TIPS = {
-    "servo": "两套零位会打架：用 Studio 的舵机页标（标完，主程序文件里 15 颗的 zero_raw 都要是 2048）",
+    "servo": "已有标定可标已完成或跳过，沿用原中位。需要重新调零时去舵机页操作",
     "imu": "装歪 8.5° 一走就往前冲（一号鸭 10-12）",
     "commit": "写的时候主程序会先卸力：扶好鸭子，别让它摔了",
     "pad": "G50 Pro 先拨到 S 档",
@@ -352,18 +352,21 @@ def servo_row(inp, rec, head):
         return _row("servo", "no", "标定模式下主程序说标定没做完", actions=[("servos", "去舵机页")], hard=HARD_SERVO)
     if not js:
         return _row("servo", "unk", "这次连上以后还没读到主程序的标定文件（calibration-status）", actions=[("servos", "去舵机页")])
+    fp = joints_fp(calib)
+    c = rec.get("confirm_servo") if isinstance(rec.get("confirm_servo"), dict) else None
+    if c and c.get("fp") == fp:
+        return _row("servo", "ok", "已核对主程序文件里每颗舵机的中位和方向", when=c.get("at"))
     off = [j for j in js if j.get("zero_raw") != 2048]
     if off:
         def one(j):
             z = j.get("zero_raw")
             d = f"（差 {(z - 2048) * 360 / 4096:+.1f}°）" if isinstance(z, (int, float)) else ""
             return f"{JOINT_CN.get(j.get('name'), j.get('name'))} {z}{d}"
-        text = f"两套零位会打架：主程序文件里 {len(off)} 颗的 zero_raw 不是 2048——" + "、".join(one(j) for j in off[:3]) \
-            + ("…" if len(off) > 3 else "") + "。多半是随包的一号鸭数值，在舵机页标一遍"
+        text = f"主程序里有 {len(off)} 颗使用自定义中位：" + "、".join(one(j) for j in off[:3]) \
+            + ("…" if len(off) > 3 else "") + "。确认是这只鸭子的标定后，可沿用原中位"
         return _row("servo", "todo", text, actions=[("servos", "去舵机页")],
-                    found="两套零位会打架：{v}也会站歪、走偏（第 3 步按 2048 写零位）")
+                    found="{v}会沿用每颗舵机原有的中位，请确认与这只鸭子相符")
     st = inp.get("studio_servo") or {}
-    fp = joints_fp(calib)
     if set(SERVO_IDS) <= set(st.get("ids") or ()):
         # 舵机页标过 15 颗：第一次看到时记下当时的关节指纹（servo_studio，_track 里记），之后指纹变了就要重新核对
         # （判法表：「并且指纹没变」，代码审查 C9-3）
@@ -373,9 +376,6 @@ def servo_row(inp, rec, head):
         if ss and ss.get("src") == st.get("time"):
             return _row("servo", "todo", "舵机页标过以后，主程序的标定文件改过了：确实校过就点「已完成」，或者在舵机页再标一遍",
                         when=st.get("time"), actions=[("servos", "去舵机页")])
-    c = rec.get("confirm_servo") if isinstance(rec.get("confirm_servo"), dict) else None
-    if c and c.get("fp") == fp:
-        return _row("servo", "ok", "核对过：主程序文件里 15 颗都是 2048", when=c.get("at"))
     if c:
         return _row("servo", "todo", "核对以后主程序的标定文件改过了：确实校过就点「已完成」，或者在舵机页标一遍",
                     actions=[("servos", "去舵机页")])
@@ -894,21 +894,22 @@ class Onboarding:
                          cat="IMU") or True
 
     def confirm_servo(self, rd, by=None):
-        """「已经校过，核对一下」：主程序文件里 15 颗都标了、zero_raw 全是 2048，才记一笔（指纹绑关节）。不能记就回原因。"""
+        """核对主程序保存的中位，只记关节指纹。"""
         calib = fresh_calib(rd)
         js = _joints(calib)
         if not js:
             return False, "这次连上以后还没读到主程序的标定文件：等几秒再点"
         if (calib or {}).get("uncalibrated_joints"):
             return False, "主程序说还有没标的关节：去舵机页标"
-        off = [j for j in js if j.get("zero_raw") != 2048 or j.get("calibrated") is False]
+        off = [j for j in js if type(j.get("zero_raw")) is not int or not 0 <= j["zero_raw"] <= 4095
+               or j.get("calibrated") is not True]
         if off:
-            return False, f"有 {len(off)} 颗的 zero_raw 不是 2048（或者没标）：两套零位会打架，去舵机页标"
-        if len(js) < len(SERVO_IDS):
-            return False, f"主程序文件里只有 {len(js)} 颗"
+            return False, f"有 {len(off)} 颗的中位无效或尚未标定，请到舵机页核对"
+        if len(js) != len(SERVO_IDS) or {j.get("id") for j in js} != set(SERVO_IDS):
+            return False, "主程序文件里的舵机 ID 和这 15 颗关节对不上"
         fp = joints_fp(calib)
         self._put("confirm_servo", {"at": self.wall(), "fp": fp, "by": by},
-                  say=f"上手清单：舵机零位「已经校过，核对一下」（{by or '页面'}；主程序文件里 15 颗都是 2048）", cat="校准")
+                  say=f"上手清单：已核对并沿用 15 颗舵机原有的中位（{by or '页面'}）", cat="校准")
         return True, None
 
     def mark(self, step, kind, rd, pad=None, servo=None, by=None, confirmed=False):
@@ -981,6 +982,14 @@ class Onboarding:
 
     def unskip(self, step, by=None, servo=None, confirmed=False):
         return self.unmark(step, "skip", by, servo, confirmed)
+
+    def servo_mark_record(self):
+        with self._lk:
+            for kind, key in KINDS.items():
+                row = (self.rec.get(key) or {}).get("servo")
+                if isinstance(row, dict):
+                    return kind, row.get("at")
+        return None
 
     def user_mark(self, step):
         """第 step 步现在算数的是不是用户自己标的：done（「已完成」）/ skip（「跳过」）/ None。

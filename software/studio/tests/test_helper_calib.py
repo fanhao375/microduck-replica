@@ -250,6 +250,68 @@ class CalibReadTest(Base):
 
 
 class CommitTest(Base):
+    def test_old_request_preserves_centers_and_new_request_changes_one(self):
+        self.commissioning()
+        self.w.restart_bus = {"mode": "motion", "phase": "control"}
+        old = build_valid()
+        centers = [1980 + i for i in range(15)]
+        for joint, center in zip(old["joints"], centers):
+            joint["zero_raw"] = center
+        self.path.write_text(H.render_calibration(old), encoding="utf-8")
+        code, _ = self.call(self.payload())
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        def saved_centers():
+            return [j["zero_raw"] for j in H.tomllib.loads(self.path.read_text("utf-8"))["joints"]]
+        self.assertEqual(saved_centers(), centers)
+        self.commissioning()
+        joints = joints_payload()
+        joints[4]["centered"] = True
+        code, _ = self.call(self.payload(joint_mode="recorded", joints=joints))
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        centers[4] = 2048
+        self.assertEqual(saved_centers(), centers)
+
+    def test_keep_existing_joint_calibration_through_write_and_readback(self):
+        self.commissioning()
+        self.w.restart_bus = {"mode": "motion", "phase": "control"}
+        old = build_valid()
+        for i, joint in enumerate(old["joints"]):
+            joint.update(zero_raw=1980+i, direction=1 if i % 2 else -1,
+                         min_rad=-1.31, max_rad=1.42)
+        self.path.write_text(H.render_calibration(old), encoding="utf-8")
+        code, _ = self.call(self.payload(joint_mode="keep"))
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        self.assertEqual(H.tomllib.loads(self.path.read_text("utf-8"))["joints"], old["joints"])
+        self.assertTrue(self.last()["detail"]["readback_ok"])
+
+    def test_keep_factory_centers_when_finishing_first_setup(self):
+        self.commissioning()
+        self.w.restart_bus = {"mode": "motion", "phase": "control"}
+        old = current_calibration()
+        for i, row in enumerate(old["joints"]):
+            row["zero_raw"] = 2000+i
+        self.path.write_text(H.render_calibration(old), encoding="utf-8")
+        code, _ = self.call(self.payload(joint_mode="keep"))
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        new = H.tomllib.loads(self.path.read_text("utf-8"))
+        self.assertEqual([j["zero_raw"] for j in new["joints"]], list(range(2000,2015)))
+        self.assertTrue(new["motion_enabled"])
+
+    def test_import_in_commissioning_keeps_mode_and_uncalibrated_joints(self):
+        self.commissioning()
+        self.w.restart_bus = {"mode": "commissioning", "phase": "ready"}
+        old = current_calibration()
+        for i, joint in enumerate(old["joints"]):
+            joint["zero_raw"] = 2000+i
+        self.path.write_text(H.render_calibration(old), encoding="utf-8")
+        code, _ = self.call(self.payload(joint_mode="imu_only"))
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        result = H.tomllib.loads(self.path.read_text("utf-8"))
+        self.assertEqual(result["joints"], old["joints"])
+        self.assertFalse(result["motion_enabled"])
+        self.assertTrue(result["imu_mount_verified"])
+        self.assertTrue(self.dropin.exists())
+
     def test_commissioning_success_deletes_dropin_and_reads_back(self):
         self.commissioning(True)
         self.w.restart_bus = {"mode": "motion", "phase": "control"}

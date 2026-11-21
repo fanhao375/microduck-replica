@@ -358,6 +358,15 @@ class ImuBackendTest(unittest.TestCase):
         self.assertEqual(b.view()["mount"]["quat"], before)                    # 主程序那边没动
         self.assertIsNone(b.last_result)
 
+    def test_import_cannot_replace_pending_while_step_three_writes(self):
+        from studio.commit import CommitService, save_pending, load_pending
+        b = self.backend(bus=recorded("robot.busStatus"), calib=recorded("robot.busCommand"))
+        b.commit = CommitService(b.rd, b.log, b.state_dir)
+        before = save_pending(b.state_dir, "lsm6dsv16x", [1, 0, 0, 0])
+        with b.commit._writing, self.assertRaisesRegex(Refused, "正在写"):
+            asyncio.run(b.handle({"op": "import-mount", "source": "lsm6dsv16x", "quat": [0, 1, 0, 0]}))
+        self.assertEqual(load_pending(b.state_dir)["quat"], before["quat"])
+
     def test_import_mount_refuses_another_chip_and_bad_numbers(self):
         b = self.backend(bus=recorded("robot.busStatus"), calib=recorded("robot.busCommand"))
         bad = ({"source": "bus", "quat": [0.5, -0.5, 0.5, -0.5]},                 # 这只鸭子用的不是这种 IMU

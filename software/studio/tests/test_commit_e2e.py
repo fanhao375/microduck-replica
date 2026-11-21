@@ -119,12 +119,12 @@ def outcome():
         return "ok"
 
 
-def fake_calib_commit(by, joints, imu, dry_run=False, timeout=180, on_line=None):
+def fake_calib_commit(by, joints, imu, dry_run=False, timeout=180, on_line=None, *, joint_mode="recorded"):
     cur = {"motion_enabled": False, "imu_mount_verified": False,
            "imu_mount_quat": list(C.DEFAULT_BUS_QUAT), "current_ma_per_count": 0.0, "units_verified": False,
            "imu_mounts": {}, "joints": [{"name": n, "id": C.JOINT_IDS[n], "zero_raw": 2048,
                                          "direction": -1, "calibrated": False} for n in C.JOINT_ORDER]}
-    cal = C.build_calibration(cur, joints, imu)
+    cal = C.build_calibration(cur, joints, imu, joint_mode)
     C.validate_calibration(cal, imu["source"])
     text = C.render_calibration(cal)
     if on_line:
@@ -258,7 +258,7 @@ class CommitE2E(unittest.TestCase):
         self.assertNotEqual(m["afterOne"], "完成", m)                          # 点一下不算
         self.assertEqual(m["after"]["row"], "完成", m)
         self.assertIn("你标了已完成", m["after"]["text"])
-        self.assertIn("你标了第 1 步已完成：15 颗按 2048 写零位（零位要是用 Studio 的舵机页校过的才对）", m["after"]["check"])
+        self.assertIn("你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向", m["after"]["check"])
         self.assertEqual(m["errors"], [])
 
     def test_01d_ssh_card_on_the_more_page(self):

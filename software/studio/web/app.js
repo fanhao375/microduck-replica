@@ -644,8 +644,8 @@ function Onboard({ st, live }) {
               ${job && job.phase !== 'running' && job.reason ? html`<div class=${'onb-commit-msg ' + (job.ok ? 'ok' : 'bad')}>${job.reason}</div>` : null}
               ${cprev ? html`<div class="onb-preview">
                 <div class="onb-preview-imu"><b>IMU</b> ${cprev.imu?.label || ''} · ${cprev.imu?.text || ''}${cprev.imu?.default ? `（按默认装法写：${cprev.imu.default}）` : ''}</div>
-                <table class="onb-preview-table"><thead><tr><th>关节</th><th>方向</th><th>限位</th></tr></thead><tbody>
-                  ${(cprev.joints || []).map((j) => html`<tr><td>${j.cn || j.name}</td><td>${j.direction > 0 ? '+1' : '−1'}</td><td class="num">${j.min_deg}° ~ ${j.max_deg}°</td></tr>`)}
+                <table class="onb-preview-table"><thead><tr><th>关节</th><th>中位</th><th>方向</th><th>限位</th></tr></thead><tbody>
+                  ${(cprev.joints || []).map((j) => html`<tr><td>${j.cn || j.name}</td><td class="num">${j.zero_raw}</td><td>${j.direction > 0 ? '+1' : '−1'}</td><td class="num">${j.min_deg == null ? "未设置" : `${j.min_deg}° ~ ${j.max_deg}°`}</td></tr>`)}
                 </tbody></table>
                 <details class="onb-preview-toml"><summary>要写的文件</summary><pre>${cprev.toml || ''}</pre></details>
               </div>` : null}

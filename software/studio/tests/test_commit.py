@@ -215,7 +215,7 @@ class ReadinessTest(Base):
         self.assertIn("主程序起来了，但读舵机出错：missing IDs [21]", mode["text"])
 
     def test_marked_steps_from_the_checklist(self):
-        """任务 16：上手清单第 1 步标了已完成 / 跳过 →「舵机零位」算满足（15 颗按 2048 写）。
+        """任务 16：上手清单第 1 步标了已完成 / 跳过 →「舵机零位」算满足（保留原中位）。
         任务 17：第 2 步标了、主程序里方向没确认、也没有 imu-pending.json →「IMU 方向」按默认装法写，算满足。"""
         class Ob:
             marks = {}
@@ -228,7 +228,7 @@ class ReadinessTest(Base):
         Ob.marks = {"servo": "done", "imu": "done"}
         servo = self.item("servo")
         self.assertTrue(servo["ok"])
-        self.assertEqual(servo["text"], "你标了第 1 步已完成：15 颗按 2048 写零位（零位要是用 Studio 的舵机页校过的才对）")
+        self.assertEqual(servo["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向")
         self.assertEqual(servo["by_mark"], "done")
         imu = self.item("imu")
         self.assertTrue(imu["ok"])
@@ -378,6 +378,82 @@ class PreviewCommitTest(Base):
         if rd is not None:
             self.svc.rd = rd
         return rd or self.rd
+
+    def test_custom_joint_values_in_preview_and_commit(self):
+        for mark, imported in (("skip", False), ("done", False), (None, True)):
+            with self.subTest(mark=mark, imported=imported):
+                current = calibration(True)
+                rows = current["calibration"]["joints"]
+                for i, joint in enumerate(rows):
+                    joint.update(zero_raw=1980+i, direction=1 if i % 2 else -1,
+                                 min_rad=-1.31, max_rad=1.42)
+                self.ready(rd=Rd(current, mode="motion", phase="control"))
+                C.save_pending(self.dir, "bus", BUS_QUAT, {"imported": imported})
+                self.svc.onboard = mock.Mock()
+                self.svc.onboard.user_mark.side_effect = lambda key: mark if key == "servo" else None
+                with mock.patch.object(helper, "available", return_value=False):
+                    preview = self.svc.preview()
+                self.assertEqual(H.tomllib.loads(preview["toml"])["joints"], rows)
+                with mock.patch.object(helper, "available", return_value=True), mock.patch.object(
+                        helper, "_call", return_value=(True, "committed", {})) as call:
+                    self.assertTrue(self.svc.commit()["ok"])
+                self.assertEqual(call.call_args.args[1]["joint_mode"], "imu_only" if imported else "keep")
+
+    def test_only_new_successful_center_operations_change_the_saved_zero(self):
+        current = calibration(True)
+        rows = current["calibration"]["joints"]
+        for i, row in enumerate(rows):
+            row["zero_raw"] = 1980 + i
+        self.svc.rd = Rd(current, mode="motion", phase="control")
+        # Older Studio receipts prove the wizard was used, not that it was used again.
+        Path(self.dir, C.SERVO_CENTERED).write_text(json.dumps(
+            {str(j["id"]): {"at": 1, "by": "old"} for j in rows}))
+        def preview_zeros():
+            with mock.patch.object(helper, "available", return_value=False):
+                return [j["zero_raw"] for j in H.tomllib.loads(self.svc.preview()["toml"])["joints"]]
+        original = [j["zero_raw"] for j in rows]
+        self.assertEqual(preview_zeros(), original)
+        C.record_centered(self.dir, [rows[3]["id"]], "servo page")
+        want = original.copy()
+        want[3] = 2048
+        self.assertEqual(preview_zeros(), want)
+        self.svc.simulate = True
+        self.assertTrue(self.svc.commit()["ok"])
+        # A later change made outside Studio must survive a subsequent commit.
+        self.assertEqual(preview_zeros(), original)
+
+    def test_mark_discards_earlier_center_but_allows_a_later_explicit_calibration(self):
+        current = calibration(True)
+        rows = current["calibration"]["joints"]
+        for i, joint in enumerate(rows):
+            joint["zero_raw"] = 1980 + i
+        self.svc.rd = Rd(current, mode="motion", phase="control")
+        self.svc.onboard = mock.Mock()
+        self.svc.onboard.servo_mark_record.return_value = ("skip", 10)
+        C.record_centered(self.dir, [rows[2]["id"]], "servo page", at=9)
+        C.record_centered(self.dir, [rows[3]["id"]], "servo page", at=11)
+        with mock.patch.object(helper, "available", return_value=False):
+            centers = [j["zero_raw"] for j in self.svc.preview()["joints"]]
+        expected = [j["zero_raw"] for j in rows]
+        expected[3] = 2048
+        self.assertEqual(centers, expected)
+
+    def test_skip_uses_saved_centers_even_when_live_positions_differ(self):
+        current = calibration(False)
+        joints = current["calibration"]["joints"]
+        for i, joint in enumerate(joints):
+            joint["zero_raw"] = 1970 + i
+        self.svc.rd = Rd(current)
+        for servo in self.svc.rd.bus.value["last_sample"]["servos"]:
+            servo["position_raw"] = 2600
+        self.svc.onboard = mock.Mock()
+        self.svc.onboard.user_mark.return_value = "skip"
+        with mock.patch.object(helper, "available", return_value=False):
+            values = [j["zero_raw"] for j in self.svc.preview()["joints"]]
+            self.assertEqual(values, list(range(1970, 1985)))
+            del joints[0]["zero_raw"]
+            with self.assertRaisesRegex(C.CalibError, "zero_raw"):
+                self.svc.preview()
 
     def test_preview_without_helper_renders_toml(self):
         self.ready()
