@@ -1035,6 +1035,58 @@ function CoarseSteps({ link, disabled, redoSession, inPlace, liveVerify, needsUn
 // imu.job = { kind: 'coarse'|'save'|'set_chip'|'detect', title, msg, tilt_deg?, target_deg?, hold?, failed?, done? }
 // 托着鸭子的那几步（摆正 ≤5°、低头 15–30°）要看倾角，所以 tilt_deg 放大写
 
+// ---------------- 导入 IMU 方向 ----------------
+// 已经有这只鸭子的方向文件时用，不用再站着校。页面只从文件里取 IMU 类型和四个数交给后端（文件里别的内容不上传）；
+// 后端记成「待写入的方向」，上手清单第 3 步「写进主程序」才生效。
+const IMPORT_MAX_BYTES = 256 * 1024;
+function mountFromFile(doc) {
+  const one = (m) => (m && typeof m === 'object' && typeof m.source === 'string' && Array.isArray(m.quat) ? { source: m.source, quat: m.quat } : null);
+  if (!doc || typeof doc !== 'object') throw new Error('文件内容不是方向文件');
+  const direct = one(doc) || one(doc.imu) || one(doc.mount);
+  if (direct) return direct;
+  if (Array.isArray(doc.records)) {
+    const found = doc.records.map((r) => one(r?.imu)).filter(Boolean);
+    if (found.length === 1) return found[0];
+    if (found.length > 1) throw new Error(`文件里有 ${found.length} 份方向：请用只含一份方向的文件`);
+  }
+  throw new Error('文件里没找到 IMU 方向');
+}
+function ImportCard({ link, live }) {
+  const [busy, setBusy] = useState(false);
+  const [out, setOut] = useState(null);
+  const input = useRef(null);
+  const off = live === false || link.status !== 'open';
+  const pick = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setOut(null);
+    let mount;
+    try {
+      if (file.size > IMPORT_MAX_BYTES) throw new Error('文件太大：不像是方向文件');
+      let doc;
+      try { doc = JSON.parse(await file.text()); } catch { throw new Error('文件读不出来：不是 json'); }
+      mount = mountFromFile(doc);
+    } catch (err) { setOut({ ok: false, text: `没导入：${err.message}` }); return; }
+    setBusy(true);
+    const r = await link.cmd('imu.op', { op: 'import-mount', source: mount.source, quat: mount.quat }, 15000);
+    setBusy(false);
+    setOut(r.ok
+      ? { ok: true, text: `导入好了${r.data?.standard?.text ? `（${r.data.standard.text}）` : ''}，还没生效：去总览上手清单第 3 步点「写进主程序」。` }
+      : { ok: false, text: `没导入：${r.reason || r.error || '没说原因'}` });
+  };
+  return html`<section class="board imu-card imu-import">
+    <h3>导入 IMU 方向 <span class="sv-small">已经有方向文件时用，不用再站着校</span></h3>
+    <div class="imu-actions">
+      <button class="btn-light imu-import-btn" disabled=${busy || off} onClick=${() => input.current?.click()}>${busy ? '正在导入…' : '导入 IMU 方向…'}</button>
+      <input ref=${input} class="imu-import-file" type="file" accept=".json,application/json" hidden onChange=${pick} />
+      <span class="sv-small">文件里的方向要是这只鸭子、这种装法的；装法不一样，写进去站起来会往一边倒。</span>
+    </div>
+    ${out ? html`<p class=${out.ok ? 'sv-small imu-import-out' : 'sv-warn imu-import-out'} role="status">${out.text}
+      ${out.ok ? html` <a href="#/" onClick=${() => setTimeout(() => document.querySelector('[data-step="commit"]')?.scrollIntoView({ block: 'center' }), 300)}>去上手清单</a>` : null}</p>` : null}
+  </section>`;
+}
+
 function JobBanner({ job }) {
   if (!job) return null;
   const kind = job.failed ? 'bad' : 'warn';
@@ -1142,6 +1194,7 @@ export function ImuPage({ st, imu, link, live, age, diagnosticElapsed = 0, pd })
         <${StanceCard} st=${st} imu=${imu} pd=${pd} link=${link} live=${live} />
         <${CollectCard} st=${st} imu=${imu} live=${live} W=${w} act=${act} muted=${muted} setMuted=${setMuted} />
         <${ResultCard} res=${w.phase === 'done' ? res || w.result : null} imu=${imu} link=${link} live=${live} onRedo=${onRedo} />
+        <${ImportCard} link=${link} live=${live} />
         <${ChipCard} imu=${imu} link=${link} live=${live} diagnosticElapsed=${diagnosticElapsed} />
       </div>
     </div>

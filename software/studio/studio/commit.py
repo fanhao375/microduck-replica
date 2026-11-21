@@ -793,7 +793,9 @@ class CommitService:
             imu_ok, imu_text = False, "IMU 总线板卡已改变：去 IMU 页重新标定"
         elif self.pending:
             imu_ok = True
-            imu_text = f"IMU 页校过了（{CHIP_CN.get(source, source)}），写的时候用这份新方向"
+            imu_text = (f"IMU 方向是导入的（{CHIP_CN.get(source, source)}），写的时候用这份"
+                        if (self.pending.get("quality") or {}).get("imported") is True
+                        else f"IMU 页校过了（{CHIP_CN.get(source, source)}），写的时候用这份新方向")
         elif verified:
             imu_ok, imu_text = True, f"主程序里的 IMU 方向已经确认过（{CHIP_CN.get(source, source)}）"
         elif mode == "commissioning":

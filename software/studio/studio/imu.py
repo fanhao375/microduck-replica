@@ -872,15 +872,49 @@ class ImuBackend:
             self.rd.calib.set(status)
         return status
 
+    def _import_mount(self, args, by=None):
+        """导入已有的安装方向：只收 IMU 类型和四元数（页面从文件里取出来的，文件里别的内容不传、不存）。
+        记成「待写入的方向」（跟站着校完同一处 imu-pending.json），上手清单第 3 步「写进主程序」才往鸭子写；
+        这里不往鸭子写任何东西。"""
+        from .commit import CHIP_CN, IMU_SOURCES, save_pending
+        view = self.view()
+        if view.get("profile_error"):
+            raise Refused(view["profile_error"])
+        current = view.get("source")
+        if current not in IMU_SOURCES:
+            raise Refused("主程序还没报用的是哪颗 IMU：等几秒再试")
+        if helper.imu_redo_state(root=self.root).get("active"):
+            raise Refused("重新标定正在进行：先取消重新标定，再导入")
+        source, quat = args.get("source"), args.get("quat")
+        if source not in IMU_SOURCES:
+            raise Refused("文件里没写清是哪种 IMU 的方向")
+        if source != current:
+            raise Refused(f"文件里是「{CHIP_CN[source]}」的方向，这只鸭子现在用的是「{CHIP_CN[current]}」：不能导入")
+        if (not isinstance(quat, list) or len(quat) != 4
+                or any(isinstance(c, bool) or not isinstance(c, (int, float)) or not math.isfinite(c) for c in quat)):
+            raise Refused("文件里的方向不是四个数")
+        norm = math.sqrt(sum(c * c for c in quat))
+        if abs(norm - 1.0) > 1e-3:
+            raise Refused("文件里的方向不是单位四元数")
+        row = save_pending(self.state_dir, source, [float(c) / norm for c in quat], {"imported": True}, by,
+                           imu_bus=view.get("imu_bus"))
+        self.last_result = None                 # 页面上没写入的那次计算结果不再算数：现在待写入的是导入的这份
+        self._result_basis = None
+        self.log.info("导入了 IMU 安装方向（还没写进主程序）", cat="IMU", raw=json.dumps(row["quat"]),
+                      ctx={"by": by, "source": source})
+        return {"ok": True, "source": source, "mount": row["quat"], "standard": imu_calib.describe_mount(row["quat"])}
+
     async def handle(self, args, by=None):
         op = args.get("op")
         if self._verify_lock.locked():
             raise Refused("安装方向正在验证：等当前操作结束，紧急时仍可卸力")
-        if (op in ("coarse-capture", "solve", "verify", "redo-start", "profile-select")
+        if (op in ("coarse-capture", "solve", "verify", "redo-start", "profile-select", "import-mount")
                 and self.job and not self.job.get("done") and not self.job.get("failed")):
             raise Refused("上一项采集或标定操作还没结束：等它完成再继续")
         if op in ("redo-start", "redo-cancel", "profile-select"):
             return await self._redo_op(args, by)
+        if op == "import-mount":
+            return self._import_mount(args, by)
         if op == "solve":
             samples = args.get("samples")
             if not isinstance(samples, list) or not samples:
