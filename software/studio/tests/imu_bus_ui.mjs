@@ -350,6 +350,23 @@ try {
   await wait(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='交给主程序验证'&&!b.disabled)`, 'unloading preserves the solved candidate');
   assert.equal(await js(`calls.filter(c=>c.args.op==='coarse-capture').length`),2);
   assert.equal(await js(`calls.some(c=>c.args.op==='verify')`),false, 'UI never auto-verifies or auto-relaxes');
+  // Importing an existing mounting sends only the chip type and the four numbers.
+  const pickFile = (doc) => js(`(() => { const input=document.querySelector('.imu-import-file'); const dt=new DataTransfer();
+    dt.items.add(new File([${JSON.stringify(doc)}], 'mount.json', {type:'application/json'})); input.files=dt.files;
+    input.dispatchEvent(new Event('change', {bubbles:true})); })()`);
+  await js(`calls.length=0; replies.length=0`);
+  await pickFile(JSON.stringify({ records: [{ note: 'private note', imu: { source: 'bus', quat: [0.5, -0.5, 0.5, -0.5] } }] }));
+  await wait(`calls.some(c=>c.args.op==='import-mount')`, 'import request');
+  assert.deepEqual(await js(`calls.find(c=>c.args.op==='import-mount').args`), { op: 'import-mount', source: 'bus', quat: [0.5, -0.5, 0.5, -0.5] });
+  await js(`replies.shift()({ok:true,data:{ok:true,source:'bus',mount:[0.5,-0.5,0.5,-0.5],standard:{text:'chip text'}}})`);
+  await wait(`/导入好了/.test(document.querySelector('.imu-import-out')?.innerText||'')`, 'import result shown');
+  assert.match(await js(`document.querySelector('.imu-import-out').innerText`), /写进主程序/);
+  await js(`calls.length=0`);
+  await pickFile(JSON.stringify({ records: [{ imu: { source: 'bus', quat: [1, 0, 0, 0] } }, { imu: { source: 'bus', quat: [0, 1, 0, 0] } }] }));
+  await wait(`/2 份方向/.test(document.querySelector('.imu-import-out')?.innerText||'')`, 'ambiguous file refused in the page');
+  await pickFile('not json');
+  await wait(`/不是 json/.test(document.querySelector('.imu-import-out')?.innerText||'')`, 'broken file refused in the page');
+  assert.equal(await js(`calls.some(c=>c.args.op==='import-mount')`), false, 'refused files never reach the robot');
   assert.deepEqual(errors, []);
   process.stdout.write('IMU bus browser assertions passed\n');
 } finally {

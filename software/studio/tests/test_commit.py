@@ -149,6 +149,10 @@ class RecordsTest(Base):
         self.assertFalse(C.clear_pending(self.dir))
         self.assertIsNone(C.load_pending(self.dir))
 
+    def test_an_imported_orientation_is_named_as_imported(self):
+        C.save_pending(self.dir, "bus", BUS_QUAT, {"imported": True}, "测试", at=5)
+        self.assertEqual(C.load_pending(self.dir)["quality"], {"imported": True})
+
     def test_bad_pending_source_is_ignored(self):
         with open(os.path.join(self.dir, C.IMU_PENDING), "w", encoding="utf-8") as f:
             json.dump({"source": "mpu6050", "quat": [1, 0, 0, 0]}, f)

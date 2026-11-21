@@ -342,6 +342,42 @@ class ImuBackendTest(unittest.TestCase):
         self.assertIn("quality", row)
         self.assertAlmostEqual(sum(x * x for x in row["quat"]), 1.0, places=9)
 
+    def test_import_mount_is_kept_for_the_commit_step_and_nothing_else_is_stored(self):
+        """导入的方向只记成「待写入」（上手清单第 3 步才往鸭子写）；只收 IMU 类型和四个数。"""
+        b = self.backend(bus=recorded("robot.busStatus"), calib=recorded("robot.busCommand"))
+        before = b.view()["mount"]["quat"]
+        res = asyncio.run(b.handle({"op": "import-mount", "source": "lsm6dsv16x", "quat": [0.5002, -0.5002, 0.5002, -0.5002],
+                                    "note": "别的字段不该被存下来"}, "测试"))
+        self.assertTrue(res["ok"], res)
+        self.assertEqual([round(c, 9) for c in res["mount"]], [0.5, -0.5, 0.5, -0.5])   # 差一点没归一的也收，存归一后的
+        self.assertTrue(res["standard"]["text"])
+        row = json.loads((Path(self.tmp.name) / "imu-pending.json").read_text(encoding="utf-8"))
+        self.assertEqual((row["source"], [round(c, 9) for c in row["quat"]], row["by"], row["quality"]),
+                         ("lsm6dsv16x", [0.5, -0.5, 0.5, -0.5], "测试", {"imported": True}))
+        self.assertNotIn("note", row)
+        self.assertEqual(b.view()["mount"]["quat"], before)                    # 主程序那边没动
+        self.assertIsNone(b.last_result)
+
+    def test_import_mount_refuses_another_chip_and_bad_numbers(self):
+        b = self.backend(bus=recorded("robot.busStatus"), calib=recorded("robot.busCommand"))
+        bad = ({"source": "bus", "quat": [0.5, -0.5, 0.5, -0.5]},                 # 这只鸭子用的不是这种 IMU
+               {"source": "nope", "quat": [1, 0, 0, 0]}, {"quat": [1, 0, 0, 0]},
+               {"source": "lsm6dsv16x", "quat": [1, 0, 0]}, {"source": "lsm6dsv16x", "quat": [1, 0, 0, float("nan")]},
+               {"source": "lsm6dsv16x", "quat": [True, 0, 0, 0]}, {"source": "lsm6dsv16x", "quat": [0.9, 0, 0, 0]},
+               {"source": "lsm6dsv16x", "quat": "1,0,0,0"})
+        for args in bad:
+            with self.subTest(args=args), self.assertRaises(Refused):
+                asyncio.run(b.handle({"op": "import-mount", **args}, "测试"))
+        self.assertFalse((Path(self.tmp.name) / "imu-pending.json").exists())
+        self.assertIn("不能导入", self._refusal(b, {"op": "import-mount", "source": "bus", "quat": [0.5, -0.5, 0.5, -0.5]}))
+        b.job = {"kind": "coarse", "title": "采数"}                            # 采数 / 标定还没结束：等它完
+        self.assertIn("还没结束", self._refusal(b, {"op": "import-mount", "source": "lsm6dsv16x", "quat": [1, 0, 0, 0]}))
+
+    def _refusal(self, b, args):
+        with self.assertRaises(Refused) as e:
+            asyncio.run(b.handle(args, "测试"))
+        return str(e.exception)
+
     def test_solve_bad_samples_fails_politely(self):
         # 乱七八糟的读数：回 ok=False 和一句原因，不抛异常、不把后端弄挂
         b = self.backend()
