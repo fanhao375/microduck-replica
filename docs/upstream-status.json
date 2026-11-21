@@ -20324,6 +20324,566 @@
               "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/2ff80a960d5d0f8bd5c26ec47ec799b0f423e6d6/robotd/src/main.rs"
             }
           }
+        },
+        {
+          "tag": "daemon-dev-ep5-scoot",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-ep5-scoot",
+          "release_id": 453633265,
+          "published_at": "2026-11-21T11:11:39Z",
+          "published_at_jst": "2026-11-21T20:11:39+09:00",
+          "release_updated_at_utc": "2026-11-21T11:11:39Z",
+          "version": "daemon 0.18.0-dev.1868.36ae166 (ep5-scoot)",
+          "head_sha": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+          "source_version": "0.18.0",
+          "api_version": 47,
+          "development_api_version": 47,
+          "prerelease": true,
+          "source_committed_at_utc": "2026-11-21T11:04:52Z",
+          "source_committed_at_jst": "2026-11-21T20:04:52+09:00",
+          "base_sha": "6844f912af1a2eceb893dce89c0c6e5d497d481e",
+          "previous_ep5_source_sha": "6844f912af1a2eceb893dce89c0c6e5d497d481e",
+          "commit_count": 1,
+          "changed_file_count": 5,
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+          "fixed_increment_url": "https://github.com/pollen-robotics/microduck/compare/6844f912af1a2eceb893dce89c0c6e5d497d481e...36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+          "associated_pull_requests": [],
+          "associated_pr_lookup": "Commit-associated PR endpoint returned no rows; not a merged/new main PR.",
+          "asset_inventory": [
+            {
+              "name": "0.18.0-dev.1868.36ae166.manifest.json",
+              "size": 386,
+              "digest": "sha256:d503b0b5983a7a1f66d551836d99e3e7200c28efaaf764fdf39ca8cab6095ff1"
+            },
+            {
+              "name": "0.18.0-dev.1868.36ae166.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:589c2a4dbd1fc75fef2315ee350988ef4818d09ae2913aca227150c456ef90f1"
+            },
+            {
+              "name": "daemon-0.18.0-dev.1868.36ae166.tar.zst",
+              "size": 15545937,
+              "digest": "sha256:e8d6e8620b0530cf1ce020d56ad035c6dbb5baa1d01fd4481097ff76e327b0b3"
+            },
+            {
+              "name": "daemon-0.18.0-dev.1868.36ae166.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:f3eb3e2a16ec62ee738ebcd3f524549feb94abb50f7b41e531215eb4c22c0bdb"
+            },
+            {
+              "name": "duckctl-0.18.0-py3-none-macosx_10_12_x86_64.whl",
+              "size": 1669195,
+              "digest": "sha256:abad2a826c65e0048cdce5aa56291eee46ba08bae8dddbeca790e2c05ab48438"
+            },
+            {
+              "name": "duckctl-0.18.0-py3-none-macosx_11_0_arm64.whl",
+              "size": 1589902,
+              "digest": "sha256:799b2d9d193e389098e76bcc6f12ce8e1a7e462644da5b343196bd434a97394e"
+            },
+            {
+              "name": "duckctl-0.18.0-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 2803266,
+              "digest": "sha256:471222470495411383d1e3ef2e7aaaee2be9cc91028f677510a72ae47e70bfc3"
+            },
+            {
+              "name": "duckctl-0.18.0-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3031080,
+              "digest": "sha256:c80a139ce1c4d4919e0188b2c30f35ad29c31cbb50159d2d71130e88ab3cca72"
+            },
+            {
+              "name": "duckctl-0.18.0-py3-none-win_amd64.whl",
+              "size": 1511119,
+              "digest": "sha256:f6e0f107d63dc452250c8251754d5120c1be57d70ff1ffcf037695b77f8fe7f6"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 361,
+              "digest": "sha256:ba676ebeff9cc7b763dc4f0f774e61aacaf84d661f9581b888bcb5b24dfde2d5"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 359,
+              "digest": "sha256:a02106c3c8c8707c5d35327877a7b1382db3dd752036638d86ba1fe74b417776"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 1501249,
+              "digest": "sha256:55949ea67894f4011805f54978e6847aae0c5942011773818d2aff7ec2b9ff1e"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 1597124,
+              "digest": "sha256:d150e6a04682f1a87f72804eb4f426699bc6d9387f5330934df789ee6b137005"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1382998,
+              "digest": "sha256:a1b5f7e125ce313670514e2bd01b48fdcc6068d6cece67a7ed3cc2f04a2fefb2"
+            },
+            {
+              "name": "manifest.json",
+              "size": 554,
+              "digest": "sha256:3190c7b2672e74dcb0209b209137088e7c7b9b460e502ebea75e8d9ae1241a33"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:14fe322657493e2f9c8c5ebb61edde8b1e003b9219f2bbfff5ecb10bfb3ce420"
+            }
+          ],
+          "manifest_verification": [
+            {
+              "asset_id": 775314530,
+              "name": "0.18.0-dev.1868.36ae166.manifest.json",
+              "sha256": "d503b0b5983a7a1f66d551836d99e3e7200c28efaaf764fdf39ca8cab6095ff1",
+              "content": {
+                "channel": "daemon",
+                "min_hw_rev": 1,
+                "schema_version": 1,
+                "sha256": "e8d6e8620b0530cf1ce020d56ad035c6dbb5baa1d01fd4481097ff76e327b0b3",
+                "sig_url": "daemon-0.18.0-dev.1868.36ae166.tar.zst.minisig",
+                "size": 15545937,
+                "source_revision": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+                "url": "daemon-0.18.0-dev.1868.36ae166.tar.zst",
+                "version": "0.18.0-dev.1868.36ae166"
+              },
+              "raw_bytes_hash_matches_asset_metadata": true
+            },
+            {
+              "asset_id": 775314615,
+              "name": "manifest.json",
+              "sha256": "3190c7b2672e74dcb0209b209137088e7c7b9b460e502ebea75e8d9ae1241a33",
+              "content": {
+                "channel": "daemon",
+                "min_hw_rev": 1,
+                "schema_version": 1,
+                "sha256": "e8d6e8620b0530cf1ce020d56ad035c6dbb5baa1d01fd4481097ff76e327b0b3",
+                "sig_url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-ep5-scoot/daemon-0.18.0-dev.1868.36ae166.tar.zst.minisig",
+                "size": 15545937,
+                "source_revision": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+                "url": "https://github.com/pollen-robotics/microduck/releases/download/daemon-dev-ep5-scoot/daemon-0.18.0-dev.1868.36ae166.tar.zst",
+                "version": "0.18.0-dev.1868.36ae166"
+              },
+              "raw_bytes_hash_matches_asset_metadata": true
+            }
+          ],
+          "package_metadata": {
+            "name": "daemon-0.18.0-dev.1868.36ae166.tar.zst",
+            "size": 15545937,
+            "digest": "sha256:e8d6e8620b0530cf1ce020d56ad035c6dbb5baa1d01fd4481097ff76e327b0b3"
+          },
+          "package_bytes_downloaded": false,
+          "package_signature_verified_by_tracker": false,
+          "signing_scope": "Release says team.dev; only small manifest bytes and asset metadata checked, no package/signature verification.",
+          "replica_integration": "not integrated; documentation only, native production/companion/online migration unchanged",
+          "classification": "Personal episode5 old-base development prototype, not a newer formal release, not PR621 adoption or local0182 integration.",
+          "priority": "Low experimental adoption priority; high before HD-1910 use: seated entry, gyro/frame, MJCF ranges, fallback/fall gates, config and inherited personal pad behavior.",
+          "change": "One new5-file commit atop archived6844: seated-only skill, gyro heading hold, optional per-skill target margin, held-chain unwind timing, guarded seated reflexes and standing|seated robot.do selection.",
+          "source_origin_comparison": {
+            "compare_main": {
+              "from_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+              "to_sha": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+              "status": "diverged",
+              "merge_base_sha": "6e6111f1ca25870ca8d6de1051c5a47be70a4ca0",
+              "ahead_by": 29,
+              "behind_by": 360,
+              "commit_count": 29,
+              "changed_file_count": 45,
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+              "scope": "History since common base includes old episode5 work; not all new in this release and not a direct upgrade."
+            },
+            "compare0182": {
+              "from_sha": "e1b49bf20c5efcbe187553e7b2210ec3df2cd788",
+              "to_sha": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+              "status": "diverged",
+              "merge_base_sha": "6e6111f1ca25870ca8d6de1051c5a47be70a4ca0",
+              "ahead_by": 29,
+              "behind_by": 14,
+              "commit_count": 29,
+              "changed_file_count": 45,
+              "fixed_url": "https://github.com/pollen-robotics/microduck/compare/e1b49bf20c5efcbe187553e7b2210ec3df2cd788...36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+              "scope": "History since common base includes old episode5 work; not all new in this release and not a direct upgrade."
+            }
+          },
+          "review": {
+            "api_number_is_compatibility_proof": false,
+            "seat_contract": "SkillDef seated=true starts only from settled Sit::Sitting and rejects standing/rising and other active moves; seat stays latched and hands back to sitstand. Distinct from API68 PR621 from_seat which also allows standing.",
+            "heading_contract": "Finite positive hold_heading enables command.wz minus gain*integrated yaw, clamped±0.3rad/s while Holding. Yaw integrates gyro projected on gravity and persists across chained windows; not external pose or absolute compass feedback.",
+            "target_contract": "Finite nonnegative target_margin clamps only skill-network targets to alpha MJCF range plus/minus margin before lowpass; joints with no range (mouth) skipped. Defaults None; not global clamp, torque/current limit or HD-1910 calibration.",
+            "chain_and_reflexes": "Held chaining skill with unwind repeats holding windows, then unwinds when released. Existing fall_safety/phase guarded() determines reflexes: only guarded moving seated skills keep fall/pickup reflexes; not automatic for every seated skill.",
+            "configuration": "New fields default seated=false/heading=None/margin=None; this CLI constructs defaults, no new flag. File edits opt in; editor now writes fall_safety and new keys, robot.setSkill keeps existing values. No protocol field change in this increment.",
+            "binding": "robot.do standing|seated selects by last published sitting state then recurses; chosen empty/unknown half refuses. Does not establish UI integration or exact seat transition timing.",
+            "legacy_base": "Inherits older episode5 footsteps/phase/beak/sound/targeted grasp and personal Select immediate-limp/held3s shutdown behavior from archived ancestry; these are not new changes or current formal defaults.",
+            "model_scope": "Commit motive refers to HannesVonEssen/microduck-backwards-scoot; no ONNX or weight file in5-file increment, and no weights installed/fetched by tracker.",
+            "tests": {
+              "new_source_cases": 6,
+              "pure_dispatch_cases": 1,
+              "ort_cases_default_ignored": 5,
+              "ort_requirement": ">=1.23 per attributes",
+              "run_by_tracker": false,
+              "independent_source_test_execution_verified": false,
+              "hardware_acceptance_verified": false
+            },
+            "published_build_ci": {
+              "source_sha": "36ae166425bd3d6f48cc8c72a693ee1c84b7fcad",
+              "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942",
+              "status": "completed",
+              "conclusion": "success",
+              "jobs": [
+                {
+                  "name": "daemon",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:11:29Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834233",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run dtolnay/rust-toolchain@stable",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run Swatinem/rust-cache@v2",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Cache the aarch64 sysroot",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Target GStreamer and libudev, as a sysroot",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run mlugg/setup-zig@v2",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run cargo install cargo-zigbuild --locked",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Derive the dev version and tag",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Build for the board",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Sign with the dev key",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run mlugg/setup-zig@v2",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Cache the aarch64 sysroot",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run Swatinem/rust-cache@v2",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "duckctl / build (linux-aarch64, ubuntu-24.04-arm, aarch64-unknown-linux-gnu, 2_28)",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:07:22Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834559",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Classifiers are ones PyPI knows",
+                      "conclusion": "skipped"
+                    },
+                    {
+                      "name": "Run PyO3/maturin-action@v1",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package the binary out of the wheel",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "duckctl / build (macos-arm64, macos-latest, aarch64-apple-darwin)",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:07:36Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834599",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Classifiers are ones PyPI knows",
+                      "conclusion": "skipped"
+                    },
+                    {
+                      "name": "Run PyO3/maturin-action@v1",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package the binary out of the wheel",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "duckctl / build (macos-x86_64, macos-latest, x86_64-apple-darwin)",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:07:40Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834642",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Classifiers are ones PyPI knows",
+                      "conclusion": "skipped"
+                    },
+                    {
+                      "name": "Run PyO3/maturin-action@v1",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package the binary out of the wheel",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "duckctl / build (linux-x86_64, ubuntu-latest, x86_64-unknown-linux-gnu, 2_28)",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:07:18Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834665",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Classifiers are ones PyPI knows",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run PyO3/maturin-action@v1",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package the binary out of the wheel",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "duckctl / build (windows-x86_64, windows-latest, x86_64-pc-windows-msvc)",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:07:20Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136825834690",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Classifiers are ones PyPI knows",
+                      "conclusion": "skipped"
+                    },
+                    {
+                      "name": "Run PyO3/maturin-action@v1",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Package the binary out of the wheel",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/upload-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Post Run actions/checkout@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                },
+                {
+                  "name": "publish",
+                  "conclusion": "success",
+                  "completed_at_utc": "2026-11-21T11:11:41Z",
+                  "url": "https://github.com/pollen-robotics/microduck/actions/runs/44897382942/job/136827411769",
+                  "steps": [
+                    {
+                      "name": "Set up job",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Run actions/download-artifact@v4",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Publish the moving per-branch prerelease",
+                      "conclusion": "success"
+                    },
+                    {
+                      "name": "Complete job",
+                      "conclusion": "success"
+                    }
+                  ]
+                }
+              ],
+              "scope": "Build/package/dev-sign/publish observed; not independent execution of6 new tests or hardware validation."
+            },
+            "fixed_sources": {
+              "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/Cargo.toml",
+              "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/duck-ipc-proto/src/lib.rs",
+              "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/robotd/src/control.rs",
+              "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/robotd/src/main.rs",
+              "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/robotd-params/src/lib.rs",
+              "robotd-params/src/edit.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/robotd-params/src/edit.rs",
+              "pad-map/src/hold.rs": "https://github.com/pollen-robotics/microduck/blob/36ae166425bd3d6f48cc8c72a693ee1c84b7fcad/pad-map/src/hold.rs"
+            },
+            "fixed_source_blobs": {
+              "Cargo.toml": "2ebae95b621994b923a4c0cb3f893b27648b9eb1",
+              "duck-ipc-proto/src/lib.rs": "af15fc64be61bf3de617dc4a38d0a135c83edef5",
+              "robotd/src/control.rs": "3542fa40c2d623730ab0098e2a2659e13be7d986",
+              "robotd/src/main.rs": "be2e5e3c54a482566af91577c84527b9999ec043",
+              "robotd-params/src/lib.rs": "2853ab688d277599959094a3e66578656262544e",
+              "robotd-params/src/edit.rs": "92d560ad211924923ed6091b3a788e76affbff6e",
+              "pad-map/src/hold.rs": "88ee9680668d3abdc27e4d0472276cdb6f85a127"
+            }
+          },
+          "impact": {
+            "HD1910": "High pre-adoption review: seated entry, controller/policy observation and alpha joint travel do not certify HD-1910 direction/range/torque or safe stopping. No integration.",
+            "camera": "No capture/calibration or detection change; old target-grasp experiment inherited.",
+            "ToF": "No sampling, range statuses, geometry or automatic target estimation change.",
+            "model_management": "Old API47 custom seated/heading/margin and existing phase/sound config differ from API68 from_seat and local0182 extensions; review parsing and retention before selective port. No model replacement.",
+            "training": "No new training code or weights in increment; no scoot model acceptance established.",
+            "motion": "Seated-only skill with heading/target/chain/reflex options and contextual dispatch; old personal Select/3s power behavior retained, not formal new gait.",
+            "sound": "Existing phase/WAV/beak experiments inherited; no sound asset or playback code added in increment."
+          }
         }
       ],
       "pending_pull_requests": [
@@ -55555,7 +56115,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-21T04:13:03Z",
+  "checked_at_utc": "2026-11-21T11:15:44Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -55568,53 +56128,33 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-20T16:00:28Z",
-    "source_snapshot_utc": "2026-11-21T04:13:03Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-21T04:17:41Z",
+    "previous_substantive_review_utc": "2026-11-21T04:13:03Z",
+    "source_snapshot_utc": "2026-11-21T11:15:44Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-21T11:17:29Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        621
-      ],
-      "pollen-robotics/microduck_yocto": [
-        160
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        620
-      ],
-      "pollen-robotics/microduck_yocto": [
-        147
-      ]
-    },
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
     "new_development_releases": [
-      "daemon-dev-seated-skills"
+      "daemon-dev-ep5-scoot"
     ],
-    "moved_development_tags": [
-      "daemon-dev-object-offer"
-    ],
+    "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Object dev1867/e31fcbc matches draft620:shared19-case machine and autonomous gift/run/drop,19+4 source cases (PR body still says2); hardware claim conflict body vs latest commit retained. New seated-skills dev1866/2ff80a9 matches open621,config opt-in/downgrade hazard despite API68.4 small manifests+32 asset metadata checked,no packages. Yocto160 merged14blobs match, both boards5a82 dev/candidate;159 prior builds now success,stable1.4.2 unchanged.147 head55e66 proposes both dev+shipping QEMU gate and read-only checks; current scriptCI only,oldQEMU131a436 and15:29 report sources unresolved404 kept separate. Core heads/formals/RL/HAT/emotions/models/blog/local migration/releases unchanged. No tests/builds/device/environment actions by tracker.",
+    "notes": "New personal ep5-scoot dev1868 actual36ae166,source0.18.0/API47 verified.1commit/5files atop archived6844, not29new features: diverged from formal0.23.0(29ahead360behind),and fixed0182(29ahead14behind). Seated-only differs from API68 from_seat; gyro heading±0.3 and alpha-range margin opt-in, mouth unbounded by margin, guarded reflexes conditional.6 source cases,5 ORT default ignored; build/sign/publish success not regression/hardware proof.2 small manifests/16 assets verified,no package/weights/tests. Core heads/formals/current PRs/otherdevs/OS/channels/models/blog/replica local records unchanged.",
     "closed_unmerged_pull_requests": {},
-    "newly_discovered_merged_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        160
-      ]
-    },
-    "official_os_main_changed": true,
+    "newly_discovered_merged_pull_requests": {},
+    "official_os_main_changed": false,
     "merged_previously_tracked_pull_requests": {},
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
-    "official_os_development_channels_changed": true,
+    "official_os_development_channels_changed": false,
     "replica_image_publication_changed": false,
     "replica_public_software_changed": false,
     "replica_main_integrations_changed": false,
     "replica_github_latest_changed": false,
     "replica_merged_pull_requests": [],
-    "official_os_pull_requests_changed": true
+    "official_os_pull_requests_changed": false
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -60804,6 +61344,66 @@
       "formal_release_artifacts_available": true,
       "formal_release_assets_completed": false,
       "official_os_development_channels_changed": false,
+      "replica_image_publication_changed": false,
+      "replica_public_software_changed": false,
+      "replica_main_integrations_changed": false,
+      "replica_github_latest_changed": false,
+      "replica_merged_pull_requests": [],
+      "official_os_pull_requests_changed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-20T16:00:28Z",
+      "source_snapshot_utc": "2026-11-21T04:13:03Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-21T04:17:41Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          621
+        ],
+        "pollen-robotics/microduck_yocto": [
+          160
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          620
+        ],
+        "pollen-robotics/microduck_yocto": [
+          147
+        ]
+      },
+      "new_development_releases": [
+        "daemon-dev-seated-skills"
+      ],
+      "moved_development_tags": [
+        "daemon-dev-object-offer"
+      ],
+      "retired_development_tags": [],
+      "notes": "Object dev1867/e31fcbc matches draft620:shared19-case machine and autonomous gift/run/drop,19+4 source cases (PR body still says2); hardware claim conflict body vs latest commit retained. New seated-skills dev1866/2ff80a9 matches open621,config opt-in/downgrade hazard despite API68.4 small manifests+32 asset metadata checked,no packages. Yocto160 merged14blobs match, both boards5a82 dev/candidate;159 prior builds now success,stable1.4.2 unchanged.147 head55e66 proposes both dev+shipping QEMU gate and read-only checks; current scriptCI only,oldQEMU131a436 and15:29 report sources unresolved404 kept separate. Core heads/formals/RL/HAT/emotions/models/blog/local migration/releases unchanged. No tests/builds/device/environment actions by tracker.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {
+        "pollen-robotics/microduck_yocto": [
+          160
+        ]
+      },
+      "official_os_main_changed": true,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "official_os_development_channels_changed": true,
       "replica_image_publication_changed": false,
       "replica_public_software_changed": false,
       "replica_main_integrations_changed": false,
