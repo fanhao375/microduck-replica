@@ -19,6 +19,8 @@ import os
 import tempfile
 import threading
 import time
+import tomllib
+import uuid
 
 JOINT_ORDER = (
     "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
@@ -108,7 +110,7 @@ def _bool_text(v):
     return "true" if v else "false"
 
 
-def build_calibration(current, joints, imu):
+def build_calibration(current, joints, imu, joint_mode="recorded"):
     """按现在文件里的 name / id，加这次的方向和 IMU 方向，组一份完整的标定。
 
     current：现在文件的字典（calibration-status 里的 calibration，或者 tomllib 读出来的）；
@@ -137,27 +139,38 @@ def build_calibration(current, joints, imu):
     if not isinstance(joints, list) or len(joints) != 15:
         raise CalibError("joints 要正好 15 个 {id, direction}")
     dirs = {}
+    centered_ids = set()
     for row in joints:
         if not isinstance(row, dict) or not _is_int(row.get("id")) or row.get("direction") not in (-1, 1):
             raise CalibError("joints 的每一行要是 {id: 整数, direction: 1 或 -1}")
         if row["id"] in dirs:
             raise CalibError(f"joints 里 id {row['id']} 出现了两次")
         dirs[row["id"]] = row["direction"]
+        if joint_mode == "recorded" and row.get("centered") is True:
+            centered_ids.add(row["id"])
     file_ids = {row.get("id") for row in by_name.values()}
     if set(dirs) != file_ids:
         raise CalibError(f"这次的 15 颗（{sorted(dirs)}）跟主程序文件里的（{sorted(file_ids, key=str)}）对不上")
 
+    if joint_mode not in ("recorded", "keep", "imu_only"):
+        raise CalibError("不认识的舵机标定写入方式")
     out_joints = []
     for name in JOINT_ORDER:
         src = by_name[name]
         jid = src.get("id")
         if not _is_int(jid):
             raise CalibError(f"{name} 的 id 不是整数")
-        lo, hi = LIMITS_DEG[name]
-        out_joints.append({
-            "name": name, "id": jid, "zero_raw": 2048, "direction": dirs[jid], "calibrated": True,
-            "min_rad": math.radians(lo), "max_rad": math.radians(hi),
-        })
+        row = dict(src)
+        if joint_mode == "recorded":
+            row["direction"] = dirs[jid]
+            if jid in centered_ids:
+                row["zero_raw"] = 2048
+        if joint_mode != "imu_only":
+            if row.get("min_rad") is None and row.get("max_rad") is None and row.get("calibrated") is False:
+                lo, hi = LIMITS_DEG[name]
+                row.update(min_rad=math.radians(lo), max_rad=math.radians(hi))
+            row["calibrated"] = True
+        out_joints.append(row)
 
     out = {
         "motion_enabled": True,
@@ -192,6 +205,8 @@ def build_calibration(current, joints, imu):
             out["imu_mounts"][kind] = {"quat": _quat(mount.get("quat"), f"imu_mounts.{kind}.quat"),
                                        "verified": bool(mount.get("verified", False))}
 
+    if joint_mode == "imu_only":
+        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {})}
     if not isinstance(imu, dict):
         raise CalibError("imu 要是一个对象")
     source = imu.get("source")
@@ -409,7 +424,7 @@ def _write_json(path, obj):
 
 
 def record_centered(state_dir, ids, by, at=None):
-    """中位校准成功一颗记一颗：{id: {"at": 墙钟, "by": 谁}}。"""
+    """每次成功校准分配新事件 ID，使同一颗舵机的旧记录不会被重复应用。"""
     ids = [int(i) for i in ids]
     if not ids:
         return {}
@@ -417,7 +432,7 @@ def record_centered(state_dir, ids, by, at=None):
     data = _read_json(p) or {}
     now = time.time() if at is None else at
     for jid in ids:
-        data[str(jid)] = {"at": now, "by": by or "舵机页"}
+        data[str(jid)] = {"at": now, "by": by or "舵机页", "event": uuid.uuid4().hex}
     _write_json(p, data)
     return data
 
@@ -547,6 +562,14 @@ class CommitService:
 
     # ---- 状态文件：按修改时间缓存（state.summarize 每帧都会调 view，不能每帧读盘） ----
 
+    def stage_import(self, source, quat, by, imu_bus):
+        if not self._writing.acquire(blocking=False):
+            raise Refused("主程序正在写标定：请写完后再导入")
+        try:
+            return save_pending(self.state_dir, source, quat, {"imported": True}, by, imu_bus=imu_bus)
+        finally:
+            self._writing.release()
+
     def _sig(self, path):
         try:
             st = os.stat(path)
@@ -609,12 +632,6 @@ class CommitService:
         rd = rd or self.rd
         return rd.bus.value if isinstance(rd.bus.value, dict) else {}
 
-    def _mtime(self, name):
-        try:
-            return os.stat(_path(self.state_dir, name)).st_mtime_ns
-        except OSError:
-            return None
-
     def _last_commit(self):
         row = _read_json(_path(self.state_dir, COMMIT_LAST))
         return row if isinstance(row, dict) else None
@@ -623,13 +640,13 @@ class CommitService:
         why = []
         if self.pending:
             why.append("IMU 方向有新校准还没写")
-        last = self._last_commit() or {}
-        cm = self._mtime(SERVO_CENTERED)
-        if cm is not None and cm > int(last.get("centered_mtime_ns") or -1):
+        mark, marked_at = self._servo_mark()
+        _, _, fresh = self._center_events(mark, marked_at)
+        if fresh:
             why.append("舵机零位记录比上次成功写入新")
         # 只比舵机页里明确设过方向的那几颗：没设过的写的时候沿用文件里的，不算改动
         rows = {j.get("id"): j for j in (cal or {}).get("joints") or [] if isinstance(j, dict)}
-        if rows and any(jid in rows and rows[jid].get("direction") != d for jid, d in self.directions.items()):
+        if not mark and rows and any(jid in rows and rows[jid].get("direction") != d for jid, d in self.directions.items()):
             why.append("舵机页设的方向和主程序文件不一样")
         return why
 
@@ -642,6 +659,27 @@ class CommitService:
             return ob.user_mark(step)
         except Exception:  # noqa: BLE001 —— 准备情况每帧都算，清单出错不能把它弄没
             return None
+
+    def _joint_mode(self, mark):
+        if self.pending and (self.pending.get("quality") or {}).get("imported") is True:
+            return "imu_only"
+        return "keep" if mark else "recorded"
+
+    def _center_events(self, mark, marked_at):
+        applied = (self._last_commit() or {}).get("center_events") or {}
+        events = {str(jid): row["event"] for jid, row in self.centered.items() if isinstance(row.get("event"), str)}
+        fresh = {jid for jid, row in self.centered.items() if str(jid) in events
+                 and events[str(jid)] != applied.get(str(jid))
+                 and (not mark or isinstance(marked_at, (int, float)) and row["at"] > marked_at)}
+        return applied, events, fresh
+
+    def _servo_mark(self):
+        # A mark takes effect as soon as it is saved, even before the next UI tick.
+        get_mark = getattr(self.onboard, "servo_mark_record", None)
+        saved = get_mark() if callable(get_mark) else None
+        if isinstance(saved, tuple):
+            return saved
+        return self._user_mark("servo"), None
 
     def _default_imu(self, source, mount, cal, mark=None):
         """第 2 步标了「已完成」/「跳过」、主程序里正在用的那颗 IMU 方向没确认、也没有 imu-pending.json：
@@ -747,14 +785,16 @@ class CommitService:
                       "action": None})
 
         missing = [name for name in JOINT_ORDER if JOINT_ID[name] not in self.centered]
-        servo_mark = self._user_mark("servo")
+        servo_mark = self._user_mark("servo")  # 只有已通过本次清单指纹检查的标记能放行
         servo_ok = not missing or servo_mark in ("done", "skip")
-        if not missing:
-            servo_text = "15 颗的零位都记在 servo-centered.json 里了"
-        elif servo_mark:
-            # 用户说第 1 步以前做过 / 先不做（用户 10-20：二号鸭零位早校过，以前被逼着重校）：写的时候 15 颗照样按 2048 写
+        joint_mode = self._joint_mode(servo_mark)
+        if joint_mode == "imu_only":
+            servo_ok, servo_text = True, "只写导入的 IMU 方向，保留全部舵机标定"
+        elif servo_mark in ("done", "skip"):
             servo_text = (("你标了第 1 步已完成" if servo_mark == "done" else "你跳过了第 1 步")
-                          + "：15 颗按 2048 写零位（零位要是用 Studio 的舵机页校过的才对）")
+                          + "：沿用主程序里每颗舵机原有的中位和方向")
+        elif not missing:
+            servo_text = "15 颗的零位都记在 servo-centered.json 里了"
         else:
             names = "、".join(JOINT_CN.get(n, n) for n in missing[:6]) + ("…" if len(missing) > 6 else "")
             servo_text = f"还有 {len(missing)} 颗没在一键中位校过：{names}"
@@ -770,7 +810,9 @@ class CommitService:
         changed.sort(key=lambda r: JOINT_ORDER.index(r["name"]))
         dir_text = ("要写成 +1 的有 " + "、".join(f"{r['cn']}" for r in changed) + "：核对一下方向对不对"
                     if changed else "15 颗都是 −1")
-        if self.directions:
+        if joint_mode in ("keep", "imu_only"):
+            dir_text, changed = "沿用主程序文件里每颗舵机的方向", []
+        elif self.directions:
             dir_text += "（舵机页设过的用舵机页的，其余沿用主程序文件里的）"
         else:
             dir_text += "（舵机页没改过方向，沿用主程序文件里的）"
@@ -870,13 +912,23 @@ class CommitService:
         if not isinstance(cal, dict) or not isinstance(cal.get("joints"), list) or len(cal["joints"]) != 15:
             raise Refused("还没读到主程序的 15 颗标定：等几秒再试")
         by_name = {j.get("name"): j for j in cal["joints"] if isinstance(j, dict)}
+        mark, marked_at = self._servo_mark()
+        joint_mode = self._joint_mode(mark)
+        applied, events, fresh_ids = self._center_events(mark, marked_at)
+        use_directions = joint_mode == "recorded"
+        if joint_mode == "keep" and fresh_ids:
+            joint_mode = "recorded"
         joints = []
         for name in JOINT_ORDER:
             row = by_name.get(name)
             if not isinstance(row, dict) or not _is_int(row.get("id")):
                 raise Refused(f"主程序的标定文件里 {name} 不对：读不到 id")
             file_dir = row.get("direction") if row.get("direction") in (1, -1) else -1
-            joints.append({"id": row["id"], "direction": self.directions.get(row["id"], file_dir)})
+            jid = row["id"]
+            joint = {"id": jid, "direction": self.directions.get(jid, file_dir) if use_directions else file_dir}
+            if joint_mode == "recorded" and jid in fresh_ids:
+                joint["centered"] = True
+            joints.append(joint)
         bus = self._current_bus(rd)
         source, mount = mount_of(bus, calib if isinstance(calib, dict) else {})
         if bus_protocol_mismatch(bus, calib, source):
@@ -904,7 +956,8 @@ class CommitService:
             quat = mount["quat"]
         else:
             raise Refused("IMU 方向还没读到：等主程序报上来，或者去 IMU 页校一次")
-        out = {"joints": joints, "imu": {"source": source, "quat": list(quat)}}
+        out = {"joints": joints, "imu": {"source": source, "quat": list(quat)}, "joint_mode": joint_mode}
+        out["center_events"] = applied if joint_mode == "imu_only" else events
         if dflt:
             out["imu_default"] = dflt["how"]          # 只给预览 / 日志看；交给小助手的 imu 照旧只有 {source, quat}
         return out
@@ -915,14 +968,12 @@ class CommitService:
         q = payload["imu"]["quat"]
         desc = describe_mount(q)
         rows = []
-        for name in JOINT_ORDER:
-            jid = JOINT_ID[name]
-            row = next((j for j in payload["joints"] if j["id"] == jid), None)
-            if row is None:
-                continue
-            lo, hi = LIMITS_DEG[name]
-            rows.append({"name": name, "cn": JOINT_CN.get(name, name), "id": jid, "direction": row["direction"],
-                         "min_deg": lo, "max_deg": hi})
+        for row in tomllib.loads(toml)["joints"]:
+            name = row["name"]
+            rows.append({"name": name, "cn": JOINT_CN.get(name, name), "id": row["id"],
+                         "direction": row["direction"], "zero_raw": row["zero_raw"],
+                         "min_deg": round(math.degrees(row["min_rad"]), 3) if row.get("min_rad") is not None else None,
+                         "max_deg": round(math.degrees(row["max_rad"]), 3) if row.get("max_rad") is not None else None})
         return {"imu": {"source": payload["imu"]["source"], "label": CHIP_CN.get(payload["imu"]["source"]),
                         "text": desc["text"], "off_deg": desc["off_deg"], "quat": list(q),
                         "default": payload.get("imu_default")},
@@ -936,20 +987,20 @@ class CommitService:
         cal, _ = self._calibration(rd)
         if helper.available():
             ok, result, detail = helper.calib_commit(by or "Studio", payload["joints"], payload["imu"],
-                                                     dry_run=True, timeout=90)
+                                                     dry_run=True, timeout=90, joint_mode=payload["joint_mode"])
             if not ok:
                 raise Refused(helper.friendly(result, detail, "calib-commit"))
             toml = (detail or {}).get("toml")
             if not isinstance(toml, str) or not toml.strip():
                 raise Refused("小助手没回要写的内容")
             return self._summary(payload, toml, True)
-        built = build_calibration(cal, payload["joints"], payload["imu"])
+        built = build_calibration(cal, payload["joints"], payload["imu"], payload["joint_mode"])
         validate_calibration(built, payload["imu"]["source"])
         return self._summary(payload, render_calibration(built), False)
 
     def _record_success(self, payload):
-        row = {"at": time.time(), "directions": {str(j["id"]): j["direction"] for j in payload["joints"]},
-               "centered_mtime_ns": self._mtime(SERVO_CENTERED), "imu_source": payload["imu"]["source"],
+        row = {"at": time.time(), "center_events": payload["center_events"], "directions": {str(j["id"]): j["direction"] for j in payload["joints"]},
+               "imu_source": payload["imu"]["source"],
                "imu_quat": list(payload["imu"]["quat"])}
         try:
             _write_json(_path(self.state_dir, COMMIT_LAST), row)
@@ -999,7 +1050,7 @@ class CommitService:
                               hint="装得不一样的站起来会往一边倒：写完在 IMU 页站着校一次，再写一次主程序")
             if self.simulate:
                 cal, _ = self._calibration(rd)
-                built = build_calibration(cal, payload["joints"], payload["imu"])
+                built = build_calibration(cal, payload["joints"], payload["imu"], payload["joint_mode"])
                 validate_calibration(built, payload["imu"]["source"])
                 toml = render_calibration(built)
                 say("电脑演示：没有真的写主程序")
@@ -1026,7 +1077,7 @@ class CommitService:
 
             say("写文件、切模式、重启主程序（最多 180 秒）")
             ok, result, detail = helper.calib_commit(by, payload["joints"], payload["imu"], dry_run=False,
-                                                     timeout=COMMIT_WAIT_S, on_line=on_line)
+                                                     timeout=COMMIT_WAIT_S, on_line=on_line, joint_mode=payload["joint_mode"])
             from_last = False
             if result == "TimeoutExpired":
                 last = helper.last_result()
@@ -1043,7 +1094,8 @@ class CommitService:
                 clear_pending(self.state_dir)
                 self._record_success(payload)
                 self.reload(force=True)
-                reason = "写进主程序了，主程序进了运动模式"
+                reason = ("已写入 IMU 方向，保留了全部舵机标定" if payload["joint_mode"] == "imu_only" else
+                          "写进主程序了，主程序进了运动模式")
                 self.job.update({"phase": "done", "ok": True, "reason": reason, "finished": time.time(),
                                  "from_last_result": from_last, "detail": detail or {}})
                 self.log.info(reason, cat="校准", raw=json.dumps(detail or {}, ensure_ascii=False)[:2000])

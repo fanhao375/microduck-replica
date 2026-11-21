@@ -71,7 +71,7 @@ import time
 import tomllib
 import types
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 VERBS = ("bus-take", "bus-give-back", "bus-abort", "pad-pair", "pad-forget",
          "wifi-hotspot-down", "wifi-hotspot-up", "calib-read", "calib-commit", "ssh-status", "ssh-password",
          "imu-recalibrate", "robotd-update", "sensors-apply", "phone-tls",
@@ -753,7 +753,7 @@ def _bool_text(v):
     return "true" if v else "false"
 
 
-def build_calibration(current, joints, imu):
+def build_calibration(current, joints, imu, joint_mode="recorded"):
     """按现在文件里的 name / id，加这次的方向和 IMU 方向，组一份完整的标定。
 
     current：现在文件的字典（calibration-status 里的 calibration，或者 tomllib 读出来的）；
@@ -782,27 +782,38 @@ def build_calibration(current, joints, imu):
     if not isinstance(joints, list) or len(joints) != 15:
         raise CalibError("joints 要正好 15 个 {id, direction}")
     dirs = {}
+    centered_ids = set()
     for row in joints:
         if not isinstance(row, dict) or not _is_int(row.get("id")) or row.get("direction") not in (-1, 1):
             raise CalibError("joints 的每一行要是 {id: 整数, direction: 1 或 -1}")
         if row["id"] in dirs:
             raise CalibError(f"joints 里 id {row['id']} 出现了两次")
         dirs[row["id"]] = row["direction"]
+        if joint_mode == "recorded" and row.get("centered") is True:
+            centered_ids.add(row["id"])
     file_ids = {row.get("id") for row in by_name.values()}
     if set(dirs) != file_ids:
         raise CalibError(f"这次的 15 颗（{sorted(dirs)}）跟主程序文件里的（{sorted(file_ids, key=str)}）对不上")
 
+    if joint_mode not in ("recorded", "keep", "imu_only"):
+        raise CalibError("不认识的舵机标定写入方式")
     out_joints = []
     for name in JOINT_ORDER:
         src = by_name[name]
         jid = src.get("id")
         if not _is_int(jid):
             raise CalibError(f"{name} 的 id 不是整数")
-        lo, hi = LIMITS_DEG[name]
-        out_joints.append({
-            "name": name, "id": jid, "zero_raw": 2048, "direction": dirs[jid], "calibrated": True,
-            "min_rad": math.radians(lo), "max_rad": math.radians(hi),
-        })
+        row = dict(src)
+        if joint_mode == "recorded":
+            row["direction"] = dirs[jid]
+            if jid in centered_ids:
+                row["zero_raw"] = 2048
+        if joint_mode != "imu_only":
+            if row.get("min_rad") is None and row.get("max_rad") is None and row.get("calibrated") is False:
+                lo, hi = LIMITS_DEG[name]
+                row.update(min_rad=math.radians(lo), max_rad=math.radians(hi))
+            row["calibrated"] = True
+        out_joints.append(row)
 
     out = {
         "motion_enabled": True,
@@ -837,6 +848,8 @@ def build_calibration(current, joints, imu):
             out["imu_mounts"][kind] = {"quat": _quat(mount.get("quat"), f"imu_mounts.{kind}.quat"),
                                        "verified": bool(mount.get("verified", False))}
 
+    if joint_mode == "imu_only":
+        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {})}
     if not isinstance(imu, dict):
         raise CalibError("imu 要是一个对象")
     source = imu.get("source")
@@ -1316,7 +1329,10 @@ def calib_gate(op, mode):
 
 
 def check_calib_commit_args(args):
-    check_keys(args, ("by", "joints", "imu", "dry_run"), "calib-commit 的参数")
+    check_keys(args, ("by", "joints", "imu", "dry_run", "joint_mode"), "calib-commit 的参数")
+    joint_mode = args.get("joint_mode", "recorded")
+    if joint_mode not in ("recorded", "keep", "imu_only"):
+        raise Stop(EXIT_ARGS, "bad_args", "joint_mode 不受支持")
     by = check_by(args)
     joints = args.get("joints")
     if not isinstance(joints, list) or len(joints) != 15:
@@ -1325,10 +1341,12 @@ def check_calib_commit_args(args):
     for row in joints:
         if not isinstance(row, dict):
             raise Stop(EXIT_ARGS, "bad_args", "joints 的每一行要是对象")
-        check_keys(row, ("id", "direction"), "joints 的一行")
+        check_keys(row, ("id", "direction", "centered") if joint_mode == "recorded" else ("id", "direction"), "joints 的一行")
+        if "centered" in row and row["centered"] is not True:
+            raise Stop(EXIT_ARGS, "bad_args", "centered 只能标记已实际校准的舵机")
         if not is_int(row.get("id")) or row.get("direction") not in (-1, 1):
             raise Stop(EXIT_ARGS, "bad_args", "joints 的每一行要是 {id: 整数, direction: 1 或 -1}")
-        rows.append({"id": row["id"], "direction": row["direction"]})
+        rows.append(dict(row))
     imu = args.get("imu")
     if not isinstance(imu, dict):
         raise Stop(EXIT_ARGS, "bad_args", "imu 要是一个对象")
@@ -1548,10 +1566,11 @@ def readback_mismatches(expected, calibration):
     return out
 
 
-def wait_motion(op, expected):
-    """重启后每 0.5 秒看一次，最多 30 秒。成功 = motion + control + 标定逐项读回一致。
+def wait_motion(op, expected, expected_mode="motion"):
+    """重启后每 0.5 秒看一次，最多 30 秒。预期模式、阶段和逐项标定读回都一致才成功。
     waiting_for_bus 带标定校验的错误立刻判失败（重试也一样）；带别的错误（总线打不开）
     可能只是刚启动那一下，主程序每秒重试，等到 30 秒还这样才判失败。回一个可写进 last-result 的判定字典。"""
+    expected_phase = "control" if expected_mode == "motion" else "ready"
     deadline = op.ctx.now() + CALIB_MOTION_WAIT
     last, why = {}, None
     mismatches = []
@@ -1564,7 +1583,7 @@ def wait_motion(op, expected):
         if phase == "waiting_for_bus" and error and CALIB_ERR.search(str(error)):
             return {"ok": False, "kind": "calib_rejected", "bus": last, "readback_ok": False,
                     "mismatches": [], "error": str(error)}
-        if mode == "motion" and phase == "control":
+        if mode == expected_mode and phase == expected_phase:
             status, cs_err = calibration_status(op)
             if status is not None:
                 mismatches = readback_mismatches(expected, status.get("calibration"))
@@ -1572,25 +1591,25 @@ def wait_motion(op, expected):
                 if status.get("imu_source") in (None, "bus") and metadata_error:
                     mismatches.append(metadata_error)
                 if not mismatches:
-                    op.emit("wait", "info", "主程序进了运动模式，标定读回来逐项一致",
+                    op.emit("wait", "info", "主程序已回到预期模式，标定读回来逐项一致",
                             {"busStatus": status_summary(last), "readback_ok": True})
                     return {"ok": True, "kind": "committed", "bus": last, "status": status,
                             "readback_ok": True, "mismatches": []}
                 op.emit("wait", "warn", f"标定读回来跟写进去的不一致（{len(mismatches)} 处）",
                         {"mismatches": mismatches[:20]})
             else:
-                op.emit("wait", "info", f"已进控制阶段，标定还没读回来：{cs_err}", {"busStatus": status_summary(last)})
+                op.emit("wait", "info", f"已进预期模式，标定还没读回来：{cs_err}", {"busStatus": status_summary(last)})
         if op.ctx.now() >= deadline:
             break
         if op.ctx.now() - last_emit >= 5.0:
             last_emit = op.ctx.now()
             op.emit("wait", "info",
-                    f"等主程序进运动模式并读回标定（mode={mode or '?'}，phase={phase or '?'}）",
+                    f"等主程序进入 {expected_mode} 并读回标定（mode={mode or '?'}，phase={phase or '?'}）",
                     {"busStatus": status_summary(last), "mismatches": mismatches[:20]})
         op.ctx.sleep(CALIB_STATUS_INTERVAL)
     if not last and why:
         last = {"error": why}
-    if mode == "motion" and phase == "control":
+    if mode == expected_mode and phase == expected_phase:
         kind = "readback_mismatch"
     elif phase == "waiting_for_bus" and last.get("error"):
         kind = "bus_unavailable"
@@ -1761,11 +1780,12 @@ def verb_calib_commit(op, args, raw):
     op.emit("read", "info", f"读了主程序的标定：{len(rows)} 颗，id 对得上")
 
     try:
-        built = build_calibration(data, joints, imu)
+        joint_mode = args.get("joint_mode", "recorded")
+        built = build_calibration(data, joints, imu, joint_mode)
         validate_calibration(built, imu["source"])
     except CalibError as e:
         raise Stop(EXIT_ARGS, "invalid", f"要写的内容没过校验：{e}") from e
-    op.emit("build", "info", "按标准限位、这次的方向和 IMU 方向组好了新内容")
+    op.emit("build", "info", "已生成待写标定", {"joint_mode": joint_mode})
     text = render_calibration(built)
     back = tomllib.loads(text)
     if not same_calibration(normalized_calibration(back), normalized_calibration(built)):
@@ -1797,7 +1817,7 @@ def verb_calib_commit(op, args, raw):
     try:
         install_calibration(op, text, old, main_meta, saved_meta)
         verify_calibration_file(op, built, imu["source"])
-        if mode == "commissioning":
+        if mode == "commissioning" and joint_mode != "imu_only":
             if not remove(op.ctx, COMMISSIONING_DROPIN):
                 raise OSError(f"commissioning 文件不见了：{COMMISSIONING_DROPIN}")
             op.ctx.run(["systemctl", "daemon-reload"])
@@ -1809,10 +1829,11 @@ def verb_calib_commit(op, args, raw):
         if not up:
             return _commit_fail(op, "restart_failed", "写进去了，但主程序没在 40 秒内起来（没连上 hello）",
                                 base, {"bus": None, "readback_ok": False, "mismatches": []}, journal)
-        judged = wait_motion(op, built)
+        judged = wait_motion(op, built, mode if joint_mode == "imu_only" else "motion")
         if judged.get("ok"):
             detail = _commit_detail(base, judged, None, journal)
             return op.finish(EXIT_OK, "committed",
+                             "IMU 方向已写入，15 颗舵机的原标定已逐颗读回" if joint_mode == "imu_only" else
                              "写进主程序了：主程序进了运动模式，15 颗和 IMU 方向读回来都一致", detail)
         bus = status_summary(judged.get("bus"))
         if judged.get("kind") == "calib_rejected":
@@ -1821,10 +1842,11 @@ def verb_calib_commit(op, args, raw):
             why = f"主程序打不开舵机总线：{judged.get('error')}。舵机电源开了吗？"
         elif judged.get("kind") == "readback_mismatch":
             first = (judged.get("mismatches") or ["没读到 calibration-status"])[0]
-            why = f"主程序进了运动模式，但标定读回来跟写进去的不一致：{first}"
+            why = f"主程序已重启，但标定读回来跟写进去的不一致：{first}"
         else:
             stuck = bus.get("error") or f"mode={bus.get('mode') or '?'}，phase={bus.get('phase') or '?'}"
-            why = f"等 30 秒主程序还没进运动模式：{stuck}"
+            target_mode = "标定模式" if joint_mode == "imu_only" and mode == "commissioning" else "运动模式"
+            why = f"等 30 秒主程序还没进{target_mode}：{stuck}"
         return _commit_fail(op, judged.get("kind") or "not_motion", why, base, judged, journal)
     except Stop as e:
         rb = rollback(op, backup_path)

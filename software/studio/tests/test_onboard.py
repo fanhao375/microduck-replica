@@ -137,10 +137,10 @@ class RowTest(unittest.TestCase):
         self.assertEqual([a["do"] for a in r["actions"]], ["servos"])
         self.assertEqual(r["mark"]["done"], {"confirm": False, "ask": None})
         self.assertIn("已完成", r["text"])
-        # ● zero_raw 不是 2048：两套零位会打架，列出是哪颗、差多少度
+        # 自定义中位按原值展示，允许用户确认沿用。
         r = row(O.evaluate(inp(calib=calib_with(left_knee=1990)), rec), "servo")
         self.assertEqual(r["state"], "todo")
-        self.assertIn("两套零位会打架", r["text"])
+        self.assertIn("自定义中位", r["text"])
         self.assertIn("左膝 1990（差 -5.1°）", r["text"])
         # ✓ Studio 舵机页标过 15 颗，而且记下的关节指纹没变（代码审查 C9-3：判法表「并且指纹没变」）
         stu = {"ids": set(O.SERVO_IDS), "time": "2026-10-18 03:12:00"}
@@ -369,9 +369,14 @@ class OnboardingTest(unittest.TestCase):
 
     def test_confirm_servo_checks_the_file(self):
         ob = O.Onboarding(str(self.dir), self.log)
-        ok, why = ob.confirm_servo(FakeRd(calib=calib_with(left_knee=1990)), "电脑")
+        existing = FakeRd(calib=calib_with(left_knee=1990))
+        ok, why = ob.confirm_servo(existing, "电脑")
+        self.assertTrue(ok, why)
+        ob.tick(existing)
+        self.assertEqual(row(ob.view(), "servo")["state"], "ok")
+        ok, why = ob.confirm_servo(FakeRd(calib=calib_with(left_knee=4096)), "电脑")
         self.assertFalse(ok)
-        self.assertIn("2048", why)
+        self.assertIn("中位", why)
         ok, why = ob.confirm_servo(FakeRd(calib=None), "电脑")
         self.assertFalse(ok)
         ok, why = ob.confirm_servo(FakeRd(), "电脑")
@@ -1144,7 +1149,7 @@ class Batch3SkipTest(unittest.TestCase):
         self.rd.calib_valid_after = self.rd.calib.at - 0.001
         self.pad.view = pad_view(pads=[XPAD], estop="bad", checks=[{"label": "padd 在跑", "ok": False, "why": "padd 没在跑"}])
         v = self.tick()
-        for key, word in (("imu", "差 8.5°"), ("estop", "急停不管用"), ("servo", "两套零位")):
+        for key, word in (("imu", "差 8.5°"), ("estop", "急停不管用"), ("servo", "中位")):
             with self.subTest(step=key):
                 r = row(v, key)
                 self.assertEqual(r["state"], "todo", r)                         # 以测出的问题为准，不再是「跳过了」
@@ -1358,7 +1363,7 @@ class CommitStepTest(unittest.TestCase):
             self.assertEqual(row(ob.view(), "servo")["state"], "ok")
             s = item("servo")
             self.assertTrue(s["ok"])
-            self.assertEqual(s["text"], "你标了第 1 步已完成：15 颗按 2048 写零位（零位要是用 Studio 的舵机页校过的才对）")
+            self.assertEqual(s["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向")
             self.assertIsNone(s["action"])
             self.assertFalse(item("imu")["ok"])
             ob.tick(rd)

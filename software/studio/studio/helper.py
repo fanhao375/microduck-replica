@@ -354,10 +354,11 @@ def last_result():
         return None
 
 
-def calib_commit(by, joints, imu, dry_run=False, timeout=180, on_line=None):
+def calib_commit(by, joints, imu, dry_run=False, timeout=180, on_line=None, *, joint_mode="recorded"):
     """把舵机零位 / 方向 / IMU 方向写进主程序（小助手 calib-commit）。回 (ok, result, detail)。
     dry_run=True 只回要写的 TOML（detail["toml"]），不写文件、不重启。on_line 收每一步进度。"""
-    payload = {"by": by, "joints": joints, "imu": imu, "dry_run": bool(dry_run)}
+    # 旧小助手会拒绝未知字段，不能退回重设中位的写法。
+    payload = {"by": by, "joints": joints, "imu": imu, "dry_run": bool(dry_run), "joint_mode": joint_mode}
     return _call("calib-commit", payload, timeout, on_line=on_line)
 
 

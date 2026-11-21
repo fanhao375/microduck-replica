@@ -348,6 +348,12 @@ try {
   await js(`calls.length=0`);
   await pickFile(JSON.stringify({ records: [{ imu: { source: 'bus', quat: [1, 0, 0, 0] } }, { imu: { source: 'bus', quat: [0, 1, 0, 0] } }] }));
   await wait(`/2 份方向/.test(document.querySelector('.imu-import-out')?.innerText||'')`, 'ambiguous file refused in the page');
+  const first = {source: 'bus', quat: [1, 0, 0, 0]};
+  const other = {source: 'bus', quat: [0, 1, 0, 0]};
+  await pickFile(JSON.stringify({imu: first, mount: other, records: [{imu: other}]}));
+  await wait(`/3 份方向/.test(document.querySelector('.imu-import-out')?.innerText || '') && !calls.length`, 'mixed shapes refused');
+  await pickFile(JSON.stringify({imu: {source: 'bus', quat: [1, 0, 0, {note: 'private'}]}}));
+  await wait(`/四个有限数/.test(document.querySelector('.imu-import-out')?.innerText || '') && !calls.length`, 'non-numeric file stays local');
   await pickFile('not json');
   await wait(`/不是 json/.test(document.querySelector('.imu-import-out')?.innerText||'')`, 'broken file refused in the page');
   assert.equal(await js(`calls.some(c=>c.args.op==='import-mount')`), false, 'refused files never reach the robot');
