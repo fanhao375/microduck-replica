@@ -14,7 +14,7 @@
 | **Radxa Cubie A7Z** | [A7Z preview1 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) | [烧录与配网](radxa-cubie-a7z/image/README.md) · [IMX219 相机适配源码（晚于 preview1）](radxa-cubie-a7z/control/camera/README.md) |
 | **Orange Pi Zero 3W（香橙派 A733）** | [香橙派 R2 预览镜像](https://github.com/Liangjin5437/microduck-replica/releases/tag/orangepi-zero3w-20261112-r2) | [首次开机与 Studio 设密](software/orangepi-zero3w/image/README.md) · 主控默认只读，实板 SD 卡首启待验证。 |
 
-**已经在用 Radxa ZERO 3W 的 1104 卡？** 第一次先运行准备工具并重启。打开 **Studio → 设置 → 软件更新**，看到新版本后点 **立即更新**。鸭子会下载并验签，重连后可查看安装结果。[下载准备工具](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20) · [首次准备步骤](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.20/software/updater/stock1104/README.md)
+**新卡**下载上表的 1104 镜像，开机即可使用发布页标明的正式软件。**旧卡**在 Studio → 设置 → 软件更新 检查并安装新版。最初的 1104 卡若从未准备过在线更新，先运行一次准备工具并重启。[原卡首次准备说明](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.20/software/updater/stock1104/README.md)
 
 **飞特 HD-1910 版本已完成整机实机验证：站立、行走、前滚翻后起身均已跑通。** 主线使用 **15 颗飞特 HD-1910 舵机**，提供可烧录的**复刻镜像**和 **Microduck Studio 网页中控**，通过手机或电脑浏览器完成配网、标定和遥控。
 
