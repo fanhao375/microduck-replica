@@ -21,6 +21,7 @@ pad_visible：手柄那一块在不在屏幕上（总览重排审查 O1：手柄
 import asyncio
 import contextlib
 import gzip
+import hashlib
 import io
 import json
 import os
@@ -33,9 +34,10 @@ import zipfile
 from pathlib import Path
 
 from starlette.applications import Starlette
+from starlette.datastructures import Headers
 from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Mount, Route, WebSocketRoute
-from starlette.staticfiles import StaticFiles
+from starlette.staticfiles import NotModifiedResponse, StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from .auth import COOKIE, REMEMBER_S, Auth, OriginGuard
@@ -106,17 +108,35 @@ class HostGuard:
         await self.app(scope, receive, send)
 
 
-class AppStatic(StaticFiles):
-    """页面自己的文件每次都问一下有没有更新（改了马上生效）；vendor、model 这些不会变的缓存一天。"""
+class WebFileResponse(FileResponse):
+    """发布包把所有文件的修改时间归一；页面和模型只能按实际送出的内容验证。"""
 
+    def set_stat_headers(self, stat_result):
+        self.headers.setdefault("content-length", str(stat_result.st_size))
+
+    def _should_use_range(self, http_if_range):
+        return http_if_range == self.headers["etag"]
+
+    def content_etag(self):
+        digest = hashlib.sha256()
+        with open(self.path, "rb") as source:
+            for block in iter(lambda: source.read(64 * 1024), b""):
+                digest.update(block)
+        return f'"{digest.hexdigest()}"'
+
+    async def __call__(self, scope, receive, send):
+        etag = await asyncio.to_thread(self.content_etag)
+        self.headers["etag"] = etag
+        self.headers["cache-control"] = "no-cache"
+        for value in Headers(scope=scope).getlist("if-none-match"):
+            if value.strip() == "*" or any(tag.strip() in (etag, "W/" + etag) for tag in value.split(",")):
+                return await NotModifiedResponse(self.headers)(scope, receive, send)
+        await super().__call__(scope, receive, send)
+
+
+class AppStatic(StaticFiles):
     def file_response(self, full_path, stat_result, scope, status_code=200):
-        resp = super().file_response(full_path, stat_result, scope, status_code)
-        path = scope.get("path", "")
-        if path.startswith(("/vendor/", "/model/")):
-            resp.headers["Cache-Control"] = "public, max-age=86400"
-        else:
-            resp.headers["Cache-Control"] = "no-cache"
-        return resp
+        return WebFileResponse(full_path, status_code=status_code, stat_result=stat_result)
 
 
 def _client_desc(conn):
@@ -652,14 +672,14 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     await asyncio.to_thread(Path(temporary).unlink, missing_ok=True)
 
     async def meshes(request):
-        """3D 模型 2.8 MB：预先压好的 .gz 直接给（不在板子上现压），浏览器缓存一天。"""
+        """3D 模型 2.8 MB：有 gzip 时直接发送预压缩文件。"""
         raw = web_dir / "model" / "meshes.bin"
         gz = raw.with_suffix(".bin.gz")
-        headers = {"Cache-Control": "public, max-age=86400", "Vary": "Accept-Encoding"}
+        headers = {"Vary": "Accept-Encoding"}
         if gz.is_file() and "gzip" in request.headers.get("accept-encoding", ""):
             headers["Content-Encoding"] = "gzip"
-            return FileResponse(gz, media_type="application/octet-stream", headers=headers)
-        return FileResponse(raw, media_type="application/octet-stream", headers=headers)
+            return WebFileResponse(gz, media_type="application/octet-stream", headers=headers)
+        return WebFileResponse(raw, media_type="application/octet-stream", headers=headers)
 
     # ---- WebSocket ----
 
