@@ -43,7 +43,7 @@
 
 动图为无声预览，MP4 保留完整画面和声音。
 
-**[按主板下载镜像](#按主板下载镜像)** · **[首次使用指南（PDF / 网页）](docs/上手指南/README.md)** · **[CAD 与打印件](https://github.com/fanhao375/microduck-replica-cad)** · **[装配教程](#-装配视频教程)** · **[BOM 采购清单](BOM/README.md)** · **[硬件工程](hardware/README.md)**
+**[按主板下载镜像](#按主板下载镜像)** · **[首次使用指南（PDF / 网页）](docs/上手指南/README.md)** · **[CAD 与打印件（飞特轮滑件 11-19 更新）](https://github.com/fanhao375/microduck-replica-cad#下载)** · **[装配教程](#-装配视频教程)** · **[BOM 采购清单](BOM/README.md)** · **[硬件工程](hardware/README.md)**
 
 ---
 
@@ -158,7 +158,7 @@
 
 | 需要什么 | 入口 |
 |---|---|
-| **一站式打印** | **[拓竹 MakerWorld（飞特版）](https://makerworld.com.cn/zh/models/2963569-microduck#profileId-3478428)** · [Bambu Studio 3MF 工程](https://github.com/fanhao375/microduck-replica-cad#打印) |
+| **飞特 HD-1910 轮滑件 · 2026-11-19** | 机械行者Robo 更新了打印工程。两侧共用同款滑轮支架，打印 2 个。4 个合体轮胎排在第 6 盘，用 TPU 打印。[下载 Bambu Studio 3MF](https://raw.githubusercontent.com/fanhao375/microduck-replica-cad/2dd453f467af0469afb10a042f3cc02accc59bf3/%E6%89%93%E5%8D%B0/microduck-%E9%A3%9E%E7%89%B9%E7%89%88-BambuStudio2026-11-19.3mf) · [MakerWorld 飞特版主页](https://makerworld.com.cn/zh/models/2963569-microduck#profileId-3478428) |
 | **模型与打印资料** | **[飞特 HD-1910 专区](https://github.com/fanhao375/microduck-replica-cad#飞特-hd-1910-打印资料)** · **[XL330 专区](https://github.com/fanhao375/microduck-replica-cad#dynamixel-xl330-打印资料)** |
 | **装配教程** | **[装配说明书 PDF](https://github.com/fanhao375/microduck-replica-cad/blob/master/安装说明书/microduck装配安装说明书.pdf)** · **[分集视频](#-装配视频教程)**；两版按对应结构件装配 |
 | **采购清单** | **[BOM 在线预览](BOM/README.md)** · **[下载 Excel](BOM/装配BOM-机械行者Robo-2026-10-23-带采购链接.xlsx)**：2026-10-23 飞特版，XL330 的舵机及配套电控需另行核对 |

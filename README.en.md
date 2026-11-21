@@ -43,7 +43,7 @@ Match the full model printed on the board before downloading. **Radxa ZERO 3W** 
 
 The GIFs are silent previews; the MP4 files include the complete video and audio.
 
-**[Download the image for your board](#download-the-image-for-your-board)** · **[First-use guide (PDF / web)](docs/上手指南/README.md)** · **[CAD and print files](https://github.com/fanhao375/microduck-replica-cad)** · **[Assembly tutorials](#-assembly-videos)** · **[BOM shopping list](BOM/README.md)** · **[Hardware projects](hardware/README.md)**
+**[Download the image for your board](#download-the-image-for-your-board)** · **[First-use guide (PDF / web)](docs/上手指南/README.md)** · **[CAD and print files (Feetech roller skate update, Nov 19)](https://github.com/fanhao375/microduck-replica-cad#下载)** · **[Assembly tutorials](#-assembly-videos)** · **[BOM shopping list](BOM/README.md)** · **[Hardware projects](hardware/README.md)**
 
 ---
 
@@ -158,7 +158,7 @@ The image is free for personal non-commercial builds; see the release for compon
 
 | What you need | Where to find it |
 |---|---|
-| **One-stop printing** | **[Bambu MakerWorld (Feetech)](https://makerworld.com.cn/zh/models/2963569-microduck#profileId-3478428)** · [Bambu Studio 3MF project](https://github.com/fanhao375/microduck-replica-cad#打印) |
+| **Feetech HD-1910 roller skates · 2026-11-19** | 机械行者Robo updated the print project. Print two identical brackets, one for each side. Plate 6 holds four one-piece tires and uses TPU. [Download the Bambu Studio 3MF](https://raw.githubusercontent.com/fanhao375/microduck-replica-cad/2dd453f467af0469afb10a042f3cc02accc59bf3/%E6%89%93%E5%8D%B0/microduck-%E9%A3%9E%E7%89%B9%E7%89%88-BambuStudio2026-11-19.3mf) · [Feetech project on MakerWorld](https://makerworld.com.cn/zh/models/2963569-microduck#profileId-3478428) |
 | **Models and print resources** | **[Feetech HD-1910 section](https://github.com/fanhao375/microduck-replica-cad#飞特-hd-1910-打印资料)** · **[XL330 section](https://github.com/fanhao375/microduck-replica-cad#dynamixel-xl330-打印资料)** |
 | **Assembly tutorials** | **[Assembly manual PDF](https://github.com/fanhao375/microduck-replica-cad/blob/master/安装说明书/microduck装配安装说明书.pdf)** · **[Episode videos](#-assembly-videos)**; use the matching structural parts for each build |
 | **Shopping list** | **[Online BOM preview](BOM/README.md)** · **[Download Excel](BOM/装配BOM-机械行者Robo-2026-10-23-带采购链接.xlsx)**: 2026-10-23 Feetech list; XL330 servos and associated electronics need separate checks |
