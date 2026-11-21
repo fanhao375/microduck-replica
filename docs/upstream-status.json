@@ -57023,7 +57023,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-21T18:21:43Z",
+  "checked_at_utc": "2026-11-21T19:18:30Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -57036,31 +57036,18 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-21T16:30:00Z",
-    "source_snapshot_utc": "2026-11-21T18:21:43Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-21T18:24:05Z",
+    "previous_substantive_review_utc": "2026-11-21T18:21:43Z",
+    "source_snapshot_utc": "2026-11-21T19:18:30Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-21T19:20:11Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck_rl": [
-        92
-      ]
-    },
-    "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        537,
-        538
-      ],
-      "pollen-robotics/microduck_rl": [
-        82,
-        90
-      ]
-    },
+    "new_pull_requests": {},
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "New draftRL92 actual6724d8fc atopfirst6a82:CPU final-layer fit withv8 teacher/v10 anchors,slow-start/yaw/course cues;pairedsim author reports residualhead-sensitive slowpositive stalls/negativeovershoot,notphysical or officialweights. OlderPR536 newlyarchived(literal shutdown cmdline paths);537/538 sync knownmain306incoming each,tests unchanged;82/90 sync knowndevelop5incoming each,all5/2featureblobs identical. CoreCI536/537/538action_required0jobs,RLheadruns absent;oldCPU/CUDA/macOS reports not relabelled latesthead tests. Coredefaults/formals/devactualtags/OS6channels/HF/blog/replicasoftware22/current1104/0182migration unchanged. Tracker docs only,no tests/models/build/service/page/robot actions.",
+    "notes": "Replicaformal23actualfd782d8 adds2commits/15files atop22:stageIMUquaternion and preserve per-servo centers via recorded/keep/imu_only/helper0.8.1/eventIDs. Separate mainae22/2437995 andnavigation1f0;7of15changedblobs equal,not wholesources. Formalversion23 publishedNov21UTC/Nov22JST. Package02ba93/9779200bytes;fixed1104current0daa11/834096316bytes,tagf215unchanged,5historicalassetsunchanged. Smallchecksum/buildrecord verified. CI44939002857atbuilder2437995 actually built/checked/published,unlike priorno-op;391file/QEMU/HTTPclaims not hardware or tracker binary verification. Authorreports4upgrade/rollback paths but2existingUItestfailures(cancelIMUredo,disconnectedrollbackprogress)remain;notfullbrowserpass. Officialheads/formals/devactualtags/PRs/OSchannels/HF/blog/0182migration unchanged. No trackertests/build/software/model/image download,install,service/preview/robot action.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
@@ -57068,18 +57055,14 @@
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
     "official_os_development_channels_changed": false,
-    "replica_image_publication_changed": false,
-    "replica_public_software_changed": false,
-    "replica_main_integrations_changed": false,
+    "replica_image_publication_changed": true,
+    "replica_public_software_changed": true,
+    "replica_main_integrations_changed": true,
     "replica_github_latest_changed": false,
     "replica_merged_pull_requests": [],
     "official_os_pull_requests_changed": false,
-    "replica_github_latest_assets_changed": false,
-    "newly_discovered_pull_requests": {
-      "pollen-robotics/microduck": [
-        536
-      ]
-    }
+    "replica_github_latest_assets_changed": true,
+    "newly_discovered_pull_requests": {}
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -57734,24 +57717,24 @@
   },
   "replica_public_software": {
     "recorded_on": "2026-11-22",
-    "checked_at_utc": "2026-11-21T16:30:00Z",
-    "release_tag": "microduck-software-v2026.11.22",
-    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.22",
-    "release_id": 453798359,
-    "release_name": "2026.11.22 正式软件 · 修复升级后 Studio 显示旧页面",
-    "published_at_utc": "2026-11-21T15:54:39Z",
-    "published_at_jst": "2026-11-22T00:54:39+09:00",
-    "release_updated_at_utc": "2026-11-21T15:54:39Z",
+    "checked_at_utc": "2026-11-21T19:18:30Z",
+    "release_tag": "microduck-software-v2026.11.23",
+    "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.23",
+    "release_id": 453915741,
+    "release_name": "2026.11.23 正式软件 · 保留舵机中位，支持导入 IMU 方向",
+    "published_at_utc": "2026-11-21T19:04:49Z",
+    "published_at_jst": "2026-11-22T04:04:49+09:00",
+    "release_updated_at_utc": "2026-11-21T19:04:49Z",
     "draft": false,
     "prerelease": false,
-    "source_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
-    "tag_actual_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
-    "source_committed_at_utc": "2026-11-21T15:45:54Z",
-    "source_committed_at_jst": "2026-11-22T00:45:54+09:00",
-    "software_version": "2026.11.22",
-    "classification": "Formal replica software release for prepared ZERO3W/HD1910/1104; one cache-fix commit atop formal2026.11.20, separate from master and official daemon/OS.",
+    "source_sha": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+    "tag_actual_sha": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+    "source_committed_at_utc": "2026-11-21T18:46:22Z",
+    "source_committed_at_jst": "2026-11-22T03:46:22+09:00",
+    "software_version": "2026.11.23",
+    "classification": "Formal replica software for prepared ZERO3W/HD1910/1104;2commits atop formal22 for IMU import and saved-center preservation. Separate from master/official daemon/0182 migration.",
     "source_is_ancestor_of_observed_master": false,
-    "observed_master_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+    "observed_master_sha": "1f0ff4550f762bb326d9dd3ed757997b2e042cce",
     "image_rebuilt": true,
     "image_refresh_details": "#/replica_public_image",
     "GitHub_latest_image_tag": "microduck-replica-image-20261104",
@@ -57762,27 +57745,27 @@
     "stock_robotd_api": 43,
     "asset_inventory": [
       {
-        "name": "2026.11.22.software-update.tar",
+        "name": "2026.11.23.software-update.tar",
         "size": 9779200,
-        "digest": "sha256:ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
-        "asset_id": 776055551,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055551"
+        "digest": "sha256:02ba93add4dff646cf5c7cfcaf32889dfda8da51996effbe300e0bae9723089e",
+        "asset_id": 776571792,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776571792"
       },
       {
         "name": "SHA256SUMS.txt",
         "size": 97,
-        "digest": "sha256:ae27330964fc66c692d144927734b44a70ee6a7025cb25f6a3aaa0f7aaa4e318",
-        "asset_id": 776055552,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055552"
+        "digest": "sha256:bdab746cec8c14d8b9ba454dbb26eade66ab88e54abc09a92e78f9fab661444b",
+        "asset_id": 776571793,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776571793"
       }
     ],
     "software_package": {
-      "name": "2026.11.22.software-update.tar",
+      "name": "2026.11.23.software-update.tar",
       "size": 9779200,
-      "sha256": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
-      "scope": "Outer update-envelope GitHub metadata and small checksum checked; package bytes/inner manifest/signature not inspected.",
-      "asset_id": 776055551,
-      "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055551"
+      "sha256": "02ba93add4dff646cf5c7cfcaf32889dfda8da51996effbe300e0bae9723089e",
+      "asset_id": 776571792,
+      "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776571792",
+      "scope": "Outer update-envelope metadata and97-bytechecksum checked; no package bytes,inner manifest or tracker signature verification."
     },
     "preparation_tool": {
       "name": "prepare-stock-1104-online.pyz",
@@ -57799,15 +57782,15 @@
       "source_contract": "Builder pins factory/fix/current Git sources and signed suite-version digest; installer checks installed suite/files/original host units, stages three service drop-ins, and requires reboot. Neither preparation nor restore was executed here.",
       "release_tag": "microduck-software-v2026.11.20",
       "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20",
-      "scope": "Retained v2026.11.20 prerequisite for original/unprepared1104 cards, not an attachment of the2-asset2026.11.22 release. Preparation/reboot not performed by tracker."
+      "scope": "Retained v2026.11.20 prerequisite for original/unprepared1104 cards,not an attachment of current2-asset2026.11.23 release. Preparation/reboot not performed by tracker."
     },
     "metadata_attachment_verification": [
       {
-        "asset_id": 776055552,
+        "asset_id": 776571793,
         "name": "SHA256SUMS.txt",
-        "sha256": "ae27330964fc66c692d144927734b44a70ee6a7025cb25f6a3aaa0f7aaa4e318",
-        "content": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad  2026.11.22.software-update.tar\n",
         "size": 97,
+        "sha256": "bdab746cec8c14d8b9ba454dbb26eade66ab88e54abc09a92e78f9fab661444b",
+        "content": "02ba93add4dff646cf5c7cfcaf32889dfda8da51996effbe300e0bae9723089e  2026.11.23.software-update.tar\n",
         "bytes_match_github_metadata": true
       }
     ],
@@ -57818,43 +57801,183 @@
       "inner_manifest_inspected": false
     },
     "features": [
-      "Studio serves web/model display assets with content SHA256 ETag and no-cache, avoiding stale equal-size/normalized-mtime browser content. This is not inference weight replacement."
+      "IMU direction JSON import stages only source/quaternion for later explicit commit.",
+      "Onboarding skip/done keeps saved servo centers/directions; newly successful per-servo events alone request2048 recenter.",
+      "IMU-only commit preserves servo calibration and operating mode; preview displays saved centers.",
+      "Prior content-based Studio cache validation remains inherited from formal22."
     ],
     "actual_source_review": {
-      "parent_sha": "1549c752ea38e6b42aff31b4f1be9f7a3408d4b5",
-      "compare_to_previous_formal_url": "https://github.com/fanhao375/microduck-replica/compare/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5...2ce27f8cc685b547232f3253cb872106daed4439",
-      "commit_count": 1,
+      "parent_formal_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
+      "compare_to_previous_formal_url": "https://github.com/fanhao375/microduck-replica/compare/2ce27f8cc685b547232f3253cb872106daed4439...fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+      "commit_count": 2,
       "changed_files": [
-        "software/studio/studio/app.py",
-        "software/studio/tests/test_static_cache.py"
+        "software/studio/README.md",
+        "software/studio/deploy/INSTALL.md",
+        "software/studio/deploy/microduck-helper",
+        "software/studio/studio/commit.py",
+        "software/studio/studio/helper.py",
+        "software/studio/studio/imu.py",
+        "software/studio/studio/onboard.py",
+        "software/studio/tests/imu_bus_ui.mjs",
+        "software/studio/tests/test_commit.py",
+        "software/studio/tests/test_commit_e2e.py",
+        "software/studio/tests/test_helper_calib.py",
+        "software/studio/tests/test_imu_backend.py",
+        "software/studio/tests/test_onboard.py",
+        "software/studio/web/app.js",
+        "software/studio/web/imu.js"
       ],
-      "cache_contract": "WebFileResponse hashes served bytes in64KiB blocks; If-None-Match strong/weak/* yields304, date-only validation does not. If-Range only accepts current ETag; gzip/raw meshes have distinct content hashes and Vary:Accept-Encoding.",
-      "separate_main_commit": "e015b6156b9410e2fbf745a838fa5131ba6431d3",
-      "main_and_formal_source_are_identical": false,
-      "source_scope": "Formal22 adds only this cache fix to formal20. Main/formal have separate histories; compare merge-base is f215b658a4f24b669cf664b6381a559c61472009. Main PR55,58,61-65 and factory-refresh sources are not thereby present in software22."
+      "formal_commits": [
+        {
+          "sha": "95f4eedac07cda71d7b2cc55bdc6e895bd7599b8",
+          "committed_at_utc": "2026-11-21T18:21:30Z",
+          "committed_at_jst": "2026-11-22T03:21:30+09:00",
+          "subject": "Studio: import an existing IMU mounting on the IMU page"
+        },
+        {
+          "sha": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+          "committed_at_utc": "2026-11-21T18:46:22Z",
+          "committed_at_jst": "2026-11-22T03:46:22+09:00",
+          "subject": "Preserve saved servo centers through onboarding and IMU import"
+        }
+      ],
+      "imu_import": "Page accepts<=256KiBJSON,one quaternion record across root/imu/mount/records[].imu; sends only source+quat. Server requires current IMU kind bus/bno08x/lsm6dsv16x,finite numeric4-vector(no bool),unit norm within1e-3 and active profile/bus consistency. Stages normalized imu-pending.json with imported marker; rejects active verification/redo/capture/commit. Import itself does not write robot calibration.",
+      "physical_scope": "No individual-robot identity or physical mounting truth established by numeric/type checks. Operator must match file to this robot/chip/mount; no tracker import.",
+      "joint_modes": "New helper0.8.1 calib-commit joint_mode recorded|keep|imu_only. keep retains saved center/direction/limits; ordinary setup may mark uncalibrated joints and fill missing limits. Studio filters fresh successful event IDs and sends centered=true; helper recorded mode resets only those explicit boolean flags to2048,does not ingest event IDs. Boot/live pose is not a zero measurement.",
+      "event_contract": "Per-servo UUID events replace file-mtime-only center reuse. Successful commit records applied event IDs; skip/done discards older events and allows later explicit centering. Preview renders actual generated TOML centers,not assumed2048.",
+      "imu_only": "Copies current calibration then replaces only selected IMU orientation. Preserves joints,motion_enabled,limits/flags and mode; commissioning drop-in retained and readback accepts commissioning/ready instead of forcing motion/control. Existing lock,backup,atomic file install,readback and rollback gates remain.",
+      "compatibility": "Studio always sends joint_mode. Old strict helper rejects unknown field; no fallback to old rewrite-all-centers behavior. Formal/source helper agreement is a contract requirement,not a daemon API bump.",
+      "formal_main_scope": "Formal23 is2commits atop formal22 on separate history. Current master1f0ff45 is not source ancestor; common base f215b658. Only7of15 changed-file blobs equal main2437995; do not infer whole sources or main PR55/58/61-65 are included.",
+      "formal_main_changed_blob_comparison": [
+        {
+          "file": "software/studio/README.md",
+          "formal_blob": "9d152679a762ef31167191054e690d66e897bbf4",
+          "main_blob": "b02a4d29e3b0b9f164808283ff73701849e1eb1a",
+          "identical": false
+        },
+        {
+          "file": "software/studio/deploy/INSTALL.md",
+          "formal_blob": "205b48e32fe4339bd61f9581972e9d561cc872c9",
+          "main_blob": "205b48e32fe4339bd61f9581972e9d561cc872c9",
+          "identical": true
+        },
+        {
+          "file": "software/studio/deploy/microduck-helper",
+          "formal_blob": "bc51deb9b8374f514a161e07cfe13ca9e4b3657c",
+          "main_blob": "52258e92e91a69632f43762a97f009771c61b108",
+          "identical": false
+        },
+        {
+          "file": "software/studio/studio/commit.py",
+          "formal_blob": "7381a2d9f0ff52424776254d941d33f2e2c1a9da",
+          "main_blob": "7381a2d9f0ff52424776254d941d33f2e2c1a9da",
+          "identical": true
+        },
+        {
+          "file": "software/studio/studio/helper.py",
+          "formal_blob": "5bf6f3d52b76a0da0ff7b45ac73cd49d5c685e36",
+          "main_blob": "cc14b395944298a7c6b3342214dc71abf928d287",
+          "identical": false
+        },
+        {
+          "file": "software/studio/studio/imu.py",
+          "formal_blob": "f83d154edf41d0115e6d54a6a68868134fe2b47e",
+          "main_blob": "50e81d8df867ac366caf520dbfb4b2b0a773bea4",
+          "identical": false
+        },
+        {
+          "file": "software/studio/studio/onboard.py",
+          "formal_blob": "e28f32c68941f15b76db793c904ca00f1ec6790c",
+          "main_blob": "e28f32c68941f15b76db793c904ca00f1ec6790c",
+          "identical": true
+        },
+        {
+          "file": "software/studio/tests/imu_bus_ui.mjs",
+          "formal_blob": "6a457ee48cdd72dc930f9ae19a5f18b218bb1e4a",
+          "main_blob": "dce26ec67347a5159234a8107f72e31e2b699acb",
+          "identical": false
+        },
+        {
+          "file": "software/studio/tests/test_commit.py",
+          "formal_blob": "47eb617c33dd4fb4ab13955e08a08da2d9deaca8",
+          "main_blob": "47eb617c33dd4fb4ab13955e08a08da2d9deaca8",
+          "identical": true
+        },
+        {
+          "file": "software/studio/tests/test_commit_e2e.py",
+          "formal_blob": "e7ef6f5593a179c39c235b1861727a1bd5e1cbdc",
+          "main_blob": "9793c9c01dbc964b8f8c3fcfdb04db1cd81d6751",
+          "identical": false
+        },
+        {
+          "file": "software/studio/tests/test_helper_calib.py",
+          "formal_blob": "032c8a25152bb075467f0610409d9fad10e15e2a",
+          "main_blob": "032c8a25152bb075467f0610409d9fad10e15e2a",
+          "identical": true
+        },
+        {
+          "file": "software/studio/tests/test_imu_backend.py",
+          "formal_blob": "092cf76badb96b8d429360c75345ecac7f21acef",
+          "main_blob": "092cf76badb96b8d429360c75345ecac7f21acef",
+          "identical": true
+        },
+        {
+          "file": "software/studio/tests/test_onboard.py",
+          "formal_blob": "60d97c482bf6b12173d23e3824b4645cf0cc765b",
+          "main_blob": "60d97c482bf6b12173d23e3824b4645cf0cc765b",
+          "identical": true
+        },
+        {
+          "file": "software/studio/web/app.js",
+          "formal_blob": "301fa080ff4a19b71d4abd893b01184ebff6269a",
+          "main_blob": "14cd6f0cd272e0ab1a0791eee331579178e6386f",
+          "identical": false
+        },
+        {
+          "file": "software/studio/web/imu.js",
+          "formal_blob": "887f6289d81f6b4c93069fa8d54723b91fa40433",
+          "main_blob": "856ce270474a073cd5989ca1a26bc6694a5b0be9",
+          "identical": false
+        }
+      ],
+      "fixed_sources": {
+        "software/studio/studio/imu.py": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/studio/imu.py",
+        "software/studio/studio/commit.py": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/studio/commit.py",
+        "software/studio/studio/onboard.py": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/studio/onboard.py",
+        "software/studio/studio/helper.py": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/studio/helper.py",
+        "software/studio/deploy/microduck-helper": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/deploy/microduck-helper",
+        "software/studio/web/imu.js": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/web/imu.js",
+        "software/studio/web/app.js": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/web/app.js",
+        "software/studio/deploy/INSTALL.md": "https://github.com/fanhao375/microduck-replica/blob/fd782d8d75957bef6f0f95e2fc8fad23c3473733/software/studio/deploy/INSTALL.md"
+      }
     },
     "reported_verification": {
-      "source": "Published software22 release notes453798359; author report, not tracker rerun.",
-      "scope": "Original1104 ARM updater in QEMU offline, upgrades from11.4/11.20rc1/11.20,391 installed-file hashes,rollback and signature refusal.",
-      "hardware": "No physical robot acceptance inferred; existing1104/0182 limits retained."
+      "source": "Published453915741release notes at snapshot; author report,not tracker rerun.",
+      "scope": "Original1104 ARM updater in QEMU:11.4,11.20rc1,11.20,11.22 check/install/rollback paths and391 runtime files each; software regression for center retention/IMU import.",
+      "known_failures": [
+        "Existing webpage test: cancel IMU recalibration.",
+        "Existing webpage test: display rollback progress during disconnection."
+      ],
+      "limits": "Not a full passing browser-suite claim. Image CI checks factory preload/ARM Studio routes; it does not establish all four update paths or these two UI failures passed.",
+      "hardware": "Fresh-card boot and real actions pending. Independent0182/canonicalARM reports retain original source/fixture/service-capture limits."
     },
     "hardware_acceptance": false,
     "independent_0182_acceptance_changed": false,
     "deployed_by_heartbeat": false,
     "package_signature_verified_by_tracker": false,
-    "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/2ce27f8cc685b547232f3253cb872106daed4439",
+    "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/fd782d8d75957bef6f0f95e2fc8fad23c3473733",
     "operation_document_url": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/updater/stock1104/README.md",
     "impact": {
-      "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
-      "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
-      "ToF": "No sampling, coordinate or avoidance implementation change.",
-      "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
-      "training": "No training recipe or policy weights added by the cache-fix delta.",
-      "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
-      "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+      "HD1910": "High calibration impact: preserve saved per-servo centers/directions when skipping/confirming onboarding. Only new explicit successful calibration events recenter selected joints. IMU-only import preserves all joints,motion_enabled and existing mode; no native runtime/0182 deployment or physical acceptance.",
+      "camera": "No capture,ISP,calibration or existing preview availability verification.",
+      "ToF": "No sensor sampling,geometry or avoidance change.",
+      "model_management": "No new policy/model contract or weights in15-file software delta. Quaternion/source validation does not establish ownership or physical mounting correctness.",
+      "training": "No training implementation or new weights. RL92 remains independent unmerged draft.",
+      "motion": "Software prevents accidental center overwrite and changes commit-mode contract; does not validate gait,get-up,real servo behavior or original-card dependency compatibility.",
+      "sound": "No new sound assets,voice implementation or acoustic acceptance in this delta."
     },
-    "priority": "High for current download/cache provenance; physical adoption and native migration gates unchanged.",
-    "heartbeat_verification": "Read committed/tagged source and small metadata only; no package/prepare program/model/image download or execution,tests,build,service,robot or live-page operation.",
+    "priority": "High for HD1910 calibration preservation and matching helper/import contracts; physical adoption still pending.",
+    "heartbeat_verification": "Read actual formal/main source,release andsmallchecksums; observed existing CI metadata only. No package/model/image/program download,signature execution,tests,build,install,service,robot or live-page operation.",
     "history": [
       {
         "recorded_on": "2026-10-31",
@@ -58327,8 +58450,134 @@
           "nov20_main_merges_and_fixes_in_this_formal_tag": false,
           "details": "#/replica_main_integrations/nov20_integrations"
         }
+      },
+      {
+        "recorded_on": "2026-11-22",
+        "checked_at_utc": "2026-11-21T16:30:00Z",
+        "release_tag": "microduck-software-v2026.11.22",
+        "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.22",
+        "release_id": 453798359,
+        "release_name": "2026.11.22 正式软件 · 修复升级后 Studio 显示旧页面",
+        "published_at_utc": "2026-11-21T15:54:39Z",
+        "published_at_jst": "2026-11-22T00:54:39+09:00",
+        "release_updated_at_utc": "2026-11-21T15:54:39Z",
+        "draft": false,
+        "prerelease": false,
+        "source_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
+        "tag_actual_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
+        "source_committed_at_utc": "2026-11-21T15:45:54Z",
+        "source_committed_at_jst": "2026-11-22T00:45:54+09:00",
+        "software_version": "2026.11.22",
+        "classification": "Formal replica software release for prepared ZERO3W/HD1910/1104; one cache-fix commit atop formal2026.11.20, separate from master and official daemon/OS.",
+        "source_is_ancestor_of_observed_master": false,
+        "observed_master_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+        "image_rebuilt": true,
+        "image_refresh_details": "#/replica_public_image",
+        "GitHub_latest_image_tag": "microduck-replica-image-20261104",
+        "target_image": "microduck-replica-image-20261104",
+        "target_stock_source_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+        "stock_runtime_family": "0.15.1",
+        "stock_robotd_build": "replica-imu-verify-control.48",
+        "stock_robotd_api": 43,
+        "asset_inventory": [
+          {
+            "name": "2026.11.22.software-update.tar",
+            "size": 9779200,
+            "digest": "sha256:ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
+            "asset_id": 776055551,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055551"
+          },
+          {
+            "name": "SHA256SUMS.txt",
+            "size": 97,
+            "digest": "sha256:ae27330964fc66c692d144927734b44a70ee6a7025cb25f6a3aaa0f7aaa4e318",
+            "asset_id": 776055552,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055552"
+          }
+        ],
+        "software_package": {
+          "name": "2026.11.22.software-update.tar",
+          "size": 9779200,
+          "sha256": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
+          "scope": "Outer update-envelope GitHub metadata and small checksum checked; package bytes/inner manifest/signature not inspected.",
+          "asset_id": 776055551,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776055551"
+        },
+        "preparation_tool": {
+          "name": "prepare-stock-1104-online.pyz",
+          "size": 227510,
+          "sha256": "41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07",
+          "signature_attachment": "prepare-stock-1104-online.pyz.minisig",
+          "required_on_stock1104": true,
+          "reboot_required": true,
+          "executed_by_tracker": false,
+          "signature_verified_by_tracker": false,
+          "source_build_file": "software/updater/stock1104/build.py",
+          "factory_pin": "f215b658a4f24b669cf664b6381a559c61472009",
+          "readiness_fix_source": "a9ef4020a610fb7f4948ec49845e8d23c9fbb432",
+          "source_contract": "Builder pins factory/fix/current Git sources and signed suite-version digest; installer checks installed suite/files/original host units, stages three service drop-ins, and requires reboot. Neither preparation nor restore was executed here.",
+          "release_tag": "microduck-software-v2026.11.20",
+          "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.20",
+          "scope": "Retained v2026.11.20 prerequisite for original/unprepared1104 cards, not an attachment of the2-asset2026.11.22 release. Preparation/reboot not performed by tracker."
+        },
+        "metadata_attachment_verification": [
+          {
+            "asset_id": 776055552,
+            "name": "SHA256SUMS.txt",
+            "sha256": "ae27330964fc66c692d144927734b44a70ee6a7025cb25f6a3aaa0f7aaa4e318",
+            "content": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad  2026.11.22.software-update.tar\n",
+            "size": 97,
+            "bytes_match_github_metadata": true
+          }
+        ],
+        "metadata_crosschecks": {
+          "checksum_entry_matches_package_metadata": true,
+          "binary_payloads_downloaded": false,
+          "archive_unpacked": false,
+          "inner_manifest_inspected": false
+        },
+        "features": [
+          "Studio serves web/model display assets with content SHA256 ETag and no-cache, avoiding stale equal-size/normalized-mtime browser content. This is not inference weight replacement."
+        ],
+        "actual_source_review": {
+          "parent_sha": "1549c752ea38e6b42aff31b4f1be9f7a3408d4b5",
+          "compare_to_previous_formal_url": "https://github.com/fanhao375/microduck-replica/compare/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5...2ce27f8cc685b547232f3253cb872106daed4439",
+          "commit_count": 1,
+          "changed_files": [
+            "software/studio/studio/app.py",
+            "software/studio/tests/test_static_cache.py"
+          ],
+          "cache_contract": "WebFileResponse hashes served bytes in64KiB blocks; If-None-Match strong/weak/* yields304, date-only validation does not. If-Range only accepts current ETag; gzip/raw meshes have distinct content hashes and Vary:Accept-Encoding.",
+          "separate_main_commit": "e015b6156b9410e2fbf745a838fa5131ba6431d3",
+          "main_and_formal_source_are_identical": false,
+          "source_scope": "Formal22 adds only this cache fix to formal20. Main/formal have separate histories; compare merge-base is f215b658a4f24b669cf664b6381a559c61472009. Main PR55,58,61-65 and factory-refresh sources are not thereby present in software22."
+        },
+        "reported_verification": {
+          "source": "Published software22 release notes453798359; author report, not tracker rerun.",
+          "scope": "Original1104 ARM updater in QEMU offline, upgrades from11.4/11.20rc1/11.20,391 installed-file hashes,rollback and signature refusal.",
+          "hardware": "No physical robot acceptance inferred; existing1104/0182 limits retained."
+        },
+        "hardware_acceptance": false,
+        "independent_0182_acceptance_changed": false,
+        "deployed_by_heartbeat": false,
+        "package_signature_verified_by_tracker": false,
+        "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/2ce27f8cc685b547232f3253cb872106daed4439",
+        "operation_document_url": "https://github.com/fanhao375/microduck-replica/blob/1549c752ea38e6b42aff31b4f1be9f7a3408d4b5/software/updater/stock1104/README.md",
+        "impact": {
+          "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
+          "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
+          "ToF": "No sampling, coordinate or avoidance implementation change.",
+          "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
+          "training": "No training recipe or policy weights added by the cache-fix delta.",
+          "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
+          "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+        },
+        "priority": "High for current download/cache provenance; physical adoption and native migration gates unchanged.",
+        "heartbeat_verification": "Read committed/tagged source and small metadata only; no package/prepare program/model/image download or execution,tests,build,service,robot or live-page operation."
       }
-    ]
+    ],
+    "release_notes_sha256": "e8e2406cf153285bbb19aed28698e6a6316f352626febf24f7a144f27d68069c",
+    "version_date_scope": "Version name23; actual publication is2026-11-21UTC/2026-11-22AsiaTokyo,not an inferred November23 release date."
   },
   "replica_public_prereleases": {
     "recorded_on": "2026-11-04",
@@ -62544,30 +62793,108 @@
       "replica_merged_pull_requests": [],
       "official_os_pull_requests_changed": false,
       "replica_github_latest_assets_changed": true
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-21T16:30:00Z",
+      "source_snapshot_utc": "2026-11-21T18:21:43Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-21T18:24:05Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {
+        "pollen-robotics/microduck_rl": [
+          92
+        ]
+      },
+      "updated_pull_requests": {
+        "pollen-robotics/microduck": [
+          537,
+          538
+        ],
+        "pollen-robotics/microduck_rl": [
+          82,
+          90
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "notes": "New draftRL92 actual6724d8fc atopfirst6a82:CPU final-layer fit withv8 teacher/v10 anchors,slow-start/yaw/course cues;pairedsim author reports residualhead-sensitive slowpositive stalls/negativeovershoot,notphysical or officialweights. OlderPR536 newlyarchived(literal shutdown cmdline paths);537/538 sync knownmain306incoming each,tests unchanged;82/90 sync knowndevelop5incoming each,all5/2featureblobs identical. CoreCI536/537/538action_required0jobs,RLheadruns absent;oldCPU/CUDA/macOS reports not relabelled latesthead tests. Coredefaults/formals/devactualtags/OS6channels/HF/blog/replicasoftware22/current1104/0182migration unchanged. Tracker docs only,no tests/models/build/service/page/robot actions.",
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "official_os_development_channels_changed": false,
+      "replica_image_publication_changed": false,
+      "replica_public_software_changed": false,
+      "replica_main_integrations_changed": false,
+      "replica_github_latest_changed": false,
+      "replica_merged_pull_requests": [],
+      "official_os_pull_requests_changed": false,
+      "replica_github_latest_assets_changed": false,
+      "newly_discovered_pull_requests": {
+        "pollen-robotics/microduck": [
+          536
+        ]
+      }
     }
   ],
   "replica_public_image": {
     "recorded_on": "2026-11-22",
-    "checked_at_utc": "2026-11-21T16:30:00Z",
-    "classification": "Refreshed attachments on fixed1104 formal replica image tag, preloaded formal2026.11.22; not a new native runtime release.",
+    "checked_at_utc": "2026-11-21T19:18:30Z",
+    "classification": "Fixed1104 formal image attachments refreshed again,preloaded formal23; same factory tag/native family,not native0182 upgrade.",
     "release_tag": "microduck-replica-image-20261104",
     "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
     "release_id": 433776261,
-    "release_name": "1104 正式镜像 · Radxa ZERO 3W · 预装软件 2026.11.22",
+    "release_name": "1104 正式镜像 · Radxa ZERO 3W · 预装软件 2026.11.23",
     "published_at_utc": "2026-11-04T10:57:46Z",
-    "release_updated_at_utc": "2026-11-21T16:00:33Z",
-    "release_updated_at_tokyo": "2026-11-22T01:00:33+09:00",
+    "release_updated_at_utc": "2026-11-21T19:10:38Z",
+    "release_updated_at_tokyo": "2026-11-22T04:10:38+09:00",
     "draft": false,
     "prerelease": false,
     "github_latest": true,
     "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
-    "tag_scope": "Unchanged factory-base tag, not a source revision proving refreshed image build execution.",
+    "tag_scope": "Unchanged factory-basef215tag; current softwarefd782d8 and CIbuilder2437995 identify distinct sources,asset digest identifies delivered bytes.",
     "native_source_sha": "eecac1878136d3188370a5f6460b7d0521cf845d",
     "runtime_family": "0.15.1",
     "robotd_build": "replica-imu-verify-control.48",
     "robotd_api": 43,
     "native_scope": "Inherited base metadata and committed builder controller-hash checks; tracker did not inspect new image bytes or certify native files.",
     "asset_inventory": [
+      {
+        "name": "1104-build.json",
+        "size": 714,
+        "digest": "sha256:4f824dcab15e286d817f7a1c083db9291ad26d245e81f7b7a28e97bb450f11c0",
+        "asset_id": 776585426,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585426"
+      },
+      {
+        "name": "factory-1104-source.xz",
+        "size": 755670732,
+        "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+        "asset_id": 776053818,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
+      },
+      {
+        "name": "factory-records.zip",
+        "size": 23476,
+        "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+        "asset_id": 776053761,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
+      },
       {
         "name": "microduck-replica-20261104-licenses.txt",
         "size": 13349,
@@ -62590,73 +62917,52 @@
         "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113646"
       },
       {
-        "name": "factory-records.zip",
-        "size": 23476,
-        "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
-        "asset_id": 776053761,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
-      },
-      {
-        "name": "factory-1104-source.xz",
-        "size": 755670732,
-        "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
-        "asset_id": 776053818,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
-      },
-      {
         "name": "microduck-replica-20261104.img.xz",
-        "size": 834340632,
-        "digest": "sha256:5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
-        "asset_id": 776074554,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
+        "size": 834096316,
+        "digest": "sha256:0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4",
+        "asset_id": 776584129,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776584129"
       },
       {
         "name": "microduck-replica-20261104.img.xz.sha256",
         "size": 100,
-        "digest": "sha256:25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
-        "asset_id": 776082282,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082282"
-      },
-      {
-        "name": "1104-build.json",
-        "size": 714,
-        "digest": "sha256:7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
-        "asset_id": 776082427,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427"
+        "digest": "sha256:66de247f8687e10d94d0b8674bd1ee56453b0b85069676fbe8afc7aa0d202693",
+        "asset_id": 776585369,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585369"
       },
       {
         "name": "SHA256SUMS.txt",
         "size": 783,
-        "digest": "sha256:bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
-        "asset_id": 776082684,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082684"
+        "digest": "sha256:4eb6db70f7463cea4c85480600de5c16fd612f09c0accf7a49809894963e05a3",
+        "asset_id": 776585489,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585489"
       }
     ],
     "package": {
       "name": "microduck-replica-20261104.img.xz",
-      "size": 834340632,
-      "sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
-      "verification": "1104-build.json published report, not a tracker rerun",
-      "asset_id": 776074554,
-      "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
+      "size": 834096316,
+      "sha256": "0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4",
+      "asset_id": 776584129,
+      "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776584129",
+      "verification": "Current1104-build.json plus observedCI44939002857; no tracker binary rehash."
     },
     "matching_software": {
-      "tag": "microduck-software-v2026.11.22",
-      "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.22",
+      "tag": "microduck-software-v2026.11.23",
+      "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.23",
       "prerelease": false,
-      "tag_actual_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
+      "tag_actual_sha": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
       "asset_count": 2
     },
     "build_record": {
       "schema": 1,
       "base_version": "1104",
-      "software_version": "2026.11.22",
-      "source_revision": "2ce27f8cc685b547232f3253cb872106daed4439",
+      "software_version": "2026.11.23",
+      "source_revision": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
       "base_sha256": "f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
-      "package_sha256": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
+      "package_sha256": "02ba93add4dff646cf5c7cfcaf32889dfda8da51996effbe300e0bae9723089e",
       "prepare_sha256": "41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07",
-      "image_sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
-      "image_bytes": 834340632,
+      "image_sha256": "0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4",
+      "image_bytes": 834096316,
       "verified_runtime_files": 391,
       "compressed_image_readback": true,
       "ext4_checked": true,
@@ -62664,45 +62970,45 @@
       "stale_browser_revalidation": true,
       "hardware_boot_verified": false
     },
-    "build_record_scope": "714-byte public record hash verified. source_revision names software source2ce27f8, not builder source. Assertions report391 files,readback,ext4 and ARM Studio HTTP/cache checks,hardware_boot_verified=false. No image binary downloaded.",
+    "build_record_scope": "714-byte public record verified against GitHub asset digest. source_revision names formal softwarefd782d8. Reports391files,compressed readback,ext4,ARM Studio HTTP/cache checks and hardware_boot_verified=false; tracker did not download image.",
     "metadata_attachment_verification": [
       {
+        "asset_id": 776585426,
         "name": "1104-build.json",
-        "asset_id": 776082427,
         "size": 714,
-        "sha256": "7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
-        "bytes_match_github_metadata": true,
-        "scope": "Small metadata bytes inspected."
+        "sha256": "4f824dcab15e286d817f7a1c083db9291ad26d245e81f7b7a28e97bb450f11c0",
+        "content": "{\n  \"schema\": 1,\n  \"base_version\": \"1104\",\n  \"software_version\": \"2026.11.23\",\n  \"source_revision\": \"fd782d8d75957bef6f0f95e2fc8fad23c3473733\",\n  \"base_sha256\": \"f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78\",\n  \"package_sha256\": \"02ba93add4dff646cf5c7cfcaf32889dfda8da51996effbe300e0bae9723089e\",\n  \"prepare_sha256\": \"41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07\",\n  \"image_sha256\": \"0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4\",\n  \"image_bytes\": 834096316,\n  \"verified_runtime_files\": 391,\n  \"compressed_image_readback\": true,\n  \"ext4_checked\": true,\n  \"arm_studio_http\": true,\n  \"stale_browser_revalidation\": true,\n  \"hardware_boot_verified\": false\n}\n",
+        "bytes_match_github_metadata": true
       },
       {
+        "asset_id": 776585489,
         "name": "SHA256SUMS.txt",
-        "asset_id": 776082684,
         "size": 783,
-        "sha256": "bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
-        "bytes_match_github_metadata": true,
-        "scope": "Small metadata bytes inspected."
+        "sha256": "4eb6db70f7463cea4c85480600de5c16fd612f09c0accf7a49809894963e05a3",
+        "content": "4f824dcab15e286d817f7a1c083db9291ad26d245e81f7b7a28e97bb450f11c0  1104-build.json\nf9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78  factory-1104-source.xz\ne9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a  factory-records.zip\nc9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c  microduck-replica-20261104-licenses.txt\n539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d  microduck-replica-20261104-models.txt\n42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b  microduck-replica-20261104-third-party.txt\n0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4  microduck-replica-20261104.img.xz\n66de247f8687e10d94d0b8674bd1ee56453b0b85069676fbe8afc7aa0d202693  microduck-replica-20261104.img.xz.sha256\n",
+        "bytes_match_github_metadata": true
       },
       {
+        "asset_id": 776585369,
         "name": "microduck-replica-20261104.img.xz.sha256",
-        "asset_id": 776082282,
         "size": 100,
-        "sha256": "25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
-        "bytes_match_github_metadata": true,
-        "scope": "Small metadata bytes inspected."
-      },
-      {
-        "name": "factory-records.zip",
-        "asset_id": 776053761,
-        "size": 23476,
-        "sha256": "e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
-        "bytes_match_github_metadata": true,
-        "scope": "Report archive inspected in memory without extraction/execution."
+        "sha256": "66de247f8687e10d94d0b8674bd1ee56453b0b85069676fbe8afc7aa0d202693",
+        "content": "0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4  microduck-replica-20261104.img.xz\n",
+        "bytes_match_github_metadata": true
       }
     ],
     "metadata_crosschecks": {
       "checksum_entries_match_current_asset_metadata": 8,
       "image_checksum_matches_metadata_and_build_record": true,
-      "archived_member_hashes_match_original_inventory": 12
+      "unchanged_previous_asset_metadata_count": 5,
+      "unchanged_previous_asset_names": [
+        "factory-1104-source.xz",
+        "factory-records.zip",
+        "microduck-replica-20261104-licenses.txt",
+        "microduck-replica-20261104-models.txt",
+        "microduck-replica-20261104-third-party.txt"
+      ],
+      "factory_archive_scope": "Originalbase/reportarchive/3license-modeltexts metadata unchanged.12-member byte verification remains prior16:30UTC evidence,not a new archive download/retest."
     },
     "factory_base_archive": {
       "name": "factory-1104-source.xz",
@@ -62779,25 +63085,27 @@
       "scope": "All12 report/checksum/license members exactly match original asset name,size,digest. Historical factory verification is not refreshed-image regression."
     },
     "builder_source": {
-      "sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
-      "url": "https://github.com/fanhao375/microduck-replica/blob/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c/software/image/refresh1104/build.py",
-      "smoke_url": "https://github.com/fanhao375/microduck-replica/blob/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c/software/image/refresh1104/smoke.py",
-      "scope": "Static committed recipe only; exact builder execution revision for current attachments not independently established.",
+      "sha": "24379951746c351c0e2d0f133c51d94d56459375",
+      "url": "https://github.com/fanhao375/microduck-replica/blob/24379951746c351c0e2d0f133c51d94d56459375/software/image/refresh1104/build.py",
+      "smoke_url": "https://github.com/fanhao375/microduck-replica/blob/24379951746c351c0e2d0f133c51d94d56459375/software/image/refresh1104/smoke.py",
+      "scope": "CI44939002857 checks out github.sha2437995 for both jobs; actual build and promotion steps succeeded. Recipe blobs identical to archived7a0. Software revisionfd782d8 remains distinct from builder revision.",
       "contract": "Pins factory base/preparation/public key,verifies signatures,applies update using original ARM engine in offline QEMU,retains rollback,checks391-file tree,controller hashes,clean identity/commissioning. Decompresses compressed output independently and runs ARM Studio in private network/overlay; no physical boot."
     },
     "refresh_ci_observation": {
-      "id": 44922228079,
-      "url": "https://github.com/fanhao375/microduck-replica/actions/runs/44922228079",
-      "head_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+      "id": 44939002857,
+      "url": "https://github.com/fanhao375/microduck-replica/actions/runs/44939002857",
+      "head_sha": "24379951746c351c0e2d0f133c51d94d56459375",
       "event": "workflow_dispatch",
-      "created_at_utc": "2026-11-21T16:01:06Z",
-      "updated_at_utc": "2026-11-21T16:01:25Z",
+      "created_at_utc": "2026-11-21T19:05:03Z",
+      "updated_at_utc": "2026-11-21T19:10:42Z",
       "conclusion": "success",
       "jobs": [
         {
-          "id": 136900549443,
+          "id": 136951850606,
           "name": "build",
           "conclusion": "success",
+          "started_at_utc": "2026-11-21T19:05:06Z",
+          "completed_at_utc": "2026-11-21T19:09:31Z",
           "steps": [
             {
               "name": "Set up job",
@@ -62817,23 +63125,23 @@
             },
             {
               "name": "Install Linux image tools",
-              "conclusion": "skipped"
+              "conclusion": "success"
             },
             {
               "name": "Download original factory image and signed inputs",
-              "conclusion": "skipped"
+              "conclusion": "success"
             },
             {
               "name": "Build and verify the offline factory image",
-              "conclusion": "skipped"
+              "conclusion": "success"
             },
             {
               "name": "Match outputs to the public software package",
-              "conclusion": "skipped"
+              "conclusion": "success"
             },
             {
               "name": "Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f",
-              "conclusion": "skipped"
+              "conclusion": "success"
             },
             {
               "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
@@ -62846,13 +63154,50 @@
           ]
         },
         {
-          "id": 136900633677,
+          "id": 136953101377,
           "name": "publish",
-          "conclusion": "skipped",
-          "steps": []
+          "conclusion": "success",
+          "started_at_utc": "2026-11-21T19:09:33Z",
+          "completed_at_utc": "2026-11-21T19:10:41Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131",
+              "conclusion": "success"
+            },
+            {
+              "name": "Promote verified files to the fixed 1104 release",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
         }
       ],
-      "scope": "No-op already-current selection and promotion-unit-test CI. Image tools/download/build/verify/upload steps and publish job skipped. Not the refreshed image build or publish provenance."
+      "artifacts": [
+        {
+          "id": 14721091573,
+          "name": "verified-factory-44939002857-1",
+          "size_in_bytes": 834097604,
+          "digest": "sha256:511445bb5e7b8eeb26991d1f9049e89dce2e0268c7baec81ffdfde370539dde9",
+          "expired": false
+        }
+      ],
+      "scope": "Actual build and publish jobs/steps all succeeded,unlike earlier44922228079no-op. Pinned checkout2437995 ran offline builder,checked output/package and promoted artifact byID. CI metadata/code/report evidence,not tracker rerun,image rehash or hardware acceptance.",
+      "artifact_digest_scope": "511445bb... is Actions archive-container digest,not the .img.xz digest0daa11e5..."
     },
     "hardware_acceptance": {
       "new_card_boot": false,
@@ -62870,23 +63215,23 @@
     },
     "fixed_sources": {
       "factory_base_commit": "https://github.com/fanhao375/microduck-replica/commit/f215b658a4f24b669cf664b6381a559c61472009",
-      "software_source": "https://github.com/fanhao375/microduck-replica/commit/2ce27f8cc685b547232f3253cb872106daed4439",
-      "builder_source": "https://github.com/fanhao375/microduck-replica/commit/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+      "software_source": "https://github.com/fanhao375/microduck-replica/commit/fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+      "builder_source": "https://github.com/fanhao375/microduck-replica/commit/24379951746c351c0e2d0f133c51d94d56459375",
       "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
       "latest_release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest",
-      "build_record_asset_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427",
+      "build_record_asset_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585426",
       "factory_records_asset_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
     },
     "impact": {
-      "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
-      "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
-      "ToF": "No sampling, coordinate or avoidance implementation change.",
-      "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
-      "training": "No training recipe or policy weights added by the cache-fix delta.",
-      "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
-      "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+      "HD1910": "High calibration impact: preserve saved per-servo centers/directions when skipping/confirming onboarding. Only new explicit successful calibration events recenter selected joints. IMU-only import preserves all joints,motion_enabled and existing mode; no native runtime/0182 deployment or physical acceptance.",
+      "camera": "No capture,ISP,calibration or existing preview availability verification.",
+      "ToF": "No sensor sampling,geometry or avoidance change.",
+      "model_management": "No new policy/model contract or weights in15-file software delta. Quaternion/source validation does not establish ownership or physical mounting correctness.",
+      "training": "No training implementation or new weights. RL92 remains independent unmerged draft.",
+      "motion": "Software prevents accidental center overwrite and changes commit-mode contract; does not validate gait,get-up,real servo behavior or original-card dependency compatibility.",
+      "sound": "No new sound assets,voice implementation or acoustic acceptance in this delta."
     },
-    "priority": "High for replaced same-name image provenance and historical acceptance boundaries.",
+    "priority": "High for same-name image digest/software/helper provenance; original factory and prior22verification histories retained.",
     "current_latest_download_record": "#/replica_github_latest",
     "history": [
       {
@@ -63044,12 +63389,355 @@
           "current_latest_download_record": "#/replica_github_latest",
           "original_release_and_acceptance_record_preserved": true
         }
+      },
+      {
+        "recorded_on": "2026-11-22",
+        "checked_at_utc": "2026-11-21T16:30:00Z",
+        "classification": "Refreshed attachments on fixed1104 formal replica image tag, preloaded formal2026.11.22; not a new native runtime release.",
+        "release_tag": "microduck-replica-image-20261104",
+        "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+        "release_id": 433776261,
+        "release_name": "1104 正式镜像 · Radxa ZERO 3W · 预装软件 2026.11.22",
+        "published_at_utc": "2026-11-04T10:57:46Z",
+        "release_updated_at_utc": "2026-11-21T16:00:33Z",
+        "release_updated_at_tokyo": "2026-11-22T01:00:33+09:00",
+        "draft": false,
+        "prerelease": false,
+        "github_latest": true,
+        "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+        "tag_scope": "Unchanged factory-base tag, not a source revision proving refreshed image build execution.",
+        "native_source_sha": "eecac1878136d3188370a5f6460b7d0521cf845d",
+        "runtime_family": "0.15.1",
+        "robotd_build": "replica-imu-verify-control.48",
+        "robotd_api": 43,
+        "native_scope": "Inherited base metadata and committed builder controller-hash checks; tracker did not inspect new image bytes or certify native files.",
+        "asset_inventory": [
+          {
+            "name": "microduck-replica-20261104-licenses.txt",
+            "size": 13349,
+            "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c",
+            "asset_id": 709113574,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113574"
+          },
+          {
+            "name": "microduck-replica-20261104-models.txt",
+            "size": 7477,
+            "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d",
+            "asset_id": 709113579,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113579"
+          },
+          {
+            "name": "microduck-replica-20261104-third-party.txt",
+            "size": 4931,
+            "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b",
+            "asset_id": 709113646,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113646"
+          },
+          {
+            "name": "factory-records.zip",
+            "size": 23476,
+            "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+            "asset_id": 776053761,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
+          },
+          {
+            "name": "factory-1104-source.xz",
+            "size": 755670732,
+            "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+            "asset_id": 776053818,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
+          },
+          {
+            "name": "microduck-replica-20261104.img.xz",
+            "size": 834340632,
+            "digest": "sha256:5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
+            "asset_id": 776074554,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
+          },
+          {
+            "name": "microduck-replica-20261104.img.xz.sha256",
+            "size": 100,
+            "digest": "sha256:25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
+            "asset_id": 776082282,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082282"
+          },
+          {
+            "name": "1104-build.json",
+            "size": 714,
+            "digest": "sha256:7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
+            "asset_id": 776082427,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427"
+          },
+          {
+            "name": "SHA256SUMS.txt",
+            "size": 783,
+            "digest": "sha256:bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
+            "asset_id": 776082684,
+            "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082684"
+          }
+        ],
+        "package": {
+          "name": "microduck-replica-20261104.img.xz",
+          "size": 834340632,
+          "sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
+          "verification": "1104-build.json published report, not a tracker rerun",
+          "asset_id": 776074554,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
+        },
+        "matching_software": {
+          "tag": "microduck-software-v2026.11.22",
+          "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.22",
+          "prerelease": false,
+          "tag_actual_sha": "2ce27f8cc685b547232f3253cb872106daed4439",
+          "asset_count": 2
+        },
+        "build_record": {
+          "schema": 1,
+          "base_version": "1104",
+          "software_version": "2026.11.22",
+          "source_revision": "2ce27f8cc685b547232f3253cb872106daed4439",
+          "base_sha256": "f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+          "package_sha256": "ef3407735512114440a0aa953989f16105bfc7ca30ba14ebde1e8bb858109dad",
+          "prepare_sha256": "41c5988ea4f711b106743b9538ff6fea221841aae06105ade00853c194279f07",
+          "image_sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
+          "image_bytes": 834340632,
+          "verified_runtime_files": 391,
+          "compressed_image_readback": true,
+          "ext4_checked": true,
+          "arm_studio_http": true,
+          "stale_browser_revalidation": true,
+          "hardware_boot_verified": false
+        },
+        "build_record_scope": "714-byte public record hash verified. source_revision names software source2ce27f8, not builder source. Assertions report391 files,readback,ext4 and ARM Studio HTTP/cache checks,hardware_boot_verified=false. No image binary downloaded.",
+        "metadata_attachment_verification": [
+          {
+            "name": "1104-build.json",
+            "asset_id": 776082427,
+            "size": 714,
+            "sha256": "7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
+            "bytes_match_github_metadata": true,
+            "scope": "Small metadata bytes inspected."
+          },
+          {
+            "name": "SHA256SUMS.txt",
+            "asset_id": 776082684,
+            "size": 783,
+            "sha256": "bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
+            "bytes_match_github_metadata": true,
+            "scope": "Small metadata bytes inspected."
+          },
+          {
+            "name": "microduck-replica-20261104.img.xz.sha256",
+            "asset_id": 776082282,
+            "size": 100,
+            "sha256": "25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
+            "bytes_match_github_metadata": true,
+            "scope": "Small metadata bytes inspected."
+          },
+          {
+            "name": "factory-records.zip",
+            "asset_id": 776053761,
+            "size": 23476,
+            "sha256": "e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+            "bytes_match_github_metadata": true,
+            "scope": "Report archive inspected in memory without extraction/execution."
+          }
+        ],
+        "metadata_crosschecks": {
+          "checksum_entries_match_current_asset_metadata": 8,
+          "image_checksum_matches_metadata_and_build_record": true,
+          "archived_member_hashes_match_original_inventory": 12
+        },
+        "factory_base_archive": {
+          "name": "factory-1104-source.xz",
+          "size": 755670732,
+          "sha256": "f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+          "same_original_image_digest": true
+        },
+        "factory_records_archive": {
+          "name": "factory-records.zip",
+          "size": 23476,
+          "sha256": "e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+          "members": [
+            {
+              "name": "microduck-replica-20261104-licenses.txt",
+              "size": 13349,
+              "sha256": "c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
+            },
+            {
+              "name": "microduck-replica-20261104-manifest.txt",
+              "size": 9734,
+              "sha256": "47935e29ef69e29024ca9171b40e97e75d765272f253e8b6d01ceadef5d4c2b4"
+            },
+            {
+              "name": "microduck-replica-20261104-models.txt",
+              "size": 7477,
+              "sha256": "539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
+            },
+            {
+              "name": "microduck-replica-20261104-software-components.json",
+              "size": 1671,
+              "sha256": "caa5cf32701de1a9185a1873f62afd55d67d71c6fd07ed580cfd66cb8a688e81"
+            },
+            {
+              "name": "microduck-replica-20261104-third-party.txt",
+              "size": 4931,
+              "sha256": "42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
+            },
+            {
+              "name": "microduck-replica-20261104-verification.json",
+              "size": 3293,
+              "sha256": "82d153834404444ae7745909a76fd3119897ee39af18b82041fa330852c029bb"
+            },
+            {
+              "name": "microduck-replica-20261104.img.xz.sha256",
+              "size": 100,
+              "sha256": "0f9e72fb6a5e1b297994679c919c3c31a4da517b182c83eb51b9fd5510288dcf"
+            },
+            {
+              "name": "README.txt",
+              "size": 1178,
+              "sha256": "7f08b0ef024ff8f4dc09d2fb9f5a97ec00c776dd2d01ba8d84ec47cb8808c0e1"
+            },
+            {
+              "name": "runtime-provenance.json",
+              "size": 1687,
+              "sha256": "e8a186255f7b6eb0280c9f61c40560dc445a45768004eabf249cc42abdad9492"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "size": 1202,
+              "sha256": "a63e5e2c6013592cda5345c1501ca6b5fc876e8189e3fd79836ce734a5e99b74"
+            },
+            {
+              "name": "update-summary.txt",
+              "size": 4239,
+              "sha256": "df8fed785b2de40684f591e38c90ee89a0eb78af75731ee52130410602c6989b"
+            },
+            {
+              "name": "validation-report.json",
+              "size": 4048,
+              "sha256": "b9ab24e097a5e9d95bc6fbb0f182aeb79445439172311f970bc1e7dd881b1582"
+            }
+          ],
+          "scope": "All12 report/checksum/license members exactly match original asset name,size,digest. Historical factory verification is not refreshed-image regression."
+        },
+        "builder_source": {
+          "sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+          "url": "https://github.com/fanhao375/microduck-replica/blob/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c/software/image/refresh1104/build.py",
+          "smoke_url": "https://github.com/fanhao375/microduck-replica/blob/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c/software/image/refresh1104/smoke.py",
+          "scope": "Static committed recipe only; exact builder execution revision for current attachments not independently established.",
+          "contract": "Pins factory base/preparation/public key,verifies signatures,applies update using original ARM engine in offline QEMU,retains rollback,checks391-file tree,controller hashes,clean identity/commissioning. Decompresses compressed output independently and runs ARM Studio in private network/overlay; no physical boot."
+        },
+        "refresh_ci_observation": {
+          "id": 44922228079,
+          "url": "https://github.com/fanhao375/microduck-replica/actions/runs/44922228079",
+          "head_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+          "event": "workflow_dispatch",
+          "created_at_utc": "2026-11-21T16:01:06Z",
+          "updated_at_utc": "2026-11-21T16:01:25Z",
+          "conclusion": "success",
+          "jobs": [
+            {
+              "id": 136900549443,
+              "name": "build",
+              "conclusion": "success",
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Test release promotion and interrupted swaps",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Select the newest published stable software",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Install Linux image tools",
+                  "conclusion": "skipped"
+                },
+                {
+                  "name": "Download original factory image and signed inputs",
+                  "conclusion": "skipped"
+                },
+                {
+                  "name": "Build and verify the offline factory image",
+                  "conclusion": "skipped"
+                },
+                {
+                  "name": "Match outputs to the public software package",
+                  "conclusion": "skipped"
+                },
+                {
+                  "name": "Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f",
+                  "conclusion": "skipped"
+                },
+                {
+                  "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Complete job",
+                  "conclusion": "success"
+                }
+              ]
+            },
+            {
+              "id": 136900633677,
+              "name": "publish",
+              "conclusion": "skipped",
+              "steps": []
+            }
+          ],
+          "scope": "No-op already-current selection and promotion-unit-test CI. Image tools/download/build/verify/upload steps and publish job skipped. Not the refreshed image build or publish provenance."
+        },
+        "hardware_acceptance": {
+          "new_card_boot": false,
+          "real_hotspot_recovery": false,
+          "direction_motion": false,
+          "gait_or_getup_fix": false
+        },
+        "verification": {
+          "tag_and_commit_checked": true,
+          "release_assets_name_size_digest_match_previous": false,
+          "package_downloaded_or_rehashed_by_tracker": false,
+          "tests_executed_by_tracker": false,
+          "image_built_or_published_by_tracker": false,
+          "independent_0182_acceptance_changed": false
+        },
+        "fixed_sources": {
+          "factory_base_commit": "https://github.com/fanhao375/microduck-replica/commit/f215b658a4f24b669cf664b6381a559c61472009",
+          "software_source": "https://github.com/fanhao375/microduck-replica/commit/2ce27f8cc685b547232f3253cb872106daed4439",
+          "builder_source": "https://github.com/fanhao375/microduck-replica/commit/7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+          "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
+          "latest_release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest",
+          "build_record_asset_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427",
+          "factory_records_asset_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
+        },
+        "impact": {
+          "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
+          "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
+          "ToF": "No sampling, coordinate or avoidance implementation change.",
+          "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
+          "training": "No training recipe or policy weights added by the cache-fix delta.",
+          "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
+          "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+        },
+        "priority": "High for replaced same-name image provenance and historical acceptance boundaries.",
+        "current_latest_download_record": "#/replica_github_latest"
       }
     ]
   },
   "replica_github_latest": {
-    "observed_at_utc": "2026-11-21T16:30:00Z",
-    "observed_at_tokyo": "2026-11-22T01:30:00+09:00",
+    "observed_at_utc": "2026-11-21T19:18:30Z",
+    "observed_at_tokyo": "2026-11-22T04:18:30+09:00",
     "switch_time_utc": null,
     "release_tag": "microduck-replica-image-20261104",
     "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
@@ -63057,11 +63745,32 @@
     "tag_object_sha": "f215b658a4f24b669cf664b6381a559c61472009",
     "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
     "published_at_utc": "2026-11-04T10:57:46Z",
-    "release_updated_at_utc": "2026-11-21T16:00:33Z",
-    "release_updated_at_tokyo": "2026-11-22T01:00:33+09:00",
+    "release_updated_at_utc": "2026-11-21T19:10:38Z",
+    "release_updated_at_tokyo": "2026-11-22T04:10:38+09:00",
     "prerelease": false,
     "draft": false,
     "asset_inventory": [
+      {
+        "name": "1104-build.json",
+        "size": 714,
+        "digest": "sha256:4f824dcab15e286d817f7a1c083db9291ad26d245e81f7b7a28e97bb450f11c0",
+        "asset_id": 776585426,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585426"
+      },
+      {
+        "name": "factory-1104-source.xz",
+        "size": 755670732,
+        "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+        "asset_id": 776053818,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
+      },
+      {
+        "name": "factory-records.zip",
+        "size": 23476,
+        "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+        "asset_id": 776053761,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
+      },
       {
         "name": "microduck-replica-20261104-licenses.txt",
         "size": 13349,
@@ -63084,53 +63793,32 @@
         "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113646"
       },
       {
-        "name": "factory-records.zip",
-        "size": 23476,
-        "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
-        "asset_id": 776053761,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
-      },
-      {
-        "name": "factory-1104-source.xz",
-        "size": 755670732,
-        "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
-        "asset_id": 776053818,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
-      },
-      {
         "name": "microduck-replica-20261104.img.xz",
-        "size": 834340632,
-        "digest": "sha256:5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
-        "asset_id": 776074554,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
+        "size": 834096316,
+        "digest": "sha256:0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4",
+        "asset_id": 776584129,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776584129"
       },
       {
         "name": "microduck-replica-20261104.img.xz.sha256",
         "size": 100,
-        "digest": "sha256:25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
-        "asset_id": 776082282,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082282"
-      },
-      {
-        "name": "1104-build.json",
-        "size": 714,
-        "digest": "sha256:7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
-        "asset_id": 776082427,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427"
+        "digest": "sha256:66de247f8687e10d94d0b8674bd1ee56453b0b85069676fbe8afc7aa0d202693",
+        "asset_id": 776585369,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585369"
       },
       {
         "name": "SHA256SUMS.txt",
         "size": 783,
-        "digest": "sha256:bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
-        "asset_id": 776082684,
-        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082684"
+        "digest": "sha256:4eb6db70f7463cea4c85480600de5c16fd612f09c0accf7a49809894963e05a3",
+        "asset_id": 776585489,
+        "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776585489"
       }
     ],
     "asset_inventory_unchanged": false,
     "image_rebuilt": true,
     "previous_observation": {
-      "observed_at_utc": "2026-11-20T06:51:15Z",
-      "observed_at_tokyo": "2026-11-20T15:51:15+09:00",
+      "observed_at_utc": "2026-11-21T16:30:00Z",
+      "observed_at_tokyo": "2026-11-22T01:30:00+09:00",
       "switch_time_utc": null,
       "release_tag": "microduck-replica-image-20261104",
       "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
@@ -63138,147 +63826,239 @@
       "tag_object_sha": "f215b658a4f24b669cf664b6381a559c61472009",
       "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
       "published_at_utc": "2026-11-04T10:57:46Z",
-      "release_updated_at_utc": "2026-11-20T06:25:36Z",
-      "release_updated_at_tokyo": "2026-11-20T15:25:36+09:00",
+      "release_updated_at_utc": "2026-11-21T16:00:33Z",
+      "release_updated_at_tokyo": "2026-11-22T01:00:33+09:00",
       "prerelease": false,
       "draft": false,
       "asset_inventory": [
         {
           "name": "microduck-replica-20261104-licenses.txt",
           "size": 13349,
-          "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
-        },
-        {
-          "name": "microduck-replica-20261104-manifest.txt",
-          "size": 9734,
-          "digest": "sha256:47935e29ef69e29024ca9171b40e97e75d765272f253e8b6d01ceadef5d4c2b4"
+          "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c",
+          "asset_id": 709113574,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113574"
         },
         {
           "name": "microduck-replica-20261104-models.txt",
           "size": 7477,
-          "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
-        },
-        {
-          "name": "microduck-replica-20261104-software-components.json",
-          "size": 1671,
-          "digest": "sha256:caa5cf32701de1a9185a1873f62afd55d67d71c6fd07ed580cfd66cb8a688e81"
+          "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d",
+          "asset_id": 709113579,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113579"
         },
         {
           "name": "microduck-replica-20261104-third-party.txt",
           "size": 4931,
-          "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
+          "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b",
+          "asset_id": 709113646,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/709113646"
         },
         {
-          "name": "microduck-replica-20261104-verification.json",
-          "size": 3293,
-          "digest": "sha256:82d153834404444ae7745909a76fd3119897ee39af18b82041fa330852c029bb"
+          "name": "factory-records.zip",
+          "size": 23476,
+          "digest": "sha256:e9f8c2c01590076b594b134e4b44a605b8f6e2c4ea5d92c9b1ff3e878cd1319a",
+          "asset_id": 776053761,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053761"
+        },
+        {
+          "name": "factory-1104-source.xz",
+          "size": 755670732,
+          "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78",
+          "asset_id": 776053818,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776053818"
         },
         {
           "name": "microduck-replica-20261104.img.xz",
-          "size": 755670732,
-          "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78"
+          "size": 834340632,
+          "digest": "sha256:5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
+          "asset_id": 776074554,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776074554"
         },
         {
           "name": "microduck-replica-20261104.img.xz.sha256",
           "size": 100,
-          "digest": "sha256:0f9e72fb6a5e1b297994679c919c3c31a4da517b182c83eb51b9fd5510288dcf"
+          "digest": "sha256:25290fe554ccda5e04bcdf8a6a93fb913fdc44897a0fffe7de7c7ea8fd0deb28",
+          "asset_id": 776082282,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082282"
         },
         {
-          "name": "README.txt",
-          "size": 1178,
-          "digest": "sha256:7f08b0ef024ff8f4dc09d2fb9f5a97ec00c776dd2d01ba8d84ec47cb8808c0e1"
-        },
-        {
-          "name": "runtime-provenance.json",
-          "size": 1687,
-          "digest": "sha256:e8a186255f7b6eb0280c9f61c40560dc445a45768004eabf249cc42abdad9492"
+          "name": "1104-build.json",
+          "size": 714,
+          "digest": "sha256:7d532cda406cd257d588df075269c99c38a5395dfcc3d24929283ed706563785",
+          "asset_id": 776082427,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082427"
         },
         {
           "name": "SHA256SUMS.txt",
-          "size": 1202,
-          "digest": "sha256:a63e5e2c6013592cda5345c1501ca6b5fc876e8189e3fd79836ce734a5e99b74"
-        },
-        {
-          "name": "update-summary.txt",
-          "size": 4239,
-          "digest": "sha256:df8fed785b2de40684f591e38c90ee89a0eb78af75731ee52130410602c6989b"
-        },
-        {
-          "name": "validation-report.json",
-          "size": 4048,
-          "digest": "sha256:b9ab24e097a5e9d95bc6fbb0f182aeb79445439172311f970bc1e7dd881b1582"
+          "size": 783,
+          "digest": "sha256:bdbc335c83506d92d7a7b1790fff4b25f06c5ba146b2080574742fd89964714f",
+          "asset_id": 776082684,
+          "asset_api_url": "https://api.github.com/repos/fanhao375/microduck-replica/releases/assets/776082684"
         }
       ],
-      "asset_inventory_unchanged": true,
-      "image_rebuilt": false,
+      "asset_inventory_unchanged": false,
+      "image_rebuilt": true,
       "previous_observation": {
-        "observed_at_utc": "2026-11-07T11:54:30.502120+00:00",
-        "observed_at_tokyo": "2026-11-07T20:54:30.502120+09:00",
+        "observed_at_utc": "2026-11-20T06:51:15Z",
+        "observed_at_tokyo": "2026-11-20T15:51:15+09:00",
         "switch_time_utc": null,
-        "release_tag": "microduck-replica-image-20261027",
-        "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027",
-        "release_id": 425090056,
-        "tag_object_sha": "4e814132bcbc48d730ce280b1b0edc283761cfa4",
-        "tag_actual_sha": "e382f0741d7dfe4e972605e2843474df7219cade",
-        "published_at_utc": "2026-10-27T06:48:08Z",
+        "release_tag": "microduck-replica-image-20261104",
+        "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+        "release_id": 433776261,
+        "tag_object_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+        "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+        "published_at_utc": "2026-11-04T10:57:46Z",
+        "release_updated_at_utc": "2026-11-20T06:25:36Z",
+        "release_updated_at_tokyo": "2026-11-20T15:25:36+09:00",
         "prerelease": false,
+        "draft": false,
         "asset_inventory": [
           {
-            "name": "microduck-replica-20261027-licenses.txt",
+            "name": "microduck-replica-20261104-licenses.txt",
             "size": 13349,
             "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
           },
           {
-            "name": "microduck-replica-20261027-manifest.txt",
+            "name": "microduck-replica-20261104-manifest.txt",
             "size": 9734,
-            "digest": "sha256:50609044b6cf0bf92e519717b4cbee33f2c4ddb95204ccd0572d3a763275c3af"
+            "digest": "sha256:47935e29ef69e29024ca9171b40e97e75d765272f253e8b6d01ceadef5d4c2b4"
           },
           {
-            "name": "microduck-replica-20261027-models.txt",
+            "name": "microduck-replica-20261104-models.txt",
             "size": 7477,
             "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
           },
           {
-            "name": "microduck-replica-20261027-third-party.txt",
+            "name": "microduck-replica-20261104-software-components.json",
+            "size": 1671,
+            "digest": "sha256:caa5cf32701de1a9185a1873f62afd55d67d71c6fd07ed580cfd66cb8a688e81"
+          },
+          {
+            "name": "microduck-replica-20261104-third-party.txt",
             "size": 4931,
             "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
           },
           {
-            "name": "microduck-replica-20261027-voice.txt",
-            "size": 345,
-            "digest": "sha256:fb0e9dd923163e556fb177982707f385994e7bf5dfe0a803158b4d8f74626bbc"
+            "name": "microduck-replica-20261104-verification.json",
+            "size": 3293,
+            "digest": "sha256:82d153834404444ae7745909a76fd3119897ee39af18b82041fa330852c029bb"
           },
           {
-            "name": "microduck-replica-20261027.img.xz",
-            "size": 741604104,
-            "digest": "sha256:91ab5550e0f409d634722718a638d6e9615412b779b5d26c0af5c777056d0194"
+            "name": "microduck-replica-20261104.img.xz",
+            "size": 755670732,
+            "digest": "sha256:f9970ec551bcddbeeae9748b0ce38f36450fa1497618c07920723849f975aa78"
           },
           {
-            "name": "microduck-replica-20261027.img.xz.sha256",
+            "name": "microduck-replica-20261104.img.xz.sha256",
             "size": 100,
-            "digest": "sha256:5665833142b39dec04a1c9181bb8f0558abfa9802a21041c5c458170f3941c27"
+            "digest": "sha256:0f9e72fb6a5e1b297994679c919c3c31a4da517b182c83eb51b9fd5510288dcf"
           },
           {
             "name": "README.txt",
-            "size": 1159,
-            "digest": "sha256:cd15233d0696ed4df7250c08c6ecfeac9c0c38e721d9d45c2974380227a04a3f"
+            "size": 1178,
+            "digest": "sha256:7f08b0ef024ff8f4dc09d2fb9f5a97ec00c776dd2d01ba8d84ec47cb8808c0e1"
+          },
+          {
+            "name": "runtime-provenance.json",
+            "size": 1687,
+            "digest": "sha256:e8a186255f7b6eb0280c9f61c40560dc445a45768004eabf249cc42abdad9492"
+          },
+          {
+            "name": "SHA256SUMS.txt",
+            "size": 1202,
+            "digest": "sha256:a63e5e2c6013592cda5345c1501ca6b5fc876e8189e3fd79836ce734a5e99b74"
+          },
+          {
+            "name": "update-summary.txt",
+            "size": 4239,
+            "digest": "sha256:df8fed785b2de40684f591e38c90ee89a0eb78af75731ee52130410602c6989b"
+          },
+          {
+            "name": "validation-report.json",
+            "size": 4048,
+            "digest": "sha256:b9ab24e097a5e9d95bc6fbb0f182aeb79445439172311f970bc1e7dd881b1582"
           }
         ],
+        "asset_inventory_unchanged": true,
+        "image_rebuilt": false,
         "previous_observation": {
-          "observed_at_utc": "2026-11-07T07:56:16.725610+00:00",
-          "release_tag": "microduck-replica-image-20261104",
-          "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
-          "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009"
+          "observed_at_utc": "2026-11-07T11:54:30.502120+00:00",
+          "observed_at_tokyo": "2026-11-07T20:54:30.502120+09:00",
+          "switch_time_utc": null,
+          "release_tag": "microduck-replica-image-20261027",
+          "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261027",
+          "release_id": 425090056,
+          "tag_object_sha": "4e814132bcbc48d730ce280b1b0edc283761cfa4",
+          "tag_actual_sha": "e382f0741d7dfe4e972605e2843474df7219cade",
+          "published_at_utc": "2026-10-27T06:48:08Z",
+          "prerelease": false,
+          "asset_inventory": [
+            {
+              "name": "microduck-replica-20261027-licenses.txt",
+              "size": 13349,
+              "digest": "sha256:c9fd6c1726d93014905c5ceeb320b62e6bb65849b46815473529eb97f0f40e8c"
+            },
+            {
+              "name": "microduck-replica-20261027-manifest.txt",
+              "size": 9734,
+              "digest": "sha256:50609044b6cf0bf92e519717b4cbee33f2c4ddb95204ccd0572d3a763275c3af"
+            },
+            {
+              "name": "microduck-replica-20261027-models.txt",
+              "size": 7477,
+              "digest": "sha256:539a03996c0f4bd446b78b508eea0a70eda21f55067586eccc77881775f40e4d"
+            },
+            {
+              "name": "microduck-replica-20261027-third-party.txt",
+              "size": 4931,
+              "digest": "sha256:42f1f6c68cbb1ac2dc684b323909858389962677685bd0516296c37ad4bc109b"
+            },
+            {
+              "name": "microduck-replica-20261027-voice.txt",
+              "size": 345,
+              "digest": "sha256:fb0e9dd923163e556fb177982707f385994e7bf5dfe0a803158b4d8f74626bbc"
+            },
+            {
+              "name": "microduck-replica-20261027.img.xz",
+              "size": 741604104,
+              "digest": "sha256:91ab5550e0f409d634722718a638d6e9615412b779b5d26c0af5c777056d0194"
+            },
+            {
+              "name": "microduck-replica-20261027.img.xz.sha256",
+              "size": 100,
+              "digest": "sha256:5665833142b39dec04a1c9181bb8f0558abfa9802a21041c5c458170f3941c27"
+            },
+            {
+              "name": "README.txt",
+              "size": 1159,
+              "digest": "sha256:cd15233d0696ed4df7250c08c6ecfeac9c0c38e721d9d45c2974380227a04a3f"
+            }
+          ],
+          "previous_observation": {
+            "observed_at_utc": "2026-11-07T07:56:16.725610+00:00",
+            "release_tag": "microduck-replica-image-20261104",
+            "release_url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+            "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009"
+          },
+          "sources": {
+            "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/425090056",
+            "latest_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest",
+            "public_download_entry": "https://github.com/fanhao375/microduck-replica/releases/latest",
+            "public_redirect_confirmed_at_utc": "2026-11-07T11:54:51Z",
+            "fixed_source": "https://github.com/fanhao375/microduck-replica/commit/e382f0741d7dfe4e972605e2843474df7219cade"
+          },
+          "impact": "Default download navigation now selects the already published October 27 image. The two formal image releases, November 4 companion prerelease, and their recorded validation scopes remain available.",
+          "priority": "High for download navigation."
         },
         "sources": {
-          "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/425090056",
+          "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
           "latest_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/latest",
           "public_download_entry": "https://github.com/fanhao375/microduck-replica/releases/latest",
-          "public_redirect_confirmed_at_utc": "2026-11-07T11:54:51Z",
-          "fixed_source": "https://github.com/fanhao375/microduck-replica/commit/e382f0741d7dfe4e972605e2843474df7219cade"
+          "fixed_source": "https://github.com/fanhao375/microduck-replica/commit/f215b658a4f24b669cf664b6381a559c61472009",
+          "navigation_commit": "https://github.com/fanhao375/microduck-replica/commit/4e86bf8992ab91a35ff14b2b8a801a8e7a020d97"
         },
-        "impact": "Default download navigation now selects the already published October 27 image. The two formal image releases, November 4 companion prerelease, and their recorded validation scopes remain available.",
-        "priority": "High for download navigation."
+        "time_scope": "updated_at is API release metadata time, not proof of the exact Latest switch time.",
+        "impact": "Latest now selects the existing November4 Radxa ZERO3W image. Its13assets and source are unchanged; no new image build, deployment or hardware acceptance.",
+        "priority": "High for current image provenance and board-specific download navigation."
       },
       "sources": {
         "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
@@ -63287,9 +64067,11 @@
         "fixed_source": "https://github.com/fanhao375/microduck-replica/commit/f215b658a4f24b669cf664b6381a559c61472009",
         "navigation_commit": "https://github.com/fanhao375/microduck-replica/commit/4e86bf8992ab91a35ff14b2b8a801a8e7a020d97"
       },
-      "time_scope": "updated_at is API release metadata time, not proof of the exact Latest switch time.",
-      "impact": "Latest now selects the existing November4 Radxa ZERO3W image. Its13assets and source are unchanged; no new image build, deployment or hardware acceptance.",
-      "priority": "High for current image provenance and board-specific download navigation."
+      "time_scope": "updated_at is raw release metadata time, not exact image build/upload time. Same fixed tag no longer identifies image bytes; use asset IDs and SHA256 plus software/build record.",
+      "impact": "Latest tag/id/base source unchanged; current same-name image now preloads formal22 and has a new digest. Old image/reports retained as factory archives. Hardware/native0182 acceptance unchanged.",
+      "priority": "High for current image provenance and board-specific download navigation.",
+      "pointer_changed_since_previous_check": false,
+      "current_image_details": "#/replica_public_image"
     },
     "sources": {
       "release_api": "https://api.github.com/repos/fanhao375/microduck-replica/releases/433776261",
@@ -63299,15 +64081,15 @@
       "navigation_commit": "https://github.com/fanhao375/microduck-replica/commit/4e86bf8992ab91a35ff14b2b8a801a8e7a020d97"
     },
     "time_scope": "updated_at is raw release metadata time, not exact image build/upload time. Same fixed tag no longer identifies image bytes; use asset IDs and SHA256 plus software/build record.",
-    "impact": "Latest tag/id/base source unchanged; current same-name image now preloads formal22 and has a new digest. Old image/reports retained as factory archives. Hardware/native0182 acceptance unchanged.",
+    "impact": "Same Latest tag/id/factory base;4currentattachments changed to preloadformal23,5factory/license/modeltexts unchanged. Build/publish CI succeeded,physical/native0182 acceptance unchanged.",
     "priority": "High for current image provenance and board-specific download navigation.",
     "pointer_changed_since_previous_check": false,
     "current_image_details": "#/replica_public_image"
   },
   "replica_main_integrations": {
     "recorded_on": "2026-11-22",
-    "checked_at_utc": "2026-11-21T16:30:00Z",
-    "observed_master_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c",
+    "checked_at_utc": "2026-11-21T19:18:30Z",
+    "observed_master_sha": "1f0ff4550f762bb326d9dd3ed757997b2e042cce",
     "phone_console": {
       "number": 52,
       "url": "https://github.com/fanhao375/microduck-replica/pull/52",
@@ -63788,6 +64570,11 @@
         "recorded_on": "2026-11-20",
         "checked_at_utc": "2026-11-20T06:51:15Z",
         "observed_master_sha": "7326be96ac93155c68138ab27397c325405f218d"
+      },
+      {
+        "recorded_on": "2026-11-22",
+        "checked_at_utc": "2026-11-21T16:30:00Z",
+        "observed_master_sha": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c"
       }
     ],
     "nov22_factory_refresh": {
@@ -63902,6 +64689,41 @@
         "scope": "No-op already-current selection and promotion-unit-test CI. Image tools/download/build/verify/upload steps and publish job skipped. Not the refreshed image build or publish provenance."
       },
       "scope": "Source and observed publication tracking only; no tracker workflow execution/build/publish/test or independent0182 integration."
+    },
+    "nov23_imu_calibration": {
+      "base_tracking_commit": "d68c55fbf7ecc56ca9b1bfdb2e8d160c874a7698",
+      "head_sha": "1f0ff4550f762bb326d9dd3ed757997b2e042cce",
+      "commits": [
+        {
+          "sha": "ae22b8832304a62467d7795b061eb4951904d24a",
+          "committed_at_utc": "2026-11-21T19:02:33Z",
+          "committed_at_jst": "2026-11-22T04:02:33+09:00",
+          "subject": "Studio: import an existing IMU mounting on the IMU page",
+          "url": "https://github.com/fanhao375/microduck-replica/commit/ae22b8832304a62467d7795b061eb4951904d24a"
+        },
+        {
+          "sha": "24379951746c351c0e2d0f133c51d94d56459375",
+          "committed_at_utc": "2026-11-21T19:02:54Z",
+          "committed_at_jst": "2026-11-22T04:02:54+09:00",
+          "subject": "Preserve saved servo centers through onboarding and IMU import",
+          "url": "https://github.com/fanhao375/microduck-replica/commit/24379951746c351c0e2d0f133c51d94d56459375"
+        },
+        {
+          "sha": "1f0ff4550f762bb326d9dd3ed757997b2e042cce",
+          "committed_at_utc": "2026-11-21T19:10:25Z",
+          "committed_at_jst": "2026-11-22T04:10:25+09:00",
+          "subject": "Point existing 1104 cards to the signed 2026.11.23 update",
+          "url": "https://github.com/fanhao375/microduck-replica/commit/1f0ff4550f762bb326d9dd3ed757997b2e042cce"
+        }
+      ],
+      "production_main_sha": "24379951746c351c0e2d0f133c51d94d56459375",
+      "formal_software_source_sha": "fd782d8d75957bef6f0f95e2fc8fad23c3473733",
+      "formal_source_is_separate_history": true,
+      "helper_version": "0.8.1",
+      "source_review": "#/replica_public_software/actual_source_review",
+      "image_refresh_ci_run": 44939002857,
+      "classification": "Main IMU import/saved-center fixes and separate formal software23 published; no native/companion production migration acceptance.",
+      "operation_by_tracker": "Fast-forwarded existing source commits only; no tests,installation,service/page/robot or model action."
     }
   },
   "replica_zero3_image_rc": {
@@ -73965,7 +74787,7 @@
     ]
   },
   "replica_image_publication_status": {
-    "checked_at_utc": "2026-11-21T16:30:00Z",
+    "checked_at_utc": "2026-11-21T19:18:30Z",
     "withdrawn": [
       {
         "tag": "microduck-replica-image-20261110rc1",
@@ -74026,10 +74848,12 @@
       "navigation_committed_at_utc": "2026-11-20T02:14:16Z",
       "historical_link_cleanup_commit": "0c96ff6b07b96daffe3898706e20ea109c5d4dfe",
       "historical_link_cleanup_committed_at_utc": "2026-11-20T02:35:18Z",
-      "software_version": "2026.11.22",
-      "image_sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
-      "image_bytes": 834340632,
-      "refresh_source_reference": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c"
+      "software_version": "2026.11.23",
+      "image_sha256": "0daa11e5c377b12971da08ea0b70b8a5445f2fbeb613fc406aa7a455424e32d4",
+      "image_bytes": 834096316,
+      "refresh_source_reference": "24379951746c351c0e2d0f133c51d94d56459375",
+      "current_software_navigation_commit": "1f0ff4550f762bb326d9dd3ed757997b2e042cce",
+      "current_software_navigation_committed_at_utc": "2026-11-21T19:10:25Z"
     },
     "already_draft_not_new_failures": [
       {
@@ -74044,7 +74868,7 @@
       }
     ],
     "recorded_on": "2026-11-22",
-    "classification": "Fixed1104 public attachment refresh; withdrawn RC records and original factory verification retained separately.",
+    "classification": "Same fixed1104 download refreshed from formal22preload toformal23; prior image/report records preserved.",
     "time_scope": "release_updated_at is the raw API last-update time, not proof of exact draft-transition time. The current draft flag and committed navigation changes establish withdrawal.",
     "historical_record_scope": "Original13asset image record preserved under replica_public_image.history; factory source and12-member records archive verified by metadata/small report bytes. Removed standalone verification URLs remain historical only, not current downloads or refreshed-image acceptance.",
     "fixed_navigation_sources": [
@@ -74052,13 +74876,13 @@
       "https://github.com/fanhao375/microduck-replica/commit/0c96ff6b07b96daffe3898706e20ea109c5d4dfe"
     ],
     "impact": {
-      "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
-      "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
-      "ToF": "No sampling, coordinate or avoidance implementation change.",
-      "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
-      "training": "No training recipe or policy weights added by the cache-fix delta.",
-      "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
-      "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+      "HD1910": "High calibration impact: preserve saved per-servo centers/directions when skipping/confirming onboarding. Only new explicit successful calibration events recenter selected joints. IMU-only import preserves all joints,motion_enabled and existing mode; no native runtime/0182 deployment or physical acceptance.",
+      "camera": "No capture,ISP,calibration or existing preview availability verification.",
+      "ToF": "No sensor sampling,geometry or avoidance change.",
+      "model_management": "No new policy/model contract or weights in15-file software delta. Quaternion/source validation does not establish ownership or physical mounting correctness.",
+      "training": "No training implementation or new weights. RL92 remains independent unmerged draft.",
+      "motion": "Software prevents accidental center overwrite and changes commit-mode contract; does not validate gait,get-up,real servo behavior or original-card dependency compatibility.",
+      "sound": "No new sound assets,voice implementation or acoustic acceptance in this delta."
     },
     "priority": "High for current image/software pairing and explicit physical/build provenance limits.",
     "github_latest_observation_at_previous_check": {
@@ -74066,7 +74890,7 @@
       "release_tag": "microduck-replica-image-20261027"
     },
     "current_github_latest": {
-      "checked_at_utc": "2026-11-21T16:30:00Z",
+      "checked_at_utc": "2026-11-21T19:18:30Z",
       "release_tag": "microduck-replica-image-20261104",
       "pointer_changed_since_previous_check": false,
       "attachments_changed": true,
@@ -74174,6 +74998,115 @@
           "checked_at_utc": "2026-11-20T06:51:15Z",
           "release_tag": "microduck-replica-image-20261104",
           "pointer_changed_since_previous_check": true,
+          "details": "#/replica_github_latest"
+        }
+      },
+      {
+        "checked_at_utc": "2026-11-21T16:30:00Z",
+        "withdrawn": [
+          {
+            "tag": "microduck-replica-image-20261110rc1",
+            "release_id": 440037934,
+            "currently_draft": true,
+            "prerelease": true,
+            "historical_published_at_utc": "2026-11-10T07:22:31Z",
+            "release_updated_at_utc": "2026-11-20T02:10:37Z",
+            "tag_actual_sha": "3c187f1fb88980c2499e9e64506a2249e7ed69bb",
+            "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/3c187f1fb88980c2499e9e64506a2249e7ed69bb",
+            "asset_metadata_count_authenticated": 8,
+            "asset_metadata_unchanged_since_archived": true,
+            "public_download_available": false,
+            "release_updated_at_jst": "2026-11-20T11:10:37+09:00",
+            "publication_state": "withdrawn_to_draft"
+          },
+          {
+            "tag": "microduck-replica-image-zero3w-20261112-rc2",
+            "release_id": 442613888,
+            "currently_draft": true,
+            "prerelease": true,
+            "historical_published_at_utc": "2026-11-12T08:05:48Z",
+            "release_updated_at_utc": "2026-11-20T02:10:47Z",
+            "tag_actual_sha": "a7dbda3bf955cfada41c654eca5172734bc8d9a7",
+            "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/a7dbda3bf955cfada41c654eca5172734bc8d9a7",
+            "asset_metadata_count_authenticated": 9,
+            "asset_metadata_unchanged_since_archived": true,
+            "public_download_available": false,
+            "release_updated_at_jst": "2026-11-20T11:10:47+09:00",
+            "publication_state": "withdrawn_to_draft"
+          },
+          {
+            "tag": "microduck-replica-image-zero3w-20261112-rc4",
+            "release_id": 442696724,
+            "currently_draft": true,
+            "prerelease": true,
+            "historical_published_at_utc": "2026-11-12T09:39:49Z",
+            "release_updated_at_utc": "2026-11-20T02:10:48Z",
+            "tag_actual_sha": "cbf06567c136c49c36babbd5fbd069db4979e1bc",
+            "fixed_source_url": "https://github.com/fanhao375/microduck-replica/commit/cbf06567c136c49c36babbd5fbd069db4979e1bc",
+            "asset_metadata_count_authenticated": 9,
+            "asset_metadata_unchanged_since_archived": true,
+            "public_download_available": false,
+            "release_updated_at_jst": "2026-11-20T11:10:48+09:00",
+            "publication_state": "withdrawn_to_draft"
+          }
+        ],
+        "recommended_download": {
+          "tag": "microduck-replica-image-20261104",
+          "release_id": 433776261,
+          "url": "https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104",
+          "tag_actual_sha": "f215b658a4f24b669cf664b6381a559c61472009",
+          "draft": false,
+          "prerelease": false,
+          "asset_count": 9,
+          "asset_inventory_unchanged": false,
+          "navigation_commit": "74ef85b41eb7834d084b0415293f819f1fc97828",
+          "navigation_committed_at_utc": "2026-11-20T02:14:16Z",
+          "historical_link_cleanup_commit": "0c96ff6b07b96daffe3898706e20ea109c5d4dfe",
+          "historical_link_cleanup_committed_at_utc": "2026-11-20T02:35:18Z",
+          "software_version": "2026.11.22",
+          "image_sha256": "5951f101bb70aa7508d599d02cca60261eaad068576c91a2da4ea4369d93877c",
+          "image_bytes": 834340632,
+          "refresh_source_reference": "7a0bddf0d73c8201e0b4186c2100c0cd0fafaa4c"
+        },
+        "already_draft_not_new_failures": [
+          {
+            "tag": "microduck-replica-image-zero3w-20261112-rc1",
+            "draft": true,
+            "published_at": null
+          },
+          {
+            "tag": "microduck-replica-image-zero3w-20261112-rc3",
+            "draft": true,
+            "published_at": null
+          }
+        ],
+        "recorded_on": "2026-11-22",
+        "classification": "Fixed1104 public attachment refresh; withdrawn RC records and original factory verification retained separately.",
+        "time_scope": "release_updated_at is the raw API last-update time, not proof of exact draft-transition time. The current draft flag and committed navigation changes establish withdrawal.",
+        "historical_record_scope": "Original13asset image record preserved under replica_public_image.history; factory source and12-member records archive verified by metadata/small report bytes. Removed standalone verification URLs remain historical only, not current downloads or refreshed-image acceptance.",
+        "fixed_navigation_sources": [
+          "https://github.com/fanhao375/microduck-replica/blob/74ef85b41eb7834d084b0415293f819f1fc97828/README.md",
+          "https://github.com/fanhao375/microduck-replica/commit/0c96ff6b07b96daffe3898706e20ea109c5d4dfe"
+        ],
+        "impact": {
+          "HD1910": "Current1104 image metadata reports a new software preload, retaining original ZERO3W/HD1910 base0.15.1/control.48/API43. No native0182 deployment or new physical acceptance.",
+          "camera": "Content-based Studio/browser revalidation only; no capture, ISP, calibration or existing preview availability verification.",
+          "ToF": "No sampling, coordinate or avoidance implementation change.",
+          "model_management": "3D display assets use content validators; this is not policy-weight replacement or inference-model contract migration.",
+          "training": "No training recipe or policy weights added by the cache-fix delta.",
+          "motion": "No gait, servo tuning, torque or real movement validation. Separate native/companion and15-to18 migration remain disabled.",
+          "sound": "Software delivery may restart Studio/voice during a user-authorized install; cache-fix delta adds no audio assets or acoustic acceptance."
+        },
+        "priority": "High for current image/software pairing and explicit physical/build provenance limits.",
+        "github_latest_observation_at_previous_check": {
+          "checked_at_utc": "2026-11-20T02:44:40Z",
+          "release_tag": "microduck-replica-image-20261027"
+        },
+        "current_github_latest": {
+          "checked_at_utc": "2026-11-21T16:30:00Z",
+          "release_tag": "microduck-replica-image-20261104",
+          "pointer_changed_since_previous_check": false,
+          "attachments_changed": true,
           "details": "#/replica_github_latest"
         }
       }
