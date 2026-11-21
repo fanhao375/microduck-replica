@@ -35,6 +35,8 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Test release promotion and interrupted swaps
+        run: python3 -I -m unittest discover -s software/image/refresh1104 -p test_publish.py
       - name: Select the newest published stable software
         id: select
         env:
