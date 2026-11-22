@@ -29416,7 +29416,7 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-10T13:14:36Z",
-          "updated_at": "2026-11-17T14:37:55Z",
+          "updated_at": "2026-11-21T20:05:52Z",
           "merged_at": null,
           "merge_commit_sha": null,
           "url": "https://github.com/pollen-robotics/microduck/pull/565",
@@ -29427,13 +29427,13 @@
           "commit_count": 1,
           "changed_file_count": 5,
           "created_at_jst": "2026-11-10T22:14:36+09:00",
-          "updated_at_jst": "2026-11-17T23:37:55+09:00",
+          "updated_at_jst": "2026-11-22T05:05:52+09:00",
           "source_version": "0.18.9",
           "api_version": 53,
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
           "classification": "pending",
           "replica_integration": "not_integrated",
-          "review": "Same source and diff; author renewed review request, saying the hand-rollback issue still applies to 0.22.0. No independent confirmation or merge.",
+          "review": "Same source and diff; author comment at 2026-11-21T20:05:50Z says formal 0.23.0 still permits the hand-rollback failure and the patch applies cleanly on main. Comment is not an independent runtime reproduction or merge.",
           "priority": "high before unattended update",
           "comparison_to_recorded_main": {
             "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
@@ -29575,7 +29575,16 @@
           "included_in_formal_release": false,
           "head_committed_at_utc": "2026-11-11T08:41:10Z",
           "head_committed_at_jst": "2026-11-11T17:41:10+09:00",
-          "review_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-6951173528"
+          "review_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-6951173528",
+          "previous_observation": {
+            "updated_at": "2026-11-17T14:37:55Z",
+            "updated_at_jst": "2026-11-17T23:37:55+09:00",
+            "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+            "review": "Same source and diff; author renewed review request, saying the hand-rollback issue still applies to 0.22.0. No independent confirmation or merge."
+          },
+          "latest_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-7068501794",
+          "latest_comment_at_utc": "2026-11-21T20:05:50Z",
+          "latest_comment_at_jst": "2026-11-22T05:05:50+09:00"
         },
         {
           "number": 566,
@@ -34032,36 +34041,38 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-11-14T09:29:50Z",
-          "updated_at": "2026-11-16T05:04:21Z",
+          "updated_at": "2026-11-21T20:36:20Z",
           "merged_at": null,
           "merge_commit_sha": "33cca29ce90e72b0f5ac13966977d7cb04a44697",
           "url": "https://github.com/pollen-robotics/microduck/pull/600",
-          "head_sha": "6490b15538a50d13bed497e02df861450a246491",
+          "head_sha": "d867b174ab975eb7c82215dbaa4b5029963d5a09",
           "base_sha": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "base_branch": "main",
           "actual_merge_base": "094d4bb4af31ec181156e1ea772437fdd7a55978",
           "created_at_jst": "2026-11-14T18:29:50+09:00",
-          "updated_at_jst": "2026-11-16T14:04:21+09:00",
-          "head_committed_at_utc": "2026-11-15T09:31:35Z",
+          "updated_at_jst": "2026-11-22T05:36:20+09:00",
+          "head_committed_at_utc": "2026-11-21T20:36:02Z",
           "api_version": 61,
-          "commit_count": 3,
-          "changed_file_count": 7,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...6490b15538a50d13bed497e02df861450a246491",
+          "commit_count": 4,
+          "changed_file_count": 9,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...d867b174ab975eb7c82215dbaa4b5029963d5a09",
           "classification": "Open proposal. No matching development build in the checked release list and tag refs.",
           "replica_integration": "not_integrated",
           "review": {
             "projection": "Steep validated returns sufficiently below the estimated floor are classified as Drop. The threshold starts at 5 cm plus 3 cm per horizontal metre. Status 255 remains clear; no-return edges and reflective floors remain limitations.",
             "autonomous": "Successive detections in a column are needed before considering a drop. The obstacle logic uses same-column or nearby earlier floor observations when possible and stops for an unplaced, confirmed drop in the path. Forward sight must include two beams steep enough to judge drops.",
             "display": "robotctl paints drops red in monitor and its 3D view.",
-            "validation": "Author reports that a simulated 10 cm platform run stopped at the edge 40 times in 10 minutes; reports no robot check for an edge with no return.",
+            "validation": "Author-reported simulation comparison remains 4/12 falls on main versus 0/18 on the branch, with about 13% less walking; newest increment adds recorded twin-frame replay and obstacle-model regression, not fresh physical sensor or hardware braking evidence.",
             "fixed_sources": {
-              "autod/src/brain.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/brain.rs",
-              "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/obstacle.rs",
-              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/design/autonomous.md",
-              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/robot/cheatsheet.md",
-              "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/kinematics/src/tof.rs",
-              "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/duck.rs",
-              "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/monitor.rs"
+              "autod/src/brain.rs": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/autod/src/brain.rs",
+              "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/autod/src/obstacle.rs",
+              "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/docs/design/autonomous.md",
+              "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/docs/robot/cheatsheet.md",
+              "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/kinematics/src/tof.rs",
+              "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/robotctl/src/duck.rs",
+              "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/robotctl/src/monitor.rs",
+              "autod/tests/fixtures/edge_approach.py": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/autod/tests/fixtures/edge_approach.py",
+              "autod/tests/fixtures/edge_approach.json": "https://github.com/pollen-robotics/microduck/blob/d867b174ab975eb7c82215dbaa4b5029963d5a09/autod/tests/fixtures/edge_approach.json"
             },
             "simulation_comparison": {
               "pr_updated_at_utc": "2026-11-14T11:08:39Z",
@@ -34140,6 +34151,32 @@
                 "state": "open",
                 "required_for": "Reproducing the shown duck-sim video, according to the author."
               }
+            },
+            "latest_increment": {
+              "from_sha": "6490b15538a50d13bed497e02df861450a246491",
+              "to_sha": "d867b174ab975eb7c82215dbaa4b5029963d5a09",
+              "commits": 1,
+              "files": 3,
+              "commit_url": "https://github.com/pollen-robotics/microduck/commit/d867b174ab975eb7c82215dbaa4b5029963d5a09",
+              "changed_paths": [
+                "autod/src/obstacle.rs",
+                "autod/tests/fixtures/edge_approach.py",
+                "autod/tests/fixtures/edge_approach.json"
+              ],
+              "summary": "Records duck-sim 10/20 cm step ToF frames and replays them through the obstacle model; test asserts flat-floor negative and >10 cm stop margin. Does not cover no-return table edges or physical braking."
+            },
+            "replay_regression": {
+              "current_head_checks": {
+                "board": "success",
+                "check": "success",
+                "coverage": "success"
+              },
+              "simulation_fixture_only": true,
+              "physical_sensor_or_robot_test_by_tracker": false,
+              "remaining_author_noted_gaps": [
+                "table edge where ToF returns no data",
+                "turn-at-edge drift without a step"
+              ]
             }
           },
           "priority": "High before enabling autonomous movement on HD1910. Verify installed ToF geometry, no-return edges, reflective floors, turning drift, backing up, braking and manual takeover.",
@@ -34151,7 +34188,110 @@
             "training": "No direct change.",
             "motion": "Autonomous forward stops, edge-aware goal selection, turning and zoomies.",
             "sound": "No direct change."
-          }
+          },
+          "previous_observed_head": {
+            "head_sha": "6490b15538a50d13bed497e02df861450a246491",
+            "updated_at": "2026-11-16T05:04:21Z",
+            "commit_count": 3,
+            "changed_file_count": 7,
+            "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/094d4bb4af31ec181156e1ea772437fdd7a55978...6490b15538a50d13bed497e02df861450a246491",
+            "review": {
+              "projection": "Steep validated returns sufficiently below the estimated floor are classified as Drop. The threshold starts at 5 cm plus 3 cm per horizontal metre. Status 255 remains clear; no-return edges and reflective floors remain limitations.",
+              "autonomous": "Successive detections in a column are needed before considering a drop. The obstacle logic uses same-column or nearby earlier floor observations when possible and stops for an unplaced, confirmed drop in the path. Forward sight must include two beams steep enough to judge drops.",
+              "display": "robotctl paints drops red in monitor and its 3D view.",
+              "validation": "Author reports that a simulated 10 cm platform run stopped at the edge 40 times in 10 minutes; reports no robot check for an edge with no return.",
+              "fixed_sources": {
+                "autod/src/brain.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/brain.rs",
+                "autod/src/obstacle.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/autod/src/obstacle.rs",
+                "docs/design/autonomous.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/design/autonomous.md",
+                "docs/robot/cheatsheet.md": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/docs/robot/cheatsheet.md",
+                "kinematics/src/tof.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/kinematics/src/tof.rs",
+                "robotctl/src/duck.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/duck.rs",
+                "robotctl/src/monitor.rs": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/robotctl/src/monitor.rs"
+              },
+              "simulation_comparison": {
+                "pr_updated_at_utc": "2026-11-14T11:08:39Z",
+                "pr_updated_at_jst": "2026-11-14T20:08:39+09:00",
+                "code_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+                "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                "attachment_url": "https://github.com/user-attachments/assets/6fc43959-0eb2-4e58-ab1b-136cd5fa7756",
+                "environment": "duck-sim",
+                "scenario": "20 cm step, main on the left and the PR on the right as labelled by the author.",
+                "run_count_or_duration_reported": false,
+                "physical_robot_validation": false,
+                "attachment_replacement": {
+                  "published_at_utc": "2026-11-14T11:39:25Z",
+                  "published_at_jst": "2026-11-14T20:39:25+09:00",
+                  "previous_url": "https://github.com/user-attachments/assets/557154a4-bc37-4b86-bdb3-daca02d9a65f",
+                  "previous_endpoint_http_status": 404,
+                  "current_endpoint_range_get_http_status": 206,
+                  "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                  "scenario_description_changed": false
+                }
+              },
+              "additional_simulation": {
+                "reported_at_utc": "2026-11-14T19:59:47Z",
+                "reported_at_jst": "2026-11-15T04:59:47+09:00",
+                "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                "source_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+                "additional_runs": 3,
+                "minutes_per_run": 10,
+                "falls_over_edge": 1,
+                "limitation": "Forward-only ToF does not cover lateral or rear edges. Turning in place can drift. No-return edges still require hardware validation.",
+                "physical_robot_validation": false
+              },
+              "edge_memory_update": {
+                "previous_source_sha": "816ef17cd3fe36599051a866e3efd392ce2c3dbd",
+                "source_sha": "6490b15538a50d13bed497e02df861450a246491",
+                "head_committed_at_utc": "2026-11-15T09:31:35Z",
+                "pr_updated_at_utc": "2026-11-15T09:32:05Z",
+                "pr_updated_at_jst": "2026-11-15T18:32:05+09:00",
+                "fixed_increment_url": "https://github.com/pollen-robotics/microduck/compare/816ef17cd3fe36599051a866e3efd392ce2c3dbd...6490b15538a50d13bed497e02df861450a246491",
+                "fixed_commit_url": "https://github.com/pollen-robotics/microduck/commit/6490b15538a50d13bed497e02df861450a246491",
+                "fixed_api_source_url": "https://github.com/pollen-robotics/microduck/blob/6490b15538a50d13bed497e02df861450a246491/duck-ipc-proto/src/lib.rs",
+                "changed_files": [
+                  "autod/src/brain.rs",
+                  "autod/src/obstacle.rs",
+                  "docs/design/autonomous.md"
+                ],
+                "behavior": "The closest drop on the forward path has its own distance even with a nearer wall. A stop for a nearby drop records the location in the odometry frame for 60 seconds of autonomous behavior time. Within 0.45 m, heading restrictions suppress forward steps toward it, reject nearby goals in that direction, and suppress zoomies. Stop turns favor the side away from the recorded locations.",
+                "author_reported_simulation": {
+                  "source_url": "https://github.com/pollen-robotics/microduck/pull/600",
+                  "environment": "duck-sim",
+                  "step_height_cm": 20,
+                  "minutes_per_run": 10,
+                  "without_edge_memory": {
+                    "falls": 4,
+                    "runs": 12
+                  },
+                  "with_edge_memory": {
+                    "falls": 0,
+                    "runs": 18
+                  },
+                  "walking_reduction_percent_approximate": 13,
+                  "physical_robot_validation": false
+                },
+                "remaining_limits": "No-return edges require hardware validation. Heading rules suppress commanded steps, but passive turn drift and backing up can still cross an edge. Reflective-floor handling is unverified."
+              },
+              "review_request": {
+                "updated_at_utc": "2026-11-16T05:04:21Z",
+                "updated_at_jst": "2026-11-16T14:04:21+09:00",
+                "url": "https://github.com/pollen-robotics/microduck/pull/600#issuecomment-6907834333",
+                "source_sha": "6490b15538a50d13bed497e02df861450a246491",
+                "notes": "Author requested review of keeping the 60 s edge memory in odometry or moving it to the map. No source change or new physical evidence.",
+                "simulation_reproduction_dependency": {
+                  "number": 595,
+                  "url": "https://github.com/pollen-robotics/microduck/pull/595",
+                  "head_sha": "157c2f5f64e2f50ad2b4edc437896516877deab2",
+                  "state": "open",
+                  "required_for": "Reproducing the shown duck-sim video, according to the author."
+                }
+              }
+            }
+          },
+          "previous_observed_head_sha": "6490b15538a50d13bed497e02df861450a246491",
+          "head_committed_at_jst": "2026-11-22T05:36:02+09:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d867b174ab975eb7c82215dbaa4b5029963d5a09"
         },
         {
           "number": 602,
@@ -56767,20 +56907,20 @@
           "draft": true,
           "created_at": "2026-11-21T17:32:53Z",
           "created_at_jst": "2026-11-22T02:32:53+09:00",
-          "updated_at": "2026-11-21T18:02:22Z",
-          "updated_at_jst": "2026-11-22T03:02:22+09:00",
+          "updated_at": "2026-11-22T03:41:52Z",
+          "updated_at_jst": "2026-11-22T12:41:52+09:00",
           "merged_at": null,
           "merge_commit_sha": null,
-          "head_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+          "head_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
           "base_sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
           "base_branch": "develop",
           "actual_merge_base": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
-          "source_committed_at_utc": "2026-11-21T18:01:41Z",
-          "source_committed_at_jst": "2026-11-22T03:01:41+09:00",
-          "commit_count": 2,
-          "changed_file_count": 6,
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck_rl/commit/6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+          "source_committed_at_utc": "2026-11-22T03:37:19Z",
+          "source_committed_at_jst": "2026-11-22T12:37:19+09:00",
+          "commit_count": 6,
+          "changed_file_count": 7,
+          "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/89a44b6d1e7aaee16281b4512ebebd43b7312460",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...89a44b6d1e7aaee16281b4512ebebd43b7312460",
           "included_in_formal_release": false,
           "replica_integration": "Not integrated,deployed,tested or installed; documentation tracking only.",
           "tracker_tests_executed": false,
@@ -56793,35 +56933,106 @@
             "camera": "No capture,preview,ISP or camera calibration change. Simulator argument fix preserves existing optional camera arguments.",
             "ToF": "No ranging,ToF geometry or avoidance implementation change.",
             "model_management": "Experimental output-layer fit records base/teacher hashes and fit marker; no official policy-set update,downloaded model,replacement or local model-contract certification.",
-            "training": "New draft CPU imitation/ridge fit on exported v8/v10 actors and paired MuJoCo benchmark; no new PPO/CUDA training run established.",
-            "motion": "Author reports improved slow starts but incomplete speed tracking,head-pose-sensitive positive slow turns and negative overshoot. Simulator/get-up counts are not HD1910 or hardware acceptance.",
+            "training": "Draft now six commits/seven files; v8/v10 output-layer fit with a simulator-only slow-turn calibration. No ONNX/weight attached, official policy update or physical test.",
+            "motion": "Current author-reported head-pose MuJoCo medians improve slow ±0.5 rad/s turns, but +0.65 rad/s still reports one stall/24 and turning translates 9–11 cm. No hardware transfer or HD1910 acceptance.",
             "sound": "No sound assets or audio implementation changes."
           },
           "first_fit_source_sha": "6a82edb66cc21556d7cc7cd870ddd8c9a5ed8ada",
           "first_fit_committed_at_utc": "2026-11-21T17:32:32Z",
           "first_fit_committed_at_jst": "2026-11-22T02:32:32+09:00",
-          "author_reported_candidate_sha256": "6056714b8852d1c7d36c0e4166dcffe9a4ff47c188e4f8f4c6b4f0d469661fad",
+          "author_reported_candidate_sha256": "53eebdfde84c914db079f9b34655f9d1da419023c579b35c1953d5b76e550d93",
           "candidate_bytes_downloaded_or_verified_by_tracker": false,
           "official_policy_set_changed": false,
           "review": {
-            "source_scope": "Two commits: first6a82edb6 forward-start fit,then6724d8fc slow-turn/course/start revision;6files. Scripts/docs/tests only,no ONNX/checkpoint/weights committed.",
-            "method": "CPU ridge regression(ridge0.001) adjusts v10 final Gemm weights/bias only. Original hidden layers and baked normalizer retained; label actors are publicv8/v10. Temporary hidden feature output removed before saving. Output metadata retains deployment contract keys and adds fit/base/teacher SHA256 rather than copying checkpoint/run attribution.",
+            "source_scope": "Six commits, seven files at current draft head 89a44b6; the four-commit increment after 6724d8fc adds head-pose slow-turn calibration, matched replay tooling, docs and synthetic graph tests. No ONNX/checkpoint/weights committed.",
+            "method": "CPU ridge regression(ridge0.001) adjusts v10 final Gemm weights/bias only. Original hidden layers and baked normalizer retained; label actors are publicv8/v10. Temporary hidden feature output removed before saving. Output metadata retains deployment contract keys and adds fit/base/teacher SHA256 rather than copying checkpoint/run attribution. New calibrate_slow_turns adds a stateless low-speed yaw-cue correction using leg-joint velocity magnitude; deployment normalizer and hidden layers remain preserved. This is simulator research, not an official runtime/API or policy-set change.",
             "demonstrations": "v8 receives1.4x yaw cue on slow turns and simulator heading/lateral feedback for straight teacher labels; student still sees original requested twist. Short starts after settled SIT/STAND give teacher up-to0.20m/s during first second;1280pairs triple weighted. V10 labels stand/recovery/off-target. Author reports27032weightedrows.",
             "replay": "Rollouts use backlash scene,50Hz/4substeps,action_scale0.9,target gains0.7 and head0.5,command smoothing0.2; infer_policy adds optional existing walking_session injection. No daemon drive-default change; simulated pose only influences teacher,not a new runtime pose-observation input.",
-            "benchmark": "9commands,12pairedplacements per fold,primary+reserve24; same seeds/head offsets/settling for both actors. 8second trials/400ticks; report displacement in starting-heading frame and unwrapped yaw; blank first2cm means stall.6get-up poses20each/fold,6seconds,last0.5sheight>0.095m/upright requirement.",
-            "test_definitions": "Four source tests cover original-twist labels,yaw/cross-track/start teacher cues,and synthetic3input2output normalized graph final-layer fit. Synthetic graph case is not final61x14 policy or hardware inference validation. None executed by tracker.",
+            "benchmark": "Current author report: head-pose benchmark has 24 independent starts per fold/direction plus paired neutral-head controls. Median ±0.5 rad/s turns report +230°/−229° and +231°/−226°; two prior stalled placements +232°/+198°. At +0.65 rad/s a separate scan still reports one stall in 24; turns translate the trunk about 9–11 cm. Hardware transfer remains unmeasured.",
+            "test_definitions": "Four source tests cover original-twist labels,yaw/cross-track/start teacher cues,and synthetic3input2output normalized graph final-layer fit. Synthetic graph case is not final61x14 policy or hardware inference validation. None executed by tracker. Current PR body reports 284 tests passed and one skipped at 89a44b6; no check runs were returned for this head and the tracker did not execute them.",
             "input_provenance_limit": "Recipe names public policy-set v8/v10 tags and software56424efe. Tracker read sources only,did not download source actors or candidate; reported candidate hash/reproducibility and weight-only difference are author claims,not independently verified artifact facts.",
             "CI": "No Actions runs found for current RL head at check; no tracker execution.",
             "fixed_sources": {
-              "docs/velstand_policy.md": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/docs/velstand_policy.md",
-              "scripts/bench_velstand_onset.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/bench_velstand_onset.py",
-              "scripts/fit_velstand_onset.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/fit_velstand_onset.py",
-              "scripts/infer_policy.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/infer_policy.py",
-              "scripts/velstand_onset_rollouts.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/velstand_onset_rollouts.py",
-              "tests/test_velstand_onset_fit.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/tests/test_velstand_onset_fit.py"
+              "docs/velstand_policy.md": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/docs/velstand_policy.md",
+              "scripts/bench_velstand_onset.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/scripts/bench_velstand_onset.py",
+              "scripts/fit_velstand_onset.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/scripts/fit_velstand_onset.py",
+              "scripts/infer_policy.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/scripts/infer_policy.py",
+              "scripts/velstand_onset_rollouts.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/scripts/velstand_onset_rollouts.py",
+              "tests/test_velstand_onset_fit.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/tests/test_velstand_onset_fit.py",
+              "scripts/velstand_turn_calibration.py": "https://github.com/not-heavychevy/microduck_rl/blob/89a44b6d1e7aaee16281b4512ebebd43b7312460/scripts/velstand_turn_calibration.py"
             }
           },
           "reported_verification": {
+            "author_claims": {
+              "cpu_simulator": "MuJoCo 3.10.0",
+              "onnx_runtime": "CPU 1.24.4",
+              "numpy": "2.4.1",
+              "tests_passed": 284,
+              "tests_skipped": 1,
+              "candidate_artifact_sha256": "53eebdfde84c914db079f9b34655f9d1da419023c579b35c1953d5b76e550d93",
+              "independent_fits_same_hash": true
+            },
+            "check_runs_found": 0,
+            "verified_by_tracker": false,
+            "hardware_tested": false,
+            "candidate_bytes_downloaded_or_verified_by_tracker": false,
+            "previous_head_report": {
+              "classification": "PR body/document author simulation reports only; no tracker rerun or physical acceptance.",
+              "source_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+              "compared_previous_candidate_sha": "6a82edb66cc21556d7cc7cd870ddd8c9a5ed8ada",
+              "comparison_scope": "Tables compare previous fitted actor6a82 with revised fitted actor6724,not stockv10 versus revised in every table.",
+              "real_daemon_simulator": "microduck56424efe in fresh duck-sim from SIT at1.00x,backlashscene.6coldstarts at0.15m/s:55,63,62,60,60,55cm; turns+0.5:+170,+153deg and-0.5:-266,-274deg. Real daemon in simulation,not real robot.",
+              "paired_trials": "Across24placements:0.15m/s progress median57.6->60.5cm;>=30cm starts23/24->24/24;first2cm1.11->0.81s;heading27.9->18.5deg,lateral13.9->9.7cm. Desired120cm not reached. Slow turns+7.7->183.6deg(22/24>=25%requested),-9.6->-274.8deg(24/24);desired±229.2deg.",
+              "remaining_failures": "Two reserved positive starts with fixed head offsets reached12.2/14.7deg; neutral-head replays175.4/196.7deg. Negative slow turns overshoot. Turning trunk translates median11.4/7.0cm,not zero-translation yaw acceptance.",
+              "recovery": "Both fitted actors report240/240pairedget-ups each plus prior separate120/120cases; both above9.5cm during216motiontrials. Do not relabel old120 cases as final-source fresh reruns or real robot tests.",
+              "test_suite": "Author reports current PR pytest278pass/1skip,with mjlab1.3,Warp1.12,PyTorch2.15CPU; CPUORT1.24.4,MuJoCo3.10,NumPy2.4.1,ONNX1.22. No new CUDA/PPO quality comparison.",
+              "hardware_acceptance": false,
+              "independently_reproduced": false
+            },
+            "classification": "Latest-head simulation/test numbers are author reports only; no tracker rerun or physical acceptance.",
+            "source_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
+            "compared_previous_candidate_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c"
+          },
+          "previous_observed_head": {
+            "head_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+            "updated_at": "2026-11-21T18:02:22Z",
+            "updated_at_jst": "2026-11-22T03:02:22+09:00",
+            "source_committed_at_utc": "2026-11-21T18:01:41Z",
+            "source_committed_at_jst": "2026-11-22T03:01:41+09:00",
+            "commit_count": 2,
+            "changed_file_count": 6,
+            "fixed_source_url": "https://github.com/pollen-robotics/microduck_rl/commit/6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+            "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+            "author_reported_candidate_sha256": "6056714b8852d1c7d36c0e4166dcffe9a4ff47c188e4f8f4c6b4f0d469661fad",
+            "review": {
+              "source_scope": "Two commits: first6a82edb6 forward-start fit,then6724d8fc slow-turn/course/start revision;6files. Scripts/docs/tests only,no ONNX/checkpoint/weights committed.",
+              "method": "CPU ridge regression(ridge0.001) adjusts v10 final Gemm weights/bias only. Original hidden layers and baked normalizer retained; label actors are publicv8/v10. Temporary hidden feature output removed before saving. Output metadata retains deployment contract keys and adds fit/base/teacher SHA256 rather than copying checkpoint/run attribution.",
+              "demonstrations": "v8 receives1.4x yaw cue on slow turns and simulator heading/lateral feedback for straight teacher labels; student still sees original requested twist. Short starts after settled SIT/STAND give teacher up-to0.20m/s during first second;1280pairs triple weighted. V10 labels stand/recovery/off-target. Author reports27032weightedrows.",
+              "replay": "Rollouts use backlash scene,50Hz/4substeps,action_scale0.9,target gains0.7 and head0.5,command smoothing0.2; infer_policy adds optional existing walking_session injection. No daemon drive-default change; simulated pose only influences teacher,not a new runtime pose-observation input.",
+              "benchmark": "9commands,12pairedplacements per fold,primary+reserve24; same seeds/head offsets/settling for both actors. 8second trials/400ticks; report displacement in starting-heading frame and unwrapped yaw; blank first2cm means stall.6get-up poses20each/fold,6seconds,last0.5sheight>0.095m/upright requirement.",
+              "test_definitions": "Four source tests cover original-twist labels,yaw/cross-track/start teacher cues,and synthetic3input2output normalized graph final-layer fit. Synthetic graph case is not final61x14 policy or hardware inference validation. None executed by tracker.",
+              "input_provenance_limit": "Recipe names public policy-set v8/v10 tags and software56424efe. Tracker read sources only,did not download source actors or candidate; reported candidate hash/reproducibility and weight-only difference are author claims,not independently verified artifact facts.",
+              "CI": "No Actions runs found for current RL head at check; no tracker execution.",
+              "fixed_sources": {
+                "docs/velstand_policy.md": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/docs/velstand_policy.md",
+                "scripts/bench_velstand_onset.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/bench_velstand_onset.py",
+                "scripts/fit_velstand_onset.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/fit_velstand_onset.py",
+                "scripts/infer_policy.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/infer_policy.py",
+                "scripts/velstand_onset_rollouts.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/scripts/velstand_onset_rollouts.py",
+                "tests/test_velstand_onset_fit.py": "https://github.com/pollen-robotics/microduck_rl/blob/6724d8fc79fc7e874473f7bd5e6b5118d562b13c/tests/test_velstand_onset_fit.py"
+              }
+            }
+          },
+          "previous_author_reported_candidate_sha256": "6056714b8852d1c7d36c0e4166dcffe9a4ff47c188e4f8f4c6b4f0d469661fad",
+          "latest_increment": {
+            "from_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+            "to_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
+            "commits": 4,
+            "files": 7,
+            "compare_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...89a44b6d1e7aaee16281b4512ebebd43b7312460",
+            "summary": "Adds slow-turn/head-pose simulation calibration and replay benchmark; draft remains open, no weight artifact."
+          },
+          "previous_reported_verification": {
             "classification": "PR body/document author simulation reports only; no tracker rerun or physical acceptance.",
             "source_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
             "compared_previous_candidate_sha": "6a82edb66cc21556d7cc7cd870ddd8c9a5ed8ada",
@@ -57023,7 +57234,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-21T19:18:30Z",
+  "checked_at_utc": "2026-11-22T04:32:43Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -57036,33 +57247,75 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-21T18:21:43Z",
-    "source_snapshot_utc": "2026-11-21T19:18:30Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-21T19:20:11Z",
+    "previous_substantive_review_utc": "2026-11-21T19:18:30Z",
+    "source_snapshot_utc": "2026-11-22T04:32:43Z",
+    "final_relevant_sources_checked_at_utc": "2026-11-22T04:32:43Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {},
+    "updated_pull_requests": {
+      "pollen-robotics/microduck_rl": [
+        92
+      ],
+      "pollen-robotics/microduck": [
+        600,
+        565
+      ]
+    },
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
-    "notes": "Replicaformal23actualfd782d8 adds2commits/15files atop22:stageIMUquaternion and preserve per-servo centers via recorded/keep/imu_only/helper0.8.1/eventIDs. Separate mainae22/2437995 andnavigation1f0;7of15changedblobs equal,not wholesources. Formalversion23 publishedNov21UTC/Nov22JST. Package02ba93/9779200bytes;fixed1104current0daa11/834096316bytes,tagf215unchanged,5historicalassetsunchanged. Smallchecksum/buildrecord verified. CI44939002857atbuilder2437995 actually built/checked/published,unlike priorno-op;391file/QEMU/HTTPclaims not hardware or tracker binary verification. Authorreports4upgrade/rollback paths but2existingUItestfailures(cancelIMUredo,disconnectedrollbackprogress)remain;notfullbrowserpass. Officialheads/formals/devactualtags/PRs/OSchannels/HF/blog/0182migration unchanged. No trackertests/build/software/model/image download,install,service/preview/robot action.",
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
     "merged_previously_tracked_pull_requests": {},
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
-    "official_os_development_channels_changed": false,
-    "replica_image_publication_changed": true,
-    "replica_public_software_changed": true,
-    "replica_main_integrations_changed": true,
+    "replica_image_publication_changed": false,
+    "replica_public_software_changed": false,
+    "replica_main_integrations_changed": false,
     "replica_github_latest_changed": false,
-    "replica_merged_pull_requests": [],
+    "replica_github_latest_assets_changed": false,
     "official_os_pull_requests_changed": false,
-    "replica_github_latest_assets_changed": true,
-    "newly_discovered_pull_requests": {}
+    "official_os_development_channels_changed": false,
+    "replica_merged_pull_requests": [],
+    "newly_discovered_pull_requests": {},
+    "notes": "Four official default heads, formal daemon 0.23.0, current dev tags, Yocto OS 1.4.2/six channels, four HF model refs and official blog unchanged; blog still has three articles, newest 2026-10-23. Existing draft RL #92 advances from 6724d8fc to 89a44b6d (4 commits/7-file current PR diff): author-reported head-pose slow-turn CPU MuJoCo candidate, residual stall at +0.65, no artifact download/weight release/hardware transfer; no check runs at current head. Open core #600 advances from 6490b155 to d867b174 with three-file recorded duck-sim edge replay regression; board/check/coverage pass, but no-return table edges and physical braking remain unverified. #565 source remains 2b0f49ca; author comment reaffirms hand rollback issue on0.23.0, not independently reproduced. Replica software 11.23 and current1104 image unchanged; only docs updated, no tracker tests/build/device actions.",
+    "updated_pull_request_details": {
+      "pollen-robotics/microduck_rl#92": {
+        "previous_head_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+        "head_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
+        "updated_at_utc": "2026-11-22T03:41:52Z",
+        "draft": true,
+        "commits": 4,
+        "files": 7,
+        "current_total_commits": 6,
+        "current_total_files": 7,
+        "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/89a44b6d1e7aaee16281b4512ebebd43b7312460",
+        "checked_runs": 0
+      },
+      "pollen-robotics/microduck#600": {
+        "previous_head_sha": "6490b15538a50d13bed497e02df861450a246491",
+        "head_sha": "d867b174ab975eb7c82215dbaa4b5029963d5a09",
+        "updated_at_utc": "2026-11-21T20:36:20Z",
+        "draft": false,
+        "commits": 1,
+        "files": 3,
+        "check_runs": {
+          "board": "success",
+          "check": "success",
+          "coverage": "success"
+        },
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d867b174ab975eb7c82215dbaa4b5029963d5a09"
+      },
+      "pollen-robotics/microduck#565": {
+        "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+        "updated_at_utc": "2026-11-21T20:05:52Z",
+        "new_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-7068501794",
+        "source_changed": false
+      }
+    }
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -62849,6 +63102,88 @@
         "pollen-robotics/microduck": [
           536
         ]
+      }
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-21T19:18:30Z",
+      "source_snapshot_utc": "2026-11-22T04:32:43Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-22T04:32:43Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck_rl": [
+          92
+        ],
+        "pollen-robotics/microduck": [
+          600,
+          565
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "replica_image_publication_changed": false,
+      "replica_public_software_changed": false,
+      "replica_main_integrations_changed": false,
+      "replica_github_latest_changed": false,
+      "replica_github_latest_assets_changed": false,
+      "official_os_pull_requests_changed": false,
+      "official_os_development_channels_changed": false,
+      "replica_merged_pull_requests": [],
+      "newly_discovered_pull_requests": {},
+      "notes": "Four official default heads, formal daemon 0.23.0, current dev tags, Yocto OS 1.4.2/six channels, four HF model refs and official blog unchanged; blog still has three articles, newest 2026-10-23. Existing draft RL #92 advances from 6724d8fc to 89a44b6d (4 commits/7-file current PR diff): author-reported head-pose slow-turn CPU MuJoCo candidate, residual stall at +0.65, no artifact download/weight release/hardware transfer; no check runs at current head. Open core #600 advances from 6490b155 to d867b174 with three-file recorded duck-sim edge replay regression; board/check/coverage pass, but no-return table edges and physical braking remain unverified. #565 source remains 2b0f49ca; author comment reaffirms hand rollback issue on0.23.0, not independently reproduced. Replica software 11.23 and current1104 image unchanged; only docs updated, no tracker tests/build/device actions.",
+      "updated_pull_request_details": {
+        "pollen-robotics/microduck_rl#92": {
+          "previous_head_sha": "6724d8fc79fc7e874473f7bd5e6b5118d562b13c",
+          "head_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
+          "updated_at_utc": "2026-11-22T03:41:52Z",
+          "draft": true,
+          "commits": 4,
+          "files": 7,
+          "current_total_commits": 6,
+          "current_total_files": 7,
+          "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/89a44b6d1e7aaee16281b4512ebebd43b7312460",
+          "checked_runs": 0
+        },
+        "pollen-robotics/microduck#600": {
+          "previous_head_sha": "6490b15538a50d13bed497e02df861450a246491",
+          "head_sha": "d867b174ab975eb7c82215dbaa4b5029963d5a09",
+          "updated_at_utc": "2026-11-21T20:36:20Z",
+          "draft": false,
+          "commits": 1,
+          "files": 3,
+          "check_runs": {
+            "board": "success",
+            "check": "success",
+            "coverage": "success"
+          },
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d867b174ab975eb7c82215dbaa4b5029963d5a09"
+        },
+        "pollen-robotics/microduck#565": {
+          "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+          "updated_at_utc": "2026-11-21T20:05:52Z",
+          "new_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-7068501794",
+          "source_changed": false
+        }
       }
     }
   ],
