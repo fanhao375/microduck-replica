@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-22",
+  "recorded_on": "2026-11-23",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -21178,6 +21178,52 @@
         }
       ],
       "pending_pull_requests": [
+        {
+          "number": 622,
+          "title": "autod: don't brace a seated duck for backing",
+          "url": "https://github.com/pollen-robotics/microduck/pull/622",
+          "state": "open",
+          "draft": false,
+          "created_at": null,
+          "created_at_jst": null,
+          "created_date_observed": "2026-11-22",
+          "updated_at": null,
+          "updated_at_jst": null,
+          "merged_at": null,
+          "merged_at_jst": null,
+          "closed_at": null,
+          "closed_at_jst": null,
+          "head_sha": "fdb796cfed0f47c202236feb2b08a9fdd006b829",
+          "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "actual_merge_base": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "base_branch": "main",
+          "merge_commit_sha": null,
+          "source_version": null,
+          "api_version": 68,
+          "commit_count": 1,
+          "changed_file_count": 1,
+          "source_committed_at_utc": "2026-11-22T13:35:29Z",
+          "source_committed_at_jst": "2026-11-22T22:35:29+09:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/fdb796cfed0f47c202236feb2b08a9fdd006b829",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...fdb796cfed0f47c202236feb2b08a9fdd006b829",
+          "merge_comparison": {
+            "from_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+            "to_sha": "fdb796cfed0f47c202236feb2b08a9fdd006b829",
+            "merge_base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+            "fixed_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...fdb796cfed0f47c202236feb2b08a9fdd006b829",
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "file_count": 1,
+            "commit_count": 1
+          },
+          "classification": "Open, unmerged autod false-positive fix; not included in the formal 0.23.0 source.",
+          "included_in_formal_release": false,
+          "replica_integration": "not_integrated",
+          "review": "Gate backing detection on !world.sitting so trunk odometry drift while seated cannot alternate Nap and Brace. Adds a regression test for 100 ticks. PR reports cargo test -p autod: 43 passed; tracker did not run it. No hardware validation.",
+          "priority": "Medium reference; review seated-state and odometry contracts before any HD-1910 adaptation.",
+          "included_in_formal_release_tag": null
+        },
         {
           "number": 616,
           "title": "Prepare release 0.23.0",
@@ -57243,7 +57289,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-22T11:29:31Z",
+  "checked_at_utc": "2026-11-22T23:44:53.818Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -57256,18 +57302,19 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-22T04:32:43Z",
-    "source_snapshot_utc": "2026-11-22T11:29:31Z",
-    "final_relevant_sources_checked_at_utc": "2026-11-22T11:29:31Z",
+    "previous_substantive_review_utc": "2026-11-22T11:29:31Z",
+    "source_snapshot_utc": "2026-11-22T23:44:53.818Z",
+    "source_snapshot_jst": "2026-11-23T08:44:53.818+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-22T23:44:53.818Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
-      "pollen-robotics/microduck_rl": [
-        92
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        622
       ]
     },
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
     "retired_development_tags": [],
@@ -57285,25 +57332,33 @@
     "official_os_pull_requests_changed": false,
     "official_os_development_channels_changed": false,
     "replica_merged_pull_requests": [],
-    "newly_discovered_pull_requests": {},
-    "notes": "Four official default heads and stable daemon 0.23.0 unchanged; tracked development refs and Yocto OS 1.4.2 unchanged; the four model metadata refs and official blog unchanged (three posts, latest 2026-10-23). Existing draft microduck_rl#92 advanced from 89a44b6d to 4aa7b3ac at 2026-11-22T11:14:59Z; one new commit/six changed files add a delayed-write simulation fixture and opt-in left-turn damper. Author reports outlier reduction under delayed simulation, but +0.65 outliers and possible +0.4 over-braking remain. No weights, hardware transfer, tracker tests, model replacement, image change or local integration.",
+    "newly_discovered_pull_requests": {
+      "pollen-robotics/microduck": [
+        622
+      ]
+    },
+    "notes": "Four official repository heads, stable daemon 0.23.0, Yocto OS 1.4.2, tracked development tag SHAs and model refs remain unchanged; the official blog still lists three articles, latest 2026-10-23. New open core PR #622 targets main from the 0.23.0 head: one commit/one file gates autod backing detection on !world.sitting to prevent seated odometry drift from alternating Nap/Brace. No release, merge, local integration, hardware validation, tracker tests, image or runtime change.",
     "updated_pull_request_details": {
-      "pollen-robotics/microduck_rl#92": {
-        "previous_head_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
-        "head_sha": "4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
-        "updated_at_utc": "2026-11-22T11:14:59Z",
-        "updated_at_jst": "2026-11-22T20:14:59+09:00",
-        "draft": true,
+      "pollen-robotics/microduck#622": {
+        "previous_head_sha": null,
+        "head_sha": "fdb796cfed0f47c202236feb2b08a9fdd006b829",
+        "state": "open",
+        "draft": false,
+        "created_date_observed": "2026-11-22",
+        "source_committed_at_utc": "2026-11-22T13:35:29Z",
+        "source_committed_at_jst": "2026-11-22T22:35:29+09:00",
         "commits_in_increment": 1,
-        "files_in_increment": 6,
-        "current_total_commits": 6,
-        "current_total_files": 7,
-        "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
-        "fixed_compare_url": "https://github.com/pollen-robotics/microduck_rl/compare/89a44b6d1e7aaee16281b4512ebebd43b7312460...4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
-        "author_reported_simulator_results_only": true,
+        "files_in_increment": 1,
+        "current_total_commits": 1,
+        "current_total_files": 1,
+        "base_branch": "main",
+        "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/fdb796cfed0f47c202236feb2b08a9fdd006b829",
+        "fixed_compare_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...fdb796cfed0f47c202236feb2b08a9fdd006b829",
+        "replica_integration": "not_integrated",
         "tracker_tests_executed": false,
-        "new_weights_committed": false,
-        "hardware_transfer": false
+        "author_reported_test_only": "cargo test -p autod: 43 passed (PR page); not independently run by tracker",
+        "hardware_validation": false
       }
     }
   },
@@ -63255,6 +63310,69 @@
           "updated_at_utc": "2026-11-21T20:05:52Z",
           "new_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-7068501794",
           "source_changed": false
+        }
+      }
+    },
+    {
+      "default_branch_changes": false,
+      "new_stable_release": false,
+      "previous_tracked_prs_merged": false,
+      "official_blog_new_articles": false,
+      "model_metadata_changed": false,
+      "official_os_release_changed": false,
+      "local_migration_record_changed": false,
+      "runtime_code_changed_by_heartbeat": false,
+      "tests_executed_by_tracker": false,
+      "robot_connected": false,
+      "image_built_or_published_by_tracker": false,
+      "previous_substantive_review_utc": "2026-11-22T04:32:43Z",
+      "source_snapshot_utc": "2026-11-22T11:29:31Z",
+      "final_relevant_sources_checked_at_utc": "2026-11-22T11:29:31Z",
+      "stable_release_tag": "daemon-v0.23.0",
+      "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+      "stable_asset_count": 8,
+      "new_pull_requests": {},
+      "updated_pull_requests": {
+        "pollen-robotics/microduck_rl": [
+          92
+        ]
+      },
+      "new_development_releases": [],
+      "moved_development_tags": [],
+      "retired_development_tags": [],
+      "closed_unmerged_pull_requests": {},
+      "newly_discovered_merged_pull_requests": {},
+      "official_os_main_changed": false,
+      "merged_previously_tracked_pull_requests": {},
+      "formal_release_artifacts_available": true,
+      "formal_release_assets_completed": false,
+      "replica_image_publication_changed": false,
+      "replica_public_software_changed": false,
+      "replica_main_integrations_changed": false,
+      "replica_github_latest_changed": false,
+      "replica_github_latest_assets_changed": false,
+      "official_os_pull_requests_changed": false,
+      "official_os_development_channels_changed": false,
+      "replica_merged_pull_requests": [],
+      "newly_discovered_pull_requests": {},
+      "notes": "Four official default heads and stable daemon 0.23.0 unchanged; tracked development refs and Yocto OS 1.4.2 unchanged; the four model metadata refs and official blog unchanged (three posts, latest 2026-10-23). Existing draft microduck_rl#92 advanced from 89a44b6d to 4aa7b3ac at 2026-11-22T11:14:59Z; one new commit/six changed files add a delayed-write simulation fixture and opt-in left-turn damper. Author reports outlier reduction under delayed simulation, but +0.65 outliers and possible +0.4 over-braking remain. No weights, hardware transfer, tracker tests, model replacement, image change or local integration.",
+      "updated_pull_request_details": {
+        "pollen-robotics/microduck_rl#92": {
+          "previous_head_sha": "89a44b6d1e7aaee16281b4512ebebd43b7312460",
+          "head_sha": "4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
+          "updated_at_utc": "2026-11-22T11:14:59Z",
+          "updated_at_jst": "2026-11-22T20:14:59+09:00",
+          "draft": true,
+          "commits_in_increment": 1,
+          "files_in_increment": 6,
+          "current_total_commits": 6,
+          "current_total_files": 7,
+          "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
+          "fixed_compare_url": "https://github.com/pollen-robotics/microduck_rl/compare/89a44b6d1e7aaee16281b4512ebebd43b7312460...4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
+          "author_reported_simulator_results_only": true,
+          "tracker_tests_executed": false,
+          "new_weights_committed": false,
+          "hardware_transfer": false
         }
       }
     }
