@@ -67,7 +67,7 @@
 <div align="center">
   <img src="assets/wechat-group-16.png" alt="鸭子复刻群 16 微信二维码" width="280">
   <br>
-  <sub><b>鸭子复刻群 16 · 二维码在 2026-11-20 前有效</b>（微信群码 7 天自动失效）<br>
+  <sub><b>鸭子复刻群 16 · 二维码在 2026-11-30 前有效</b>（微信群码 7 天自动失效）<br>
   过期了请开个 <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> 说一声，我会换上新的</sub>
 </div>
 

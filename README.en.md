@@ -67,7 +67,7 @@ The code below is for **Duck Replica Group 16** (WeChat disables QR joins once a
 <div align="center">
   <img src="assets/wechat-group-16.png" alt="Duck Replica Group 16 WeChat QR code" width="280">
   <br>
-  <sub><b>Duck Replica Group 16 · QR code valid before 2026-11-20</b> — WeChat group codes are valid for 7 days<br>
+  <sub><b>Duck Replica Group 16 · QR code valid before 2026-11-30</b> — WeChat group codes are valid for 7 days<br>
   If it has expired, open an <a href="https://github.com/fanhao375/microduck-replica/issues">issue</a> and I will post a fresh one</sub>
 </div>
 
