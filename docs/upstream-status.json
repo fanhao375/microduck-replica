@@ -56963,7 +56963,7 @@
           "actual_merge_base": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
           "source_committed_at_utc": "2026-11-22T11:13:48Z",
           "source_committed_at_jst": "2026-11-22T20:13:48+09:00",
-          "commit_count": 6,
+          "commit_count": 7,
           "changed_file_count": 7,
           "fixed_source_url": "https://github.com/not-heavychevy/microduck_rl/commit/4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
           "fixed_diff_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
@@ -56990,7 +56990,7 @@
           "candidate_bytes_downloaded_or_verified_by_tracker": false,
           "official_policy_set_changed": false,
           "review": {
-            "source_scope": "Six commits/seven files in the current open draft at 4aa7b3ac; the one-commit six-file increment after 89a44b6 adds delayed motor-write replay, opt-in left-turn calibration, documentation and synthetic graph tests. No ONNX/checkpoint/weight file was committed.",
+            "source_scope": "Seven commits/seven files in the current open draft at 4aa7b3ac; the one-commit six-file increment after 89a44b6 adds delayed motor-write replay, opt-in left-turn calibration, documentation and synthetic graph tests. No ONNX/checkpoint/weight file was committed.",
             "method": "CPU ridge regression(ridge0.001) adjusts v10 final Gemm weights/bias only. Original hidden layers and baked normalizer retained; label actors are publicv8/v10. Temporary hidden feature output removed before saving. Output metadata retains deployment contract keys and adds fit/base/teacher SHA256 rather than copying checkpoint/run attribution. New calibrate_slow_turns adds a stateless low-speed yaw-cue correction using leg-joint velocity magnitude; deployment normalizer and hidden layers remain preserved. This is simulator research, not an official runtime/API or policy-set change. Latest increment adds a default-off post-fit left-turn damper using trunk angular velocity projected onto world vertical plus measured neck position; benchmark can place every Nth action write after the physics batch. It remains simulator-side calibration, not a runtime contract change.",
             "demonstrations": "v8 receives1.4x yaw cue on slow turns and simulator heading/lateral feedback for straight teacher labels; student still sees original requested twist. Short starts after settled SIT/STAND give teacher up-to0.20m/s during first second;1280pairs triple weighted. V10 labels stand/recovery/off-target. Author reports27032weightedrows.",
             "replay": "Rollouts use backlash scene,50Hz/4substeps,action_scale0.9,target gains0.7 and head0.5,command smoothing0.2; infer_policy adds optional existing walking_session injection. No daemon drive-default change; simulated pose only influences teacher,not a new runtime pose-observation input.",
@@ -57289,7 +57289,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-22T23:44:53.818Z",
+  "checked_at_utc": "2026-11-23T01:41:55.943Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -75636,5 +75636,19 @@
         }
       }
     ]
-  }
+  },
+  "data_correction_history": [
+    {
+      "checked_at_utc": "2026-11-23T01:41:55.943Z",
+      "checked_at_jst": "2026-11-23T10:41:55.943+09:00",
+      "record": "pollen-robotics/microduck_rl#92 current commit count",
+      "previous_recorded_value": 6,
+      "verified_value": 7,
+      "head_sha": "4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1",
+      "base_sha": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+      "verification": "GitHub PR page lists 7 commits; git rev-list --count base..head confirms 7. Head SHA and source diff did not change; this corrects the stored total only.",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_rl/pull/92/commits",
+      "fixed_compare_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1"
+    }
+  ]
 }
