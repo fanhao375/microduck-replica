@@ -7,9 +7,11 @@
     "pollen-robotics/microduck": {
       "default_branch": "main",
       "head": {
-        "sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
-        "committed_at": "2026-11-18T09:58:25Z",
-        "subject": "Merge pull request #616 from pollen-robotics/release-0.23.0"
+        "sha": "3bd5265a870918c88d98cad1679fcfe50f362a36",
+        "committed_at": "2026-11-23T09:30:34Z",
+        "subject": "Merge pull request #565 from Nixxx19/stuck-release-reverted-stays-known-bad",
+        "committed_at_jst": "2026-11-23T18:30:34+09:00",
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/3bd5265a870918c88d98cad1679fcfe50f362a36"
       },
       "latest_stable_release": {
         "tag_name": "daemon-v0.23.0",
@@ -3257,13 +3259,13 @@
           "tag": "daemon-dev-main",
           "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
           "release_id": 449797497,
-          "head_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "head_sha": "3bd5265a870918c88d98cad1679fcfe50f362a36",
           "version": "daemon 0.23.0-dev.1856.56424ef (main)",
           "published_at": "2026-11-18T10:03:48Z",
           "published_at_jst": "2026-11-18T19:03:48+09:00",
-          "committed_at": "2026-11-18T09:58:25Z",
-          "committed_at_jst": "2026-11-18T18:58:25+09:00",
-          "source_committed_at_utc": "2026-11-18T09:58:25Z",
+          "committed_at": "2026-11-23T09:30:34Z",
+          "committed_at_jst": "2026-11-23T18:30:34+09:00",
+          "source_committed_at_utc": "2026-11-23T09:30:34Z",
           "prerelease": true,
           "source_version": "0.23.0",
           "api_version": 68,
@@ -3351,11 +3353,11 @@
             }
           ],
           "assets_checked_at_utc": "2026-11-18T10:06:34Z",
-          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/56424efe58b7de40efcf3b2d3a5cd169ee83a182",
-          "classification": "Development build matches formal-tagged 0.23.0 source",
-          "review": "Main dev1856 and formal 0.23.0 share source SHA and API68. Both development and formal manifest bytes have been verified; package digests refer to GitHub artifact metadata.",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/3bd5265a870918c88d98cad1679fcfe50f362a36",
+          "classification": "Moved development Git ref; main source includes merged PR #565, but a matching newly built dev release artifact was not confirmed.",
+          "review": "Git ref now points to 3bd5265a, which includes merged PR #565; the release page still advertises the earlier daemon 0.22.0-dev.1852 package built from 46c8f1f6. A matching dev artifact for the moved ref was not confirmed.",
           "priority": "Medium before DIY phone-control adoption; verify motion ownership and online-update interaction.",
-          "replica_integration": "not_integrated",
+          "replica_integration": "not_integrated; formal release remains daemon-v0.23.0 at 56424efe and local software/image unchanged.",
           "previous_head_sha": "46c8f1f6f60edf28129f57690fea326c926f0f3c",
           "source_history": [
             {
@@ -12499,6 +12501,11 @@
                 "file_count": 8,
                 "commit_count": 6
               }
+            },
+            {
+              "head_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+              "observed_at_utc": "2026-11-23T04:40:29.071Z",
+              "classification": "previously recorded dev-main ref"
             }
           ],
           "head_history": [
@@ -12694,7 +12701,19 @@
             "actions": "The Wi-Fi transport reuses the existing Bluetooth command filter; verify authentication, refusals and disconnect behavior.",
             "sound": "Inherits already-merged sing and flashlight controls; no new audio asset in the increment.",
             "updater": "A Wi-Fi lane session is not counted as a WebRTC peer by updater checks. Verify stop/update interaction when integrating with DIY online updates."
-          }
+          },
+          "source_committed_at_jst": "2026-11-23T18:30:34+09:00",
+          "fixed_increment_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...3bd5265a870918c88d98cad1679fcfe50f362a36",
+          "release_page_observed_version": "daemon 0.22.0-dev.1852.46c8f1f (main)",
+          "release_page_observed_source_sha": "46c8f1f6f60edf28129f57690fea326c926f0f3c",
+          "release_page_observed_published_at": "2026-11-17T16:07 (GitHub page display)",
+          "matching_package_confirmed": false,
+          "change": "Tag currently points to new formal-main head 3bd5265a; source diff from formal tag adds PR #565 updater journal known-bad and pruning safeguards. Release page still shows an older source build, so tag movement is not recorded as a new matching package.",
+          "associated_merged_pull_requests": [
+            565
+          ],
+          "artifact_source_sha": "46c8f1f6f60edf28129f57690fea326c926f0f3c",
+          "artifact_matches_current_ref": false
         },
         {
           "tag": "daemon-dev-ground-grasp-x",
@@ -29511,28 +29530,39 @@
         {
           "number": 565,
           "title": "updater: a stuck release reverted by hand is not put back",
-          "state": "open",
+          "state": "closed",
           "draft": false,
           "created_at": "2026-11-10T13:14:36Z",
-          "updated_at": "2026-11-21T20:05:52Z",
+          "updated_at": null,
           "merged_at": null,
-          "merge_commit_sha": null,
+          "merge_commit_sha": "3bd5265a870918c88d98cad1679fcfe50f362a36",
           "url": "https://github.com/pollen-robotics/microduck/pull/565",
-          "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
-          "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+          "head_sha": "6a7af9cb32e3de906a4750144dda85847ed889fc",
+          "base_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
           "base_branch": "main",
-          "actual_merge_base": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
-          "commit_count": 1,
-          "changed_file_count": 5,
+          "actual_merge_base": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+          "commit_count": 3,
+          "changed_file_count": 6,
           "created_at_jst": "2026-11-10T22:14:36+09:00",
-          "updated_at_jst": "2026-11-22T05:05:52+09:00",
-          "source_version": "0.18.9",
-          "api_version": 53,
-          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/ef666aada8a7e945cbbeefbf1577a091b8a8294b...2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
-          "classification": "pending",
+          "updated_at_jst": null,
+          "source_version": "0.23.0 main (not formally released)",
+          "api_version": 68,
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/56424efe58b7de40efcf3b2d3a5cd169ee83a182...6a7af9cb32e3de906a4750144dda85847ed889fc",
+          "classification": "merged_main_unreleased",
           "replica_integration": "not_integrated",
-          "review": "Same source and diff; author comment at 2026-11-21T20:05:50Z says formal 0.23.0 still permits the hand-rollback failure and the patch applies cleanly on main. Comment is not an independent runtime reproduction or merge.",
-          "priority": "high before unattended update",
+          "review": {
+            "change": "A previously Stuck component version becomes known-bad after the robot later moves to an older version. Explicit manual apply retry remains possible. Prune removes known-bad releases without spending keep_previous slots, preserving a good rollback target; unreadable journal retains count-only prune behavior.",
+            "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/6a7af9cb32e3de906a4750144dda85847ed889fc",
+            "merged_source_url": "https://github.com/pollen-robotics/microduck/commit/3bd5265a870918c88d98cad1679fcfe50f362a36",
+            "included_in_formal_release": false,
+            "formal_release_tag": "daemon-v0.23.0",
+            "formal_release_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
+            "tests": "Regression tests were added upstream; tracker did not run tests.",
+            "current_dev_tag": "daemon-dev-main",
+            "current_dev_tag_sha": "3bd5265a870918c88d98cad1679fcfe50f362a36",
+            "dev_release_artifact": "Not confirmed: public release page still displays daemon 0.22.0-dev.1852 at 46c8f1f6f60edf28129f57690fea326c926f0f3c; do not treat the moved tag alone as a matching package."
+          },
+          "priority": "High updater safety tracking; high review before adopting unattended daemon updates.",
           "comparison_to_recorded_main": {
             "from_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
             "to_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
@@ -29655,19 +29685,28 @@
                 "motion": "No direct change.",
                 "sound": "No direct change."
               }
+            },
+            {
+              "observed_at_utc": "2026-11-23T04:40:29.071Z",
+              "observed_at_jst": "2026-11-23T13:40:29.071+09:00",
+              "state": "open",
+              "head_sha": "2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
+              "base_sha": "ef666aada8a7e945cbbeefbf1577a091b8a8294b",
+              "classification": "last open observation before merge",
+              "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/2b0f49ca9ef7e2366701c4e0b65d488166256bb2"
             }
           ],
           "impact": {
-            "HD1910": "High review priority before any adoption of official OTA or rollback. Current replica migration is independent.",
-            "camera": "No direct change.",
-            "ToF": "No direct change.",
-            "model_management": "No direct change.",
-            "training": "No direct change.",
-            "motion": "No direct change.",
-            "sound": "No direct change."
+            "HD1910": "Reduces repeated failed OTA downloads/writes/restarts after a stuck release is manually reverted; no servo/gait change and no hardware test.",
+            "camera": "No capture/calibration change.",
+            "ToF": "No sensor/geometry/avoidance change.",
+            "model_management": "Changes component updater journal/prune/rollback safety, not policy/model weights or contracts.",
+            "training": "No training or weights change.",
+            "motion": "No policy or gait change; update rollback restarts can interrupt motion.",
+            "sound": "No audio assets or playback change."
           },
           "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/2b0f49ca9ef7e2366701c4e0b65d488166256bb2",
-          "merged_at_jst": null,
+          "merged_at_jst": "2026-11-23T18:30:34+09:00",
           "closed_at": null,
           "closed_at_jst": null,
           "included_in_formal_release": false,
@@ -29682,7 +29721,15 @@
           },
           "latest_comment_url": "https://github.com/pollen-robotics/microduck/pull/565#issuecomment-7068501794",
           "latest_comment_at_utc": "2026-11-21T20:05:50Z",
-          "latest_comment_at_jst": "2026-11-22T05:05:50+09:00"
+          "latest_comment_at_jst": "2026-11-22T05:05:50+09:00",
+          "merged": true,
+          "tracker_tests_executed": false,
+          "hardware_validation": false,
+          "merged_date_display": "2026-11-23 (GitHub PR page displays Merged; exact API merged_at unavailable)",
+          "merge_commit_committed_at_utc": "2026-11-23T09:30:34Z",
+          "merge_commit_committed_at_jst": "2026-11-23T18:30:34+09:00",
+          "state_observed_at_utc": "2026-11-23T09:52:33.994Z",
+          "state_observed_at_jst": "2026-11-23T18:52:33.994+09:00"
         },
         {
           "number": 566,
@@ -57341,11 +57388,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-23T04:40:29.071Z",
+  "checked_at_utc": "2026-11-23T09:52:33.994Z",
   "latest_review": {
-    "default_branch_changes": false,
+    "default_branch_changes": true,
     "new_stable_release": false,
-    "previous_tracked_prs_merged": false,
+    "previous_tracked_prs_merged": true,
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "official_os_release_changed": false,
@@ -57354,22 +57401,32 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-22T23:44:53.818Z",
-    "source_snapshot_utc": "2026-11-23T04:40:29.071Z",
-    "source_snapshot_jst": "2026-11-23T13:40:29.071+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-23T04:40:29.071Z",
+    "previous_substantive_review_utc": "2026-11-23T04:40:29.071Z",
+    "source_snapshot_utc": "2026-11-23T09:52:33.994Z",
+    "source_snapshot_jst": "2026-11-23T18:52:33.994+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-23T09:52:33.994Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
     "new_pull_requests": {},
-    "updated_pull_requests": {},
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        565
+      ]
+    },
     "new_development_releases": [],
-    "moved_development_tags": [],
+    "moved_development_tags": [
+      "daemon-dev-main"
+    ],
     "retired_development_tags": [],
     "closed_unmerged_pull_requests": {},
     "newly_discovered_merged_pull_requests": {},
     "official_os_main_changed": false,
-    "merged_previously_tracked_pull_requests": {},
+    "merged_previously_tracked_pull_requests": {
+      "pollen-robotics/microduck": [
+        565
+      ]
+    },
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": false,
     "replica_image_publication_changed": false,
@@ -57380,12 +57437,8 @@
     "official_os_pull_requests_changed": false,
     "official_os_development_channels_changed": false,
     "replica_merged_pull_requests": [],
-    "newly_discovered_pull_requests": {
-      "pollen-robotics/microduck": [
-        622
-      ]
-    },
-    "notes": "Four official default heads, stable daemon 0.23.0/API68, Yocto OS 1.4.2, tracked PR states and official blog are unchanged. Inventory reconciliation added two previously omitted historical dev-tag records: release-lookup-by-tag is already an ancestor of formal main; ground-pick-mouth is an Oct 2026 unmerged dev prototype not present in formal 0.23.0. Neither tag was newly published in this check. Open PR #622 remains at fdb796cf and RL PR #92 remains draft at 4aa7b3ac. No replica integration, tests, build, image or device action.",
+    "newly_discovered_pull_requests": {},
+    "notes": "Core main advanced from formal daemon-v0.23.0 56424efe to 3bd5265a via merge of tracked PR #565. The updater now treats a Stuck version as known-bad only after moving back to an older version, preserves explicit manual retry, and prunes known-bad versions without consuming keep_previous. Stable 0.23.0 remains 56424efe; not formally released. daemon-dev-main ref moved to 3bd5265a, but its release page still shows old build 46c8f1f, so a matching package was not confirmed. Other tracked repository heads, PR #622, RL #92, Yocto 1.4.2 and official blog unchanged. No local integration, tests, build, image or hardware action.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#622": {
         "previous_head_sha": null,
