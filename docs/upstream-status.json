@@ -57405,7 +57405,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-23T10:51:35.026Z",
+  "checked_at_utc": "2026-11-23T11:55:36.061Z",
   "latest_review": {
     "default_branch_changes": true,
     "new_stable_release": false,
@@ -57419,9 +57419,9 @@
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
     "previous_substantive_review_utc": "2026-11-23T10:51:35.026Z",
-    "source_snapshot_utc": "2026-11-23T10:51:35.026Z",
-    "source_snapshot_jst": "2026-11-23T19:51:35.026+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-23T10:51:35.026Z",
+    "source_snapshot_utc": "2026-11-23T11:55:36.061Z",
+    "source_snapshot_jst": "2026-11-23T20:55:36.061+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-23T11:55:36.061Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
@@ -57451,7 +57451,7 @@
     "official_os_development_channels_changed": true,
     "replica_merged_pull_requests": [],
     "newly_discovered_pull_requests": {},
-    "notes": "The four upstream repository default heads and stable daemon-v0.23.0 (56424efe), tracked PR state (#622 open, RL #92 draft open, HAT #8 and emotions #1 open), official OS release and three-article blog have no new change. GitHub release API now lists a new daemon-dev-main release record (id 455216614; previous observed entry id 449797497) with package 0.23.0-dev.1870.3bd5265 matching the current main/tag SHA 3bd5265a, with 16 assets; daemon tar.zst metadata reports size 19,992,871 and digest sha256:7322c486e9139517a24181ad584b0b709e546a54d5940fb01d3befe05737fb73. This mutable release record reports published_at 09:35:51Z, despite the prior 09:52Z snapshot showing an older package; exact transition time is not inferred. Source diff from stable is four commits/six files for PR #565 updater known-bad/rollback retention. Team.dev signature is for dev boards only and customer boards reject it. Metadata only: package/manifest bytes were not downloaded, signature not verified, nothing installed or executed. No local integration, tests, build, image, robot or hardware validation. Yocto main also advanced from 5a82fa22 to 93910906 via merged PR #161 (one main commit, 15 files; 27 commits/99 files ahead of formal OS source 635c4111). The PR trims kernel modules/configs, keeps key USB serial and DRM/NPU paths, and builds overlayfs in for read-only rootfs. GitHub build-image CI succeeded and published dev/candidate channel metadata for beta and Face Board v1, all tied to 93910906; official 1.4.2 stable channels/tag remain at 635c411. PR-author board/QEMU/motion tests predate the rebase on #160; post-rebase Face Board boot/overlay and Zero 3W build/boot are unverified. No local OS integration, image download/install, tests or device work.",
+    "notes": "The four upstream repository default heads and stable daemon-v0.23.0 (56424efe), tracked PR state (#622 open, RL #92 draft open, HAT #8 and emotions #1 open), official OS release and three-article blog have no new change. GitHub release API now lists a new daemon-dev-main release record (id 455216614; previous observed entry id 449797497) with package 0.23.0-dev.1870.3bd5265 matching the current main/tag SHA 3bd5265a, with 16 assets; daemon tar.zst metadata reports size 19,992,871 and digest sha256:7322c486e9139517a24181ad584b0b709e546a54d5940fb01d3befe05737fb73. This mutable release record reports published_at 09:35:51Z, despite the prior 09:52Z snapshot showing an older package; exact transition time is not inferred. Source diff from stable is four commits/six files for PR #565 updater known-bad/rollback retention. Team.dev signature is for dev boards only and customer boards reject it. Metadata only: package/manifest bytes were not downloaded, signature not verified, nothing installed or executed. No local integration, tests, build, image, robot or hardware validation. Yocto main also advanced from 5a82fa22 to 93910906 via merged PR #161 (one main commit, 15 files; 27 commits/99 files ahead of formal OS source 635c4111). The PR trims kernel modules/configs, keeps key USB serial and DRM/NPU paths, and builds overlayfs in for read-only rootfs. GitHub build-image CI succeeded and published dev/candidate channel metadata for beta and Face Board v1, all tied to 93910906; official 1.4.2 stable channels/tag remain at 635c411. PR-author board/QEMU/motion tests predate the rebase on #160; post-rebase Face Board boot/overlay and Zero 3W build/boot are unverified. No local OS integration, image download/install, tests or device work. Data correction: the beta dev channel raw SHA-256 had been truncated in the JSON; the current raw env bytes confirm the full digest a273b4b3d1ada01788cf9320de22dbcc741466845a80495384455af8177cb149. Channel fields/build metadata are otherwise unchanged.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#622": {
         "previous_head_sha": null,
@@ -57509,7 +57509,14 @@
     "official_os_build_workflow_conclusion": "success",
     "official_os_release_attachment": "skipped",
     "official_os_post_rebase_hardware_validation": false,
-    "zero3w_trim_hardware_validation": false
+    "zero3w_trim_hardware_validation": false,
+    "data_correction": {
+      "record": "official_os_main_since_release.update_channel_observation.channels[microduck-beta/dev] SHA-256 metadata",
+      "previous_recorded_value": "a273b4b3d1ada01788cf9320de22dbcc741466845a",
+      "verified_value": "a273b4b3d1ada01788cf9320de22dbcc741466845a80495384455af8177cb149",
+      "fixed_source_url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
+      "change_date_jst": "2026-11-23T20:55:36.061+09:00"
+    }
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -72782,7 +72789,7 @@
           "board": "microduck-beta",
           "channel": "dev",
           "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
-          "raw_sha256": "a273b4b3d1ada01788cf9320de22dbcc741466845a",
+          "raw_sha256": "a273b4b3d1ada01788cf9320de22dbcc741466845a80495384455af8177cb149",
           "fields": {
             "VERSION": "1.4.2+20261123102859",
             "BUILD": "20261123102859",
@@ -72796,7 +72803,7 @@
           },
           "fixed_build_manifest": {
             "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261123102859.env",
-            "sha256": "a273b4b3d1ada01788cf9320de22dbcc741466845a"
+            "sha256": "a273b4b3d1ada01788cf9320de22dbcc741466845a80495384455af8177cb149"
           }
         },
         {
@@ -76207,6 +76214,16 @@
       "verification": "GitHub PR page lists 7 commits; git rev-list --count base..head confirms 7. Head SHA and source diff did not change; this corrects the stored total only.",
       "fixed_source_url": "https://github.com/pollen-robotics/microduck_rl/pull/92/commits",
       "fixed_compare_url": "https://github.com/pollen-robotics/microduck_rl/compare/0daab160d3fb1c2cbaba16a4a19052f36709dd9e...4aa7b3ac67f2c6839cdaa226cd523fe4f18c11d1"
+    },
+    {
+      "checked_at_utc": "2026-11-23T11:55:36.061Z",
+      "checked_at_jst": "2026-11-23T20:55:36.061+09:00",
+      "record": "official_os_main_since_release.update_channel_observation.channels[microduck-beta/dev] SHA-256 metadata",
+      "previous_recorded_value": "a273b4b3d1ada01788cf9320de22dbcc741466845a",
+      "verified_value": "a273b4b3d1ada01788cf9320de22dbcc741466845a80495384455af8177cb149",
+      "verification": "Refetched the current dev.env as raw response bytes; SHA-256 of the returned bytes is the full 64-hex value. The prior JSON value had been truncated to 42 characters. Current endpoint metadata still points to build 20261123102859 from 93910906c0fb3c849d2716c96ff83d34e32ae654. No image payload was downloaded.",
+      "fixed_source_url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env",
+      "fixed_build_manifest_url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/builds/20261123102859.env"
     }
   ]
 }
