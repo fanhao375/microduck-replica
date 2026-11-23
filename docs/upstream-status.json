@@ -21175,6 +21175,58 @@
             "motion": "Seated-only skill with heading/target/chain/reflex options and contextual dispatch; old personal Select/3s power behavior retained, not formal new gait.",
             "sound": "Existing phase/WAV/beak experiments inherited; no sound asset or playback code added in increment."
           }
+        },
+        {
+          "tag": "daemon-dev-release-lookup-by-tag",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-release-lookup-by-tag",
+          "head_sha": "a927c3d577c5261f222dcf256283877c0c68be81",
+          "source_committed_at_utc": "2026-10-17T10:02:12Z",
+          "source_committed_at_jst": "2026-10-17T19:02:12+09:00",
+          "prerelease": true,
+          "classification": "Historical dev-tag inventory; source is an ancestor of current formal main 56424efe58b7de40efcf3b2d3a5cd169ee83a182, so already merged into main.",
+          "change": "Updater resolves channel releases from filtered tag refs rather than the growing release listing, avoiding the observed >1 MiB metadata response failure; development ref behavior unchanged.",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/a927c3d577c5261f222dcf256283877c0c68be81",
+          "current_main_contains_source": true,
+          "replica_integration": "not separately ported; this is already upstream formal-main functionality, not a new replica change.",
+          "impact": {
+            "HD1910": "No direct servo/motion change; more reliable updater discovery only.",
+            "camera": "No capture or calibration change.",
+            "ToF": "No sensing or avoidance change.",
+            "model_management": "Updater release selection reliability improves; package/model contract unchanged.",
+            "training": "No training or weights change.",
+            "motion": "No gait or controller change.",
+            "sound": "No audio assets or playback change."
+          },
+          "priority": "Medium operational reference; already in upstream main."
+        },
+        {
+          "tag": "daemon-dev-ground-pick-mouth",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-ground-pick-mouth",
+          "head_sha": "ec406c901cebb216b2b0d9d46e4912d8d4b2ad36",
+          "source_committed_at_utc": "2026-10-10T14:07:22Z",
+          "source_committed_at_jst": "2026-10-10T23:07:22+09:00",
+          "release_date_display": "2026-10-24 (release page display; exact UTC publication timestamp not independently resolved)",
+          "version": "daemon 0.16.1-dev.1432.ec406c9",
+          "prerelease": true,
+          "classification": "Historical development prototype; source commit is not an ancestor of current formal main 56424efe58b7de40efcf3b2d3a5cd169ee83a182 and is absent from its source tree.",
+          "parent_sha": "dec725c67ffbbdde7f1de30f8c936b1bf9c1d70e",
+          "changed_files": 6,
+          "change": "Adds optional policy.ground_pick_mouth and policy.ground_pick_mouth_close settings; robotd drives mouth from the ground-pick controller phase instead of per-tick client intent when configured. Unset preserves existing behavior; theremin/chorale precedence is retained. No new audio or policy weights.",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/ec406c901cebb216b2b0d9d46e4912d8d4b2ad36",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/dec725c67ffbbdde7f1de30f8c936b1bf9c1d70e...ec406c901cebb216b2b0d9d46e4912d8d4b2ad36",
+          "current_main_contains_source": false,
+          "formal_release_contains_source": false,
+          "replica_integration": "not_integrated; no local software, image, device, or hardware validation changed.",
+          "impact": {
+            "HD1910": "Review robot.mouth units, controller phase, servo response, and Feetech integration before any port; not actuator validation.",
+            "camera": "No capture/calibration change.",
+            "ToF": "No sensing/geometry/avoidance change.",
+            "model_management": "Adds optional policy runtime parameters only; no model weights or replacement.",
+            "training": "Describes timing for a ground-pick trained with scripted mouth; no new strategy weights released.",
+            "motion": "Changes ground-pick mouth scheduling only; no leg gait/controller acceptance.",
+            "sound": "No new audio; existing theremin/chorale precedence retained."
+          },
+          "priority": "Medium upstream tracking; high review priority before local adoption."
         }
       ],
       "pending_pull_requests": [
@@ -57289,7 +57341,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-23T01:41:55.943Z",
+  "checked_at_utc": "2026-11-23T04:40:29.071Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -57302,18 +57354,14 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-22T11:29:31Z",
-    "source_snapshot_utc": "2026-11-22T23:44:53.818Z",
-    "source_snapshot_jst": "2026-11-23T08:44:53.818+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-22T23:44:53.818Z",
+    "previous_substantive_review_utc": "2026-11-22T23:44:53.818Z",
+    "source_snapshot_utc": "2026-11-23T04:40:29.071Z",
+    "source_snapshot_jst": "2026-11-23T13:40:29.071+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-23T04:40:29.071Z",
     "stable_release_tag": "daemon-v0.23.0",
     "stable_release_actual_sha": "56424efe58b7de40efcf3b2d3a5cd169ee83a182",
     "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        622
-      ]
-    },
+    "new_pull_requests": {},
     "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [],
@@ -57337,7 +57385,7 @@
         622
       ]
     },
-    "notes": "Four official repository heads, stable daemon 0.23.0, Yocto OS 1.4.2, tracked development tag SHAs and model refs remain unchanged; the official blog still lists three articles, latest 2026-10-23. New open core PR #622 targets main from the 0.23.0 head: one commit/one file gates autod backing detection on !world.sitting to prevent seated odometry drift from alternating Nap/Brace. No release, merge, local integration, hardware validation, tracker tests, image or runtime change.",
+    "notes": "Four official default heads, stable daemon 0.23.0/API68, Yocto OS 1.4.2, tracked PR states and official blog are unchanged. Inventory reconciliation added two previously omitted historical dev-tag records: release-lookup-by-tag is already an ancestor of formal main; ground-pick-mouth is an Oct 2026 unmerged dev prototype not present in formal 0.23.0. Neither tag was newly published in this check. Open PR #622 remains at fdb796cf and RL PR #92 remains draft at 4aa7b3ac. No replica integration, tests, build, image or device action.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#622": {
         "previous_head_sha": null,
@@ -57360,7 +57408,11 @@
         "author_reported_test_only": "cargo test -p autod: 43 passed (PR page); not independently run by tracker",
         "hardware_validation": false
       }
-    }
+    },
+    "newly_tracked_historical_development_releases": [
+      "daemon-dev-release-lookup-by-tag",
+      "daemon-dev-ground-pick-mouth"
+    ]
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
