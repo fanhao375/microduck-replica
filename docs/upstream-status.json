@@ -58035,11 +58035,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-24T01:41:53Z",
+  "checked_at_utc": "2026-11-24T08:41:30.532Z",
   "latest_review": {
-    "default_branch_changes": true,
-    "new_stable_release": true,
-    "previous_tracked_prs_merged": true,
+    "default_branch_changes": false,
+    "new_stable_release": false,
+    "previous_tracked_prs_merged": false,
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "official_os_release_changed": false,
@@ -58049,16 +58049,16 @@
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
     "previous_substantive_review_utc": "2026-11-23T11:55:36.061Z",
-    "source_snapshot_utc": "2026-11-24T01:41:53Z",
-    "source_snapshot_jst": "2026-11-24T10:41:53+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-24T01:41:53Z",
+    "source_snapshot_utc": "2026-11-24T08:41:30.532Z",
+    "source_snapshot_jst": "2026-11-24T17:41:30.532+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-24T08:41:30.532Z",
     "stable_release_tag": "daemon-v0.23.1",
     "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "stable_asset_count": 8,
     "new_pull_requests": {},
     "updated_pull_requests": {
-      "pollen-robotics/microduck": [
-        623
+      "pollen-robotics/microduck_yocto": [
+        140
       ]
     },
     "new_development_releases": [],
@@ -58085,7 +58085,7 @@
     "replica_main_integrations_changed": false,
     "replica_github_latest_changed": false,
     "replica_github_latest_assets_changed": false,
-    "official_os_pull_requests_changed": false,
+    "official_os_pull_requests_changed": true,
     "official_os_development_channels_changed": false,
     "replica_merged_pull_requests": [],
     "newly_discovered_pull_requests": {
@@ -58093,7 +58093,7 @@
         623
       ]
     },
-    "notes": "At 2026-11-24T01:41:53Z, formal daemon-v0.23.1 published (release 455626124) at source/main SHA 93b26bbf; API v68 unchanged. Release contains 19 commits/18 files since 0.23.0 and 8 formal assets; release workflow succeeded. Metadata only: package/raw manifest not downloaded and signatures not verified. PR #623 merged as version-only bump. Current daemon-dev-main dev1878 also points at 93b26bbf and remains team.dev. Yocto stable remains OS 1.4.2/SHA 635c4111, main 5fda21c4, #140 open draft; no paired OS release. #621/#622 remain open against 0.23.0 base 56424efe. RL/HAT/emotions heads and PR #92/#8/#1 unchanged. Official blog still 3 posts, latest 2026-10-23. No tracker tests, package download, image build, hardware access, or replica code integration.",
+    "notes": "At 2026-11-24T08:41:30.532Z, Yocto PR #140 was refreshed from ce50f41 to e08cc46 and remains open/draft. It now pins formal daemon 0.23.1 at 93b26bb, packages ORT 1.28.0 as libonnxruntime.so.1 with /usr/lib/libonnxruntime.version, and installs padd Nintendo hidraw rules; stricter QA fixes are also included. Current PR-head lint/test checks pass, but no full image or hardware validation was verified for e08cc46. Stable OS remains 1.4.2 at 635c411; public dev/candidate metadata still points to main 5fda21c, not the PR head. Daemon main/release/dev tag, other tracked repos and PRs, and official blog are unchanged. No tracker tests/builds, package or image downloads, device actions, or replica runtime integration.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#577": {
         "previous_head_sha": "db5a968cf3a496bb5305995213aedf6d99acb301",
@@ -58117,6 +58117,35 @@
         "state": "merged",
         "merged_at": "2026-11-23T14:57:28Z",
         "merge_commit_sha": "ebf0b92eba995b18e84681bd980c5a3ab46400a4"
+      },
+      "pollen-robotics/microduck_yocto#140": {
+        "previous_head_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
+        "head_sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+        "state": "open",
+        "draft": true,
+        "base_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+        "updated_at_utc": "2026-11-24T08:07:55Z",
+        "commit_count": 3,
+        "changed_file_count": 9,
+        "change_summary": "Adds stricter QA warning handling and targeted QA fixes; updates ONNX Runtime 1.28.0 packaging to install libonnxruntime.version, keep bare libonnxruntime.so in -dev, and package versioned runtime libraries; bumps daemon SRCREV to formal 0.23.1 SHA 93b26bb and packages padd Nintendo hidraw rules.",
+        "upstream_head_checks": [
+          {
+            "name": "oelint",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380571/job/138305078044"
+          },
+          {
+            "name": "test",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380598/job/138305078316"
+          },
+          {
+            "name": "test",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380980/job/138305079856"
+          }
+        ],
+        "validation_scope": "GitHub PR-head lint/test checks only; no full image build, current-head QEMU report or hardware acceptance verified by tracker."
       }
     },
     "newly_tracked_historical_development_releases": [
@@ -58126,7 +58155,7 @@
     "updated_development_release_artifacts": [
       "daemon-dev-main"
     ],
-    "development_tag_pointer_changed_since_previous_check": true,
+    "development_tag_pointer_changed_since_previous_check": false,
     "development_package_matches_current_ref": true,
     "development_package_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "development_release_version": "0.23.1-dev.1878.93b26bb",
@@ -58154,7 +58183,50 @@
     "stable_release_published_at_utc": "2026-11-23T15:39:45Z",
     "stable_api_version": 68,
     "stable_release_workflow_url": "https://github.com/pollen-robotics/microduck/actions/runs/45207727294",
-    "stable_release_workflow_conclusion": "success"
+    "stable_release_workflow_conclusion": "success",
+    "official_os_channel_recheck": {
+      "checked_at_utc": "2026-11-24T08:41:30.532Z",
+      "checked_at_jst": "2026-11-24T17:41:30.532+09:00",
+      "metadata_only": true,
+      "bundle_bytes_downloaded": false,
+      "bundle_signatures_verified_by_tracker": false,
+      "channels": [
+        {
+          "board": "microduck-beta",
+          "channel": "dev",
+          "build": "20261123133456",
+          "commit": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "raw_sha256": "ccdb76f474abeaff32b5a9b927a4c8ebd9d11c77f51bf4b543a8833d16cba520",
+          "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/dev.env"
+        },
+        {
+          "board": "microduck-beta",
+          "channel": "candidate",
+          "build": "20261123133457",
+          "commit": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "raw_sha256": "982e61d94b601c7e88c2a6fd44fb4dec9b4039134f4f56908345de8ae82cf8b7",
+          "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-beta/candidate.env"
+        },
+        {
+          "board": "microduck-face-board-v1",
+          "channel": "dev",
+          "build": "20261123133353",
+          "commit": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "raw_sha256": "3b583602c423aa9c83fa9e029f1d58b91895ef7a7fb56382e786e76dd87c872f",
+          "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/dev.env"
+        },
+        {
+          "board": "microduck-face-board-v1",
+          "channel": "candidate",
+          "build": "20261123133354",
+          "commit": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "raw_sha256": "f745d53ebef8a0e3ef39ea852720fd2cc0fc3bcfb996d0a7f42ba90f628b76af",
+          "url": "https://huggingface.co/buckets/pollen-robotics/microduck-os/resolve/os/microduck-face-board-v1/candidate.env"
+        }
+      ],
+      "fixed_pr_source": "https://github.com/pollen-robotics/microduck_yocto/pull/140"
+    },
+    "substantive_update_detected": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -64559,6 +64631,23 @@
       "source_snapshot_url": "https://github.com/pollen-robotics/microduck/commit/ebf0b92eba995b18e84681bd980c5a3ab46400a4",
       "stable_release_unchanged": true,
       "blog_latest": "2026-10-23"
+    },
+    {
+      "checked_at_utc": "2026-11-24T08:41:30.532Z",
+      "checked_at_jst": "2026-11-24T17:41:30.532+09:00",
+      "record": "Yocto PR #140 refreshed to daemon 0.23.1 / versioned ONNX Runtime package contract",
+      "source_snapshot_url": "https://github.com/pollen-robotics/microduck_yocto/commit/e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6...e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+      "stable_daemon_unchanged": true,
+      "stable_os_unchanged": true,
+      "draft_pr_updated": 140,
+      "draft_pr_head_sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+      "official_os_channels_still_at_main": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+      "blog_latest": "2026-10-23",
+      "tracker_ran_tests_or_builds": false,
+      "tracker_downloaded_bundles_or_images": false,
+      "tracker_touched_hardware": false,
+      "replica_runtime_integrated": false
     }
   ],
   "replica_public_image": {
@@ -68008,24 +68097,24 @@
       "url": "https://github.com/pollen-robotics/microduck_yocto/pull/140",
       "state": "open",
       "draft": true,
-      "head_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-      "base_sha": "3f8ea13becceb800d84970d758f76aa444c7f5b9",
+      "head_sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+      "base_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
       "base_branch": "main",
-      "actual_merge_base": "3f8ea13becceb800d84970d758f76aa444c7f5b9",
+      "actual_merge_base": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
       "commit_count": 3,
-      "changed_file_count": 8,
+      "changed_file_count": 9,
       "merged_at": null,
       "merge_commit_sha": null,
       "replica_integration": "not_integrated",
-      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/3f8ea13becceb800d84970d758f76aa444c7f5b9...ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6...e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
       "created_at": "2026-11-19T11:10:08Z",
       "created_at_jst": "2026-11-19T20:10:08+09:00",
-      "updated_at": "2026-11-20T10:18:48Z",
-      "updated_at_jst": "2026-11-20T19:18:48+09:00",
-      "source_committed_at_utc": "2026-11-20T10:18:31Z",
-      "source_committed_at_jst": "2026-11-20T19:18:31+09:00",
-      "classification": "Draft, blocked on daemon PR618 merging and shipping a formal daemon release. Temporary branch pin is explicitly DO NOT MERGE.",
+      "updated_at": "2026-11-24T08:07:55Z",
+      "updated_at_jst": "2026-11-24T17:07:55+09:00",
+      "source_committed_at_utc": "2026-11-24T08:07:13Z",
+      "source_committed_at_jst": "2026-11-24T17:07:13+09:00",
+      "classification": "Still an open draft and not part of a released OS. The former daemon #618 blocker is resolved at source level: this revision pins formal daemon 0.23.1 and aligns ORT packaging to its versioned loader/stamp contract. Current public dev/candidate channels remain on Yocto main 5fda21c; no channel artifact for this PR head was observed.",
       "included_in_formal_os_release": false,
       "priority": "High paired daemon/ORT packaging boundary before adoption; QA/build reference only for current replica.",
       "review": {
@@ -68089,14 +68178,14 @@
         "rebase_scope": "Inherits main bin_package classes,features_check,variable ordering andTOML parser;these are already archived main changes,notnewQAfixes. SameQA/ORTproposal,nowtemporarydaemonpin1858;unmerged draft still waits fordaemonPR618formalrelease."
       },
       "impact": {
-        "HD1910": "No servo-driver feature; old-card ABI/path compatibility not established.",
-        "camera": "Build-path/QA changes in GStreamer and rkAIQ packaging, plus ORT lookup for detector CPU fallback; no new capture mode or calibration.",
-        "ToF": "No driver or geometry change.",
-        "model_management": "ORT runtime package layout must be paired with a daemon that loads .so.1 and reads the stamp; no new weights.",
-        "training": "No training recipe change.",
-        "motion": "Walk policy library loading dependency only; no new gait/control code.",
-        "sound": "No new audio or voice assets.",
-        "build": "Stricter package QA and narrower exceptions; remaining vendor GNU_HASH exception stated explicitly."
+        "HD1910": "No Feetech driver, servo mapping or motion-control change; the Nintendo pad hidraw rule is separate. No HD-1910 acceptance.",
+        "camera": "The ORT 1.28 package contract now matches daemon 0.23.1 versioned loading; mediad CPU inference depends on this pairing. No capture or calibration change; still an unmerged OS draft.",
+        "ToF": "No ToF driver, timing, geometry or algorithm change.",
+        "model_management": "No new model API or weights; runtime policy loading must ship with libonnxruntime.so.1 and the version stamp expected by the daemon.",
+        "training": "No training recipe or policy weights change.",
+        "motion": "No gait or Feetech changes; installs the upstream Nintendo-pad hidraw battery rule for padd only.",
+        "sound": "No new audio assets or playback behavior.",
+        "build": "WARN_QA now fails builds; several QA skips are removed/narrowed, while the Rockchip librknnrt GNU_HASH exception remains explicit."
       },
       "closed_at": null,
       "closed_at_jst": null,
@@ -68183,49 +68272,88 @@
             "sound": "No new audio or voice assets.",
             "build": "Stricter package QA and narrower exceptions; remaining vendor GNU_HASH exception stated explicitly."
           }
+        },
+        {
+          "number": 140,
+          "repository": "pollen-robotics/microduck_yocto",
+          "title": "Drop the QA skips that hide nothing; fix plugins-rs buildpaths; fail on QA warnings",
+          "url": "https://github.com/pollen-robotics/microduck_yocto/pull/140",
+          "state": "open",
+          "draft": true,
+          "head_sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+          "base_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "base_branch": "main",
+          "actual_merge_base": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+          "commit_count": 3,
+          "changed_file_count": 9,
+          "merged_at": null,
+          "merge_commit_sha": null,
+          "replica_integration": "not_integrated",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6...e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+          "created_at": "2026-11-19T11:10:08Z",
+          "updated_at": "2026-11-24T08:07:55Z",
+          "source_committed_at_utc": "2026-11-24T08:07:13Z",
+          "classification": "Still an open draft and not part of a released OS. The former daemon #618 blocker is resolved at source level: this revision pins formal daemon 0.23.1 and aligns ORT packaging to its versioned loader/stamp contract. Current public dev/candidate channels remain on Yocto main 5fda21c; no channel artifact for this PR head was observed.",
+          "included_in_formal_os_release": false,
+          "observed_at_utc": "2026-11-24T08:41:30.532Z",
+          "change_summary": "Adds stricter QA warning handling and targeted QA fixes; updates ONNX Runtime 1.28.0 packaging to install libonnxruntime.version, keep bare libonnxruntime.so in -dev, and package versioned runtime libraries; bumps daemon SRCREV to formal 0.23.1 SHA 93b26bb and packages padd Nintendo hidraw rules."
         }
       ],
-      "checked_at_utc": "2026-11-20T10:54:14Z",
+      "checked_at_utc": "2026-11-24T08:41:30.532Z",
       "source_refresh": {
-        "checked_at_utc": "2026-11-20T10:54:14Z",
-        "previous_head_sha": "a85133376d9e7fca9d939a08d561f12886cbfd6d",
-        "current_head_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-        "noncomment_changed_paths": [
-          "meta-microduck-bsp/recipes-bsp/librknnrt/librknnrt_2.3.2.bb",
-          "meta-microduck-bsp/recipes-bsp/microduck-beta-camera/microduck-beta-camera_6.0x32.0.bb",
-          "meta-microduck/recipes-microduck/microduck-daemon/microduck-daemon_0.21.1.bb",
-          "meta-microduck/recipes-microduck/onnxruntime/onnxruntime_1.28.0.bb",
-          "meta-microduck/recipes-microduck/rustypot-wizard/rustypot-wizard_0.3.0.bb",
-          "meta-microduck/recipes-multimedia/gstreamer/gstreamer1.0-plugins-rs_1.28.2.bb"
-        ],
-        "rebased_to_sha": "3f8ea13becceb800d84970d758f76aa444c7f5b9",
-        "current_head_ci": [
+        "checked_at_utc": "2026-11-24T08:41:30.532Z",
+        "previous_head_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
+        "current_head_sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+        "base_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+        "commits": [
           {
-            "name": "slot-health",
-            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44718161932",
-            "source_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-            "status": "completed",
-            "conclusion": "success",
-            "updated_at_utc": "2026-11-20T10:19:21Z"
+            "sha": "12d16c1998b122298f3dbdb63784a4dd3cfbf873",
+            "committed_at_utc": "2026-11-24T08:06:18Z",
+            "subject": "Drop the QA skips that hide nothing, fix plugins-rs buildpaths, fail on warnings"
           },
           {
-            "name": "oelint",
-            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44718161803",
-            "source_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-            "status": "completed",
-            "conclusion": "success",
-            "updated_at_utc": "2026-11-20T10:20:26Z"
+            "sha": "4bbd9661b17f740f69c8b3c0bf7359e6d23b280d",
+            "committed_at_utc": "2026-11-24T08:06:18Z",
+            "subject": "onnxruntime: version stamp, bare .so back in -dev, no dev-so skip"
           },
           {
-            "name": "osupdate-page",
-            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/44718161981",
-            "source_sha": "ce50f41ae5b58e7df52673a246b6f0cc2d7d5748",
-            "status": "completed",
-            "conclusion": "success",
-            "updated_at_utc": "2026-11-20T10:19:05Z"
+            "sha": "e08cc4640a6f5ce86ce30391bb8f4ca5ada50379",
+            "committed_at_utc": "2026-11-24T08:07:13Z",
+            "subject": "microduck-daemon: 0.23.1"
           }
         ],
-        "validation_scope": "Current-head script/lint CI only;previous image,QEMU andhardware reports remain at recorded source SHAs. No tracker tests/builds."
+        "changed_files": [
+          "meta-microduck-bsp/recipes-bsp/librknnrt/librknnrt_2.3.2.bb",
+          "meta-microduck-bsp/recipes-bsp/microduck-beta-camera/microduck-beta-camera_6.0x32.0.bb",
+          "meta-microduck-distro/conf/distro/microduck.conf",
+          "meta-microduck/recipes-microduck/microduck-daemon/microduck-daemon-crates.inc",
+          "meta-microduck/recipes-microduck/microduck-daemon/microduck-daemon_0.23.1.bb",
+          "meta-microduck/recipes-microduck/onnxruntime/onnxruntime_1.28.0.bb",
+          "meta-microduck/recipes-microduck/rustypot-wizard/rustypot-wizard_0.3.0.bb",
+          "meta-microduck/recipes-multimedia/gstreamer/gstreamer1.0-plugins-rs_1.28.2.bb",
+          "scripts/qemu-test.sh"
+        ],
+        "additions": 129,
+        "deletions": 100,
+        "current_head_ci": [
+          {
+            "name": "oelint",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380571/job/138305078044"
+          },
+          {
+            "name": "test",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380598/job/138305078316"
+          },
+          {
+            "name": "test",
+            "conclusion": "success",
+            "url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45353380980/job/138305079856"
+          }
+        ],
+        "validation_scope": "Current-head PR CI only; it does not establish a released OS, full image build, QEMU boot or hardware acceptance."
       }
     },
     {
