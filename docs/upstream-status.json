@@ -58035,11 +58035,11 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-24T09:42:01.790Z",
+  "checked_at_utc": "2026-11-24T11:01:27Z",
   "latest_review": {
-    "default_branch_changes": true,
+    "default_branch_changes": false,
     "new_stable_release": false,
-    "previous_tracked_prs_merged": true,
+    "previous_tracked_prs_merged": false,
     "official_blog_new_articles": false,
     "model_metadata_changed": false,
     "official_os_release_changed": false,
@@ -58048,17 +58048,17 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-23T11:55:36.061Z",
-    "source_snapshot_utc": "2026-11-24T09:42:01.790Z",
-    "source_snapshot_jst": "2026-11-24T18:42:01.790+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-24T09:42:01.790Z",
+    "previous_substantive_review_utc": "2026-11-24T09:42:01.790Z",
+    "source_snapshot_utc": "2026-11-24T11:01:27Z",
+    "source_snapshot_jst": "2026-11-24T20:01:27+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-24T11:01:27Z",
     "stable_release_tag": "daemon-v0.23.1",
     "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "stable_asset_count": 8,
     "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck_yocto": [
-        140
+        147
       ]
     },
     "new_development_releases": [],
@@ -58067,17 +58067,9 @@
     ],
     "retired_development_tags": [],
     "closed_unmerged_pull_requests": {},
-    "newly_discovered_merged_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        140
-      ]
-    },
-    "official_os_main_changed": true,
-    "merged_previously_tracked_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        140
-      ]
-    },
+    "newly_discovered_merged_pull_requests": {},
+    "official_os_main_changed": false,
+    "merged_previously_tracked_pull_requests": {},
     "formal_release_artifacts_available": true,
     "formal_release_assets_completed": true,
     "replica_image_publication_changed": false,
@@ -58086,14 +58078,10 @@
     "replica_github_latest_changed": false,
     "replica_github_latest_assets_changed": false,
     "official_os_pull_requests_changed": true,
-    "official_os_development_channels_changed": true,
+    "official_os_development_channels_changed": false,
     "replica_merged_pull_requests": [],
-    "newly_discovered_pull_requests": {
-      "pollen-robotics/microduck": [
-        623
-      ]
-    },
-    "notes": "At 2026-11-24T09:42:01.790Z, Yocto PR #140 merged as 6edf276c at 08:52:51Z. Beta dev/candidate metadata advanced to the merge source via successful job 6b055076; Face Board v1 publish had no artifacts prefix and remained on 5fda21c4. Workflow 45359985582 failed only at Face Board publish. OS stable remains v1.4.2/635c4111; daemon 0.23.1/93b26bbf and API68 unchanged. RL/HAT/emotions and Microduck blog unchanged. No bundle download, signature check, tracker build/test, installation, hardware validation or replica runtime integration.",
+    "newly_discovered_pull_requests": {},
+    "notes": "At 2026-11-24T11:01:27Z, Yocto PR #147 is still open and unmerged; head advanced to 38085ba96390 on main 6edf276c3006 with board/Cukinia and QEMU system-test proposal plus candidate publish gating. Current-head scripts/oelint checks pass; no current-head board/QEMU or candidate publication evidence. Beta dev/candidate still point to 6edf276c; Face Board v1 channels remain on 5fda21c4. Stable OS v1.4.2/635c4111 and daemon 0.23.1/93b26bbf/API68 are unchanged. RL/HAT/emotions, tracked PRs, and the Microduck blog are unchanged. No tracker bundle download, test/build, installation, hardware validation, or replica runtime integration.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#577": {
         "previous_head_sha": "db5a968cf3a496bb5305995213aedf6d99acb301",
@@ -58136,15 +58124,49 @@
           "microduck_beta_job": "success; published dev and candidate channel metadata",
           "face_board_v1_job": "publish step failed because no artifacts prefix was returned; no new face-board channel artifact"
         }
+      },
+      "pollen-robotics/microduck_yocto#147": {
+        "previous_recorded_head_sha": "55e66fee779440fa3453f57ddfd4bcfa249fb92d",
+        "head_sha": "38085ba96390f2f470e9fdaaeeda117596051d28",
+        "base_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+        "state": "open",
+        "draft": false,
+        "merged_at": null,
+        "updated_at_utc": "2026-11-24T09:10:31Z",
+        "source_committed_at_utc": "2026-11-24T09:09:11Z",
+        "commit_count": 12,
+        "changed_file_count": 27,
+        "additions": 1221,
+        "deletions": 197,
+        "current_head_checks": [
+          {
+            "name": "scripts",
+            "conclusion": "success",
+            "completed_at_utc": "2026-11-24T09:11:28Z"
+          },
+          {
+            "name": "oelint",
+            "conclusion": "success",
+            "completed_at_utc": "2026-11-24T09:11:52Z"
+          }
+        ],
+        "scope": "Cukinia board checks; optional motion checks; QEMU system tests for dev/shipping bundles; candidate publication gate proposed after both QEMU legs; script unit-test workflow.",
+        "validation_boundary": "Current head checks show scripts/oelint only; no current-head QEMU, board, or candidate publication evidence. PR-body hardware/QEMU claims refer to older builds. Not merged, no tracker tests or hardware use.",
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/38085ba96390f2f470e9fdaaeeda117596051d28",
+        "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/6edf276c3006aa8f8863e11af495a5e5c1b5f7f0...38085ba96390f2f470e9fdaaeeda117596051d28",
+        "priority": "High review priority before any reuse for HD-1910 motion acceptance; medium for camera/ToF diagnostics; no current integration.",
+        "impact": {
+          "HD1910": "Proposed servo checks and opt-in movement; no motor implementation change or HD-1910 hardware result.",
+          "camera": "Proposed frame diagnostic only; no capture/color/calibration contract change.",
+          "ToF": "Proposed live-frame diagnostic only; no range/status/geometry contract change.",
+          "model_management": "Candidate image publication gate proposed; model update contract unchanged.",
+          "training": "No training recipe or weight change.",
+          "motion_and_sound": "Opt-in motion and mic/speaker checks proposed; no new policy or sound asset."
+        }
       }
     },
-    "newly_tracked_historical_development_releases": [
-      "daemon-dev-release-lookup-by-tag",
-      "daemon-dev-ground-pick-mouth"
-    ],
-    "updated_development_release_artifacts": [
-      "daemon-dev-main"
-    ],
+    "newly_tracked_historical_development_releases": [],
+    "updated_development_release_artifacts": [],
     "development_tag_pointer_changed_since_previous_check": false,
     "development_package_matches_current_ref": true,
     "development_package_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
@@ -58156,7 +58178,7 @@
     "development_daemon_asset_size": 19989497,
     "development_daemon_asset_digest": "sha256:a270bfccdf362b9e7dabd70d74415eef79bb89ff8fcafc0d3d35f6c97965c1cd",
     "development_manifest_asset_digest": "sha256:2a4a2c011fb616409305ccf052e73119a56b3434482129e46957dcc7c814b500",
-    "newly_observed_development_package_match": true,
+    "newly_observed_development_package_match": false,
     "development_release_source_url": "https://github.com/pollen-robotics/microduck/commit/93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "development_release_url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-main",
     "official_os_main_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
@@ -58175,8 +58197,8 @@
     "stable_release_workflow_url": "https://github.com/pollen-robotics/microduck/actions/runs/45207727294",
     "stable_release_workflow_conclusion": "success",
     "official_os_channel_recheck": {
-      "checked_at_utc": "2026-11-24T09:42:01.790Z",
-      "checked_at_jst": "2026-11-24T18:42:01.790+09:00",
+      "checked_at_utc": "2026-11-24T11:01:27Z",
+      "checked_at_jst": "2026-11-24T20:01:27+09:00",
       "metadata_only": true,
       "bundle_bytes_downloaded": false,
       "bundle_signatures_verified_by_tracker": false,
@@ -58223,7 +58245,8 @@
       "workflow_url": "https://github.com/pollen-robotics/microduck_yocto/actions/runs/45359985582",
       "workflow_conclusion": "failure",
       "beta_job": "success",
-      "face_board_v1_publish": "failed_no_artifacts_prefix"
+      "face_board_v1_publish": "failed_no_artifacts_prefix",
+      "metadata_unchanged_since_previous_check": true
     },
     "substantive_update_detected": true,
     "official_os_build_workflow_id": 45359985582,
@@ -60315,49 +60338,6 @@
     "priority": "Candidate for isolated spare-card acceptance; published prerelease is not a stable-image replacement or an instruction to deploy."
   },
   "review_history": [
-    {
-      "previous_substantive_review_utc": "2026-11-06T14:05:20.762419+00:00",
-      "source_snapshot_utc": "2026-11-07T01:48:05.686366+00:00",
-      "final_relevant_sources_checked_at_utc": "2026-11-07T01:56:51.036900+00:00",
-      "default_branch_changes": true,
-      "new_stable_release": false,
-      "stable_release_tag": "daemon-v0.18.8",
-      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
-      "stable_asset_count": 8,
-      "new_pull_requests": {
-        "pollen-robotics/microduck": [
-          550,
-          551,
-          552,
-          553
-        ]
-      },
-      "updated_pull_requests": {
-        "pollen-robotics/microduck": [
-          449
-        ]
-      },
-      "previous_tracked_prs_merged": false,
-      "new_development_releases": [
-        "daemon-dev-mediad-mic-track",
-        "daemon-dev-crouchstand"
-      ],
-      "moved_development_tags": [
-        "daemon-dev-main",
-        "daemon-dev-impact-guard-v3"
-      ],
-      "official_blog_new_articles": false,
-      "model_metadata_changed": true,
-      "local_migration_record_changed": false,
-      "project_public_prereleases_changed": false,
-      "runtime_code_changed_by_heartbeat": false,
-      "tests_executed_by_tracker": false,
-      "robot_connected": false,
-      "image_built_or_published": false,
-      "canonical_text_sources_verified": 105,
-      "small_policy_manifests_reviewed": 3,
-      "notes": "Main189/API51unreleased550/552/553;formal189ref/release404,188unchanged. v9tagreappeared/restoresv7identities,notnewtraining. ImpactV4OFFandEEPROMsemantics/pending551186API51;mic363188API51audio/videovotes,crouch188API50no model;phase449189API52sync-only10of11lineequal. 105pinnedGittexts+3smallHFmanifestbytes,modelLFSmetadataonly;no weights/program/test/build/install/robot/previewaction. Interruptedpriorcapturestagesretained. TransientGitHubreadsrecovered."
-    },
     {
       "previous_substantive_review_utc": "2026-11-07T01:56:51.036900+00:00",
       "source_snapshot_utc": "2026-11-07T07:55:18.843550+00:00",
@@ -64675,6 +64655,28 @@
       "tracker_downloaded_bundles_or_images": false,
       "tracker_touched_hardware": false,
       "replica_runtime_integrated": false
+    },
+    {
+      "checked_at_utc": "2026-11-24T11:01:27Z",
+      "checked_at_jst": "2026-11-24T20:01:27+09:00",
+      "record": "Yocto PR #147 head advanced; board/QEMU and candidate-gate proposal remains unmerged",
+      "source_snapshot_url": "https://github.com/pollen-robotics/microduck_yocto/commit/38085ba96390f2f470e9fdaaeeda117596051d28",
+      "stable_release_unchanged": true,
+      "stable_os_unchanged": true,
+      "updated_pull_request": 147,
+      "pull_request_state": "open",
+      "pull_request_head_sha": "38085ba96390f2f470e9fdaaeeda117596051d28",
+      "pull_request_base_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+      "current_head_scripts_check": "success",
+      "current_head_oelint_check": "success",
+      "current_head_board_qemu_evidence": false,
+      "beta_channel_source_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+      "face_board_v1_channel_source_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+      "blog_latest": "2026-10-23",
+      "tracker_ran_tests_or_builds": false,
+      "tracker_downloaded_bundles_or_images": false,
+      "tracker_touched_hardware": false,
+      "replica_runtime_integrated": false
     }
   ],
   "replica_public_image": {
@@ -68811,20 +68813,20 @@
       "url": "https://github.com/pollen-robotics/microduck_yocto/pull/147",
       "state": "open",
       "draft": false,
-      "head_sha": "55e66fee779440fa3453f57ddfd4bcfa249fb92d",
-      "base_sha": "5a82fa22ed75cb00533c8c7179c1abd674564de5",
+      "head_sha": "38085ba96390f2f470e9fdaaeeda117596051d28",
+      "base_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
       "base_branch": "main",
-      "actual_merge_base": "5a82fa22ed75cb00533c8c7179c1abd674564de5",
-      "source_committed_at_utc": "2026-11-20T16:48:56Z",
-      "source_committed_at_jst": "2026-11-21T01:48:56+09:00",
+      "actual_merge_base": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+      "source_committed_at_utc": "2026-11-24T09:09:11Z",
+      "source_committed_at_jst": "2026-11-24T18:09:11+09:00",
       "merge_commit_sha": null,
-      "commit_count": 10,
+      "commit_count": 12,
       "changed_file_count": 27,
-      "classification": "Open unmerged test/CI proposal rebased onto read-only main; dual-bundle candidate gate proposed, not executed in publishing CI.",
+      "classification": "Open unmerged board/QEMU functional test and candidate-CI proposal on current Yocto main; no current-head board or QEMU result.",
       "included_in_formal_os_release": false,
       "replica_integration": "not_integrated",
-      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/5a82fa22ed75cb00533c8c7179c1abd674564de5...55e66fee779440fa3453f57ddfd4bcfa249fb92d",
-      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/55e66fee779440fa3453f57ddfd4bcfa249fb92d",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/6edf276c3006aa8f8863e11af495a5e5c1b5f7f0...38085ba96390f2f470e9fdaaeeda117596051d28",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck_yocto/commit/38085ba96390f2f470e9fdaaeeda117596051d28",
       "impact": {
         "HD1910": "High review priority before any future motion tests:index7/9,direction/amplitude,current thresholds and actual torque/control exclusivity must match local motor contract. No tests/integration by tracker.",
         "camera": "No capture algorithm or supported hardware change;existing flash/UYVY assumptions still board-specific.",
@@ -68837,8 +68839,8 @@
       },
       "created_at": "2026-11-19T16:21:34Z",
       "created_at_jst": "2026-11-20T01:21:34+09:00",
-      "updated_at": "2026-11-20T16:52:08Z",
-      "updated_at_jst": "2026-11-21T01:52:08+09:00",
+      "updated_at": "2026-11-24T09:10:31Z",
+      "updated_at_jst": "2026-11-24T18:10:31+09:00",
       "closed_at": null,
       "closed_at_jst": null,
       "merged_at": null,
@@ -68953,14 +68955,30 @@
         "validation_limit": "No tracker execution or robot connection. Read-only47/dev42 local claims and old64-motion build remain separated from final proposal. Kernel check disabled, backwards2/6 failures remain; read-only checks not yet reported on board under this updated suite."
       },
       "priority": "Medium reference for CI and image test reporting;high before HD1910motion reuse or accepting64/64with kernel-log check disabled.",
-      "checked_at_utc": "2026-11-21T04:13:03Z",
+      "checked_at_utc": "2026-11-24T11:01:27Z",
       "source_refresh": {
-        "observed_at_utc": "2026-11-21T04:13:03Z",
-        "head_sha": "55e66fee779440fa3453f57ddfd4bcfa249fb92d",
-        "base_sha": "5a82fa22ed75cb00533c8c7179c1abd674564de5",
-        "new_test_logic": true,
-        "motion_and_hw_blobs_unchanged": true,
-        "old_qemu_run_source_sha": "131a4369703244c3914b20d073c75a8bae6a1973"
+        "checked_at_utc": "2026-11-24T11:01:27Z",
+        "previous_recorded_head_sha": "55e66fee779440fa3453f57ddfd4bcfa249fb92d",
+        "current_head_sha": "38085ba96390f2f470e9fdaaeeda117596051d28",
+        "current_base_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+        "commit_count": 12,
+        "changed_file_count": 27,
+        "additions": 1221,
+        "deletions": 197,
+        "current_head_checks": [
+          {
+            "name": "scripts",
+            "conclusion": "success",
+            "completed_at_utc": "2026-11-24T09:11:28Z"
+          },
+          {
+            "name": "oelint",
+            "conclusion": "success",
+            "completed_at_utc": "2026-11-24T09:11:52Z"
+          }
+        ],
+        "board_or_qemu_check_on_current_head": false,
+        "validation_scope": "Proposal describes board/QEMU coverage; historical test claims are from older image sources. No current-head image build, candidate publish, or hardware validation evidence."
       },
       "history": [
         {
@@ -69514,8 +69532,18 @@
             ],
             "validation_scope": "Current-head script/lint CI only;previous image,QEMU andhardware reports remain at recorded source SHAs. No tracker tests/builds."
           }
+        },
+        {
+          "checked_at_utc": "2026-11-24T11:01:27Z",
+          "head_sha": "38085ba96390f2f470e9fdaaeeda117596051d28",
+          "base_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+          "state": "open",
+          "updated_at_utc": "2026-11-24T09:10:31Z",
+          "note": "Head advanced from previously recorded 55e66fee to current 38085ba9; scripts/oelint checks pass, no current-head board/QEMU evidence."
         }
-      ]
+      ],
+      "additions": 1221,
+      "deletions": 197
     },
     {
       "number": 148,
