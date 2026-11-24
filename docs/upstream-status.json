@@ -35971,6 +35971,45 @@
           },
           "merged_at_jst": "2026-11-24T00:29:43+09:00",
           "closed_at_jst": "2026-11-24T00:29:43+09:00"
+        },
+        {
+          "number": 625,
+          "repository": "pollen-robotics/microduck",
+          "title": "Report excess MIDI chord notes during chorale import",
+          "state": "open",
+          "draft": false,
+          "url": "https://github.com/pollen-robotics/microduck/pull/625",
+          "created_at": "2026-11-24T12:06:35Z",
+          "created_at_jst": "2026-11-24T21:06:35+09:00",
+          "updated_at": "2026-11-24T12:06:35Z",
+          "updated_at_jst": "2026-11-24T21:06:35+09:00",
+          "merged_at": null,
+          "closed_at": null,
+          "head_sha": "6b568429f8ed6d40ebfa019c65291a0bc6383757",
+          "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+          "base_branch": "main",
+          "commit_count": 1,
+          "changed_file_count": 1,
+          "additions": 50,
+          "deletions": 15,
+          "source_committed_at_utc": "2026-11-24T12:06:12Z",
+          "source_committed_at_jst": "2026-11-24T21:06:12+09:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/6b568429f8ed6d40ebfa019c65291a0bc6383757",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/93b26bbf2acf73babb53cd6b47e800d2661f54f4...6b568429f8ed6d40ebfa019c65291a0bc6383757",
+          "classification": "Open unmerged sound-tooling bug-fix proposal; not a formal release and not integrated in replica.",
+          "author_reported_validation": "PR description reports sounds crate tests/format/clippy; GitHub check-runs empty and status pending when checked.",
+          "tracker_tests_executed": false,
+          "hardware_validation": false,
+          "impact": {
+            "HD1910": "No change.",
+            "camera": "No change.",
+            "ToF": "No change.",
+            "model_management": "No change.",
+            "training": "No change.",
+            "motion": "No change.",
+            "sound": "MIDI chorale importer would report pitches dropped when a chord exceeds four voices; playback and sound assets unchanged."
+          },
+          "priority": "Medium for the sound-content import workflow; no hardware/runtime effect."
         }
       ],
       "previous_stable_releases": [
@@ -58035,7 +58074,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-24T11:01:27Z",
+  "checked_at_utc": "2026-11-24T12:48:25Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -58048,19 +58087,20 @@
     "tests_executed_by_tracker": false,
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
-    "previous_substantive_review_utc": "2026-11-24T09:42:01.790Z",
-    "source_snapshot_utc": "2026-11-24T11:01:27Z",
-    "source_snapshot_jst": "2026-11-24T20:01:27+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-24T11:01:27Z",
+    "previous_substantive_review_utc": "2026-11-24T11:01:27Z",
+    "source_snapshot_utc": "2026-11-24T12:48:25Z",
+    "source_snapshot_jst": "2026-11-24T21:48:25+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-24T12:48:25Z",
     "stable_release_tag": "daemon-v0.23.1",
     "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "stable_asset_count": 8,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        147
+    "new_pull_requests": {
+      "pollen-robotics/microduck": [
+        624,
+        625
       ]
     },
+    "updated_pull_requests": {},
     "new_development_releases": [],
     "moved_development_tags": [
       "daemon-dev-main"
@@ -58077,11 +58117,16 @@
     "replica_main_integrations_changed": false,
     "replica_github_latest_changed": false,
     "replica_github_latest_assets_changed": false,
-    "official_os_pull_requests_changed": true,
+    "official_os_pull_requests_changed": false,
     "official_os_development_channels_changed": false,
     "replica_merged_pull_requests": [],
-    "newly_discovered_pull_requests": {},
-    "notes": "At 2026-11-24T11:01:27Z, Yocto PR #147 is still open and unmerged; head advanced to 38085ba96390 on main 6edf276c3006 with board/Cukinia and QEMU system-test proposal plus candidate publish gating. Current-head scripts/oelint checks pass; no current-head board/QEMU or candidate publication evidence. Beta dev/candidate still point to 6edf276c; Face Board v1 channels remain on 5fda21c4. Stable OS v1.4.2/635c4111 and daemon 0.23.1/93b26bbf/API68 are unchanged. RL/HAT/emotions, tracked PRs, and the Microduck blog are unchanged. No tracker bundle download, test/build, installation, hardware validation, or replica runtime integration.",
+    "newly_discovered_pull_requests": {
+      "pollen-robotics/microduck": [
+        624,
+        625
+      ]
+    },
+    "notes": "At 2026-11-24T12:48:25Z, Microduck main/release/dev references remain 93b26bbf / daemon-v0.23.1 / API68. New PR #625 (head 6b568429f8ed6d40ebfa019c65291a0bc6383757) proposes reporting excess MIDI chord notes in sounds/src/chorale/midi.rs; open/unmerged, no GitHub checks yet. PR #624 adds only renovate.json and is closed unmerged. Yocto main/OS release, PR #147 and public channel metadata are unchanged; official blog remains three articles, latest 2026-10-23. No tracker tests/builds, downloads, hardware connection, or runtime integration.",
     "updated_pull_request_details": {
       "pollen-robotics/microduck#577": {
         "previous_head_sha": "db5a968cf3a496bb5305995213aedf6d99acb301",
@@ -58163,6 +58208,52 @@
           "training": "No training recipe or weight change.",
           "motion_and_sound": "Opt-in motion and mic/speaker checks proposed; no new policy or sound asset."
         }
+      },
+      "pollen-robotics/microduck#624": {
+        "state": "closed",
+        "merged_at": null,
+        "updated_at_utc": "2026-11-24T11:36:07Z",
+        "head_sha": "7ababd27af9f941777710a52f82cfce6b312acca",
+        "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "changed_file_count": 1,
+        "additions": 6,
+        "deletions": 0,
+        "scope": "Adds shared Renovate preset configuration only; no main merge or runtime behavior.",
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/7ababd27af9f941777710a52f82cfce6b312acca",
+        "fixed_pr_url": "https://github.com/pollen-robotics/microduck/pull/624"
+      },
+      "pollen-robotics/microduck#625": {
+        "state": "open",
+        "draft": false,
+        "merged_at": null,
+        "created_at_utc": "2026-11-24T12:06:35Z",
+        "updated_at_utc": "2026-11-24T12:06:35Z",
+        "head_sha": "6b568429f8ed6d40ebfa019c65291a0bc6383757",
+        "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "source_committed_at_utc": "2026-11-24T12:06:12Z",
+        "changed_files": [
+          "sounds/src/chorale/midi.rs"
+        ],
+        "additions": 50,
+        "deletions": 15,
+        "commit_count": 1,
+        "actual_change": "Keep the lowest four pitches per chord onset; report each omitted higher pitch with its MIDI tick; add a regression test for four-note and five-note chords.",
+        "check_runs": [],
+        "commit_status": "pending",
+        "author_reported_validation": "PR description reports cargo test --locked -p sounds (68 tests), cargo fmt --all --check, and clippy; not independently verified by tracker.",
+        "validation_boundary": "Open/unmerged proposal; no GitHub check runs currently visible; tracker ran no tests and did not integrate it.",
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/6b568429f8ed6d40ebfa019c65291a0bc6383757",
+        "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/93b26bbf2acf73babb53cd6b47e800d2661f54f4...6b568429f8ed6d40ebfa019c65291a0bc6383757",
+        "fixed_pr_url": "https://github.com/pollen-robotics/microduck/pull/625",
+        "priority": "Medium for users of the chorale import tool; no direct robot or replica runtime effect.",
+        "impact": {
+          "HD1910": "No motor or motion change.",
+          "camera": "No capture or image change.",
+          "ToF": "No sensor change.",
+          "model_management": "No model/interface change.",
+          "training": "No training change.",
+          "motion_and_sound": "Sound MIDI chorale import warns on notes dropped when a chord exceeds four voices; playback and sound assets unchanged; not merged or integrated."
+        }
       }
     },
     "newly_tracked_historical_development_releases": [],
@@ -58197,8 +58288,8 @@
     "stable_release_workflow_url": "https://github.com/pollen-robotics/microduck/actions/runs/45207727294",
     "stable_release_workflow_conclusion": "success",
     "official_os_channel_recheck": {
-      "checked_at_utc": "2026-11-24T11:01:27Z",
-      "checked_at_jst": "2026-11-24T20:01:27+09:00",
+      "checked_at_utc": "2026-11-24T12:48:25Z",
+      "checked_at_jst": "2026-11-24T21:48:25+09:00",
       "metadata_only": true,
       "bundle_bytes_downloaded": false,
       "bundle_signatures_verified_by_tracker": false,
@@ -60338,31 +60429,6 @@
     "priority": "Candidate for isolated spare-card acceptance; published prerelease is not a stable-image replacement or an instruction to deploy."
   },
   "review_history": [
-    {
-      "previous_substantive_review_utc": "2026-11-07T01:56:51.036900+00:00",
-      "source_snapshot_utc": "2026-11-07T07:55:18.843550+00:00",
-      "final_relevant_sources_checked_at_utc": "2026-11-07T07:56:16.725610+00:00",
-      "default_branch_changes": false,
-      "new_stable_release": false,
-      "stable_release_tag": "daemon-v0.18.8",
-      "stable_release_actual_sha": "4a763dd893f3982c3a11c136468ccf5d26bcc28a",
-      "stable_asset_count": 8,
-      "new_pull_requests": {},
-      "updated_pull_requests": {},
-      "previous_tracked_prs_merged": false,
-      "new_development_releases": [],
-      "moved_development_tags": [],
-      "official_blog_new_articles": false,
-      "model_metadata_changed": false,
-      "local_migration_record_changed": false,
-      "project_public_image_release_status_changed": true,
-      "project_public_software_status_changed": false,
-      "runtime_code_changed_by_heartbeat": false,
-      "tests_executed_by_tracker": false,
-      "robot_connected": false,
-      "image_built_or_published_by_tracker": false,
-      "notes": "GitHub now lists the existing November 4 replica image as the latest formal release. The tag and attachment inventory match the November 4 snapshot. The matching software remains a prerelease. The release body keeps its pending hardware acceptance items."
-    },
     {
       "previous_substantive_review_utc": "2026-11-07T07:56:16.725610+00:00",
       "source_snapshot_utc": "2026-11-07T11:53:50.553748+00:00",
@@ -64672,6 +64738,34 @@
       "current_head_board_qemu_evidence": false,
       "beta_channel_source_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
       "face_board_v1_channel_source_sha": "5fda21c4f55a828ff49fc4b2ebbb40c2e19c65a6",
+      "blog_latest": "2026-10-23",
+      "tracker_ran_tests_or_builds": false,
+      "tracker_downloaded_bundles_or_images": false,
+      "tracker_touched_hardware": false,
+      "replica_runtime_integrated": false
+    },
+    {
+      "checked_at_utc": "2026-11-24T12:48:25Z",
+      "checked_at_jst": "2026-11-24T21:48:25+09:00",
+      "record": "New Microduck PR #625 proposes reporting omitted MIDI chorale chord notes; #624 is closed unmerged housekeeping.",
+      "source_snapshot_url": "https://github.com/pollen-robotics/microduck/commit/6b568429f8ed6d40ebfa019c65291a0bc6383757",
+      "stable_release_unchanged": true,
+      "stable_os_unchanged": true,
+      "new_pull_requests": {
+        "pollen-robotics/microduck": [
+          624,
+          625
+        ]
+      },
+      "pr625_state": "open",
+      "pr625_head_sha": "6b568429f8ed6d40ebfa019c65291a0bc6383757",
+      "pr625_base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+      "pr625_current_checks": "none; commit status pending",
+      "pr624_state": "closed_unmerged",
+      "pr624_scope": "renovate.json only",
+      "yocto_main_unchanged": true,
+      "yocto_pr147_unchanged": true,
+      "beta_and_faceboard_channel_metadata_unchanged": true,
       "blog_latest": "2026-10-23",
       "tracker_ran_tests_or_builds": false,
       "tracker_downloaded_bundles_or_images": false,
