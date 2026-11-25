@@ -1,0 +1,14 @@
+# 深蹲：两只脚踩着地蹲到底，再自己站起来。
+# 模型来自 Ley-WL/microduck-rl 的 models/crouch_hd1910_823g_3000（Apache-2.0），见同目录的 README.md、LICENSE、来源.txt。
+# 指令第一位 1 = 蹲，0 = 站。先蹲 3 秒，再用 1.5 秒站回来，然后交还给走路模型。
+# 幅度必须是 1.0：这个模型训练时就是 1.0，按 0.7 跑只会蹲下去一点点。
+[[policy.skill]]
+name = "crouch"
+duration = 3.0
+command = [1.0, 0.0, 0.0]
+unwind = [0.0, 0.0, 0.0]
+unwind_s = 1.5
+chain = false
+[policy.skill.params]
+action_scale = 1.0
+gain_ratio = 1.0

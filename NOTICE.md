@@ -32,6 +32,7 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 | `software/training/` 内的 3D 网格 | 训练使用的仿真几何 | 保留上游模型来源与许可，不作为实物打印文件 |
 | `tools/servo-web/model/` | 网页调试显示模型 | 从上游 MJCF / STL 转换，非最新实物 CAD |
 | `software/studio/web/model/` | Studio 网页里的 3D 鸭子 | 从上游仿真模型转换，只留外形，非最新实物 CAD |
+| `docs/motion-plaza/` 的预览图和视频 | 动作广场里各动作的封面、预览、分解图、首屏和连拍图 | 用上面那只 3D 鸭子渲染的仿真回放 |
 | `docs/hole_analysis.json` | 孔位几何分析数据 | 由上游 STL 计算得出 |
 
 > **模型下载迁移（2026-09-28）**：`print/` 和 `cad/` 已改为指向 [CAD 仓库](https://github.com/fanhao375/microduck-replica-cad) 的入口说明，旧单件 STL、装配 STL 与对照表已从当前版本移除，避免误作最新打印件。Git 历史中的旧模型仍为上游 STL 的重命名、分类或装配变换衍生作品，继续遵循 CC BY-NC-SA；移除下载副本不改变历史文件的作者与许可。
@@ -45,6 +46,7 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 | `software/studio/` 的代码 | Microduck Studio 网页中控（不含 `web/vendor/`、`deps/`、`web/model/`） | **Apache-2.0** |
 | `software/image/` | 复刻镜像的构建脚本、首次开机和配网脚本 | **Apache-2.0** |
 | `software/updater/` | 签名组件包构建、原更新引擎适配、网页升级协调与首次引导工具 | **Apache-2.0**；原updaterd来自Pollen Robotics，来源1fa8438 |
+| `docs/motion-plaza/` 的代码 | 动作广场网站的页面、样式、脚本、目录数据和生成工具（不含预览图、视频和 `motions/crouch/` 里的第三方模型） | **Apache-2.0** |
 | `software/duck-echo/` 的代码 | 本地R3语音、录音和音乐互动；不包含构建机私钥或用户录音 | **Apache-2.0**；外置Vosk模型及ARM64依赖按各自许可，清单保留来源和hash |
 | `docs/*.md`、`*.md` | 全部文档与逆向分析文本 | **CC BY-NC-SA 4.0** |
 | `build-log/` 照片 | 实物构建照片 | **CC BY-NC-SA 4.0**，由本项目参与者拍摄并授权 |
@@ -85,6 +87,7 @@ Microduck 是 Pollen Robotics 的商业产品，硬件**部分开源**：
 |---|---|---|---|
 | `tools/飞特/` | 飞特 FD 调试软件 1.9.8.5 + CH340 驱动 | [gitee.com/ftservo/fddebug](https://gitee.com/ftservo/fddebug)，2026-09-11 复制 | **MIT**（FTServo 2024，LICENSE 同目录） |
 | `tools/rufus/` | Rufus 4.15 Windows x64 便携版与同版本源码 | [pbatard/rufus v4.15](https://github.com/pbatard/rufus/releases/tag/v4.15)，2026-10-25 原样下载 | **GPL-3.0-or-later**；许可、源码归档、校验值及来源记录在该目录 |
+| `docs/motion-plaza/motions/crouch/files/`、`crouch-leywl.zip` | 深蹲动作模型 `policy.onnx` 及作者的说明、目标角度、评估结果 | [Ley-WL/microduck-rl](https://github.com/Ley-WL/microduck-rl) 的 `models/crouch_hd1910_823g_3000`，提交 `4a4a34a5`，2026-11-24 原样下载；`policy.onnx` 的 SHA-256 与作者公布的一致 | **Apache-2.0**（许可全文和来源记录在同目录） |
 | `software/studio/web/vendor/` | Studio 前端库：Preact、htm 3.1.1、three.js 0.160.0 | 各自官方发布 | Preact、three.js **MIT**，htm **Apache-2.0**（许可证在 `web/vendor/licenses/`） |
 | `software/studio/deps/` | Studio 的 Python 依赖（anyio、click、h11、idna、pyserial、sniffio、starlette、typing_extensions、uvicorn、wsproto） | pypi.org 原版 wheel，版本和校验值见 `deps/VERSIONS.txt` | MIT / BSD-3-Clause / PSF-2.0 等，各包许可证在各自的 `*.dist-info` 里 |
 

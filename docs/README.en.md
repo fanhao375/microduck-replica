@@ -21,6 +21,7 @@ Find resources by task. Start with first use and assembly; detailed investigatio
 | [Image build and release](../software/image/README.md) | Image construction and release notes |
 | [Software updates and local voice (Chinese)](软件更新与语音使用说明-20261027.md) | One-time bootstrap, signed web updates/rollback and R3 sit/stand commands |
 | [Training workbench](../software/training-studio/README.md) | Browser-based experiment management, evaluation and export |
+| [Motion plaza](motion-plaza/README.md) ([open online](https://fanhao375.github.io/microduck-replica/motion-plaza/)) | Motion library site: simulated previews, key frames and joint curves per motion, with source and how far each is verified; preview release, Chinese only |
 | [Training project](../software/training/README.md) | Training environment and commands |
 | [Pre-training data checklist](HD-1910训练前数据清单.md) | Geometry, actuators, IMU and measurements |
 | [Software sources and changes](软件来源与我们的改动.md) | Upstream sources and project modifications |

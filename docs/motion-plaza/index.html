@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microduck 动作广场</title>
+<meta name="description" content="Microduck 复刻版的动作库：看预览，挑动作，装到自己的鸭子上。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&amp;family=Space+Grotesk:wght@500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/home.css">
+</head>
+<body>
+<div style="background: #FBF7EC; color: #0E0E0C; font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-font-smoothing: antialiased">
+
+  <header class="hero" id="top" style="position: relative; background: #FFC21F; color: #0E0E0C; overflow: hidden; min-height: 880px">
+    <div class="pad" style="position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 26px">
+      <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 700; font-size: 17px; min-height: 44px; color: #0E0E0C">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="15" fill="#0E0E0C"/><circle cx="15" cy="15" r="6" fill="#FFC21F"/></svg>
+        <span>Microduck 动作广场</span>
+      </a>
+      <nav aria-label="主导航" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+        <a class="navl" href="#all">全部动作</a>
+        <a class="navl" href="#plan">在路上</a>
+        <a class="navl" href="#pack">怎么装</a>
+        <a class="navl" href="#give">投稿</a>
+        <a class="navl" href="#give" data-repo="" style="border: 1.5px solid #0E0E0C; margin-left: 8px">GitHub</a>
+      </nav>
+    </div>
+    <h1 class="h1 pad" style="position: relative; z-index: 2; margin: 44px 0 0; font-weight: 900; line-height: 1; letter-spacing: -0.03em">
+      <span class="rv" style="display: block">挑个动作</span>
+      <span class="rv rv2" style="display: block">鸭子<span style="display: inline-block; background: #FFF6DC; color: #0E0E0C; border: 0.03em solid #0E0E0C; box-shadow: 0.045em 0.045em 0 #0E0E0C; padding: 0 0.1em 0.05em; margin-left: 0.08em; border-radius: 0.08em; transform: rotate(-2.5deg)">就会</span></span>
+    </h1>
+    <p class="pad fu f1" style="position: relative; z-index: 4; margin: 34px 0 0; max-width: 546px; font-size: 19px; line-height: 1.75; color: #0E0E0C">群友训练好的动作都放在这里。看一眼预览，装到自己的鸭子上，按一个键它就做。</p>
+    <div class="pad fu f2" style="position: relative; z-index: 4; display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px">
+      <a class="btn k" href="#all">看全部 <span data-n="all">8</span> 个动作 ↓</a>
+      <a class="btn g" href="#give">我也要投稿</a>
+    </div>
+    <div class="pad fu f3" style="position: relative; z-index: 4; margin-top: 40px; display: flex; gap: 26px; flex-wrap: wrap; font-size: 13.5px; color: #0E0E0C">
+      <div><span style="font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; display: block; line-height: 1.1" data-n="all">8</span>个动作</div>
+      <div><span style="font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; display: block; line-height: 1.1" data-n="community">1</span>个群友投稿</div>
+      <div><span style="font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; display: block; line-height: 1.1">&lt; 2 MB</span>一个动作包</div>
+    </div>
+    <div class="disc" aria-hidden="true"></div>
+    <div class="duck duckin" role="img" aria-label="Microduck，头会跟着鼠标转" id="duck"></div>
+    <div class="bar" aria-hidden="true" style="position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; height: 62px; background: #F4F1EA; color: #0E0E0C; border-top: 2px solid #0E0E0C; overflow: hidden; display: flex; align-items: center">
+      <div class="mq" id="mq"></div>
+    </div>
+  </header>
+
+  <section class="pad" style="background: #FFF6DC; color: #0E0E0C; padding-top: 96px; padding-bottom: 104px">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; flex-wrap: wrap">
+      <div>
+        <div class="mono" style="font-size: 13px; letter-spacing: 0.14em; color: #C2410C">前滚翻 · 连拍</div>
+        <h2 style="font-weight: 900; font-size: clamp(40px, 5vw, 68px); line-height: 1.08; letter-spacing: -0.02em; margin: 14px 0 0">翻一整圈，<br>拆开来看。</h2>
+      </div>
+      <p style="max-width: 440px; font-size: 16.5px; line-height: 1.8; color: #4A4538; margin: 0">每一格都是模型在仿真里真做出来的一瞬间，不是画的。动作交上来，先在仿真里跑一遍，预览就是这么来的。</p>
+    </div>
+    <div class="plates" style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; margin-top: 52px">
+      <div class="plate"><img src="assets/img/plate-0.webp" alt="前滚翻 0.0 秒：站着"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">0.0 s</span><i style="animation-delay: 0s"></i></div>
+      <div class="plate"><img src="assets/img/plate-1.webp" alt="前滚翻 0.3 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">0.3 s</span><i style="animation-delay: 0.8s"></i></div>
+      <div class="plate"><img src="assets/img/plate-2.webp" alt="前滚翻 0.6 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">0.6 s</span><i style="animation-delay: 1.6s"></i></div>
+      <div class="plate"><img src="assets/img/plate-3.webp" alt="前滚翻 0.9 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">0.9 s</span><i style="animation-delay: 2.4s"></i></div>
+      <div class="plate"><img src="assets/img/plate-4.webp" alt="前滚翻 1.2 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">1.2 s</span><i style="animation-delay: 3.2s"></i></div>
+      <div class="plate"><img src="assets/img/plate-5.webp" alt="前滚翻 1.5 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">1.5 s</span><i style="animation-delay: 4s"></i></div>
+      <div class="plate"><img src="assets/img/plate-6.webp" alt="前滚翻 1.8 秒"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">1.8 s</span><i style="animation-delay: 4.8s"></i></div>
+      <div class="plate"><img src="assets/img/plate-7.webp" alt="前滚翻 2.1 秒：站回来"><span class="mono" style="position: absolute; left: 10px; top: 9px; font-size: 12px; color: #0E0E0C">2.1 s</span><i style="animation-delay: 5.6s"></i></div>
+    </div>
+  </section>
+
+  <section class="pad" id="all" style="padding-top: 108px; padding-bottom: 96px">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap">
+      <h2 style="font-weight: 900; font-size: clamp(52px, 7vw, 104px); line-height: 1; letter-spacing: -0.03em; margin: 0; display: flex; align-items: flex-start; gap: 14px">全部动作<span style="font-family: 'Space Grotesk', sans-serif; font-size: 0.3em; font-weight: 700; color: #C2410C; margin-top: 0.35em" data-n2="all">08</span></h2>
+      <div id="tabs" role="group" aria-label="筛选动作" style="display: flex; gap: 8px; flex-wrap: wrap"></div>
+    </div>
+    <div id="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px; margin-top: 48px"></div>
+  </section>
+
+  <section class="pad" id="plan" style="padding-top: 0; padding-bottom: 104px">
+    <div style="border-top: 2px dashed #0E0E0C; padding-top: 72px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; flex-wrap: wrap">
+      <div>
+        <div class="mono" style="font-size: 13px; letter-spacing: 0.14em; color: #C2410C">计划训练 · 等上真机</div>
+        <h2 style="font-weight: 900; font-size: clamp(40px, 5vw, 68px); line-height: 1.08; letter-spacing: -0.02em; margin: 14px 0 0">还在路上的</h2>
+      </div>
+      <p style="max-width: 440px; font-size: 16.5px; line-height: 1.8; color: #4A4538; margin: 0">想好了怎么训但还没训的、训了还没上真机的，先挂在这里。练成一个，就搬到上面去。</p>
+    </div>
+    <div id="lanes" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; margin-top: 48px; align-items: start"></div>
+  </section>
+
+  <section class="pad pack" id="pack" style="background: #FFC21F; border-top: 2px solid #0E0E0C; border-bottom: 2px solid #0E0E0C; padding-top: 100px; padding-bottom: 100px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 64px; align-items: center">
+    <div>
+      <h2 style="font-weight: 900; font-size: clamp(40px, 5vw, 68px); line-height: 1.08; letter-spacing: -0.02em; margin: 0">一个动作，<br>不到 2 MB。</h2>
+      <p style="font-size: 17px; line-height: 1.8; max-width: 470px; margin: 22px 0 0">动作不塞进镜像。镜像里只带出厂那几个，别的想要再装。一个动作就是一个小文件夹，格式和官方放在 Hugging Face 上的一样。</p>
+    </div>
+    <div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div class="file"><span class="mono" style="font-size: 16px; font-weight: 500; flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere">policy.onnx</span><span style="font-size: 14px; color: #55524A; flex: 0 1 200px">动作模型本体</span><span style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; white-space: nowrap">775 KB</span></div>
+        <div class="file"><span class="mono" style="font-size: 16px; font-weight: 500; flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere">manifest.json</span><span style="font-size: 14px; color: #55524A; flex: 0 1 200px">名字、时长、适用的机器</span><span style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; white-space: nowrap">2 KB</span></div>
+        <div class="file"><span class="mono" style="font-size: 16px; font-weight: 500; flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere">media/preview.mp4</span><span style="font-size: 14px; color: #55524A; flex: 0 1 200px">预览：仿真或实拍</span><span style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; white-space: nowrap">≈ 200 KB</span></div>
+      </div>
+      <div class="soon">下面这两种装法，Studio 里还在做</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px">
+        <div style="background: #FFF6DC; color: #0E0E0C; border: 2px solid #0E0E0C; border-radius: 16px; padding: 20px 22px"><h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0E0E0C">鸭子连着家里 Wi‑Fi</h3><p style="margin: 8px 0 0; font-size: 14.5px; line-height: 1.7; color: #4A4538">在 Studio 里点「装」，鸭子自己去下。</p></div>
+        <div style="background: #FFF6DC; color: #0E0E0C; border: 2px solid #0E0E0C; border-radius: 16px; padding: 20px 22px"><h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0E0E0C">鸭子开的是热点</h3><p style="margin: 8px 0 0; font-size: 14.5px; line-height: 1.7; color: #4A4538">手机先把包下好，连上鸭子再传进去。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad" id="give" style="background: #FFF6DC; color: #0E0E0C; padding-top: 104px; padding-bottom: 84px">
+    <div class="mono" style="font-size: 13px; letter-spacing: 0.14em; color: #C2410C">投稿</div>
+    <h2 style="font-weight: 900; font-size: clamp(40px, 5vw, 68px); line-height: 1.08; letter-spacing: -0.02em; margin: 14px 0 0">把你训练的动作<br>放上来。</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 48px">
+      <div style="background: #fff; border: 2px solid #0E0E0C; border-radius: 18px; padding: 24px 24px 26px"><span style="font-family: 'Space Grotesk', sans-serif; font-size: 54px; font-weight: 700; color: #E2570F; line-height: 1; display: block">1</span><h3 style="margin: 14px 0 0; font-size: 21px; font-weight: 700">导出模型</h3><p style="margin: 8px 0 0; font-size: 15px; line-height: 1.75; color: #4A4538">训练完导出 ONNX。用我们仓库里的训练流程，站姿和关节顺序自然就对得上。</p></div>
+      <div style="background: #fff; border: 2px solid #0E0E0C; border-radius: 18px; padding: 24px 24px 26px"><span style="font-family: 'Space Grotesk', sans-serif; font-size: 54px; font-weight: 700; color: #E2570F; line-height: 1; display: block">2</span><h3 style="margin: 14px 0 0; font-size: 21px; font-weight: 700">写清楚怎么用</h3><p style="margin: 8px 0 0; font-size: 15px; line-height: 1.75; color: #4A4538">名字、时长、怎么触发、在哪台机器上试过。有实拍就一起交。</p></div>
+      <div style="background: #fff; border: 2px solid #0E0E0C; border-radius: 18px; padding: 24px 24px 26px"><span style="font-family: 'Space Grotesk', sans-serif; font-size: 54px; font-weight: 700; color: #E2570F; line-height: 1; display: block">3</span><h3 style="margin: 14px 0 0; font-size: 21px; font-weight: 700">先过一遍仿真</h3><p style="margin: 8px 0 0; font-size: 15px; line-height: 1.75; color: #4A4538">我们在仿真里跑一遍、生成预览，标上「仿真通过」或「实机验证」，再上架。</p></div>
+    </div>
+    <div style="display: flex; margin-top: 40px"><a class="btn y yo" href="#give" data-repo="/issues/new/choose">去 GitHub 投稿</a></div>
+    <div style="margin-top: 72px; padding-top: 26px; border-top: 1.5px solid #D9CFB4; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 13.5px; color: #6B6558">
+      <span>Microduck 复刻 · 动作广场</span>
+      <span>预览为仿真回放（简化舵机模型），实际效果以实机为准</span>
+    </div>
+  </section>
+</div>
+<script src="data/motions.js"></script>
+<script src="assets/home.js"></script>
+</body>
+</html>

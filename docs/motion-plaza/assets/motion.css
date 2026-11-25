@@ -1,0 +1,34 @@
+/* 详情页样式。照设计稿「动作详情」那块画板搬的。 */
+body{margin:0;background:#FBF7EC;color:#0E0E0C;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}a:hover{color:inherit}
+*{box-sizing:border-box}
+.mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace}
+.pad{padding-left:56px;padding-right:56px}
+.navl{text-decoration:none;font-size:15px;padding:0 16px;min-height:44px;display:flex;align-items:center;border-radius:999px;color:#0E0E0C}
+.navl:hover{background:rgba(14,14,12,.1)}
+.btn{font:inherit;font-weight:700;font-size:17px;text-decoration:none;min-height:58px;padding:0 30px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;border:2px solid #0E0E0C;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,background-color .18s}
+.btn.k{background:#0E0E0C;color:#fff;box-shadow:0 5px 0 #F0621A}
+.btn.k:hover{transform:translateY(-3px);box-shadow:0 8px 0 #F0621A;color:#fff}
+.btn.k:active{transform:translateY(3px);box-shadow:0 2px 0 #F0621A}
+.btn.o{background:transparent;color:#0E0E0C}
+.btn.o:hover{background:#0E0E0C;color:#FFC21F}
+.state{display:inline-flex;align-items:center;min-height:58px;padding:0 26px;border-radius:999px;border:2px dashed #0E0E0C;font-weight:700;font-size:17px;background:rgba(255,255,255,.55)}
+.pill{border:1.5px solid #0E0E0C;border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:500}
+.ctl{font:inherit;border:0;cursor:pointer;padding:0}
+.key{font:inherit;cursor:pointer;border-radius:14px;padding:8px 8px 10px;display:flex;flex-direction:column;gap:8px;text-align:left;color:#0E0E0C;background:#fff;border:2px solid #D6D1C4;transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.key:hover{transform:translateY(-4px)}
+.key.on{background:#FFC21F;border-color:#0E0E0C}
+.key img{width:100%;aspect-ratio:4/5;object-fit:contain;display:block;border-radius:8px;background:#EDE9DF}
+.key.sq img{aspect-ratio:1/1;object-fit:cover}
+.row{display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-top:1.5px solid #E4E0D5;font-size:15.5px;line-height:1.6}
+.frow{display:flex;gap:14px;align-items:baseline;padding:14px 0;border-top:1.5px solid #E4E0D5;flex-wrap:wrap}
+.box{background:#fff;border:2px solid #0E0E0C;border-radius:22px;padding:30px 32px 18px}
+.h2{font-weight:900;font-size:clamp(40px,5vw,68px);line-height:1.08;letter-spacing:-0.02em;margin:14px 0 0}
+.eyebrow{font-size:13px;letter-spacing:0.14em;color:#C2410C}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap}
+@media (max-width:1000px){
+  .pad{padding-left:20px;padding-right:20px}
+  .two{grid-template-columns:minmax(0,1fr) !important}
+  .keys{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+}
+@media (prefers-reduced-motion:reduce){.btn,.key{transition:none}}

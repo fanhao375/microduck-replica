@@ -16,6 +16,7 @@
 | **走路和动作模型** | 走路、坐下 / 站起、低头捡、前滚翻、左右踢、轮滑 4 个 | 复刻镜像里带着。每个模型干什么、对应哪个手柄键、谁训练的，见[模型说明](image/overlay/usr/share/doc/microduck/模型说明.txt) | 作者的个人非商业许可，**不是开源许可**：不得随收费产品分发 |
 | **训练工程** | HD-1910 仿真训练 | [`training/`](training/) | 代码 Apache-2.0，3D 网格 CC BY-NC-SA |
 | **Microduck Training Studio** | 电脑上的网页训练工作台：实验管理、曲线、评估与模型导出 | [`training-studio/`](training-studio/README.md)，与鸭子上的 Studio 分开运行 | 代码 Apache-2.0；依赖与素材许可见该目录说明 |
+| **动作广场**（预览版） | 动作库网站：每个动作的仿真预览、分解图、关节曲线，标清来源和验证到哪一步；还没练成的列在「还在路上的」 | [在线看](https://fanhao375.github.io/microduck-replica/motion-plaza/)；网页放在 [`docs/motion-plaza/`](../docs/motion-plaza/README.md)，拿到本地双击 `index.html` 也能看。在 Studio 里一键安装动作还没做 | 代码 Apache-2.0；预览图和视频 CC BY-NC-SA；收录的第三方模型按各自许可 |
 | servo-web（旧） | 9 月的网页舵机调试台，Studio 出来以前用 | [`tools/servo-web/`](../tools/servo-web/) | Apache-2.0 |
 
 独立的舵机测试、IMU 检查和步态分析入口见[工具导航](../tools/README.md)；电路板与固件入口见[硬件工程](../hardware/README.md)。

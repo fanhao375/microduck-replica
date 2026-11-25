@@ -1,0 +1,71 @@
+/* 首页样式。从设计稿搬过来的（tools/import_design.py），之后可以直接改这个文件。 */
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+*{box-sizing:border-box}
+.mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace}
+.navl{text-decoration:none;font-size:15px;padding:0 16px;min-height:44px;display:flex;align-items:center;border-radius:999px;color:#0E0E0C}
+.navl:hover{background:rgba(14,14,12,.1);color:#0E0E0C}
+.btn{font:inherit;font-weight:700;font-size:17px;text-decoration:none;min-height:58px;padding:0 30px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;border:2px solid transparent;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,background-color .18s,color .18s}
+.btn.y{background:#FFC21F;color:#0E0E0C;border-color:#0E0E0C;box-shadow:0 5px 0 #0E0E0C}
+.btn.y:hover{transform:translateY(-3px);box-shadow:0 8px 0 #0E0E0C;color:#0E0E0C}
+.btn.y:active{transform:translateY(3px);box-shadow:0 2px 0 #0E0E0C}
+.btn.yo{box-shadow:0 5px 0 #F0621A}.btn.yo:hover{box-shadow:0 8px 0 #F0621A}
+.btn.g{color:#0E0E0C;border-color:#0E0E0C}
+.btn.g:hover{background:#0E0E0C;color:#FFC21F}
+.btn.k{background:#0E0E0C;color:#fff;border-color:#0E0E0C;box-shadow:0 5px 0 #F0621A}
+.btn.k:hover{transform:translateY(-3px);box-shadow:0 8px 0 #F0621A;color:#fff}
+.btn.k:active{transform:translateY(3px);box-shadow:0 2px 0 #F0621A}
+.h1{font-size:clamp(64px,12.6vw,184px)}
+.disc{position:absolute;z-index:1;right:70px;bottom:120px;width:610px;height:610px;border-radius:50%;background:#FFF6DC;border:2px solid #0E0E0C}
+.duck{position:absolute;z-index:3;right:92px;bottom:54px;width:566px;height:715px;background-image:url(img/look-sheet.webp);background-size:600% 300%;background-repeat:no-repeat;filter:drop-shadow(0 30px 26px rgba(70,45,0,.3))}
+.badge{position:absolute;z-index:4;right:560px;bottom:470px;width:148px;height:148px;animation:spin 16s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mq{display:flex;gap:34px;white-space:nowrap;font-weight:900;font-size:25px;animation:slide 30s linear infinite;padding-left:34px}
+@keyframes slide{to{transform:translateX(-50%)}}
+.plate{position:relative;background:#fff;border:1.5px solid #0E0E0C;border-radius:12px;aspect-ratio:3/4;overflow:hidden}
+.plate img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.plate i{position:absolute;left:0;right:0;bottom:0;height:6px;background:#F0621A;transform:scaleX(0);transform-origin:left;animation:tick 6.4s linear infinite}
+@keyframes tick{0%{transform:scaleX(0)}12.5%{transform:scaleX(1)}12.6%,100%{transform:scaleX(0)}}
+.tab{font:inherit;font-size:15px;font-weight:500;min-height:46px;padding:0 20px;border-radius:999px;border:2px solid #0E0E0C;cursor:pointer}
+.card{position:relative;flex-direction:column;background:#fff;border:2px solid #0E0E0C;border-radius:22px;padding:12px 12px 18px;text-decoration:none;color:#0E0E0C;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+.card:hover{transform:translate(-4px,-4px);box-shadow:8px 8px 0 #0E0E0C;color:#0E0E0C}
+.stage{position:relative;border-radius:13px;overflow:hidden;aspect-ratio:1/1;background:#EDE9DF}
+.stage img.p,.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.chip{position:absolute;top:10px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:999px}
+.shot{position:absolute;right:10px;bottom:10px;width:74px;height:74px;border-radius:10px;border:2px solid #fff;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.28);transform:rotate(4deg)}
+.pill{border:1.5px solid #0E0E0C;border-radius:999px;padding:3px 10px;font-weight:500}
+.file{background:#fff;border:2px solid #0E0E0C;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;box-shadow:5px 5px 0 #0E0E0C;flex-wrap:wrap}
+.lane{background:#FFF6DC;border:2px solid #0E0E0C;border-radius:22px;padding:22px 20px 20px;display:flex;flex-direction:column;gap:12px}
+.lane>*{margin-top:0;margin-bottom:0}
+.todo{background:#fff;border:2px dashed #0E0E0C;border-radius:16px;padding:16px 18px}
+a.todo:hover{background:#FFC21F !important;color:#0E0E0C}
+.pad{padding-left:56px;padding-right:56px}
+/* 进场：一拍一拍来，每一拍到位后停住 —— 标题揭开、圆盘弹出、鸭子落位、贴纸盖上 */
+.rv{animation:rv .9s cubic-bezier(.2,.8,.2,1) both}
+.rv2{animation-delay:.12s}
+@keyframes rv{from{clip-path:inset(0 0 100% 0);transform:translateY(38%)}to{clip-path:inset(-20% -5% -20% -5%);transform:none}}
+.fu{animation:fu .7s cubic-bezier(.2,.8,.2,1) both}
+.f1{animation-delay:.45s}.f2{animation-delay:.55s}.f3{animation-delay:.65s}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.disc{animation:pop .8s cubic-bezier(.34,1.56,.64,1) .15s both}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
+.duckin{animation:duckin .8s cubic-bezier(.2,.8,.2,1) .4s both}
+@keyframes duckin{from{opacity:0;transform:translateY(70px)}to{opacity:1;transform:none}}
+.badge svg{animation:stamp .5s cubic-bezier(.34,1.56,.64,1) 1s both}
+@keyframes stamp{from{transform:scale(0) rotate(-40deg)}to{transform:none}}
+.bar{animation:barin .6s cubic-bezier(.2,.8,.2,1) .8s both}
+@keyframes barin{from{transform:translateY(100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.rv,.fu,.disc,.duckin,.badge svg,.bar{animation:none}}
+@media (max-width:1000px){
+  .pad{padding-left:20px;padding-right:20px}
+  .disc{width:320px;height:320px;right:-40px;bottom:96px}
+  .duck{width:300px;height:379px;right:-10px;bottom:58px}
+  .badge{display:none}
+  .hero{min-height:0 !important;padding-bottom:440px}
+  .plates{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+  .pack{grid-template-columns:minmax(0,1fr) !important}
+}
+@media (prefers-reduced-motion:reduce){.badge,.mq,.plate i{animation:none}.card,.btn{transition:none}}
+.card{display:flex}
+.card[hidden]{display:none}
+.soon{display:inline-block;font-size:13px;font-weight:500;border:1.5px dashed #0E0E0C;border-radius:999px;padding:3px 12px;margin-top:30px}

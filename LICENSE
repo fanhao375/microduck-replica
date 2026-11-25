@@ -12,6 +12,10 @@
      software/image/       复刻镜像的构建脚本和开机脚本 / replica image build and boot scripts
      software/updater/     签名软件包、网页升级协调与引导工具 / signed software update tooling
      software/duck-echo/   本地语音与音频互动代码 / local voice and audio interaction code
+     docs/motion-plaza/
+                           动作广场网站的代码（预览图、视频和收录的第三方模型除外，见下）
+                           Motion plaza website code (except the preview images,
+                           videos and the third-party model, see below)
 
    Apache-2.0 全文 / full text: https://www.apache.org/licenses/LICENSE-2.0
 
@@ -28,13 +32,16 @@
                            网页显示模型 / web visualization geometry
      software/studio/web/model/
                            Studio 网页里的 3D 鸭子 / 3D duck in the Studio web console
+     docs/motion-plaza/ 的预览图和视频 / preview images and videos in docs/motion-plaza/
+                           用上面那只 3D 鸭子渲染的仿真回放，以及两张实拍小图
+                           simulation replays rendered with that 3D duck, plus two build photos
      cad/, print/ 的历史 STL / historical STLs in cad/ and print/
                            旧模型已于 2026-09-28 移除，Git 历史中的衍生作品许可不变
                            removed on 2026-09-28; their licence in Git history is unchanged
      docs/hole_analysis.json
                            由上游 STL 计算得出的孔位数据
                            hole geometry computed from upstream STLs
-     *.md, docs/*.md       全部文档与逆向分析文本
+     *.md, docs/*.md       全部文档与逆向分析文本（docs/motion-plaza/ 的网页代码除外，见上）
                            all documentation and reverse-engineering text
      build-log/, assets/   实物照片与图片素材，由本项目参与者拍摄并授权
                            build photos and image assets, shot by and licensed
@@ -76,6 +83,12 @@
   是原样收录的第三方软件，保留各自的许可证，许可证文件在原目录里。
   Vendored third-party code in software/studio/web/vendor/ and software/studio/deps/
   keeps its own licences; the licence files sit next to the code.
+
+- docs/motion-plaza/motions/crouch/ 里的深蹲模型原样取自 Ley-WL/microduck-rl，
+  保留其 Apache-2.0 许可，许可全文和来源记录在 files/ 目录里。
+  The crouch model in docs/motion-plaza/motions/crouch/ is redistributed
+  unmodified from Ley-WL/microduck-rl under Apache-2.0; licence text and
+  provenance sit in its files/ directory.
 
 - 复刻镜像里带的走路和动作模型不在本仓库里，适用模型作者的个人非商业许可，见
   software/image/overlay/usr/share/doc/microduck/模型说明.txt。

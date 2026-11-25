@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动作详情 · Microduck 动作广场</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&amp;family=Space+Grotesk:wght@500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/motion.css">
+</head>
+<body>
+<!-- 这一页的内容全部由 assets/motion.js 按地址里的 ?id= 从 data/motions.js 填出来 -->
+<header style="background: #FFC21F; border-bottom: 2px solid #0E0E0C">
+  <div class="pad" style="display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 12px">
+    <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 700; font-size: 17px; min-height: 44px">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="15" fill="#0E0E0C"/><circle cx="15" cy="15" r="6" fill="#FFC21F"/></svg>
+      <span>Microduck 动作广场</span>
+    </a>
+    <nav aria-label="主导航" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+      <a class="navl" href="index.html#all">← 全部动作</a>
+      <a class="navl" href="index.html#plan">在路上</a>
+      <a class="navl" href="index.html#pack">怎么装</a>
+      <a class="navl" href="index.html#give">投稿</a>
+    </nav>
+  </div>
+  <div id="hero"></div>
+</header>
+<main id="main"></main>
+<section class="pad" style="background: #FFC21F; color: #0E0E0C; border-top: 2px solid #0E0E0C; padding-top: 96px; padding-bottom: 96px">
+  <div id="retrain"></div>
+  <div style="margin-top: 72px; padding-top: 26px; border-top: 1.5px solid rgba(14,14,12,.25); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 13.5px">
+    <span>Microduck 复刻 · 动作广场</span>
+    <span>预览为仿真回放（简化舵机模型），实际效果以实机为准</span>
+  </div>
+</section>
+<script src="data/motions.js"></script>
+<script src="data/curves.js"></script>
+<script src="assets/motion.js"></script>
+</body>
+</html>

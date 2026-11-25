@@ -21,6 +21,7 @@
 | [镜像构建与发布](../software/image/README.md) | 镜像构建方式与发布说明 |
 | [软件更新与本地语音](软件更新与语音使用说明-20261027.md) | 旧卡一次性引导、网页签名升级/回退、R3坐下与站起来 |
 | [训练平台](../software/training-studio/README.md) | 网页实验管理、评估与模型导出 |
+| [动作广场](motion-plaza/README.md)（[在线看](https://fanhao375.github.io/microduck-replica/motion-plaza/)） | 动作库网站：各动作的仿真预览、分解图、关节曲线，来源和验证到哪一步；预览版 |
 | [训练工程](../software/training/README.md) | 训练环境与运行方法 |
 | [训练前数据清单](HD-1910训练前数据清单.md) | 几何、舵机、IMU 与实测项 |
 | [软件来源与改动](软件来源与我们的改动.md) | 上游来源和本项目的修改 |

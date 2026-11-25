@@ -28,6 +28,9 @@
 *.xlsx  binary
 *.docx  binary
 
+# 模型
+*.onnx  binary
+
 # EDA 工程
 *.eprj2 binary
 *.epro2 binary
@@ -35,6 +38,7 @@
 # systemd 单元直接拷到主板用，CRLF 会让 systemd 读错
 *.service text eol=lf
 *.ps1 text eol=crlf
+*.bat text eol=crlf
 # 鸭子上直接执行、或由 systemd / sudo / sshd / NetworkManager 读的文件：一律 LF。
 # 没后缀的脚本（#!/usr/bin/python3）、sudoers、*.conf 变成 CRLF 开机就会坏，
 # 复刻镜像构建脚本也会拒绝带 CR 的 overlay（见 software/image/README.md）。
