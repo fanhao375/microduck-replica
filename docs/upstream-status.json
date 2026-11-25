@@ -23854,8 +23854,8 @@
           "url": "https://github.com/pollen-robotics/microduck/pull/452",
           "created_at": "2026-10-25T10:25:00Z",
           "created_at_jst": "2026-10-25T19:25:00+09:00",
-          "updated_at": "2026-11-24T19:56:29Z",
-          "updated_at_jst": "2026-11-25T04:56:29+09:00",
+          "updated_at": "2026-11-25T09:13:13Z",
+          "updated_at_jst": "2026-11-25T18:13:13+09:00",
           "merged_at": null,
           "closed_at": null,
           "head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
@@ -23870,7 +23870,7 @@
           "classification": "Previously tracked open training proposal synchronized with main; no new training implementation or model weights since the October source.",
           "change_summary": "Prevents leakage by splitting overlapping audio windows by capture session; adds optional data provenance manifest, seeded training, early stopping, reporting and ONNX/PyTorch parity checks. Does not replace shipped model or alter production runtime.",
           "author_reported_validation": "PR reports 10 Python tests, 7 Rust pet-detect tests, lint/format checks, and synthetic multi-session end-to-end smoke. Not rerun by tracker.",
-          "check_status": "Commit status pending; no check-runs available at observation.",
+          "check_status": "Three GitHub check-runs success: check, coverage and board, workflow attempt 2. Actual PR merge checkout tree matches current PR head.",
           "included_in_formal_release": false,
           "replica_integration": "not_integrated",
           "impact": {
@@ -23906,6 +23906,92 @@
             "ci_file_changed_with_upstream_main": true,
             "verification": "Compared the seven non-CI PR file blob SHAs in complete Git trees at 49964294930a78023800d0b0246be30e1aecd388 and d094639bdf382576379eb3bf14769d9dc9886f96. All seven are identical; only .github/workflows/ci.yml differs among the eight PR files.",
             "fixed_merge_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96"
+          },
+          "check_status_history": [
+            {
+              "checked_at_utc": "2026-11-25T09:07:27.606Z",
+              "head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+              "check_status": "Commit status pending; no check-runs available at observation.",
+              "scope": "Earlier query before attempt 2 results were read; preserved as history."
+            }
+          ],
+          "ci_observation": {
+            "observed_at_utc": "2026-11-25T10:02:28.687Z",
+            "observed_at_jst": "2026-11-25T19:02:28.687+09:00",
+            "workflow_run_id": 45473208883,
+            "run_attempt": 2,
+            "workflow_attempt_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/attempts/2",
+            "workflow_event": "pull_request",
+            "status": "completed",
+            "conclusion": "success",
+            "workflow_updated_at_utc": "2026-11-25T09:18:03Z",
+            "workflow_updated_at_jst": "2026-11-25T18:18:03+09:00",
+            "pr_head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+            "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+            "actual_checkout_ref": "refs/pull/452/merge",
+            "actual_checkout_sha": "9fb8de2603641158bed80bd61134b4abfec7a0f7",
+            "actual_checkout_parents": [
+              "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+              "d094639bdf382576379eb3bf14769d9dc9886f96"
+            ],
+            "actual_checkout_tree_sha": "f23533c27dd408ced171dbea39104f800c993edc",
+            "pr_head_tree_sha": "f23533c27dd408ced171dbea39104f800c993edc",
+            "checkout_and_pr_head_tree_identical": true,
+            "checkout_verified_from_all_three_job_logs": true,
+            "fixed_checkout_source_url": "https://github.com/pollen-robotics/microduck/commit/9fb8de2603641158bed80bd61134b4abfec7a0f7",
+            "fixed_workflow_source_url": "https://github.com/pollen-robotics/microduck/blob/d094639bdf382576379eb3bf14769d9dc9886f96/.github/workflows/ci.yml",
+            "jobs": [
+              {
+                "name": "check",
+                "check_run_id": 139098482120,
+                "status": "completed",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-25T09:13:11Z",
+                "completed_at_utc": "2026-11-25T09:17:45Z",
+                "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098482120",
+                "runner_labels": [
+                  "ubuntu-latest"
+                ]
+              },
+              {
+                "name": "coverage",
+                "check_run_id": 139098482009,
+                "status": "completed",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-25T09:13:11Z",
+                "completed_at_utc": "2026-11-25T09:18:02Z",
+                "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098482009",
+                "runner_labels": [
+                  "ubuntu-latest"
+                ]
+              },
+              {
+                "name": "board",
+                "check_run_id": 139098481489,
+                "status": "completed",
+                "conclusion": "success",
+                "started_at_utc": "2026-11-25T09:13:13Z",
+                "completed_at_utc": "2026-11-25T09:16:14Z",
+                "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098481489",
+                "runner_labels": [
+                  "ubuntu-24.04-arm"
+                ]
+              }
+            ],
+            "training_integrity_python_tests_passed": 12,
+            "training_integrity_scope": "Standard-library dataset discovery, manifest, session split and metric helpers. Full private-audio training and PyTorch/ONNX export parity smoke were not CI steps.",
+            "coverage_lines_percent": 72.97,
+            "coverage_scope": "Workspace line coverage; xtask excluded by the workflow. Not model accuracy or generalization.",
+            "board_scope": "ARM64 ubuntu-24.04-arm runner; zig aarch64 GNU build and Debian trixie-slim containers execute board-test.sh software checks. Not physical robot acceptance or replica original-card dependency compatibility.",
+            "board_source_url": "https://github.com/pollen-robotics/microduck/blob/d094639bdf382576379eb3bf14769d9dc9886f96/scripts/board-test.sh",
+            "source_changed_since_previous_observation": false,
+            "new_model_weights": false,
+            "pr_merged": false,
+            "included_in_formal_release": false,
+            "replica_integrated": false,
+            "tracker_ran_tests_or_builds": false,
+            "tracker_downloaded_ci_program_artifacts": false,
+            "tracker_connected_robot": false
           }
         },
         {
@@ -58386,12 +58472,12 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-25T09:07:27.606Z",
+  "checked_at_utc": "2026-11-25T10:02:28.687Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-25T08:05:56.658Z",
-    "source_snapshot_utc": "2026-11-25T09:07:27.606Z",
-    "source_snapshot_jst": "2026-11-25T18:07:27.606+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-25T09:19:13Z",
+    "previous_substantive_review_utc": "2026-11-25T09:07:27.606Z",
+    "source_snapshot_utc": "2026-11-25T10:02:28.687Z",
+    "source_snapshot_jst": "2026-11-25T19:02:28.687+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-25T10:09:16.879348+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.23.1",
@@ -58400,32 +58486,16 @@
     "stable_release_assets_changed": false,
     "new_pull_requests": {},
     "newly_discovered_pull_requests": {},
-    "updated_pull_requests": {},
-    "corrected_pull_request_details": {
-      "pollen-robotics/microduck#452": {
-        "previous_head_sha": "49964294930a78023800d0b0246be30e1aecd388",
-        "current_head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
-        "kind": "Merge main only; original two feature commits remain unchanged.",
-        "training_feature_files_identical": true,
-        "unchanged_file_count": 7,
-        "ci_file_changed_with_upstream_main": true,
-        "verification": "Compared the seven non-CI PR file blob SHAs in complete Git trees at 49964294930a78023800d0b0246be30e1aecd388 and d094639bdf382576379eb3bf14769d9dc9886f96. All seven are identical; only .github/workflows/ci.yml differs among the eight PR files.",
-        "fixed_merge_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96"
-      }
+    "updated_pull_requests": {
+      "pollen-robotics/microduck": [
+        452
+      ]
     },
     "previous_tracked_prs_merged": false,
     "merged_previously_tracked_pull_requests": {},
-    "corrected_stale_pr_indices": {
-      "512": "Merged 2026-11-23; already formally released in 0.23.1.",
-      "619": "Closed unmerged 2026-11-23; docs-only."
-    },
     "new_development_releases": [],
     "moved_development_tags": [],
-    "retired_development_tags": [
-      "daemon-dev-duckctl-refused-not-moved",
-      "daemon-dev-workout-test",
-      "daemon-dev-onnx-version-stamp"
-    ],
+    "retired_development_tags": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_date": "2026-10-23",
@@ -58435,7 +58505,6 @@
     "official_os_pull_requests_changed": false,
     "official_os_development_channels_changed": false,
     "official_os_main_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
-    "source_classification_corrected": true,
     "substantive_update_detected": true,
     "local_migration_record_changed": false,
     "runtime_code_changed_by_heartbeat": false,
@@ -58443,7 +58512,25 @@
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
     "package_bytes_downloaded": false,
-    "notes": "No new default-branch commit, formal release, model revision or blog article. Correct the previous misclassification of already tracked PR #452: the new head only merges main, all seven non-CI feature file blobs match the October head. Correct raw UTC/JST times and consolidate its duplicate index with history retained. Three development refs and release endpoints now return 404; retain their last source SHAs and metadata in retirement records without inferring deletion time. Correct stale #512/#619 states and current OS/ONNX summary. This is a provenance/status correction, not a new training feature or local integration."
+    "notes": "Official default heads, formal releases, development tag SHAs, model metadata, OS channels and blog remain unchanged. PR #452 remains open/unmerged at d094639b. Its workflow run 45473208883 attempt 2 completed successfully at 2026-11-25T09:18:03Z: check, coverage and board all success. Logs show all jobs checked out 9fb8de26, whose tree equals the PR head tree f23533c2. Logs confirm 12 Python integrity tests, workspace line coverage 72.97%, and ARM64 Debian container software checks. No new model weights, private-audio training/parity smoke CI, formal release, local integration or physical robot validation. Tracker read only metadata/source/text logs and ran no tests/builds.",
+    "updated_pull_request_details": {
+      "pollen-robotics/microduck#452": {
+        "kind": "Newly observed successful CI; no source, weights, state or merge change.",
+        "head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+        "actual_checkout_sha": "9fb8de2603641158bed80bd61134b4abfec7a0f7",
+        "checkout_tree_matches_pr_head": true,
+        "workflow_run_id": 45473208883,
+        "run_attempt": 2,
+        "checks": [
+          "check:success",
+          "coverage:success",
+          "board:success"
+        ],
+        "training_integrity_python_tests_passed": 12,
+        "workflow_attempt_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/attempts/2"
+      }
+    },
+    "new_validation_evidence": true
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -65227,6 +65314,152 @@
       "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96",
       "tracker_ran_tests_or_builds": false,
       "replica_runtime_integrated": false
+    },
+    {
+      "record": "Preserved preceding latest_review before CI evidence update",
+      "source_snapshot_utc": "2026-11-25T09:07:27.606Z",
+      "historical_snapshot": {
+        "previous_substantive_review_utc": "2026-11-25T08:05:56.658Z",
+        "source_snapshot_utc": "2026-11-25T09:07:27.606Z",
+        "source_snapshot_jst": "2026-11-25T18:07:27.606+09:00",
+        "final_relevant_sources_checked_at_utc": "2026-11-25T09:19:13Z",
+        "default_branch_changes": false,
+        "new_stable_release": false,
+        "stable_release_tag": "daemon-v0.23.1",
+        "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "stable_asset_count": 8,
+        "stable_release_assets_changed": false,
+        "new_pull_requests": {},
+        "newly_discovered_pull_requests": {},
+        "updated_pull_requests": {},
+        "corrected_pull_request_details": {
+          "pollen-robotics/microduck#452": {
+            "previous_head_sha": "49964294930a78023800d0b0246be30e1aecd388",
+            "current_head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+            "kind": "Merge main only; original two feature commits remain unchanged.",
+            "training_feature_files_identical": true,
+            "unchanged_file_count": 7,
+            "ci_file_changed_with_upstream_main": true,
+            "verification": "Compared the seven non-CI PR file blob SHAs in complete Git trees at 49964294930a78023800d0b0246be30e1aecd388 and d094639bdf382576379eb3bf14769d9dc9886f96. All seven are identical; only .github/workflows/ci.yml differs among the eight PR files.",
+            "fixed_merge_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96"
+          }
+        },
+        "previous_tracked_prs_merged": false,
+        "merged_previously_tracked_pull_requests": {},
+        "corrected_stale_pr_indices": {
+          "512": "Merged 2026-11-23; already formally released in 0.23.1.",
+          "619": "Closed unmerged 2026-11-23; docs-only."
+        },
+        "new_development_releases": [],
+        "moved_development_tags": [],
+        "retired_development_tags": [
+          "daemon-dev-duckctl-refused-not-moved",
+          "daemon-dev-workout-test",
+          "daemon-dev-onnx-version-stamp"
+        ],
+        "official_blog_new_articles": false,
+        "official_blog_article_count": 3,
+        "official_blog_latest_date": "2026-10-23",
+        "model_metadata_changed": false,
+        "official_os_release_changed": false,
+        "official_os_main_changed": false,
+        "official_os_pull_requests_changed": false,
+        "official_os_development_channels_changed": false,
+        "official_os_main_sha": "6edf276c3006aa8f8863e11af495a5e5c1b5f7f0",
+        "source_classification_corrected": true,
+        "substantive_update_detected": true,
+        "local_migration_record_changed": false,
+        "runtime_code_changed_by_heartbeat": false,
+        "tests_executed_by_tracker": false,
+        "robot_connected": false,
+        "image_built_or_published_by_tracker": false,
+        "package_bytes_downloaded": false,
+        "notes": "No new default-branch commit, formal release, model revision or blog article. Correct the previous misclassification of already tracked PR #452: the new head only merges main, all seven non-CI feature file blobs match the October head. Correct raw UTC/JST times and consolidate its duplicate index with history retained. Three development refs and release endpoints now return 404; retain their last source SHAs and metadata in retirement records without inferring deletion time. Correct stale #512/#619 states and current OS/ONNX summary. This is a provenance/status correction, not a new training feature or local integration."
+      }
+    },
+    {
+      "record": "PR #452 current-source-associated CI passes; retain actual checkout provenance and software-only scope",
+      "checked_at_utc": "2026-11-25T10:02:28.687Z",
+      "checked_at_jst": "2026-11-25T19:02:28.687+09:00",
+      "source_snapshot_url": "https://github.com/pollen-robotics/microduck/commit/9fb8de2603641158bed80bd61134b4abfec7a0f7",
+      "ci_observation": {
+        "observed_at_utc": "2026-11-25T10:02:28.687Z",
+        "observed_at_jst": "2026-11-25T19:02:28.687+09:00",
+        "workflow_run_id": 45473208883,
+        "run_attempt": 2,
+        "workflow_attempt_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/attempts/2",
+        "workflow_event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "workflow_updated_at_utc": "2026-11-25T09:18:03Z",
+        "workflow_updated_at_jst": "2026-11-25T18:18:03+09:00",
+        "pr_head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+        "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "actual_checkout_ref": "refs/pull/452/merge",
+        "actual_checkout_sha": "9fb8de2603641158bed80bd61134b4abfec7a0f7",
+        "actual_checkout_parents": [
+          "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+          "d094639bdf382576379eb3bf14769d9dc9886f96"
+        ],
+        "actual_checkout_tree_sha": "f23533c27dd408ced171dbea39104f800c993edc",
+        "pr_head_tree_sha": "f23533c27dd408ced171dbea39104f800c993edc",
+        "checkout_and_pr_head_tree_identical": true,
+        "checkout_verified_from_all_three_job_logs": true,
+        "fixed_checkout_source_url": "https://github.com/pollen-robotics/microduck/commit/9fb8de2603641158bed80bd61134b4abfec7a0f7",
+        "fixed_workflow_source_url": "https://github.com/pollen-robotics/microduck/blob/d094639bdf382576379eb3bf14769d9dc9886f96/.github/workflows/ci.yml",
+        "jobs": [
+          {
+            "name": "check",
+            "check_run_id": 139098482120,
+            "status": "completed",
+            "conclusion": "success",
+            "started_at_utc": "2026-11-25T09:13:11Z",
+            "completed_at_utc": "2026-11-25T09:17:45Z",
+            "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098482120",
+            "runner_labels": [
+              "ubuntu-latest"
+            ]
+          },
+          {
+            "name": "coverage",
+            "check_run_id": 139098482009,
+            "status": "completed",
+            "conclusion": "success",
+            "started_at_utc": "2026-11-25T09:13:11Z",
+            "completed_at_utc": "2026-11-25T09:18:02Z",
+            "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098482009",
+            "runner_labels": [
+              "ubuntu-latest"
+            ]
+          },
+          {
+            "name": "board",
+            "check_run_id": 139098481489,
+            "status": "completed",
+            "conclusion": "success",
+            "started_at_utc": "2026-11-25T09:13:13Z",
+            "completed_at_utc": "2026-11-25T09:16:14Z",
+            "fixed_job_url": "https://github.com/pollen-robotics/microduck/actions/runs/45473208883/job/139098481489",
+            "runner_labels": [
+              "ubuntu-24.04-arm"
+            ]
+          }
+        ],
+        "training_integrity_python_tests_passed": 12,
+        "training_integrity_scope": "Standard-library dataset discovery, manifest, session split and metric helpers. Full private-audio training and PyTorch/ONNX export parity smoke were not CI steps.",
+        "coverage_lines_percent": 72.97,
+        "coverage_scope": "Workspace line coverage; xtask excluded by the workflow. Not model accuracy or generalization.",
+        "board_scope": "ARM64 ubuntu-24.04-arm runner; zig aarch64 GNU build and Debian trixie-slim containers execute board-test.sh software checks. Not physical robot acceptance or replica original-card dependency compatibility.",
+        "board_source_url": "https://github.com/pollen-robotics/microduck/blob/d094639bdf382576379eb3bf14769d9dc9886f96/scripts/board-test.sh",
+        "source_changed_since_previous_observation": false,
+        "new_model_weights": false,
+        "pr_merged": false,
+        "included_in_formal_release": false,
+        "replica_integrated": false,
+        "tracker_ran_tests_or_builds": false,
+        "tracker_downloaded_ci_program_artifacts": false,
+        "tracker_connected_robot": false
+      }
     }
   ],
   "replica_public_image": {
