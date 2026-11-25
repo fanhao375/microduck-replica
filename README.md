@@ -22,6 +22,8 @@
 
 **接线图（3D，可旋转，逐步高亮）：** [在线查看](https://fanhao375.github.io/microduck-replica/wiring3d/)。电池 → 香蕉板 → HUB → 腿 / 头 / IMU，摄像头、ToF、扬声器、HAT 各接口，按步骤看清每根线接哪里。
 
+**动作库（动作广场）：** [在线查看](https://fanhao375.github.io/microduck-replica/motion-plaza/)。鸭子能做的 8 个动作，每个都有仿真预览、来源和许可，能直接下载动作包；在 Studio 的「动作」页导入，点播放就做、还能绑到手柄键上。
+
 ## 鸭子现在的样子
 
 **2026-10-24 · 实机运动验证通过**：下方两段实拍视频分别展示前滚翻后起身和桌面行走。
@@ -149,6 +151,18 @@
 **[按主板下载镜像](#按主板下载镜像)** · **[首次使用指南](docs/上手指南/README.md)** · **[Studio 说明](software/studio/README.md)**
 
 镜像免费，仅供个人非商业复刻；各部分许可见发布页。摄像头默认测试源，真实摄像头和 ToF 的验证范围见本版说明。
+
+---
+
+## 🕺 动作库 · 动作广场
+
+鸭子能做的动作都放在 **[动作广场](https://fanhao375.github.io/microduck-replica/motion-plaza/)**：每个动作有仿真预览、关键帧、来源和许可，能直接下载动作包。现在收录 8 个：出厂的前滚翻、踢左脚、踢右脚、捡东西、坐下 / 站起，加上走路、深蹲和群友投稿的抖一抖；还在训练的动作也列在「在路上」里。
+
+<p align="center"><a href="https://fanhao375.github.io/microduck-replica/motion-plaza/"><img src="assets/motion-plaza-20261125.webp" alt="Microduck 动作广场：首页和全部动作，自动横滑" width="920"></a><br><sub>首页和「全部动作」自动轮换，点图进入动作广场</sub></p>
+
+下载的动作包在鸭子上的 **Studio →「动作」页** 导入（2026.11.25 及以后的软件）：点播放让鸭子做一次，点键帽把它绑到手柄键上。自己训练的动作也能投稿，流程见动作广场的「投稿」。
+
+**[打开动作广场](https://fanhao375.github.io/microduck-replica/motion-plaza/)** · [全部动作](https://fanhao375.github.io/microduck-replica/motion-plaza/#all) · [Studio 动作页说明](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.25/software/studio/MODEL_IMPORT.md)
 
 ---
 

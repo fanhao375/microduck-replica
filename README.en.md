@@ -22,6 +22,8 @@ Match the full model printed on the board before downloading. **Radxa ZERO 3W** 
 
 **Wiring diagram (3D, rotatable, step-by-step highlight):** [open online](https://fanhao375.github.io/microduck-replica/wiring3d/). Battery → banana board → HUB → legs / head / IMU, plus the camera, ToF, speaker and every HAT connector, so you can see exactly where each wire goes.
 
+**Motion library (motion plaza):** [open online (Chinese)](https://fanhao375.github.io/microduck-replica/motion-plaza/). The 8 motions the duck can do, each with a simulated preview, source and license, plus a downloadable motion package. Import it on the Studio Motions page, then play it or bind it to a gamepad button.
+
 ## The ducks in action
 
 **2026-10-24 · Motion validated on real hardware**: the two recordings below show a forward roll followed by standing back up, and walking on a tabletop.
@@ -149,6 +151,18 @@ As of **2026-10-25**, **the Feetech replica, first-use workflow and robot motion
 **[Download the image for your board](#download-the-image-for-your-board)** · **[First-use guide](docs/上手指南/README.md)** · **[Studio documentation](software/studio/README.md)**
 
 The image is free for personal non-commercial builds; see the release for component licences. Camera input defaults to a test source; see the release notes for physical camera and ToF verification limits.
+
+---
+
+## 🕺 Motion library · Motion plaza
+
+Every motion the duck can do is on the **[motion plaza (Chinese)](https://fanhao375.github.io/microduck-replica/motion-plaza/)**, with a simulated preview, key frames, source and license, plus a downloadable motion package. It lists 8 motions: the factory roll, left kick, right kick, ground pick and sit / stand, plus walking, a squat and a community-contributed shimmy. Motions still in training are listed as well.
+
+<p align="center"><a href="https://fanhao375.github.io/microduck-replica/motion-plaza/"><img src="assets/motion-plaza-20261125.webp" alt="Microduck motion plaza: home page and all motions, sliding" width="920"></a><br><sub>The home page and the full motion list slide in turn; click to open the plaza</sub></p>
+
+Import a downloaded package on the duck in **Studio → Motions** (software 2026.11.25 or later): play it once, or click a keycap to bind it to a gamepad button. You can also submit your own trained motions; see the plaza's submission section.
+
+**[Open the motion plaza](https://fanhao375.github.io/microduck-replica/motion-plaza/)** · [All motions](https://fanhao375.github.io/microduck-replica/motion-plaza/#all) · [Studio motion import notes (Chinese)](https://github.com/fanhao375/microduck-replica/blob/microduck-software-v2026.11.25/software/studio/MODEL_IMPORT.md)
 
 ---
 
