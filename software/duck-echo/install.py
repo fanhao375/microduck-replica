@@ -11,6 +11,10 @@ import sys
 
 BASE = Path(__file__).resolve().parent
 STATE = Path('/var/lib/duck-echo')
+SOURCE_FILE = Path('/var/lib/microduck-studio/microphone-source.json')
+MICROPHONE_SOURCES = ('onboard', 'external', 'both')
+ONBOARD_CONTROLS = ('Right PGA Mixer Mic3R Switch', 'Right PGA Mixer Mic2R Switch')
+EXTERNAL_CONTROL = 'Right PGA Mixer Line1L Switch'
 DESTINATION = Path('/opt/duck-echo')
 UNIT = Path('/etc/systemd/system/duck-echo.service')
 DEFAULTS = Path('/etc/default/duck-echo')
@@ -58,13 +62,90 @@ def mixer(card, action, name, value=None):
     return match[1].strip()
 
 
+def mixer_controls(card):
+    listing = run(['amixer', '-c', card, 'controls']).stdout
+    return set(re.findall(r"name='([^']+)'", listing))
+
+
+def onboard_control(names):
+    return next((name for name in ONBOARD_CONTROLS if name in names), None)
+
+
+class MicrophoneRoutes:
+    """Select the analog inputs to the right ADC. Studio owns the preference."""
+    def __init__(self, card, path=SOURCE_FILE):
+        self.card = card
+        self.path = Path(path)
+        self.source = None
+
+    @classmethod
+    def for_capture(cls, device, channel):
+        match = re.fullmatch(r'(?:plug)?hw:(?:CARD=)?([A-Za-z0-9_-]+)(?:,(?:DEV=)?\d+)?', device)
+        if channel == 1 and match:
+            return cls(match[1])
+        return None
+
+    def restore(self):
+        try:
+            with self.path.open('rb') as stream:
+                raw = stream.read(257)
+        except FileNotFoundError:
+            source = 'onboard'
+        else:
+            if len(raw) > 256:
+                raise ValueError('invalid saved microphone source')
+            preference = json.loads(raw)
+            if not isinstance(preference, dict) or set(preference) != {'source'}:
+                raise ValueError('invalid saved microphone source')
+            source = preference['source']
+        self.select(source)
+
+    def select(self, source):
+        if source not in MICROPHONE_SOURCES:
+            raise ValueError('invalid microphone source')
+        self.source = None
+        names = mixer_controls(self.card)
+        onboard = onboard_control(names)
+        if onboard is None:
+            raise RuntimeError('onboard AIC3x microphone control unavailable')
+        desired = {onboard: 'off' if source == 'external' else 'on'}
+        if EXTERNAL_CONTROL in names:
+            desired[EXTERNAL_CONTROL] = 'off' if source == 'onboard' else 'on'
+        current = {n: mixer(self.card, 'cget', n) for n in desired}
+        observed = (current[onboard], current.get(EXTERNAL_CONTROL, 'off'))
+        self.source = {('on', 'off'): 'onboard', ('off', 'on'): 'external',
+                       ('on', 'on'): 'both'}.get(observed)
+        if source != 'onboard' and EXTERNAL_CONTROL not in names:
+            raise RuntimeError('external J2 Line1L control unavailable')
+        changed = []
+        try:
+            for name, value in desired.items():
+                if current[name] == value:
+                    continue
+                changed.append(name)
+                if mixer(self.card, 'cset', name, value) != value:
+                    raise RuntimeError('microphone switch readback mismatch: ' + name)
+            if changed and any(mixer(self.card, 'cget', n) != v for n, v in desired.items()):
+                raise RuntimeError('microphone route verification failed')
+        except Exception:
+            failed = []
+            for name in reversed(changed):
+                try:
+                    if mixer(self.card, 'cset', name, current[name]) != current[name]:
+                        failed.append(name)
+                except (OSError, RuntimeError, subprocess.SubprocessError):
+                    failed.append(name)
+            if failed:
+                self.source = None
+                raise RuntimeError('microphone route rollback failed: ' + ', '.join(failed))
+            raise
+        self.source = source
+
+
 def prepare_microphone(card, backup):
     # Read every control BEFORE changing any; abort cleanly for a different codec.
-    listing = run(['amixer', '-c', card, 'controls']).stdout
-    names = set(re.findall(r"name='([^']+)'", listing))
-    microphone = next((name for name in (
-        'Right PGA Mixer Mic3R Switch', 'Right PGA Mixer Mic2R Switch',
-    ) if name in names), None)
+    names = mixer_controls(card)
+    microphone = onboard_control(names)
     if microphone is None or not {'PGA Capture Switch', 'PGA Capture Volume'} <= names:
         raise RuntimeError('known AIC3x right microphone controls not found; mixer left unchanged')
     settings = {name: 'off' for name in sorted(names)

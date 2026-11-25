@@ -258,6 +258,83 @@ class CaptureProcess:
 
 
 class ContinuousTests(unittest.TestCase):
+    def test_switch_while_off_does_not_start_capture_or_play_a_cue(self):
+        self.assertTrue(hasattr(self.audio, 'change_microphone'), 'source transition missing')
+        applied = []
+        self.audio.activation_cue = lambda *_: self.fail('unexpected activation')
+        self.audio.change_microphone(SimpleNamespace(select=applied.append), 'external')
+        self.assertEqual(applied, ['external'])
+        self.assertEqual(self.processes, [])
+        self.assertFalse(self.audio.active)
+
+    def test_switch_invalidates_inflight_recognition_and_restarts_active_capture_without_cue(self):
+        from speech_control import VoiceControl
+        self.assertTrue(hasattr(self.audio, 'change_microphone'), 'source transition missing')
+        entered, release = threading.Event(), threading.Event()
+        actions = []
+        class Recognizer:
+            def recognize(self, data):
+                entered.set()
+                release.wait(2)
+                return {'text': '坐下', 'confidence': 1}
+        voice = VoiceControl(Recognizer, SimpleNamespace(execute=lambda *a, **kw: actions.append('sit')), self.audio.play)
+        self.audio.voice = voice
+        self.addCleanup(voice.close)
+        self.addCleanup(release.set)
+        process = self.start()
+        self.feed_phrase(process)
+        self.assertTrue(entered.wait(1))
+        old = self.audio.generation
+        cues = []
+        self.audio.activation_cue = self.audio.deactivation_cue = lambda *_: cues.append(True)
+        def apply(source):
+            release.set()
+            self.assertTrue(voice.idle.wait(1))
+            self.audio.feed(pcm(.4), old)
+            self.audio.play(b'stale playback')
+        self.audio.change_microphone(SimpleNamespace(select=apply), 'both')
+        self.assertTrue(eventually(lambda: len(self.processes) == 2))
+        self.assertTrue(self.audio.active)
+        self.assertIsNotNone(process.poll())
+        self.assertEqual((actions, cues), ([], []))
+        self.assertFalse(self.backend.played.is_set())
+
+    def test_level_uses_live_right_adc_ac_samples_in_voice_and_music_and_expires(self):
+        self.assertTrue(hasattr(self.audio, 'microphone_level_dbfs'), 'live microphone level missing')
+        self.assertIsNone(self.audio.microphone_level_dbfs)
+        self.start()
+        for music in (False, True):
+            self.audio.set_music(music)
+            self.audio.feed(measured_pcm(.12, amplitude=8192, dc=5000))
+            self.assertAlmostEqual(self.audio.microphone_level_dbfs, -15.05, delta=.3)
+            self.audio.feed(pcm(.12, right=0, left=25000))
+            self.assertEqual(self.audio.microphone_level_dbfs, -96)
+        self.now[0] += 1
+        self.assertIsNone(self.audio.microphone_level_dbfs)
+        self.audio.stop()
+        self.assertIsNone(self.audio.microphone_level_dbfs)
+
+    def test_switch_preserves_music_and_concurrent_stop_wins(self):
+        self.assertTrue(hasattr(self.audio, 'change_microphone'), 'source transition missing')
+        self.start()
+        self.audio.set_music(True)
+        self.audio.change_microphone(SimpleNamespace(select=lambda source: None), 'both')
+        self.assertTrue(self.audio.active and self.audio.music_mode)
+        switching, release = threading.Event(), threading.Event()
+        def apply(source):
+            switching.set()
+            release.wait(1)
+        worker = threading.Thread(target=self.audio.change_microphone, args=(SimpleNamespace(select=apply), 'external'))
+        worker.start()
+        self.assertTrue(switching.wait(1))
+        off = threading.Thread(target=self.audio.stop)
+        off.start()
+        self.assertTrue(eventually(lambda: not self.audio.active))
+        release.set()
+        worker.join(1)
+        off.join(1)
+        self.assertFalse(self.audio.active or self.audio.music_mode)
+
     def test_update_blocks_r3_activation_and_cancels_active_feed(self):
         blocked=[True];self.audio.guard=lambda:not blocked[0]
         button=continuous.ToggleButton(self.audio);button.event(1)

@@ -53,6 +53,8 @@ from .state import summarize
 from .pad import Refused as PadRefused, robot_view  # 手柄页
 from .ai_connections import AiError
 from .ai_service import AiService
+from .audio_interaction import MICROPHONE_SOURCES, microphone_request
+from .microphone_settings import MicrophoneSettings
 from .maintenance import make_handler
 from .updates import Updates, UpdateError, handle as handle_updates, safe_during_update
 
@@ -91,7 +93,8 @@ class HostGuard:
         self.app, self.guard, self.log = app, guard, log
 
     async def __call__(self, scope, receive, send):
-        if scope['type'] == 'http' and (scope.get('path') == '/api/ai' or scope.get('path','').startswith('/api/updates')):
+        if scope['type'] == 'http' and (scope.get('path') in ('/api/ai', '/api/microphone')
+                                       or scope.get('path','').startswith('/api/updates')):
             original_send = send
             async def private_send(message):
                 if message['type'] == 'http.response.start':
@@ -190,6 +193,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
               sensor_auto=None, ca_cert=None):
     guard = OriginGuard(names=names)
     ai = AiService(state_dir)
+    microphone_settings = MicrophoneSettings(state_dir or getattr(auth, 'dir', None))
     updates = updates or Updates()
     if pad is not None:
         pad.update_guard=updates.installing
@@ -272,6 +276,45 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         return guard.origin_ok(conn.headers.get("origin"), conn.headers.get("host", ""))
 
     # ---- HTTP ----
+
+    async def read_microphone(message):
+        return await asyncio.to_thread(microphone_request, message)
+
+    async def api_microphone(request):
+        def error(reason, status):
+            return JSONResponse({'ok': False, 'error': reason}, status_code=status)
+
+        _, sess = session_of(request)
+        if not sess:
+            return error('请先登录。', 401)
+        write = request.method == 'POST'
+        if (request.headers.get('x-csrf') != sess['csrf'] or
+                ((write or 'origin' in request.headers) and not origin_ok(request))):
+            return error('请求校验失败，请刷新页面再试。', 403)
+        if write:
+            try:
+                body = json.loads(await limited_body(request, 1024))
+            except OverflowError:
+                return error('麦克风请求过大。', 413)
+            except (ValueError, RecursionError):
+                return error('麦克风请求格式不正确。', 400)
+            if not isinstance(body, dict) or set(body) != {'source'} or body['source'] not in MICROPHONE_SOURCES:
+                return error('请选择有效的麦克风输入源。', 400)
+            if updates.installing():
+                return error('软件更新正在进行，请等待完成。', 409)
+        try:
+            if write:
+                task = asyncio.current_task()
+                update_commands.add(task)
+                try:
+                    data = await microphone_settings.apply(body['source'], read_microphone)
+                finally:
+                    update_commands.discard(task)
+            else:
+                data = await read_microphone({'method': 'status'})
+            return JSONResponse({'ok': True, 'data': data})
+        except (RuntimeError, ValueError, OSError) as exc:
+            return error(str(exc), 503)
 
     async def api_updates(request):
         try:
@@ -1790,6 +1833,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         Route("/healthz", healthz),
         Route("/api/session", api_session),
         Route("/api/ai", api_ai, methods=["GET", "POST"]),
+        Route("/api/microphone", api_microphone, methods=["GET", "POST"]),
         Route('/api/updates',api_updates,methods=['GET','POST']),
         Route('/api/updates/upload',api_updates,methods=['POST']),
         Route("/api/login", api_login, methods=["POST"]),

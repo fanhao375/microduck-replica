@@ -209,6 +209,29 @@ class PlaybackTests(unittest.TestCase):
 
 
 class TriggerModeTests(unittest.TestCase):
+    def setUp(self):
+        # CLI wiring tests simulate Linux on the host and never access its mixer.
+        restore = patch('install.MicrophoneRoutes.restore')
+        restore.start()
+        self.addCleanup(restore.stop)
+
+    def test_daemon_restores_preference_on_configured_alsa_card_before_serving(self):
+        import install
+        restored = []
+        def restore(routes):
+            restored.append(routes.card)
+            routes.source = 'both'
+        def serve(server, *args):
+            self.assertEqual(restored, ['TestCard'])
+            self.assertEqual(server.control.status()['microphone_source'], 'both')
+            self.assertFalse(server.control.status()['listening'])
+        with patch.object(install.MicrophoneRoutes, 'restore', restore), \
+                patch.object(echo.sys, 'platform', 'linux'), patch.object(echo, 'daemon'), \
+                patch.object(echo.signal, 'signal'), patch.object(echo.logging, 'basicConfig'), \
+                patch('audio_control.AudioControlServer.start', serve), \
+                patch('speech_control.MandarinRecognizer'):
+            self.assertEqual(echo.main(['daemon', '--capture-device', 'plughw:CARD=TestCard,DEV=0']), 0)
+
     def test_daemon_default_discards_unknown_pcm_and_explicit_echo_restores_replay(self):
         import continuous_audio
         for options, should_play in (([], False), (['--reply-mode', 'echo'], True)):

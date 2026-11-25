@@ -13,6 +13,7 @@ import { ImuPage } from './imu.js';
 import { PadPage, padActivity, padGo } from './pad.js';
 import { BatteryCell } from './battery.js';
 import { BatterySettings } from './settings-battery.js';
+import { MicrophoneSettings } from './settings-microphone.js';
 import { AiSettings } from './settings-ai.js';
 import { UpdateNotice, UpdateSettings } from './settings-updates.js';
 import { AccessGuide, AiSshEntry } from './settings-access.js';
@@ -141,6 +142,7 @@ let csrf = '';   // /api/session 给的；改动类 POST 要带上（X-CSRF）�
 async function api(path, body, timeoutMs = 10000, signal) {
   const opt = body === undefined ? { credentials: 'same-origin' }
     : { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF': csrf }, body: JSON.stringify(body) };
+  if (path === '/api/microphone' && body === undefined) opt.headers = { 'X-CSRF': csrf };
   const ctl = new AbortController();
   const abort = () => ctl.abort();
   if (signal?.aborted) ctl.abort();
@@ -781,6 +783,7 @@ function Settings({ st, tune }) {
     <${AiSshEntry} />
     <${UpdateSettings} api=${api} csrf=${csrf} />
     <${AiSettings} api=${api} />
+    <${MicrophoneSettings} api=${api} />
     <div class="board" style="padding:16px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
       <span style="font-size:15px;font-weight:600;flex:1">日志和诊断</span>
       <a class="settings-logs" href="#/logs" style="font-size:15px">日志</a>

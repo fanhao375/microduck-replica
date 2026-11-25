@@ -296,7 +296,7 @@ export function openPadArea(link) {
   return link.cmd('pad.op', { op: 'drive', open: true }, 8000);
 }
 
-/** 开 / 关板载聆听。被「回到手柄区」拒了就补一次 open 再重试一次 */
+/** 开 / 关鸭子监听。被「回到手柄区」拒了就补一次 open 再重试一次 */
 export async function setAudio(link, values, tries = 2) {
   for (let i = 0; i < tries; i++) {
     const r = await link.cmd('pad.op', { op: 'audio', ...values }, 12000);
@@ -304,7 +304,7 @@ export async function setAudio(link, values, tries = 2) {
     if (!PAD_AREA_WHY.test(String(r.reason || r.error || '')) || i === tries - 1) return r;
     await openPadArea(link);
   }
-  return { ok: false, reason: '板载语音没切换成功' };
+  return { ok: false, reason: '鸭子的监听开关没切换成功' };
 }
 
 // ---------------- 一句话 → 动作 ----------------

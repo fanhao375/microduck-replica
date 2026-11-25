@@ -58,6 +58,33 @@ elif kind == 'amixer':
 
 @unittest.skipUnless(os.name == 'posix', 'Linux subprocess integration')
 class LinuxAlsaTests(unittest.TestCase):
+    def test_private_socket_switches_both_physical_inputs_with_listening_off(self):
+        from audio_control import AudioControl, AudioControlServer
+        from install import CAPTURE_SETTINGS, MicrophoneRoutes
+        hardware = self.root / 'mixer.json'
+        hardware.write_text(json.dumps(CAPTURE_SETTINGS))
+        routes = MicrophoneRoutes('aic3104', self.root / 'microphone-source.json')
+        routes.restore()
+        audio = self.continuous()
+        server = AudioControlServer(AudioControl(audio, SimpleNamespace(snapshot=lambda: {}), routes),
+                                    self.root / 'control.sock')
+        server.start()
+        self.addCleanup(server.close)
+        for source, mic, line in [('external', 'off', 'on'), ('both', 'on', 'on'), ('onboard', 'on', 'off')]:
+            with socket.socket(socket.AF_UNIX) as client:
+                client.settimeout(5)
+                client.connect(str(server.path))
+                client.sendall((json.dumps({'method': 'microphone', 'source': source}) + '\n').encode())
+                reply = json.loads(client.recv(8192))
+            self.assertTrue(reply['ok'], reply)
+            self.assertEqual(reply['status']['microphone_source'], source)
+            self.assertIsNone(reply['status']['microphone_level_dbfs'])
+            self.assertFalse(reply['status']['listening'])
+            self.assertIsNone(audio.capture)
+            state = json.loads(hardware.read_text())
+            self.assertEqual((state['Right PGA Mixer Mic3R Switch'], state['Right PGA Mixer Line1L Switch']), (mic, line))
+        self.assertFalse(self.playback.exists())
+
     def test_music_query_answers_during_unbroken_fake_capture_and_ipc_off_cancels(self):
         from audio_control import AudioControl, AudioControlServer
         from music_interaction import MusicInteraction

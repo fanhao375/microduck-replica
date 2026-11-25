@@ -122,6 +122,16 @@ button:disabled { cursor: default; }
 /* ---- 白板 ---- */
 .board { background: var(--board); border-radius: var(--radius-board); box-shadow: inset 0 0 0 1px var(--board-edge); }
 
+.microphone-settings { padding: 16px 20px; }
+.microphone-settings h2 { margin: 0 0 10px; font-size: 16px; }
+.microphone-sources { display: flex; flex-wrap: wrap; gap: 6px; }
+.microphone-sources button { min-height: 36px; padding: 5px 12px; border: 1px solid var(--board-edge); border-radius: 9px; background: var(--page); color: var(--text); font-size: 14px; }
+.microphone-sources button[aria-pressed=true] { background: var(--blue); color: white; }
+.microphone-sources button:disabled { opacity: .6; }
+.microphone-settings p, .microphone-settings details { margin: 8px 0 0; font-size: 13px; color: var(--text-2); }
+.microphone-settings [role=alert] { color: var(--danger); overflow-wrap: anywhere; }
+.microphone-settings summary { color: var(--link); cursor: pointer; }
+
 /* ---- 舞台 ---- */
 .stage { position: relative; border-radius: var(--radius-stage); overflow: hidden; background: var(--stage-bg); box-shadow: var(--stage-edge); color: var(--stage-fg); }
 .stage-ov { height: 416px; }

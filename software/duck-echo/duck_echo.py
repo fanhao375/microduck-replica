@@ -475,6 +475,16 @@ def main(argv=None):
     signal.signal(signal.SIGTERM, lambda *_: stopped.set())
     signal.signal(signal.SIGINT, lambda *_: stopped.set())
     audio = AlsaAudio(args.capture_device, args.playback_device, args.channel, args.pitch, args.maximum)
+    routes, route_error = None, None
+    if args.action == 'daemon':
+        from install import MicrophoneRoutes
+        routes = MicrophoneRoutes.for_capture(args.capture_device, args.channel)
+        if routes is not None:
+            try:
+                routes.restore()
+            except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+                route_error = 'microphone: ' + str(error)
+                LOG.warning('could not restore microphone route: %s', error)
     toggle_daemon = args.action == 'daemon' and args.trigger_mode == 'toggle'
     if toggle_daemon:
         from continuous_audio import ContinuousAudio
@@ -515,7 +525,7 @@ def main(argv=None):
                     feel.feed(raw, timestamp)
                     audio.music.feed(raw, timestamp)
             audio.observer = observe
-            control_server = AudioControlServer(AudioControl(audio, feel), args.control_socket)
+            control_server = AudioControlServer(AudioControl(audio, feel, routes, route_error), args.control_socket)
             control_server.start()
         if args.action == 'daemon':
             daemon(audio, stopped, args.input, trigger_mode=args.trigger_mode)

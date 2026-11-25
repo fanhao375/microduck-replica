@@ -7,6 +7,7 @@ import threading
 import time
 
 HEAD_ZERO = {'neck_pitch': 0., 'head_pitch': 0., 'head_yaw': 0., 'head_roll': 0.}
+MICROPHONE_SOURCES = ('onboard', 'external', 'both')
 
 
 def _number(value, lo, hi):
@@ -15,14 +16,31 @@ def _number(value, lo, hi):
     return value
 
 
+def _microphone_fields(value):
+    source, level = value.get('microphone_source'), value.get('microphone_level_dbfs')
+    if source is not None and source not in MICROPHONE_SOURCES:
+        raise ValueError('invalid microphone source')
+    if level is not None:
+        _number(level, -96., 0.)
+    listening, error = value.get('listening'), value.get('error')
+    if type(listening) is not bool:
+        raise ValueError('invalid listening state')
+    if error is not None and (not isinstance(error, str) or len(error) > 240):
+        raise ValueError('invalid audio error')
+    return {'microphone_source': source, 'microphone_level_dbfs': level if listening else None,
+            'listening': listening, 'error': error}
+
+
 def validate_status(value):
-    if not isinstance(value, dict) or set(value)-{'listening','music','rhythm','error','runtime_root','voice_ready','last'}:
+    if not isinstance(value, dict) or set(value)-{'listening','music','rhythm','error','runtime_root','voice_ready','last',
+                                                  'microphone_source','microphone_level_dbfs'}:
         raise ValueError('invalid audio status fields')
+    _microphone_fields(value)
     if 'voice_ready' in value and type(value['voice_ready']) is not bool:
         raise ValueError('invalid voice readiness')
     if 'runtime_root' in value and (not isinstance(value['runtime_root'],str) or len(value['runtime_root'])>512):
         raise ValueError('invalid voice runtime')
-    if type(value.get('listening')) is not bool or type(value.get('music')) is not bool:
+    if type(value.get('music')) is not bool:
         raise ValueError('invalid audio switches')
     rhythm = value.get('rhythm')
     if not isinstance(rhythm, dict) or set(rhythm)-{'bpm','confidence','feel','last_beat','age','level'}:
@@ -35,9 +53,6 @@ def validate_status(value):
     for name in ('last_beat','age','level'):
         if rhythm.get(name) is not None:
             _number(rhythm[name], 0, 1e12)
-    error = value.get('error')
-    if error is not None and (not isinstance(error,str) or len(error)>240):
-        raise ValueError('invalid audio error')
     # 「最近一次认出的指令」（新版 duck-echo 才有）。只带指令名、成没成、失败原因、
     # 多久之前、第几次：整句原话不落这里，所以校验也只放这几样
     last = value.get('last')
@@ -59,10 +74,10 @@ def validate_status(value):
     return copy.deepcopy(value)
 
 
-def audio_request(message, path='/run/duck-echo/control.sock'):
+def audio_request(message, path='/run/duck-echo/control.sock', timeout=.4):
     encoded = json.dumps(message,allow_nan=False,separators=(',',':')).encode()+b'\n'
     with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as connection:
-        connection.settimeout(.4)
+        connection.settimeout(timeout)
         connection.connect(path)
         connection.sendall(encoded)
         data = bytearray()
@@ -74,6 +89,30 @@ def audio_request(message, path='/run/duck-echo/control.sock'):
             if len(data)>8192:
                 raise ValueError('audio response too large')
         return json.loads(bytes(data).split(b'\n',1)[0])
+
+
+def microphone_request(message):
+    """Return only settings-page fields. A mode must be confirmed before saving it."""
+    try:
+        reply = audio_request(message, timeout=5. if message['method'] == 'microphone' else .4)
+        if not isinstance(reply, dict):
+            raise ValueError()
+        if reply.get('ok') is not True:
+            reason = reply.get('error')
+            raise RuntimeError(reason[:240] if isinstance(reason, str) and reason else '语音服务未完成请求')
+        status = reply.get('status')
+        if not isinstance(status, dict):
+            raise ValueError()
+        if 'microphone_source' not in status:
+            raise RuntimeError('当前语音服务未报告麦克风输入源，请更新控制器软件。')
+        data = _microphone_fields(status)
+        if message['method'] == 'microphone' and data['microphone_source'] != message['source']:
+            raise RuntimeError(data['error'] or '语音服务未确认所选输入源，请查看当前状态。')
+        return data
+    except OSError:
+        raise RuntimeError('连接不到语音服务，请检查 duck-echo。') from None
+    except (ValueError, RecursionError, OverflowError):
+        raise RuntimeError('语音服务返回的麦克风状态无效。') from None
 
 
 class AudioClient:

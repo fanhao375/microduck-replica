@@ -62,6 +62,7 @@ class PcmSegmenter:
         self.reset()
 
     def reset(self):
+        self.level_dbfs = None
         self.partial = bytearray()
         self.phrase = bytearray()
         self.quiet = 0
@@ -73,7 +74,7 @@ class PcmSegmenter:
     def buffered_bytes(self):
         return len(self.partial) + len(self.phrase) + sum(map(len, self.pre_roll))
 
-    def feed(self, data):
+    def feed(self, data, detect_speech=True):
         phrases = []
         # Never retain an unbounded source chunk, even with a non-ALSA source.
         for offset in range(0, len(data), self.window_bytes):
@@ -86,6 +87,9 @@ class PcmSegmenter:
                 # output suppression. Do not put that transient in pre-roll.
                 if self.startup_bytes > 0:
                     self.startup_bytes -= len(selected)
+                    continue
+                self.level_dbfs = max(-96., min(0., level['dbfs']))
+                if not detect_speech:
                     continue
                 voiced = level['rms'] >= self.noise_floor * 2.5
                 if not self.phrase and not voiced:
@@ -139,6 +143,8 @@ class ContinuousAudio:
         self.voice = None
         self.music = None
         self.music_mode = False
+        self.switching_source = False
+        self.level_at = None
         self.activation_cue = None
         self.deactivation_cue = None
         self.deactivation_pending = None
@@ -200,6 +206,43 @@ class ContinuousAudio:
         with self.condition:
             return self.failed
 
+    @property
+    def microphone_level_dbfs(self):
+        with self.condition:
+            if self.active and self.level_at is not None and self.clock() - self.level_at <= .6:
+                return self.segmenter.level_dbfs
+            return None
+
+    def change_microphone(self, routes, source):
+        # Invalidate everything made from the previous route before it changes.
+        # A new arecord instance discards old samples buffered in ALSA/the pipe.
+        with self.dispatch_lock:
+            with self.condition:
+                self.switching_source = True
+                self._invalidate()
+                self.segmenter.noise_floor = self.segmenter.minimum_noise
+                if self.capture_stop is not None:
+                    self.capture_stop.set()
+                self.stop_output = True
+                self.condition.notify_all()
+            try:
+                if self.voice is not None:
+                    self.voice.cancel()
+                if self.music is not None:
+                    self.music.cancel()
+                routes.select(source)
+            except Exception:
+                if routes.source is None:
+                    with self.condition:
+                        self.active = self.music_mode = False
+                    if self.music is not None:
+                        self.music.set_enabled(False)
+                raise
+            finally:
+                with self.condition:
+                    self.switching_source = False
+                    self.condition.notify_all()
+
     def cancel_processing(self):
         with self.condition:
             generation = self._invalidate()
@@ -227,6 +270,7 @@ class ContinuousAudio:
 
     def _invalidate(self):
         self.generation += 1
+        self.level_at = None
         self.pending = None
         self.activation_pending = self.activation_inflight = None
         self.deactivation_pending = None
@@ -294,28 +338,33 @@ class ContinuousAudio:
         """Feed captured PCM; this is also the future single-source analysis hook."""
         if not self.guard():self.stop(play=False);return
         with self.condition:
-            if not self.active or (generation is not None and generation != self.generation):
+            if not self.active or self.switching_source or (generation is not None and generation != self.generation):
                 return
             if self._suppressed():
                 self.segmenter.reset()
                 return
-            if not self.music_mode:
-                for phrase in self.segmenter.feed(data):
-                    self.pending = ('phrase', self.generation, phrase)
-                    self.condition.notify_all()
+            for phrase in self.segmenter.feed(data, detect_speech=not self.music_mode):
+                self.pending = ('phrase', self.generation, phrase)
+                self.condition.notify_all()
             observer, timestamp = self.observer, self.clock()
+            self.level_at = timestamp
+            session, mode = self.generation, self.mode_generation
         # Observers must be quick in-memory consumers. They never run under the
         # capture lock and never receive output-contaminated or inactive input.
         if observer is not None:
-            try:
-                observer(data, timestamp)
-            except Exception:
-                LOG.exception('PCM observer failed')
+            with self.dispatch_lock:
+                with self.condition:
+                    if not self.active or session != self.generation or mode != self.mode_generation:
+                        return
+                try:
+                    observer(data, timestamp)
+                except Exception:
+                    LOG.exception('PCM observer failed')
 
     def play(self, data):
         if not self.guard():return
         with self.condition:
-            if self.active and not self.closed:
+            if self.active and not self.closed and not self.switching_source:
                 self.output_pending = True
                 self.segmenter.reset()
                 self.pending = ('play', self.generation, data)
@@ -425,7 +474,7 @@ class ContinuousAudio:
     def _capture_loop(self):
         while True:
             with self.condition:
-                while not self.active and not self.closed:
+                while (not self.active or self.switching_source) and not self.closed:
                     self.condition.wait()
                 if self.closed:
                     return

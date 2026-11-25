@@ -14,7 +14,7 @@
 
 实际手柄为 Nintendo Switch Pro Controller，输入设备 /dev/input/event4。安装前后 robotd PID 1090、padd PID 1128 及启动时间均未变化，控制环保持 50 Hz。已设置服务 enabled，未为此重启整机；已配对手柄开机回连后，复读服务会自动检测。
 
-适用硬件：64 位 Linux、TLV320AIC3104 HAT、已有正常的喇叭播放通路、支持 BTN_THUMBR 的实体手柄。采集的是项目初始化脚本使用的 Mic3R（右声道）。不支持网页模拟手柄的 R3。
+适用硬件：64 位 Linux、TLV320AIC3104 HAT、已有正常的喇叭播放通路、支持 BTN_THUMBR 的实体手柄。默认使用板载 Mic3R。外接 J2 使用 Line1L，两路可以分别选用或同时混入右 ADC（`--channel 1`）。J2 选项需要声卡提供 `Right PGA Mixer Line1L Switch`。不支持网页模拟手柄的 R3。
 
 ## 听音乐与明确提问（已上机，外放与动作效果待验收）
 
@@ -24,7 +24,9 @@
 
 连续采集请求 20 毫秒 period、80 毫秒 buffer；节拍时间按样本推进，避免驱动成批送达造成节奏失真。重复性估计只保留有限数值包络，每秒最多计算五次，状态读取复用缓存。平滑音乐通常需要数秒重复证据；没有清晰重复、声音停止或采集过期时不生成节拍。稳定读数只是音量包络的周期估计，强弱拍、倍速及混合节奏仍可能存在歧义；不同证据冲突时优先较强支持，不能保证唯一的音乐拍点。
 
-仅 toggle 模式提供私有 `/run/duck-echo/control.sock`（目录 0700、socket 0600）。每连接一条 UTF-8 JSON 行，最多 8192 字节，只支持 `{"method":"status"}` 或 `{"method":"set","listening":true,"music":true}`；布尔值必须是 JSON true/false。返回监听、音乐、节奏和短故障信息，不提供录音、转写或任意机器人命令。服务重启默认关闭。hold 保留旧的按住说话行为，没有网页音乐控制 socket。
+仅 toggle 模式提供私有 `/run/duck-echo/control.sock`（目录 0700、socket 0600）。每连接一条 UTF-8 JSON 行，最多 8192 字节。`{"method":"status"}` 读取状态，`{"method":"set","listening":true,"music":true}` 调整开关，布尔值必须是 JSON true/false。hold 保留旧的按住说话行为。
+
+`{"method":"microphone","source":"external"}` 切换实际输入，source 可选 `onboard`、`external`、`both`。切换保留监听及音乐开关，丢弃旧输入的待处理语音。状态中的 `microphone_source` 表示已确认的路由，`microphone_level_dbfs` 表示右 ADC 当前窗口去直流后的 RMS 电平，显示下限为 −96 dBFS。无法确认路由、没有新鲜电平时，对应字段为 null。Studio 把用户选择保存在 `/var/lib/microduck-studio/microphone-source.json`。服务启动后按该选择恢复路由，监听初始为关闭。
 
 音乐问答需要已安装本地识别模型。模型未就绪会在状态里显示音乐识别故障；单独的录音回放及显式 echo 模式仍可使用。软件假 ALSA/UNIX socket 测试不等于真实外放音乐、混响和提问识别已通过验收。
 

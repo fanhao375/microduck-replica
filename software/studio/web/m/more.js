@@ -28,9 +28,9 @@ const PAGES = [
 ];
 
 const SOURCES = [
-  { id: 'auto', label: '自动', desc: '手机能收音就用手机，否则用板载' },
+  { id: 'auto', label: '自动', desc: '手机能收音就用手机，否则用鸭子的麦克风' },
   { id: 'phone', label: '手机麦克风', desc: '需要 https 打开本页' },
-  { id: 'board', label: '板载麦克风', desc: '鸭子自己听，离线识别' },
+  { id: 'board', label: '鸭子麦克风', desc: '鸭子自己听，离线识别' },
 ];
 
 export function MorePage({ hello, st, conn, say, nick, rename }) {
@@ -125,12 +125,12 @@ export function MorePage({ hello, st, conn, say, nick, rename }) {
     </div>
     ${!secure ? html`<div class="m-banner">
       现在是 http 打开，浏览器不给麦克风。先按下面「手机麦克风证书」装好证书，再用 https 地址打开本页；
-      在那之前用板载麦克风或打字。
+      在那之前可以用鸭子的麦克风或打字。
     </div>` : null}
 
     <h2 class="m-h2">手机麦克风证书</h2>
     <div class="m-card m-pad">
-      <div class="m-sub">第一次用「手机说话」前，让手机信任鸭子自己的 https 证书。只影响手机麦克风；板载麦克风和实体手柄不需要。</div>
+      <div class="m-sub">第一次用「手机说话」前，让手机信任鸭子自己的 https 证书。鸭子的麦克风和实体手柄无需安装证书。</div>
       <${CertificateDownload} />
       <ol class="m-tip" style="padding-left:18px;margin:10px 0 0">
         <li>iPhone：点下载 → 设置 → 已下载描述文件 → 安装；再到 设置 → 通用 → 关于本机 → 证书信任设置，打开 Microduck Local CA。</li>

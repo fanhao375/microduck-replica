@@ -29,7 +29,8 @@ class ProtocolTests(unittest.TestCase):
     def test_starts_off_and_only_reports_bounded_public_state(self):
         status = self.hub.request({'method': 'status'})
         self.assertEqual(set(status['status']),
-                         {'listening', 'music', 'rhythm', 'error', 'runtime_root', 'voice_ready', 'last'})
+                         {'listening', 'music', 'rhythm', 'error', 'runtime_root', 'voice_ready', 'last',
+                          'microphone_source', 'microphone_level_dbfs'})
         self.assertFalse(status['status']['listening'])
         self.assertFalse(status['status']['voice_ready'])
         # 还没听过任何话：last 是空的，而不是一个空壳对象
@@ -44,6 +45,28 @@ class ProtocolTests(unittest.TestCase):
         status = self.hub.status()
         self.assertEqual(status['last'], {'command': 'stand', 'accepted': True, 'age': 0.4, 'seq': 3})
         self.assertNotIn('text', status['last'])          # 原话不外泄
+
+    def test_microphone_accepts_only_fixed_sources_and_reports_actual_result(self):
+        routes = SimpleNamespace(source='onboard', restore=lambda: None)
+        routes.select = lambda source: setattr(routes, 'source', source)
+        self.audio.change_microphone = lambda routes, source: routes.select(source)
+        self.assertIn('microphone_source', self.hub.status())
+        self.hub = control.AudioControl(self.audio, self.feel, routes)
+        for source in ('both', 'external', 'onboard'):
+            result = self.hub.request({'method': 'microphone', 'source': source})
+            self.assertTrue(result['ok'])
+            self.assertEqual(result['status']['microphone_source'], source)
+            self.assertIsNone(result['status']['microphone_level_dbfs'])
+            self.assertFalse(result['status']['listening'])
+        for fields in ({}, {'source': []}, {'source': 'line2'}, {'source': True},
+                       {'source': 'external', 'listening': True}):
+            self.assertFalse(self.hub.request({'method': 'microphone', **fields})['ok'])
+        def fail(source):
+            raise RuntimeError('route readback mismatch')
+        routes.select = fail
+        self.assertFalse(self.hub.request({'method': 'microphone', 'source': 'both'})['ok'])
+        self.assertEqual(self.hub.status()['microphone_source'], 'onboard')
+        self.assertIn('readback', self.hub.status()['error'])
 
     def test_stale_last_command_drops_out(self):
         class Voice:

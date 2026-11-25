@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 import socket
 import stat
+import subprocess
 import threading
+from install import MICROPHONE_SOURCES
 
 MAX_REQUEST = 8192
 DEFAULT_SOCKET = '/run/duck-echo/control.sock'
@@ -21,15 +23,17 @@ def decode_request(raw):
 
 
 class AudioControl:
-    def __init__(self, audio, feel):
+    def __init__(self, audio, feel, routes=None, route_error=None):
         self.audio, self.feel = audio, feel
+        self.routes = routes
+        self.route_error = route_error
         self.lock = threading.RLock()
 
     def status(self):
         voice = getattr(self.audio,'voice',None)
         voice_ready = bool(voice is not None and voice.ready.is_set() and voice.recognizer is not None)
         interaction = getattr(self.audio, 'music', None)
-        error = getattr(interaction, 'error', None)
+        error = self.route_error or getattr(interaction, 'error', None)
         if self.audio.failed:
             error = 'microphone capture unavailable; enable listening to retry'
         last = None
@@ -42,6 +46,8 @@ class AudioControl:
             except Exception:
                 last = None
         return {'listening': bool(self.audio.active), 'music': bool(self.audio.music_mode),
+                'microphone_source': self.routes.source if self.routes is not None else None,
+                'microphone_level_dbfs': getattr(self.audio, 'microphone_level_dbfs', None),
                 'runtime_root':RUNTIME_ROOT,'voice_ready':voice_ready,
                 'rhythm': self.feel.snapshot(), 'error': str(error)[:240] if error else None,
                 'last': last}
@@ -53,10 +59,22 @@ class AudioControl:
             method = request.get('method')
             if method == 'status' and set(request) == {'method'}:
                 return {'ok': True, 'status': self.status()}
+            if method == 'microphone':
+                if set(request) != {'method', 'source'} or request['source'] not in MICROPHONE_SOURCES:
+                    return {'ok': False, 'error': 'expected microphone source onboard, external or both'}
+                if self.routes is None:
+                    return {'ok': False, 'error': 'microphone route unavailable for this capture device/channel'}
+                try:
+                    self.audio.change_microphone(self.routes, request['source'])
+                except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+                    self.route_error = 'microphone: ' + str(error)
+                    return {'ok': False, 'error': self.route_error[:240]}
+                self.route_error = None
+                return {'ok': True, 'status': self.status()}
             if (method != 'set' or not {'listening', 'music'} & set(request) or
                     not set(request) <= {'method', 'listening', 'music'} or
                     any(type(value) is not bool for key, value in request.items() if key != 'method')):
-                return {'ok': False, 'error': 'allowed methods are status and set with boolean listening/music'}
+                return {'ok': False, 'error': 'allowed methods are status, microphone and set with boolean listening/music'}
             if request.get('listening') is False and request.get('music') is True:
                 return {'ok': False, 'error': 'music requires listening'}
             if request.get('listening') is False:

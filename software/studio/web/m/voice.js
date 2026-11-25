@@ -2,7 +2,7 @@
 //
 // 两条路**都不需要唤醒词**：说什么就是什么，口令对了就执行（说了「鸭鸭」也照样认，会被剥掉）。
 //
-//   board —— 鸭子自己的耳朵（duck-echo + 本地 Vosk）。点了「开板载聆听」就直接对它说话。
+//   board —— 鸭子的麦克风（duck-echo + 本地 Vosk）。点了「开启监听」就直接对它说话。
 //            手机只负责开关聆听窗口、显示它认到什么。适合：安静环境、人就在鸭子旁边。
 //   phone —— 手机把话变成指令再发过去。**识别在板子上做**：手机只负责录一段音，传回 Studio，
 //            由 /api/asr 用板上 duck-echo 正在用的那一套 Vosk 中文模型认出来。
@@ -504,7 +504,7 @@ export function VoicePage({ st, pad, live, name, say }) {
   const onDown = useCallback((event) => {
     if (!event.isPrimary || event.button !== 0 || pointerRef.current !== null) return;
     event.preventDefault();
-    if (!phoneOk) { setErr(`${phoneWhy}用输入法上的话筒键听写，或者开板载麦克风。`); return; }
+    if (!phoneOk) { setErr(`${phoneWhy}可以用输入法听写，或打开鸭子的麦克风。`); return; }
     discardPhone();
     pointerRef.current = event.pointerId;
     const turn = new AbortController();
@@ -528,15 +528,15 @@ export function VoicePage({ st, pad, live, name, say }) {
     if (pointerRef.current === event.pointerId) cancelPhone();
   }, [cancelPhone]);
 
-  // ---- 板载麦克风：开关 duck-echo 的聆听 ----
+  // ---- 鸭子麦克风：开关 duck-echo 的聆听 ----
   const toggleBoard = useCallback(async (on) => {
     if (boardBusy) return;
     setErr(null);
     setBoardBusy(true);
     const r = await setAudio(link, { listening: Boolean(on) });
     setBoardBusy(false);
-    if (r.ok === false) setErr(r.reason || r.error || '板载语音没切换成功');
-    else say(on ? '板载麦克风开了：直接对它说话' : '板载麦克风关了');
+    if (r.ok === false) setErr(r.reason || r.error || '鸭子的监听开关没切换成功');
+    else say(on ? '鸭子的麦克风开了，直接对它说话' : '鸭子的麦克风关了');
   }, [boardBusy, say]);
 
   // duck-echo 认出来的结果（新版 duck-echo 才带 last 字段；没有也不影响别的功能）。
@@ -568,11 +568,11 @@ export function VoicePage({ st, pad, live, name, say }) {
     <h1 class="m-voice-title">${name}，听我说</h1>
     <p class="m-voice-lede">${mode === 'board'
       ? html`直接对着${name}说话就行，说什么就是什么。`
-      : html`按住对着手机说话，她说完松手就发过去。跟板载一样，直接说口令就行。`}</p>
+      : html`按住对着手机说口令，说完松手就发过去。`}</p>
 
     <div class="m-seg" role="group" aria-label="语音通道" style="margin:14px 0 0">
       <button aria-pressed=${mode === 'board' ? 'true' : 'false'} onClick=${() => { if (mode !== 'board') cancelPhone(); setMode('board'); setErr(null); setAsk(null); }}>
-        板载麦克风${boardOn ? ' · 听' : ''}
+        鸭子麦克风${boardOn ? ' · 听' : ''}
       </button>
       <button aria-pressed=${mode === 'phone' ? 'true' : 'false'} onClick=${() => { setMode('phone'); setErr(null); setAsk(null); }}>
         手机说话
@@ -584,23 +584,23 @@ export function VoicePage({ st, pad, live, name, say }) {
         <span class="m-halo" aria-hidden="true"></span>
         <button class=${'m-mic' + (boardOn ? ' live' : '')}
           onClick=${() => toggleBoard(!boardOn)} disabled=${boardBusy}
-          aria-label=${boardOn ? '关闭板载聆听' : '打开板载聆听'}>
+          aria-label=${boardOn ? '关闭鸭子监听' : '打开鸭子监听'}>
           <${MicIcon} />
-          <span class="t1">${boardBusy ? '切换中…' : boardOn ? '板载在听' : '开板载聆听'}</span>
+          <span class="t1">${boardBusy ? '切换中…' : boardOn ? '鸭子在听' : '开启监听'}</span>
           <span class="t2">${boardOn ? '再点一下关掉' : '点了之后直接说话'}</span>
         </button>
       </div>
       <p class="m-tip">
         ${boardOn
           ? html`它在听：<b>直接说</b>「站起来」「点头」「停下」。说完点一下关掉，省电。`
-          : html`用的是鸭子身上的麦克风。安静的时候最准，吵起来就换「手机说话」。`}
+          : html`使用鸭子设置里选的麦克风。安静的时候最准，吵起来就换「手机说话」。`}
       </p>
       ${!boardOk ? html`<div class="m-banner bad" style="text-align:left">
-        板载语音没连上：${audio.why || audio.error || 'duck-echo 没在跑'}。先用「手机说话」或打字。
+        鸭子的语音服务没连上。 ${audio.why || audio.error || 'duck-echo 没在跑'}。先用「手机说话」或打字。
       </div>` : audio.voice_ready === false ? html`<div class="m-banner bad" style="text-align:left">
-        板载麦克风连上了，但语音识别还没准备好${audio.error ? `：${audio.error}` : '（模型加载中，稍等十几秒；一直这样就看一眼 duck-echo 日志）'}。
+        鸭子的语音识别还没准备好${audio.error ? `（${audio.error}）` : '（模型加载中，稍等十几秒，仍未就绪时请查看 duck-echo 日志）'}。
       </div>` : audio.error ? html`<div class="m-banner bad" style="text-align:left">
-        板载语音报错：${audio.error}
+        鸭子的语音服务报错（${audio.error}）
       </div>` : null}
     </div>` : html`<div>
       <div class=${'m-mic-wrap' + (listening ? ' live' : '')}>
@@ -625,12 +625,12 @@ export function VoicePage({ st, pad, live, name, say }) {
       <p class="m-tip">
         ${phoneOk
           ? html`按住<b>别松手</b>，等按钮变成「<b>现在说</b>」再开口，说完松开（识别在板子上做，不联网）。`
-          : html`${phoneWhy}这条路暂时走不通，但下面的输入框（配上<b>输入法的话筒键</b>听写）和板载麦克风都能用。`}
+          : html`${phoneWhy}可以在下面的输入框用<b>输入法的话筒键</b>听写，也可以切换到鸭子麦克风。`}
       </p>
       <p class="m-tip"><a href="/diag">长按还是没反应？点这里做一次自检 →</a></p>
       ${boardOn ? html`<div class="m-banner" style="text-align:left">
-        <span>板载麦克风还开着：两路一起听，同一句话可能执行两次。</span>
-        <button class="act" onClick=${() => toggleBoard(false)}>关掉板载</button>
+        <span>鸭子的麦克风还开着。两路一起听，同一句话可能执行两次。</span>
+        <button class="act" onClick=${() => toggleBoard(false)}>关掉鸭子麦克风</button>
       </div>` : null}
     </div>`}
 

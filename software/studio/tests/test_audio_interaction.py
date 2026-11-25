@@ -8,6 +8,18 @@ from studio import audio_interaction as audio
 
 
 class SnapshotTests(unittest.TestCase):
+    def test_existing_voice_and_music_status_accepts_optional_mic_fields(self):
+        status = {'listening': True, 'music': False,
+                  'rhythm': {'bpm': None, 'confidence': 0, 'feel': 'unknown'}}
+        for source in ('onboard', None):
+            record = {**status, 'microphone_source': source, 'microphone_level_dbfs': -42.5}
+            self.assertEqual(audio.validate_status(record), record)
+        self.assertEqual(audio.validate_status(status), status)
+        for field in ({'microphone_source': 'usb'}, {'microphone_level_dbfs': True},
+                      {'microphone_level_dbfs': float('nan')}, {'microphone_level_dbfs': 8}):
+            with self.assertRaises(ValueError):
+                audio.validate_status({**status, **field})
+
     def test_only_validated_small_music_status_is_accepted(self):
         state = audio.validate_status({'listening': True, 'music': True,
             'rhythm': {'bpm': 120, 'confidence': .9, 'feel': 'lively', 'last_beat': 10., 'age': .1}})
