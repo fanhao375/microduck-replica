@@ -57,7 +57,7 @@ import time
 from .estop import STARTING_LONG_S, STARTING_PHASES
 from .imu import mount_of
 from .robotd import fresh_calib
-from .state import JOINT_CN, MAX_AGE, STILL_STARTING, posture, starting_secs
+from .state import JOINT_CN, MAX_AGE, STILL_STARTING, posture, starting_secs, viewed_bus
 from .startup_status import startup_wait
 
 ONBOARD_FILE = "onboarding.json"
@@ -1034,7 +1034,7 @@ class Onboarding:
     # ---- 每 0.5 秒一次 ----
 
     def _inputs(self, rd, pad, servo, now):
-        bus = rd.bus.value if isinstance(rd.bus.value, dict) else None
+        bus = viewed_bus(rd)
         calib = fresh_calib(rd)
         pv = None
         if pad is not None:

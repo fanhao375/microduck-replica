@@ -41,7 +41,7 @@ from .pad_mapping import MappingClient, MappingError, PadMapping
 from .pad_drive import (DRIVING, FAST_WORKERS, MAX_V, MAX_W, RELAX_CLEAR_DELAY_S, RELAX_GUARD_S,  # noqa: F401 —— MAX_V / MAX_W 给别处 import
                         DriveMixin, parse_speed_limits)
 from .rpc import LINE_LIMIT, RpcError, Timeout, Unreachable, parse_addr
-from .state import MAX_AGE
+from .state import MAX_AGE, project_bus
 from .state import posture as _posture
 
 SCAN_S, SCAN_MAX_S = 12, 30
@@ -2037,11 +2037,16 @@ def robot_view(rd, posture=None):
         return sample.value if age is not None and age <= MAX_AGE[key] else None
 
     pol, st, health = fresh(rd.policies, "policies"), fresh(rd.state, "state"), fresh(rd.health, "health")
+    if getattr(rd, "legacy_bus", None) is False:
+        bus = project_bus(None, st, pol)
+        bus_at = rd.state.at if bus is not None else None
+    else:
+        bus, bus_at = rd.bus.value, rd.bus.at
     if posture is None:
-        posture = _posture(rd.present, rd.bus.value, pol, st)
+        posture = _posture(rd.present, bus, pol, st)
     applied = ((st or {}).get("move") or {}).get("applied") if isinstance(st, dict) else None
     batt = ((health or {}).get("battery") or {}).get("percent") if isinstance(health, dict) else None
-    return {"present": rd.present, "bus": rd.bus.value, "bus_at": rd.bus.at, "posture": posture,
+    return {"present": rd.present, "bus": bus, "bus_at": bus_at, "posture": posture,
             "state": st if isinstance(st, dict) else None, "state_at": rd.state.at,
             "policies_at": rd.policies.at,
             "policies": pol if isinstance(pol, dict) else None, "applied": applied, "battery_pct": batt,

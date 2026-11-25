@@ -385,7 +385,7 @@ class Estimator:
 
     # ---- 喂数据 ----
 
-    def feed(self, now, volts=None, fresh=None, cls=None, key=None, source="robotd"):
+    def feed(self, now, volts=None, fresh=None, cls=None, key=None, source="robotd", pack=False):
         """每秒调一次。volts=None 或 key 跟上次一样 = 这一秒没有新数据（照样走计时：读不到 10 秒要重新起步）。
         回这一拍要记的日志事件（log_events 去记）。"""
         events = []
@@ -394,10 +394,16 @@ class Estimator:
             new = False             # 没给 key 时按时间去重：同一秒喂两次只算一次
         if new:
             self.last_key, self.last_feed_t = key, now
-            v, n, valid = trimmed(volts, fresh)
+            if pack:
+                v = float(volts) if _num(volts) and V_MIN <= float(volts) <= V_MAX else None
+                valid = [(0, v)] if v is not None else []
+                n, listed = len(valid), ([v] if v is not None else [])
+            else:
+                v, n, valid = trimmed(volts, fresh)
+                listed = volts
             self.n_used = n
             if v is not None:
-                events += self._add(now, v, cls, valid, volts, source)
+                events += self._add(now, v, cls, valid, listed, source)
         if self.last_valid_t is not None and now - self.last_valid_t > GAP_S:
             if self.started_at is not None:
                 events.append(_ev("warn", f"15 颗舵机都读不到电压超过 {GAP_S:.0f} 秒：电量重新估算",
@@ -621,7 +627,10 @@ class Estimator:
         lines = []
         cal = f"校准 {self.off:+.2f} V"
         if self.mode == "no_data":
-            lines.append("读不到舵机电压：舵机没电（没接电池？）或者主程序没在跑")
+            if rd_v is not None:
+                lines.append(f"还没攒够估算样本。主程序报的电池电压是 {rd_v:.2f} V")
+            else:
+                lines.append("读不到舵机电压：舵机没电（没接电池？）或者主程序没在跑")
         elif self.mode == "estimating":
             left = max(0, int(math.ceil(ESTIMATING_S - (now - self.started_at))))
             lines.append(f"刚开始读电压，{left} 秒后出数（头 {ESTIMATING_S} 秒的读数可能正好落在迈步的低谷上，先不算）")
@@ -632,8 +641,13 @@ class Estimator:
             if kind == "calm":
                 ago = int(now - t)
                 when = "现在" if ago < 5 else f"{ago // 60} 分钟前" if ago >= 60 else f"{ago} 秒前"
-                lines.append(f"最近 5 分钟最轻松的那会儿（{CLS_CN.get(c, c)}，{when}）：{vv:.2f} V"
-                             f"（15 颗去掉最高最低各 3 颗的平均，{cal}）→ 每芯 {vv / CELLS:.2f} V → 约 {pct:.0f}%")
+                if self.source == "health":
+                    lines.append(f"主程序报的电池电压（{CLS_CN.get(c, c)}，{when}）：{vv:.2f} V"
+                                 f"（{cal}）→ 每芯 {vv / CELLS:.2f} V → 约 {pct:.0f}%")
+                    lines.append("这一版主程序不把每颗舵机的电压放进状态里，电量用它自己报的电池电压")
+                else:
+                    lines.append(f"最近 5 分钟最轻松的那会儿（{CLS_CN.get(c, c)}，{when}）：{vv:.2f} V"
+                                 f"（15 颗去掉最高最低各 3 颗的平均，{cal}）→ 每芯 {vv / CELLS:.2f} V → 约 {pct:.0f}%")
                 if c == "light":
                     lines.append("站着、坐着时舵机在用电，电压比卸力低一点，所以这个数偏低一点；卸力静置 30 秒以上最准")
             else:
@@ -651,7 +665,7 @@ class Estimator:
             src = f"{rd_v:.2f} V，" if rd_v is not None else ""
             lines.append(f"主程序自己的算法：{rd_pct:.0f}%（{src}6.6–8.2 V 直线，低电量偏高）")
         sp = self._spread(names)
-        if sp and self.mode != "no_data":
+        if sp and self.mode != "no_data" and self.source != "health":
             lines.append(f"{sp['n']} 颗电压：最低 {sp['min']:.1f} V（{sp['min_name']}）· 最高 {sp['max']:.1f} V（{sp['max_name']}）")
         if self.mode == "bench":
             return lines                # 台架电源：没有电池，不说充电、保养

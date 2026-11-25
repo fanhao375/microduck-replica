@@ -22,6 +22,7 @@
 """
 import contextlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -846,6 +847,55 @@ def _view_startup_observations(observations, directions, state, error, sim):
             "port": "主程序", "online": observations["online"], "total": len(IDS),
             "hz": None, "avg_volts": avg_v, "battery_pct": battery_percent(avg_v), "drop_rate": None, "bus": None,
             "holding": None, "all_off": False, "latched": False, "relaxing": False, "last_relax": None, "rows": rows}
+
+
+def _num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def view_from_state(st, directions, state="closed", error=None, sim=False):
+    """v0.23 只读表。`robot.state` 的 `joints` 已经是模型弧度（方向折进去了），按 JOINT_NAMES
+    的顺序对着 IDS。角度直接用弧度，不再走 position_raw：v0.23 不报原始编码器。"""
+    st = st if isinstance(st, dict) else {}
+    safety = st.get("safety") if isinstance(st.get("safety"), dict) else {}
+    loop = st.get("loop") if isinstance(st.get("loop"), dict) else {}
+    live = _num(loop.get("hz")) and ("limp" in safety or "torqued" in safety)
+    measured = st.get("joints") if isinstance(st.get("joints"), list) else []
+    currents = st.get("currents_ma") if isinstance(st.get("currents_ma"), list) else []
+    torqued = safety.get("torqued")
+    torque = int(torqued) if isinstance(torqued, bool) else None
+    rows = []
+    for i, sid in enumerate(IDS):
+        rad = measured[i] if i < len(measured) and _num(measured[i]) else None
+        fresh = bool(live and rad is not None and len(measured) >= len(IDS))
+        cur = currents[i] if i < len(currents) and _num(currents[i]) else None
+        d = DEFAULT_DIRECTIONS[sid] if directions is None else directions.get(sid, -1)
+        cn, en = NAMES[sid]
+        rows.append({
+            "id": sid, "cn": cn, "en": en, "group": GROUP[sid], "dir": d,
+            "raw": None, "deg": None if rad is None else round(math.degrees(rad), 1),
+            "volt": None, "temp": None, "temp_limit": None,
+            "load": None, "current_ma": cur, "status": None, "moving": None,
+            "torque": torque, "fresh": fresh, "age_ms": None,
+            "p": None, "d": None, "mode": None, "offset": None,
+            "comm": {"asked": None, "ok": None, "missed": 0, "alarm": 0, "streak": 0, "max_streak": None},
+        })
+    return {
+        "t": "servo", "state": state, "error": error, "sim": sim, "source": "robotd",
+        "port": "主程序", "online": sum(1 for r in rows if r["fresh"]), "total": len(IDS),
+        "hz": loop.get("hz") if _num(loop.get("hz")) else None, "avg_volts": None, "battery_pct": None,
+        "drop_rate": None, "bus": None,
+        "holding": sum(1 for r in rows if r["torque"] == 1), "all_off": False, "latched": False,
+        "relaxing": False, "last_relax": None, "rows": rows,
+    }
+
+
+def readonly_view(rd, directions, state="closed", error=None, sim=False):
+    """没接管总线时的表。v0.23（legacy_bus 为 False）读 state 帧；旧固件继续读 busStatus。"""
+    if getattr(rd, "legacy_bus", None) is False:
+        st = getattr(getattr(rd, "state", None), "value", None)
+        return view_from_state(st, directions, state, error, sim)
+    return view_from_robotd(rd, directions, state, error, sim)
 
 
 def _sim_home():

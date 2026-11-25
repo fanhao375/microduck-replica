@@ -43,7 +43,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 from .auth import COOKIE, REMEMBER_S, Auth, OriginGuard
 from . import helper
 from .rpc import open_conn
-from .servo import boot_id, view_from_robotd
+from .servo import boot_id, readonly_view
 from .sshkeys import BadKey, SshKeys
 try:                      # https 之后手机要用到的两个功能，详见 phone_bridge 的注释
     from . import phone_bridge
@@ -841,8 +841,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                             or (servo.state in ("open", "opening") and me.get("route") not in ("/", "/pad"))):
                         # 接管了总线：推总线上读到的整张表；没接管：用主程序的数据拼一张只读的表
                         await send(servo.snapshot(diagnostics=diagnostics_active) if servo.state == "open"
-                                   else view_from_robotd(robotd, servo.directions, servo.state,
-                                                         servo.error, servo.sim))
+                                   else readonly_view(robotd, servo.directions, servo.state,
+                                                      servo.error, servo.sim))
                     imu_live = me.get("route") == "/imu" or diagnostics_active
                     if imu is not None and (imu_live or time.monotonic() - last_imu >= .5):
                         last_imu = time.monotonic()        # Live views share the state tick and use only the owner cache.
@@ -1631,12 +1631,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             now = time.monotonic()
             if servo.state != "open":
                 since = None
-                fresh = robotd.present is True and robotd.bus.at is not None
-                if servo.handed_back_at is not None and fresh and robotd.bus.at > servo.handed_back_at and not robotd.paused:
+                rd_at = robotd.state.at if getattr(robotd, "legacy_bus", None) is False else robotd.bus.at
+                fresh = robotd.present is True and rd_at is not None
+                if servo.handed_back_at is not None and fresh and rd_at > servo.handed_back_at and not robotd.paused:
                     servo.handed_back_at = None                    # 主程序连上了：「已交还……手动起 robotd」那句收起来
                     servo.handback_note = None
                     servo.giveback_error = servo.giveback_hint = None
-                if servo.orphan and fresh and robotd.bus.at > servo.orphan["at"] and not robotd.paused:
+                if servo.orphan and fresh and rd_at > servo.orphan["at"] and not robotd.paused:
                     servo.orphan = None                            # 主程序起来了（它会全部松开）：不用再去接管
                     await asyncio.to_thread(marker_drop)
                     log.info("上次退出时开着的舵机会话：主程序起来了（它会把舵机全部松开），不用再接管", cat="总线", dedup=False)
