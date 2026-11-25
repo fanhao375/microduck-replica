@@ -34,8 +34,9 @@ class ModelService:
         return {'items': [], 'slots': [], 'bindings': [], 'buttons': [],
                 'capabilities': {'import': True, 'select': True}}
 
-    async def import_package(self, path, name=''):
+    async def import_package(self, path, name='', kind=None):
         self.imports.append((Path(path), Path(path).read_bytes(), name))
+        self.kinds = getattr(self, 'kinds', []) + [kind]
         return await self.view()
 
     async def handle(self, args, by=None):
@@ -122,6 +123,19 @@ class ModelsHttp(unittest.IsolatedAsyncioTestCase):
         status, _, _ = await self.call('POST', '/api/models/import?filename=../../outside.zip', b'zip', self.headers)
         self.assertEqual(status, 400)
         self.assertEqual(len(self.models.imports), 1)
+
+    async def test_action_import_accepts_single_onnx_only_with_kind(self):
+        status, _, payload = await self.call('POST', '/api/models/import?filename=bow.onnx&kind=action', b'onnx', self.headers)
+        self.assertEqual(status, 200, payload)
+        self.assertEqual(self.models.kinds[-1], 'action')
+        self.assertFalse(self.models.imports[-1][0].exists())
+        status, _, _ = await self.call('POST', '/api/models/import?filename=crouch.zip&kind=action', b'zip', self.headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(self.models.kinds[-1], 'action')
+        for path in ('/api/models/import?filename=bow.onnx', '/api/models/import?filename=a.zip&kind=evil'):
+            status, _, _ = await self.call('POST', path, b'x', self.headers)
+            self.assertEqual(status, 400)
+        self.assertEqual(len(self.models.imports), 2)
 
     async def test_oversized_and_malformed_requests_never_reach_service(self):
         with mock.patch('studio.app.MODEL_UPLOAD_LIMIT', 8):

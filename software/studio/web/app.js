@@ -20,6 +20,7 @@ import { TuneSection, ModelSettings } from './tune.js';
 import { WifiCard, WifiSettings, DuckAddresses } from './wifi.js';
 import { TwoStep } from './confirm.js';
 import { ModelsPage } from './models.js';
+import { ActionsPage } from './actions.js';
 import { CameraPage, TofPage, SensorBandCells } from './sensors.js';
 import { imuDiagnosticCopy, startupStageCopy } from './startup-status.js';
 
@@ -816,6 +817,8 @@ function navCur(route, padInView) {
     if (r === '/settings') return route === r || route.startsWith(r+'/') ? 'page' : undefined;
     if (r === '/pad') return OVERVIEW(route) && padInView ? 'page' : undefined;
     if (r === '/') return OVERVIEW(route) && !padInView ? 'page' : undefined;
+    // 走路和站立模型（原来的「模型」页）从动作页进去，侧栏照样亮「动作」
+    if (r === '/actions') return route === '/actions' || route === '/models' ? 'page' : undefined;
     return route === r ? 'page' : undefined;
   };
 }
@@ -831,7 +834,7 @@ function Nav({ route, padInView, onSame }) {
     ${a('#/tof', '/tof', 'ToF')}
     ${a('#/servos', '/servos', '舵机')}
     ${a('#/imu', '/imu', 'IMU')}
-    ${a('#/models', '/models', '模型')}
+    ${a('#/actions', '/actions', '动作')}
     ${a('#/logs', '/logs', '日志')}
     <span class="spacer"></span>
     ${a('#/settings', '/settings', '设置')}
@@ -843,7 +846,7 @@ function TabBar({ route, padInView, onSame }) {
   const cur = navCur(route, padInView);
   const a = (href, r, text) => html`<a href=${href} aria-current=${cur(r)} onClick=${(e) => onSame(e, href)}>${text}</a>`;
   return html`<nav class="tabbar" aria-label="主导航">
-    ${a('#/', '/', '总览')}${a('#/pad', '/pad', '手柄')}${a('#/camera', '/camera', '摄像头')}${a('#/tof', '/tof', 'ToF')}${a('#/servos', '/servos', '舵机')}${a('#/imu', '/imu', 'IMU')}${a('#/models', '/models', '模型')}${a('#/settings', '/settings', '更多')}
+    ${a('#/', '/', '总览')}${a('#/pad', '/pad', '手柄')}${a('#/camera', '/camera', '摄像头')}${a('#/tof', '/tof', 'ToF')}${a('#/servos', '/servos', '舵机')}${a('#/imu', '/imu', 'IMU')}${a('#/actions', '/actions', '动作')}${a('#/settings', '/settings', '更多')}
   </nav>`;
 }
 
@@ -974,6 +977,7 @@ function Main({ duck }) {
   else if (route === '/servos') page = html`<${ServoPage} sv=${sv} link=${link} leaveGuards=${leaveGuards} />`;
   else if (['/settings','/settings/ssh','/settings/updates'].includes(route)) page = html`<${Settings} st=${st} tune=${tune} />`;
   else if (route === '/models') page = html`<${ModelsPage} api=${api} csrf=${csrf} link=${link} live=${live} />`;
+  else if (route === '/actions') page = html`<${ActionsPage} api=${api} csrf=${csrf} link=${link} plazaUrl="https://fanhao375.github.io/microduck-replica/motion-plaza/" />`;
   else if (route === '/imu') page = html`<${ImuPage} st=${st}
     imu=${imu && st?.imu?.diagnostic ? { ...imu, diagnostic: st.imu.diagnostic } : imu}
     link=${link} live=${live} age=${age} diagnosticElapsed=${now - (st?.imu?.diagnostic ? stAt : imuAt)} pd=${pd} />`;

@@ -42,18 +42,65 @@ export function modelSlots(view, item) {
   return (view?.slots || []).filter(slot => allowed.includes(slot.slot));
 }
 
+// 「更多动作」：从这里装的，加上别人手改配置加的（只读，但可以绑键）。
+export const customActions = view => [...(view?.actions || []), ...(view?.manual_actions || [])];
+
 export function bindingChoice(view, button, slot) {
+  const current = view?.bindings?.find(b => b.button === button);
+  const occupied = Boolean(current?.slot || current?.skill);
+  const currentLabel = current?.slot ? actionLabel(view, current.slot) : current?.action_name || current?.skill || '未绑定';
+  if (typeof slot === 'string' && slot.startsWith('skill:')) {
+    const skill = slot.slice(6);
+    if (!BUTTONS.some(b => b.button === button)) return { valid: false, reason: '只支持 A、X、LB、RB 和十字下。' };
+    const target = customActions(view).find(a => a.skill === skill);
+    if (!target || target.state !== 'loaded') return { valid: false, reason: '这个动作还没装上，先在「更多动作」里装好。' };
+    const already = current?.skill === skill;
+    return { valid: true, already, conflict: occupied && !already, currentLabel, targetLabel: target.name,
+      args: { op: 'bind', button, skill } };
+  }
   if (!BUTTONS.some(b => b.button === button) || !SKILL_SLOTS.includes(slot)) {
     return { valid: false, reason: '这个用途不能分配给动作键；走路请使用原来的站、走控制。' };
   }
   const target = view?.slots?.find(s => s.slot === slot);
   if (!target?.model_id || target.error) return { valid: false, reason: '请先为这个动作选择可用模型。' };
-  const current = view?.bindings?.find(b => b.button === button);
-  const occupied = Boolean(current?.slot || current?.skill);
   const already = current?.slot === slot;
-  const currentLabel = current?.slot ? actionLabel(view, current.slot) : current?.skill || '未绑定';
   return { valid: true, already, conflict: occupied && !already,
-    currentLabel, targetLabel: actionLabel(view, slot) };
+    currentLabel, targetLabel: actionLabel(view, slot), args: { op: 'bind', button, slot } };
+}
+
+// 动作表单：页面上的文字 ↔ 发给服务端的参数。三个数写成「1, 0, 0」。
+const fmt = v => (v == null ? '' : String(v));
+export function actionForm(action) {
+  const p = action?.params || action?.suggest || {};
+  return { name: p.name || action?.skill || action?.suggest?.name || '', duration: fmt(p.duration),
+    command: (p.command || [0, 0, 0]).join(', '), unwind: (p.unwind || [0, 0, 0]).join(', '),
+    unwind_s: fmt(p.unwind_s ?? 0), chain: p.chain === true, action_scale: fmt(p.action_scale ?? 1), gain_ratio: fmt(p.gain_ratio ?? 1) };
+}
+
+export function actionArgs(form) {
+  const num = (text, label, low, high, lowOpen = false) => {
+    const v = Number(String(text).trim());
+    if (String(text).trim() === '' || !Number.isFinite(v) || v > high || (lowOpen ? v <= low : v < low)) throw new Error(`${label}要在 ${low}–${high} 之间`);
+    return v;
+  };
+  const triple = (text, label) => {
+    const parts = String(text).split(/[,，\s]+/).filter(Boolean).map(Number);
+    if (parts.length !== 3 || parts.some(v => !Number.isFinite(v) || Math.abs(v) > 2)) throw new Error(`${label}要写 3 个 −2 到 2 之间的数，比如 1, 0, 0`);
+    return parts;
+  };
+  try {
+    const name = String(form.name || '').trim();
+    if (!/^[a-z0-9_]{1,32}$/.test(name)) throw new Error('动作名只能用小写英文字母、数字和下划线，最多 32 个字符');
+    return { ok: true, args: { name, duration: num(form.duration, '时长（秒）', 0.2, 60),
+      command: triple(form.command, '指令'), unwind: triple(form.unwind, '收尾指令'), unwind_s: num(form.unwind_s, '收尾秒数', 0, 10),
+      chain: form.chain === true, action_scale: num(form.action_scale, '幅度', 0, 2, true), gain_ratio: num(form.gain_ratio, '力度比例', 0.2, 2) } };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+}
+
+export function actionState(action) {
+  return { none: '没装', loaded: '已装上', failed: '没加载成功' }[action?.state] || '状态不明';
 }
 
 export function operationAvailability(view) {
@@ -155,17 +202,20 @@ function ModelItem({ item, view, cap, busy, onOp, onConfirm, onBind }) {
 
 function BindingRow({ binding, view, busy, cap, preset, onBind, onOp }) {
   const candidates = (view.slots || []).filter(s => SKILL_SLOTS.includes(s.slot) && s.model_id && !s.error);
-  const [slot, setSlot] = useState(binding?.slot || '');
+  const extra = customActions(view).filter(a => a.state === 'loaded' && a.skill);
+  const own = binding.slot || (extra.some(a => a.skill === binding.skill) ? 'skill:' + binding.skill : '');
+  const [slot, setSlot] = useState(own);
   const button = binding.button;
-  useEffect(() => { setSlot(binding.slot || ''); }, [binding.slot]);
+  useEffect(() => { setSlot(own); }, [own]);
   useEffect(() => { if (preset?.slot) setSlot(preset.slot); }, [preset?.tick]);
   const choice = bindingChoice(view, button, slot);
-  const current = binding.slot ? actionLabel(view, binding.slot) : binding.skill || '未绑定';
+  const current = binding.slot ? actionLabel(view, binding.slot) : binding.action_name || binding.skill || '未绑定';
   return html`<div class="models-binding" data-button=${button}>
     <div class="models-binding-current"><kbd>${keyLabel(button)}</kbd><span>${current}</span></div>
     <div class="models-binding-controls">
       <select value=${slot} aria-label=${`绑定动作 ${keyLabel(button)}`} disabled=${busy || !cap.select} onChange=${e => setSlot(e.target.value)}>
         <option value="">选择动作…</option>${candidates.map(s => html`<option value=${s.slot}>${actionLabel(view, s.slot)}</option>`)}
+        ${extra.map(a => html`<option value=${'skill:' + a.skill}>更多动作 · ${a.name}</option>`)}
       </select>
       <button class="models-btn" type="button" data-model-action="bind" aria-label=${`设置按键 ${keyLabel(button)}`} disabled=${busy || !cap.select || !choice.valid || choice.already}
         onClick=${() => onBind(button, slot)}>${choice.already ? '已绑定' : '绑定'}</button>
@@ -181,8 +231,8 @@ export function ModelsPage({ api, csrf, link, live }) {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState('');
   const [message, setMessage] = useState(null);
-  const [file, setFile] = useState(null);
-  const [name, setName] = useState('');
+  const [fileState, setFile] = useState(null);
+  const [nameState, setName] = useState('');
   const [upload, setUpload] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [preset, setPreset] = useState(null);
@@ -260,10 +310,11 @@ export function ModelsPage({ api, csrf, link, live }) {
 
   const doImport = async (e) => {
     e.preventDefault();
+    const file = fileState, name = nameState;
     if (working.current || !cap.import || !file) return;
     setMessage(null);
     if (!/\.(zip|tar\.gz|tgz)$/i.test(file.name)) {
-      setMessage({ kind: 'bad', text: '请选择 ZIP 或 tar.gz 模型包。单独的 ONNX 文件还缺少部署说明，请先打包。' });
+      setMessage({ kind: 'bad', text: '请选择 ZIP 或 tar.gz 模型包。单独的 ONNX 文件还缺少部署说明，请先打包。要装镜像之外的新动作，请到「动作」页。' });
       return;
     }
     working.current = true;
@@ -318,8 +369,8 @@ export function ModelsPage({ api, csrf, link, live }) {
     if (choice.conflict) {
       setConfirm({ title: `${keyLabel(button)} 已经绑定动作`,
         lines: [`现在：${choice.currentLabel}`, `改成：${choice.targetLabel}`, '替换后，原动作将不再由这个键触发。'],
-        label: '替换绑定', args: { op: 'bind', button, slot, replace: true }, success: `${keyLabel(button)} 的绑定已更新` });
-    } else onOp({ op: 'bind', button, slot }, `${keyLabel(button)} 已绑定「${choice.targetLabel}」`);
+        label: '替换绑定', args: { ...choice.args, replace: true }, success: `${keyLabel(button)} 的绑定已更新` });
+    } else onOp(choice.args, `${keyLabel(button)} 已绑定「${choice.targetLabel}」`);
   };
   const jumpBind = slot => {
     if (!cap.select || !live || !link) {
@@ -421,9 +472,9 @@ export function ModelsPage({ api, csrf, link, live }) {
       <form class="models-import" onSubmit=${doImport}>
         <label class="models-file-field">模型包<input ref=${fileInput} type="file" accept=".zip,.tar.gz,.tgz" aria-label="导入模型包" disabled=${busy || !cap.import}
           onChange=${e => { setFile(e.target.files[0] || null); setMessage(null); }} /></label>
-        <label>显示名称（可选）<input type="text" value=${name} maxLength="80" placeholder="留空使用包内名称" aria-label="模型名称" disabled=${busy || !cap.import}
+        <label>显示名称（可选）<input type="text" value=${nameState} maxLength="80" placeholder="留空使用包内名称" aria-label="模型名称" disabled=${busy || !cap.import}
           onInput=${e => setName(e.target.value)} /></label>
-        <button class="models-btn primary" type="submit" aria-label="导入模型" disabled=${busy || !cap.import || !file}>导入模型</button>
+        <button class="models-btn primary" type="submit" aria-label="导入模型" disabled=${busy || !cap.import || !fileState}>导入模型</button>
       </form>
       ${view && !cap.import ? html`<p class="models-note models-warning">暂时不能导入：${view.capabilities?.import_reason || cap.reason}</p>` : null}
       <details class="models-details"><summary>模型包需要哪些文件？</summary><p>把同一次部署导出的 policy.onnx、manifest.json、deployment-contract.json 一起打包；如果有 deployment-execution.json，也一起放入。导入时会检查用途和兼容性。</p></details>
@@ -451,6 +502,9 @@ export function ModelsPage({ api, csrf, link, live }) {
             success: `${slot.label} 已恢复${slot.default_disabled ? '默认停用状态' : '内置模型'}` })}>${slot.default_disabled ? '恢复默认停用' : '恢复内置'}</button>
       </div>`)}</div>
     </section>` : null}
+
+    ${view ? html`<section class="board models-panel" aria-label="更多动作"><h2>更多动作</h2>
+      <p class="models-note">镜像自带之外的新动作（导入、装上、放到手柄键）在 <a href="#/actions">「动作」页</a>。</p></section>` : null}
 
     ${view ? html`<section ref=${bindingsArea} class="board models-panel models-bindings" aria-label="手柄按键" id="models-bindings">
       <div class="models-section-head"><h2>手柄按键</h2><button class="models-btn" type="button" aria-label="恢复默认按键" disabled=${busy || !cap.select}

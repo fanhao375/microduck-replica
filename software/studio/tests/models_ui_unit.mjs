@@ -94,3 +94,91 @@ test('a stale failed refresh cannot turn a successful model operation into an of
   const current = ui.createModelReader(async () => { throw new Error('当前请求超时'); });
   await assert.rejects(current.read(), /当前请求超时/);
 });
+
+// ── 更多动作 ──
+const actionView = {
+  ...view,
+  actions: [{ id: 'a1', name: '深蹲', skill: 'crouch', state: 'loaded', buttons: [] },
+    { id: 'a2', name: '鞠躬', skill: null, state: 'none', suggest: { name: 'bow', duration: 2 } }],
+  manual_actions: [{ name: 'idle_chest', skill: 'idle_chest', state: 'loaded' }],
+  bindings: [{ button: 'a', label: 'A', slot: 'roulade', skill: 'roulade', model_id: 'flip-default' },
+    { button: 'rb', label: 'RB', slot: null, skill: 'crouch', action_name: '深蹲' }],
+};
+
+test('custom actions bind by name and only once they are loaded', () => {
+  const choice = ui.bindingChoice(actionView, 'a', 'skill:crouch');
+  assert.equal(choice.valid, true);
+  assert.equal(choice.conflict, true);
+  assert.equal(choice.targetLabel, '深蹲');
+  assert.deepEqual(choice.args, { op: 'bind', button: 'a', skill: 'crouch' });
+  assert.equal(ui.bindingChoice(actionView, 'rb', 'skill:crouch').already, true);
+  assert.equal(ui.bindingChoice(actionView, 'lb', 'skill:idle_chest').valid, true);
+  assert.equal(ui.bindingChoice(actionView, 'lb', 'skill:bow').valid, false);
+  assert.equal(ui.bindingChoice(actionView, 'start', 'skill:crouch').valid, false);
+  assert.equal(ui.bindingChoice(actionView, 'a', 'ground_pick').currentLabel, '前滚翻 · 内置前滚翻');
+  assert.equal(ui.bindingChoice(actionView, 'rb', 'ground_pick').currentLabel, '深蹲');
+});
+
+test('action form defaults to scale 1 and parses three numbers', () => {
+  const form = ui.actionForm(actionView.actions[1]);
+  assert.equal(form.name, 'bow');
+  assert.equal(form.action_scale, '1');
+  const ok = ui.actionArgs({ ...form, command: '1，0 0' });
+  assert.equal(ok.ok, true);
+  assert.deepEqual(ok.args.command, [1, 0, 0]);
+  assert.equal(ok.args.action_scale, 1);
+  assert.equal(ok.args.duration, 2);
+  for (const bad of [{ name: 'Bow' }, { duration: '0' }, { command: '1, 0' }, { unwind: '5, 0, 0' }, { action_scale: '0' }, { gain_ratio: '3' }]) {
+    assert.equal(ui.actionArgs({ ...form, ...bad }).ok, false, JSON.stringify(bad));
+  }
+  assert.equal(ui.actionState({ state: 'failed' }), '没加载成功');
+});
+
+test('physical capture stays off when a key runs a custom action', () => {
+  const rows = ['a', 'x', 'lb', 'rb', 'dpad_down'].map(button => ({ button, skill: button === 'rb' ? 'crouch' : '' }));
+  assert.equal(ui.captureAllowed({ bindings: rows }), false);
+});
+
+// ── 动作页 ──
+const actionsUrl = new URL('../web/actions.js', import.meta.url);
+const ac = existsSync(actionsUrl) ? await import(actionsUrl) : {};
+const pageView = {
+  slots: ['walk', 'sitstand', 'ground_pick', 'kick_left', 'kick_right', 'roulade', 'stand'].map((slot) => ({ slot, label: slot, model_id: 'builtin-' + slot, path: `/m/${slot}/policy.onnx` })),
+  items: [], skill_durations: { roulade: 1, kick_left: 0.5 }, loaded_skills: ['roulade', 'kick_left', 'kick_right', 'crouch'],
+  actions: [{ id: 'c1', name: '深蹲', skill: 'crouch', state: 'loaded', buttons: ['rb'], params: { duration: 3 } },
+    { id: 'i1', name: '抖一抖', skill: null, state: 'none', suggest: { name: 'idle_chest', duration: 3.1 }, buttons: [] }],
+  manual_actions: [],
+  bindings: [{ button: 'a', skill: 'ground_pick', slot: 'ground_pick' }, { button: 'x', skill: 'roulade', slot: 'roulade' },
+    { button: 'lb', skill: 'kick_left', slot: 'kick_left' }, { button: 'rb', skill: 'crouch', slot: null, action_name: '深蹲' },
+    { button: 'dpad_down', skill: 'sit_toggle', slot: 'sitstand' }],
+};
+
+test('the actions page lists factory moves, walking and imported actions together', () => {
+  const list = ac.actionList(pageView);
+  assert.deepEqual(list.map((x) => x.name), ['前滚翻', '踢左脚', '踢右脚', '捡东西', '坐下 / 站起', '走路', '深蹲', '抖一抖']);
+  const roll = list.find((x) => x.skill === 'roulade');
+  assert.equal(roll.duration, '约 1 秒');
+  assert.deepEqual(roll.keys, ['x']);
+  assert.match(roll.image, /stills\/roulade\.webp$/);
+  const idle = list.find((x) => x.name === '抖一抖');
+  assert.equal(idle.ready, false);
+  assert.equal(idle.image, null);  // 公开版没有这个动作的缩略图（模型作者没公开）
+  assert.equal(list.find((x) => x.name === '深蹲').duration, '3 秒');
+});
+
+test('key caps show action names and binding asks before replacing', () => {
+  assert.equal(ac.keyName(pageView, 'rb'), '深蹲');
+  assert.equal(ac.keyName(pageView, 'dpad_down'), '坐下 / 站起');
+  const list = ac.actionList(pageView);
+  const crouch = list.find((x) => x.skill === 'crouch');
+  const c = ac.keyChoice(pageView, crouch, 'a');
+  assert.equal(c.valid, true);
+  assert.ok(c.confirm.some((l) => l.includes('捡东西')));
+  assert.deepEqual(c.args, { op: 'bind', button: 'a', skill: 'crouch', replace: true });
+  const x = ac.keyChoice(pageView, crouch, 'x');
+  assert.ok(x.confirm.some((l) => l.includes('连着发')));
+  const kick = list.find((x) => x.skill === 'kick_right');
+  assert.deepEqual(ac.keyChoice(pageView, kick, 'lb').args, { op: 'bind', button: 'lb', slot: 'kick_right', replace: true });
+  assert.equal(ac.keyChoice(pageView, list.find((x) => x.name === '抖一抖'), 'a').valid, false);
+  assert.equal(ac.keyChoice(pageView, list.find((x) => x.kind === 'walk'), 'a').valid, false);
+});

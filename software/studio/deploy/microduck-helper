@@ -71,16 +71,18 @@ import time
 import tomllib
 import types
 
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 VERBS = ("bus-take", "bus-give-back", "bus-abort", "pad-pair", "pad-forget",
          "wifi-hotspot-down", "wifi-hotspot-up", "calib-read", "calib-commit", "ssh-status", "ssh-password",
          "imu-recalibrate", "robotd-update", "sensors-apply", "phone-tls",
-         "maintenance-export", "maintenance-preview", "maintenance-restore", "maintenance-shutdown")
+         "maintenance-export", "maintenance-preview", "maintenance-restore", "maintenance-shutdown",
+         "skill-table")
 
 EXIT_OK, EXIT_ARGS, EXIT_STATE, EXIT_BUSY, EXIT_FAIL, EXIT_RETAKE = 0, 2, 3, 4, 5, 6
 
 SELF_PATH = "/usr/local/sbin/microduck-helper"
 HELPER_DIR = "/run/microduck-helper"
+SKILL_TABLE_LOCK = HELPER_DIR + "/skill-table.lock"
 FLAG = HELPER_DIR + "/bus-held"
 ABORT = HELPER_DIR + "/abort"
 LAST = HELPER_DIR + "/last-result.json"
@@ -110,6 +112,7 @@ IMU_REDO_DIR = OPLOG_DIR + "/imu-recalibrate"
 IMU_REDO_MANIFEST = IMU_REDO_DIR + "/manifest.json"
 IMU_REDO_DROPIN = "/etc/systemd/system/robotd.service.d/zzzzzz-studio-imu-recalibrate.conf"
 IMU_REDO_SCHEMA = "microduck-imu-recalibrate/1"
+IMU_CONFIG_DIR = "/etc/robot/feetech-ft5"
 IMU_CONFIG = "/etc/robot/feetech-ft5/robotd.toml"
 IMU_CONFIG_SAVED = "/etc/robot/feetech-ft5/robotd.saved.toml"
 CALIB_RESTART_WAIT = 40.0
@@ -3306,6 +3309,140 @@ def ssh_reload(op):
     return None
 
 
+# ── skill-table：把主程序配置里写成一整行的动作表，改写成主程序自己认的「一条一条」格式 ──────────
+#
+# 镜像带的 robotd.toml 里，动作表是 `"skill" = [{...}, {...}]` 这样一整行（内联数组）。主程序自己改配置
+# （robot.setSkill / robot.removeSkill，也就是 Studio 装动作、换踢腿翻滚模型）只认 `[[policy.skill]]`，
+# 碰到内联写法就拒：「[[policy.skill]] is not a table array」。这里只改写格式：改前改后用 tomllib 读出来
+# 必须逐项相等，不等就一个字都不写。跟主程序拿同一把锁（配置旁边的 robotd.lock），不跟它同时写。
+SKILL_TABLE_LOCK_WAIT = 5.0
+SKILL_TABLE_HEADER_RE = re.compile(r'^\s*\[\[\s*"?policy"?\s*\.\s*"?skill"?\s*\]\]', re.M)
+POLICY_HEADER_RE = re.compile(r'^\s*\[\s*"?policy"?\s*\]\s*(#.*)?$')
+ANY_TABLE_HEADER_RE = re.compile(r'^\s*\[')
+SKILL_KEY_RE = re.compile(r'^\s*"?skill"?\s*=\s*')
+BARE_KEY_RE = re.compile(r'^[A-Za-z0-9_-]+$')
+
+
+def _toml_key(key):
+    return key if BARE_KEY_RE.match(key) else json.dumps(key, ensure_ascii=False)
+
+
+def _toml_scalar(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            raise Stop(EXIT_STATE, "unsupported_config", "动作表里有无穷大或非数，未修改")
+        text = repr(value)
+        return text if any(c in text for c in ".eE") else text + ".0"
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml_scalar(v) for v in value) + "]"
+    raise Stop(EXIT_STATE, "unsupported_config", f"动作表里有认不出的值：{type(value).__name__}，未修改")
+
+
+def _skill_blocks(skills):
+    out = []
+    for row in skills:
+        if not isinstance(row, dict):
+            raise Stop(EXIT_STATE, "unsupported_config", "动作表里有一项不是表，未修改")
+        lines = ["[[policy.skill]]"]
+        subtables = []
+        for key, value in row.items():
+            if isinstance(value, dict):
+                subtables.append((key, value))
+            elif isinstance(value, list) and any(isinstance(v, (dict, list)) for v in value):
+                raise Stop(EXIT_STATE, "unsupported_config", "动作表里有嵌套数组，未修改")
+            else:
+                lines.append(f"{_toml_key(key)} = {_toml_scalar(value)}")
+        for key, table in subtables:
+            lines.append(f"[policy.skill.{_toml_key(key)}]")
+            for k, v in table.items():
+                if isinstance(v, dict):
+                    raise Stop(EXIT_STATE, "unsupported_config", "动作表里有多层嵌套，未修改")
+                lines.append(f"{_toml_key(k)} = {_toml_scalar(v)}")
+        out.append("\n".join(lines))
+    return "\n\n".join(out) + "\n"
+
+
+def skill_table_rewrite(text):
+    """回改写后的文字；本来就是一条一条的（或没有动作表）回 None。"""
+    data = tomllib.loads(text)
+    policy = data.get("policy")
+    skills = policy.get("skill") if isinstance(policy, dict) else None
+    if not isinstance(skills, list) or not skills or SKILL_TABLE_HEADER_RE.search(text):
+        return None
+    lines = text.splitlines(keepends=True)
+    start = end = None
+    in_policy = False
+    for i, line in enumerate(lines):
+        bare = line.rstrip("\r\n")
+        if ANY_TABLE_HEADER_RE.match(bare):
+            in_policy = bool(POLICY_HEADER_RE.match(bare))
+            continue
+        if in_policy and SKILL_KEY_RE.match(bare):
+            start = i
+            break
+    if start is None:
+        raise Stop(EXIT_STATE, "unsupported_config", "找不到 [policy] 里的 skill 那一行，未修改")
+    # 内联数组可能跨好几行：一行一行往下加，直到能单独读通为止
+    for j in range(start, len(lines)):
+        chunk = "".join(lines[start:j + 1])
+        try:
+            tomllib.loads(chunk)
+        except ValueError:
+            continue
+        end = j + 1
+        break
+    if end is None:
+        raise Stop(EXIT_STATE, "unsupported_config", "skill 那一段读不通，未修改")
+    rest = "".join(lines[:start] + lines[end:]).rstrip("\n")
+    new = rest + "\n\n" + _skill_blocks(skills)
+    if tomllib.loads(new) != data:
+        raise Stop(EXIT_STATE, "unsupported_config", "改写后内容对不上，未修改")
+    return new
+
+
+def verb_skill_table(op, args):
+    check_keys(args, ("by",), "skill-table 的参数")
+    op.by = check_by(args)
+    if exists(op.ctx, SOFTWARE_MARKER):
+        raise Stop(EXIT_BUSY, "busy", "软件正在更新：等它装完再改")
+    native_update_conflict(op)
+    op.take_lock("改写动作表格式", SKILL_TABLE_LOCK)
+    handle, deadline = None, op.ctx.now() + SKILL_TABLE_LOCK_WAIT
+    while handle is None:
+        handle = op.ctx.lock(IMU_CONFIG_DIR + "/robotd.lock")
+        if handle is None:
+            if op.ctx.now() >= deadline:
+                raise Stop(EXIT_BUSY, "busy", "主程序正在改配置，等一下再试")
+            op.ctx.sleep(0.1)
+    converted = []
+    try:
+        for path in (IMU_CONFIG, IMU_CONFIG_SAVED):
+            if not exists(op.ctx, path):
+                continue
+            try:
+                raw = imu_profile_safe_file(op, path)
+                text = raw.decode("utf-8")
+                new = skill_table_rewrite(text)
+            except (UnicodeError, ValueError) as e:
+                raise Stop(EXIT_STATE, "bad_config", f"读不了 {path}：{type(e).__name__}: {e}") from e
+            if new is None:
+                continue
+            st = os.lstat(op.ctx.p(path))
+            write_atomic(op.ctx, path, new.encode("utf-8"), stat.S_IMODE(st.st_mode), st.st_uid, st.st_gid)
+            converted.append(path)
+            op.emit("skill-table", "info", f"动作表改成一条一条的格式：{path}")
+    finally:
+        op.ctx.unlock(handle)
+    return op.finish(EXIT_OK, "ok", "动作表格式已经是主程序认的" if not converted else "动作表格式改好了",
+                     {"converted": converted})
+
+
 def verb_ssh_password(op, args):
     check_keys(args, ("by", "on", "password"), "ssh-password 的参数")
     op.by = check_by(args)
@@ -3550,6 +3687,8 @@ def run(argv, ctx):
             return verb_ssh_password(op, args)
         if verb == "sensors-apply":
             return verb_sensors_apply(op, args)
+        if verb == "skill-table":
+            return verb_skill_table(op, args)
         return verb_abort(op, args)
     except Stop as s:
         # bad_verb 是 Studio 探测小助手可用性用的：不能把上一次真正的结果覆盖成 bad_verb

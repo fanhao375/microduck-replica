@@ -15,7 +15,7 @@ import tomllib
 import uuid
 from pathlib import Path
 
-from .model_package import PackageError, extract_package, validate_policy
+from .model_package import ACTION_NAME, PackageError, extract_action_package, extract_package, validate_policy
 from .rpc import call_once
 
 SCHEMA = 'microduck-studio-model-library/v1'
@@ -30,6 +30,11 @@ DEFAULT_KEYS = {'a': 'ground_pick', 'x': 'roulade', 'lb': 'kick_left', 'rb': 'ki
 BUTTONS = {'a': 'A', 'x': 'X', 'lb': 'LB', 'rb': 'RB', 'dpad_down': '十字下'}
 JOINTS = ('left_hip_yaw,left_hip_roll,left_hip_pitch,left_knee,left_ankle,neck_pitch,'
           'head_pitch,head_yaw,head_roll,right_hip_yaw,right_hip_roll,right_hip_pitch,right_knee,right_ankle').split(',')
+# 「更多动作」：主程序最多 30 个动作，超出的会被悄悄丢掉；留两个余量给出厂和手动加的。
+MAX_ACTIONS = 28
+# 不能拿来当自定义动作名的：出厂动作、主程序自己驱动的、按键默认值和运行槽名。
+RESERVED = frozenset(SLOTS) | frozenset(SKILLS.values()) | frozenset(DEFAULT_KEYS.values()) | {
+    'stand_test', 'roller_stand', 'swizzle', 'crouch_roller', 'spin'}
 READBACK_TIMEOUT = 25.0
 READBACK_POLL = 0.2
 
@@ -104,8 +109,10 @@ def _signature(contract):
 
 
 class Models:
-    def __init__(self, rd, log, state_dir, tune=None, root='/', validator=None, rpc=None):
+    def __init__(self, rd, log, state_dir, tune=None, root='/', validator=None, rpc=None, skill_table=None):
         self.rd, self.log, self.tune = rd, log, tune
+        # 改动作表格式要 root（配置归 root），走小助手；测试里换成假的
+        self.skill_table = skill_table
         self.root = Path(root)
         self.directory = Path(state_dir) / 'models'
         self.catalog = self.directory / 'library.json'
@@ -139,6 +146,17 @@ class Models:
         if self.directory.is_symlink():
             raise ModelError('模型库目录不能是符号链接')
         self.directory.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def actions_dir(self):
+        # 「更多动作」单放一个子目录：旧版 Studio 只扫模型库第一层，回退到旧版时不会把动作记录当成库损坏。
+        return self.directory / 'actions'
+
+    def _init_actions_dir(self):
+        self._init_dir()
+        if self.actions_dir.is_symlink():
+            raise ModelError('动作目录不能是符号链接')
+        self.actions_dir.mkdir(exist_ok=True)
 
     @staticmethod
     def _name(value):
@@ -261,12 +279,26 @@ class Models:
                     catalog['defaults'] = defaults
                     _atomic_json(self.catalog, catalog)
             entries = []
-            for child in sorted(self.directory.iterdir()):
+            folders = [(child, False) for child in sorted(self.directory.iterdir())]
+            if self.actions_dir.is_symlink():
+                error = error or '动作目录不能是符号链接'
+            elif self.actions_dir.is_dir():
+                folders += [(child, True) for child in sorted(self.actions_dir.iterdir())]
+            for child, action in folders:
                 if not re.fullmatch(r'[a-f0-9]{32}', child.name) or child.is_symlink() or not child.is_dir():
                     continue
                 try:
                     entry = _json(child / META, 64 << 10)
-                    if entry.get('id') != child.name or entry.get('slot') not in SLOTS or not isinstance(entry.get('sha256'), str) or not re.fullmatch(r'[a-f0-9]{64}', entry['sha256']):
+                    if action:
+                        # 动作没有运行槽；建议值只给页面预填，读坏了就当没有。
+                        if entry.get('kind') != 'action' or entry.get('slot') is not None:
+                            raise ValueError('动作记录无效')
+                        entry['slot'] = None
+                        if not isinstance(entry.get('suggest'), dict):
+                            entry['suggest'] = {}
+                    elif entry.get('kind') is not None or entry.get('slot') not in SLOTS:
+                        raise ValueError('模型身份记录无效')
+                    if entry.get('id') != child.name or not isinstance(entry.get('sha256'), str) or not re.fullmatch(r'[a-f0-9]{64}', entry['sha256']):
                         raise ValueError('模型身份记录无效')
                     entry['name'] = self._name(entry.get('name'))
                     entry['path'] = self._remote(child / 'policy.onnx')
@@ -374,9 +406,31 @@ class Models:
             if stage.exists():
                 shutil.rmtree(stage)
 
-    async def import_package(self, path, name=''):
+    def _install_action(self, path, name):
+        """动作只进库不登记。模型单独占一个目录，旁边只有它自己和 extras/（原因见 model_package）。"""
+        ident = uuid.uuid4().hex
+        stage, final = self.actions_dir / ('.stage-' + ident), self.actions_dir / ident
+        try:
+            self._init_actions_dir()
+            data = extract_action_package(Path(path), stage)
+            self._preflight(stage / data['onnx'])
+            suggest = data.get('suggest') or {}
+            record = {'id': ident, 'kind': 'action',
+                      'name': self._name(name or suggest.get('title') or suggest.get('name') or '新动作'),
+                      'task': None, 'sha256': data['sha256'], 'files': data['files'], 'suggest': suggest}
+            _atomic_json(stage / META, record)
+            os.replace(stage, final)
+        except (PackageError, OSError, KeyError, TypeError) as exc:
+            raise ModelError(f'动作导入失败：{exc}') from exc
+        finally:
+            if stage.exists():
+                shutil.rmtree(stage)
+
+    async def import_package(self, path, name='', kind=None):
         if not isinstance(name, str):
             raise ModelError('模型名称必须是文字')
+        if kind not in (None, 'action'):
+            raise ModelError('不认识的导入类型')
         if name:
             self._name(name)
         async with self._lock:
@@ -384,7 +438,7 @@ class Models:
             _, _, error = await self._disk(self._read_library, snap)
             if error:
                 raise ModelError(error, status=409)
-            await asyncio.to_thread(self._install, path, name)
+            await asyncio.to_thread(self._install_action if kind == 'action' else self._install, path, name)
         return await self.view()
 
     @staticmethod
@@ -398,6 +452,33 @@ class Models:
         if isinstance(lm, dict):
             paths.update(v['path'] for v in lm.values() if isinstance(v, dict) and isinstance(v.get('path'), str))
         return paths
+
+    def _needs_skill_table(self):
+        """镜像带的主程序配置把动作表写成 `"skill" = [{...}]` 一整行；主程序自己改动作表只认 [[policy.skill]]，
+        碰到一整行就拒（「[[policy.skill]] is not a table array」）。读不了配置就不管，让主程序自己报。"""
+        path = self._local('/etc/robot/feetech-ft5/robotd.toml')
+        try:
+            text = path.read_text(encoding='utf-8')
+            policy = tomllib.loads(text).get('policy')
+        except (OSError, ValueError, UnicodeError):
+            return False
+        skills = policy.get('skill') if isinstance(policy, dict) else None
+        return isinstance(skills, list) and bool(skills) and not re.search(
+            r'^\s*\[\[\s*"?policy"?\s*\.\s*"?skill"?\s*\]\]', text, re.M)
+
+    async def _ensure_skill_table(self):
+        if not await asyncio.to_thread(self._needs_skill_table):
+            return
+        fixer = self.skill_table
+        if fixer is None:
+            from . import helper
+            fixer = lambda: helper.skill_table('Studio 动作页')
+        ok, result, _ = await asyncio.to_thread(fixer)
+        if not ok or await asyncio.to_thread(self._needs_skill_table):
+            raise ModelError(f'主程序配置里的动作表要先改成主程序认的格式，没改成（{result}）；鸭子上的动作没动',
+                             status=503, code='skill_table')
+        if self.log:
+            self.log.write('主程序配置的动作表格式已改成 [[policy.skill]]（内容不变）', cat='models')
 
     def _configured_refs(self):
         """配置先落盘、加载后失败时，运行快照可能还是旧文件；不能遗漏重启引用。"""
@@ -473,9 +554,16 @@ class Models:
             bindings.append({'button': b, 'label': BUTTONS[b], 'slot': slot, 'skill': skill,
                              'model_id': slots_by_name.get(slot, {}).get('model_id'), 'default_skill': DEFAULT_KEYS[b],
                              'overridden': row.get('overridden'), 'error': row.get('error')})
+        actions, manual = self._actions_view(entries, snap, refs, config_error)
+        names = {a['skill']: a['name'] for a in actions + manual if a.get('skill')}
+        for b in bindings:
+            if b['slot'] is None and b.get('skill') in names:
+                b['action_name'] = names[b['skill']]
         items = []
         active = (snap.get('bus') or {}).get('active_model')
         for entry in entries:
+            if entry.get('kind') == 'action':
+                continue
             path, slot = entry['path'], entry['slot']
             chosen = [s['slot'] for s in slots if s.get('path') == path]
             delete_reason = self._delete_reason(entry, snap, refs, config_error)
@@ -488,7 +576,13 @@ class Models:
                           'sha12': (entry.get('sha256') or '')[:12] or None, 'path': path, 'installed': entry['installed']})
         available = await asyncio.to_thread(self._validator_available)
         reason = reason or (None if available else '本机没有可信模型运行器，无法预检模型')
-        return {'items': items, 'slots': slots, 'bindings': bindings,
+        # 动作页列表里写「约 1 秒」用；主程序自己驱动的（捡东西、坐站）没有固定时长。
+        durations = {r['name']: r['duration'] for r in self._rows(snap.get('skills'), 'skills')
+                     if isinstance(r, dict) and isinstance(r.get('name'), str) and isinstance(r.get('duration'), (int, float))
+                     and not isinstance(r.get('duration'), bool)}
+        return {'items': items, 'slots': slots, 'bindings': bindings, 'actions': actions, 'manual_actions': manual,
+                'action_limit': MAX_ACTIONS, 'skill_durations': durations,
+                'loaded_skills': list((snap.get('policies') or {}).get('skills') or []),
                 'buttons': [{'button': b, 'label': l} for b, l in BUTTONS.items()],
                 'capabilities': {'import': available and not library_error, 'select': reason is None,
                                  'rename': not library_error, 'delete': not snap['error'] and not config_error and not library_error,
@@ -523,7 +617,7 @@ class Models:
                 catalog['defaults'][item['slot']]['name'] = name
                 _atomic_json(self.catalog, catalog)
             else:
-                path = self.directory / item['id'] / META
+                path = (self.actions_dir if item.get('kind') == 'action' else self.directory) / item['id'] / META
                 record = _json(path, 64 << 10)
                 record['name'] = name
                 _atomic_json(path, record)
@@ -531,8 +625,9 @@ class Models:
     def _delete(self, item):
         if not re.fullmatch(r'[a-f0-9]{32}', item['id']):
             raise ModelError('模型目录身份无效')
-        target = self.directory / item['id']
-        if target.is_symlink() or target.resolve().parent != self.directory.resolve():
+        parent = self.actions_dir if item.get('kind') == 'action' else self.directory
+        target = parent / item['id']
+        if target.is_symlink() or target.resolve().parent != parent.resolve():
             raise ModelError('模型目录路径不安全')
         shutil.rmtree(target)
 
@@ -618,6 +713,8 @@ class Models:
                       if isinstance(r, dict) and r.get('name') == canonical and isinstance(r.get('path'), str)), None)
         changed_skill = skill is not None and slot not in ('sitstand', 'ground_pick') and skill['path'] != item['path']
         expected_skill = (canonical, item['path']) if changed_skill else None
+        if changed_skill:
+            await self._ensure_skill_table()
         try:
             await self._write_rpc('robot.loadPolicy', {'slot': slot, 'path': item['path']})
             if changed_skill:
@@ -677,7 +774,18 @@ class Models:
             if not isinstance(button, str) or button not in BUTTONS:
                 raise ModelError('只支持 A、X、LB、RB 和十字下按键')
             skill = ''
-            if op == 'bind':
+            if op == 'bind' and args.get('skill') is not None:
+                # 自定义动作：只认主程序已经加载好的名字，绑一个没加载的名字等于这个键按了没反应。
+                skill = args.get('skill')
+                if not isinstance(skill, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', skill) or skill in RESERVED:
+                    raise ModelError('这不是可以绑定的自定义动作')
+                if skill not in ((snap.get('policies') or {}).get('skills') or []):
+                    raise ModelError('主程序还没加载这个动作，先在「更多动作」里装上并确认加载成功')
+                current = rows.get(button, {}).get('skill')
+                if current and current != skill and args.get('replace') is not True:
+                    label = next((LABELS[s] for s, sk in SKILLS.items() if sk == current), current)
+                    raise ModelError(f'{BUTTONS[button]} 当前用于「{label}」，请确认替换后再修改', status=409, code='binding_conflict')
+            elif op == 'bind':
                 slot = args.get('slot')
                 if not isinstance(slot, str) or slot not in SKILLS:
                     raise ModelError('行走和独立站立不是可绑定的单次技能')
@@ -719,8 +827,232 @@ class Models:
                 raise ModelError(f'按键修改失败：{exc}；原按键配置回退也未确认：{rollback}', status=503, code='rollback_failed') from exc
             raise ModelError(f'按键修改失败：{exc}；已恢复原按键配置', status=503, code='binding_failed') from exc
 
+    # ── 更多动作：库里的 kind=action 条目 ↔ 主程序动作表 ────────────────────────────
+    #
+    # 登记状态只信主程序：配置里有没有（robot.skills）、加载了没有（robot.policies.skills）。
+    # 两个会把鸭子开不了机的情况在这里堵：登记着的模型文件不许删（删除走原有的引用检查），
+    # 模型旁边不放合同文件（导入时已经收进 extras/）。
+
+    def _same_path(self, a, b):
+        if not isinstance(a, str) or not isinstance(b, str):
+            return False
+        if a == b:
+            return True
+        try:
+            return self._remote(self._local(a).resolve()) == self._remote(self._local(b).resolve())
+        except (OSError, RuntimeError, ModelError):
+            return False
+
+    def _action_rows(self, snap, path):
+        return [r for r in self._rows(snap.get('skills'), 'skills')
+                if isinstance(r, dict) and self._same_path(r.get('path'), path)]
+
+    @staticmethod
+    def _skill_params(row):
+        keys = ('duration', 'command', 'unwind', 'unwind_s', 'chain', 'action_scale', 'gain_ratio')
+        return {k: row[k] for k in keys if row.get(k) is not None}
+
+    def _actions_view(self, entries, snap, refs, config_error):
+        loaded = set((snap.get('policies') or {}).get('skills') or [])
+        change_error = (snap.get('policies') or {}).get('change_error')
+        bound = {}
+        for row in self._rows(snap.get('bindings'), 'bindings'):
+            if isinstance(row, dict) and row.get('button') in BUTTONS:
+                bound.setdefault(row.get('skill'), []).append(row['button'])
+        actions, mine = [], set()
+        for entry in entries:
+            if entry.get('kind') != 'action':
+                continue
+            rows = self._action_rows(snap, entry['path'])
+            row = rows[0] if rows else None
+            name = row.get('name') if row else None
+            if name:
+                mine.add(name)
+            state = 'none' if not row else 'loaded' if name in loaded else 'failed'
+            delete_reason = None
+            if row:
+                delete_reason = '已经装在鸭子上，先「卸下」再删除'
+            else:
+                delete_reason = self._delete_reason(entry, snap, refs, config_error)
+            actions.append({
+                'id': entry['id'], 'name': entry['name'], 'kind': 'action', 'skill': name, 'state': state,
+                'params': self._skill_params(row) if row else None, 'suggest': entry.get('suggest') or {},
+                'error': (str(change_error or '主程序还没加载这个动作') if state == 'failed' else None),
+                'buttons': bound.get(name, []) if name else [], 'extra_names': [r.get('name') for r in rows[1:]],
+                'installed': entry['installed'], 'can_delete': delete_reason is None, 'reason': delete_reason,
+                'sha12': entry['sha256'][:12], 'path': entry['path'], 'files': entry.get('files') or []})
+        manual = []
+        for row in self._rows(snap.get('skills'), 'skills'):
+            name = row.get('name') if isinstance(row, dict) else None
+            # 不是从这里装的、也不是出厂的：别人手改配置加的。只读列出，可以绑键，不在这里删。
+            if (not isinstance(name, str) or name in RESERVED or name in mine or row.get('overridden') is not True
+                    or (isinstance(row.get('path'), str) and self._managed(row['path']))):
+                continue
+            manual.append({'name': name, 'skill': name, 'state': 'loaded' if name in loaded else 'failed',
+                           'params': self._skill_params(row), 'path': row.get('path'), 'buttons': bound.get(name, [])})
+        return actions, manual
+
+    @staticmethod
+    def _action_spec(args):
+        """把页面填的参数收成一份完整的登记。每项都显式发送：改参数时主程序会沿用没给的旧值。"""
+        def number(key, low, high, default=None, low_open=False):
+            value = args.get(key, default)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ModelError(f'{key} 需要是数字')
+            value = float(value)
+            if not math.isfinite(value) or value > high or (value <= low if low_open else value < low):
+                raise ModelError(f'{key} 超出允许范围')
+            return value
+
+        def triple(key):
+            value = args.get(key, [0.0, 0.0, 0.0])
+            if not isinstance(value, list) or len(value) != 3:
+                raise ModelError(f'{key} 需要 3 个数')
+            out = []
+            for v in value:
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) or abs(float(v)) > 2:
+                    raise ModelError(f'{key} 的每个数要在 −2 到 2 之间')
+                out.append(float(v))
+            return out
+
+        name = args.get('name')
+        if not isinstance(name, str) or not re.fullmatch(ACTION_NAME, name):
+            raise ModelError('动作名只能用小写英文字母、数字和下划线，最多 32 个字符')
+        if name in RESERVED:
+            raise ModelError(f'「{name}」是出厂动作或主程序保留的名字，换一个')
+        chain = args.get('chain', False)
+        if not isinstance(chain, bool):
+            raise ModelError('「能否连着做」需要是开或关')
+        return {'name': name, 'duration': number('duration', 0.2, 60.0),
+                'command': triple('command'), 'unwind': triple('unwind'),
+                'unwind_s': number('unwind_s', 0.0, 10.0, 0.0), 'chain': chain,
+                'action_scale': number('action_scale', 0.0, 2.0, 1.0, low_open=True),
+                'gain_ratio': number('gain_ratio', 0.2, 2.0, 1.0)}
+
+    async def _wait_actions(self, present, absent):
+        """present：{名字: 模型路径} 必须在配置里且已加载；absent：这些名字两边都必须没有。"""
+        deadline = time.monotonic() + READBACK_TIMEOUT
+        last = '尚未回读到动作已加载'
+        while True:
+            snap = await self._snapshot()
+            policies = snap.get('policies') or {}
+            loaded = set(policies.get('skills') or [])
+            config = {r.get('name'): r for r in self._rows(snap.get('skills'), 'skills') if isinstance(r, dict)}
+            error = snap['error'] or policies.get('change_error')
+            ok = (not error and all(n in loaded and self._same_path(config.get(n, {}).get('path'), p) for n, p in present.items())
+                  and all(n not in loaded and n not in config for n in absent))
+            if ok:
+                return
+            last = str(error or '主程序配置或加载的动作列表还没对上')
+            if time.monotonic() >= deadline:
+                raise ModelError('动作加载未确认：' + last, status=503, code='load_unconfirmed')
+            await asyncio.sleep(READBACK_POLL)
+
+    def _check_action_file(self, item):
+        if not item.get('installed'):
+            raise ModelError('动作的模型文件缺失或不安全，请重新导入')
+        digest = hashlib.sha256(self._local(item['path']).read_bytes()).hexdigest()
+        if digest != item['sha256']:
+            raise ModelError('动作的模型文件已改变，SHA256 校验不通过，请重新导入')
+        if any(p.name == 'deployment-contract.json' for p in self._local(item['path']).parent.iterdir()):
+            raise ModelError('动作模型旁边出现了部署合同文件；为免主程序下次开机失败，请删除后重新导入')
+        self._preflight(self._local(item['path']))
+
+    async def _action_install(self, item, args, snap):
+        if item.get('kind') != 'action':
+            raise ModelError('这个模型不是「更多动作」，请用上面的「使用此模型」')
+        spec = self._action_spec(args)
+        policies = snap.get('policies') or {}
+        if policies.get('change_error'):
+            raise ModelError('主程序上一次加载动作有错误，先处理它再装新动作：' + str(policies['change_error']), status=409)
+        try:
+            await asyncio.to_thread(self._check_action_file, item)
+        except (OSError, ValueError) as exc:
+            raise ModelError(f'无法读取或预检动作模型：{exc}') from exc
+        snap = await self._require_idle()
+        old_rows = self._action_rows(snap, item['path'])
+        old_names = {r.get('name') for r in old_rows}
+        config = {r.get('name'): r for r in self._rows(snap.get('skills'), 'skills') if isinstance(r, dict)}
+        taken = config.get(spec['name'])
+        if taken is not None and spec['name'] not in old_names:
+            raise ModelError(f'鸭子上已经有一个叫「{spec["name"]}」的动作，换一个名字', status=409, code='name_taken')
+        if spec['name'] in set((snap['skills'] or {}).get('built_in') or []):
+            raise ModelError(f'「{spec["name"]}」是主程序自己驱动的动作，换一个名字', status=409, code='name_taken')
+        renamed = sorted(n for n in old_names if n != spec['name'])
+        bound = [r.get('button') for r in self._rows(snap.get('bindings'), 'bindings')
+                 if isinstance(r, dict) and r.get('skill') in renamed]
+        if bound:
+            raise ModelError('改名前先把这个动作从手柄键上取下来：' + '、'.join(BUTTONS.get(b, b) for b in bound), status=409)
+        if spec['name'] not in old_names and len(config) >= MAX_ACTIONS:
+            raise ModelError(f'鸭子上已经登记了 {len(config)} 个动作，到上限了；先卸下几个再装', status=409, code='too_many')
+        params = dict(spec, path=item['path'])
+        await self._ensure_skill_table()
+        try:
+            await self._write_rpc('robot.setSkill', params)
+            for name in renamed:
+                await self._require_idle()
+                await self._write_rpc('robot.removeSkill', {'name': name})
+            await self._wait_actions({spec['name']: item['path']}, renamed)
+        except Exception as exc:
+            try:
+                await self._require_idle()
+                if spec['name'] in old_names:
+                    previous = next(r for r in old_rows if r.get('name') == spec['name'])
+                    await self._write_rpc('robot.setSkill', dict(self._skill_params(previous), name=spec['name'], path=previous['path']))
+                else:
+                    await self._write_rpc('robot.removeSkill', {'name': spec['name']})
+                for row in old_rows:
+                    if row.get('name') in renamed:
+                        await self._write_rpc('robot.setSkill', dict(self._skill_params(row), name=row['name'], path=row['path']))
+                await self._wait_actions({r['name']: r['path'] for r in old_rows},
+                                         [] if spec['name'] in old_names else [spec['name']])
+            except Exception as rollback:
+                raise ModelError(f'动作装上失败：{exc}；撤回也没确认：{rollback}', status=503, code='rollback_failed') from exc
+            raise ModelError(f'动作装上失败：{exc}；已经撤回，鸭子上的动作跟原来一样', status=503, code='load_failed') from exc
+
+    async def _action_uninstall(self, item, snap):
+        if item.get('kind') != 'action':
+            raise ModelError('这个模型不是「更多动作」')
+        old_rows = self._action_rows(snap, item['path'])
+        if not old_rows:
+            raise ModelError('这个动作没有装在鸭子上', status=409)
+        names = {r['name'] for r in old_rows}
+        rows = {r.get('button'): r for r in self._rows(snap['bindings'], 'bindings') if isinstance(r, dict)}
+        buttons = [b for b, r in rows.items() if r.get('skill') in names]
+        if any(not isinstance(rows[b].get('overridden'), bool) for b in buttons):
+            raise ModelError('按键原配置回读不完整，无法保存回退来源', status=503)
+        await self._ensure_skill_table()
+        try:
+            # 先把键还给出厂动作，再撤登记：撤了以后这个名字就没了，键会变成按了没反应。
+            for button in buttons:
+                await self._require_idle()
+                await self._write_rpc('pad.bind', {'button': button})
+            if buttons:
+                await self._wait_bindings({b: {'skill': DEFAULT_KEYS[b], 'overridden': False} for b in buttons})
+            for name in sorted(names):
+                await self._require_idle()
+                await self._write_rpc('robot.removeSkill', {'name': name})
+            await self._wait_actions({}, sorted(names))
+        except Exception as exc:
+            try:
+                await self._require_idle()
+                snap = await self._snapshot()
+                config = {r.get('name') for r in self._rows(snap.get('skills'), 'skills') if isinstance(r, dict)}
+                for row in old_rows:
+                    if row['name'] not in config:
+                        await self._write_rpc('robot.setSkill', dict(self._skill_params(row), name=row['name'], path=row['path']))
+                await self._wait_actions({r['name']: r['path'] for r in old_rows}, [])
+                for button in buttons:
+                    await self._write_rpc('pad.bind', {'button': button, 'skill': rows[button]['skill']})
+                if buttons:
+                    await self._wait_bindings({b: rows[b] for b in buttons})
+            except Exception as rollback:
+                raise ModelError(f'卸下动作失败：{exc}；恢复原样也没确认：{rollback}', status=503, code='rollback_failed') from exc
+            raise ModelError(f'卸下动作失败：{exc}；已恢复原样', status=503, code='unload_failed') from exc
+
     async def handle(self, args, by=None):
-        if not isinstance(args, dict) or args.get('op') not in ('rename', 'select', 'restore', 'delete', 'bind', 'unbind', 'reset_bindings'):
+        if not isinstance(args, dict) or args.get('op') not in ('rename', 'select', 'restore', 'delete', 'bind', 'unbind', 'reset_bindings',
+                                                                'action_install', 'action_uninstall'):
             raise ModelError('不支持的模型管理操作')
         op = args['op']
         async with self._lock:
@@ -742,7 +1074,11 @@ class Models:
                 reason = self._idle_reason(snap)
                 if reason:
                     raise ModelError(reason, status=409, code='not_idle')
-                if op in ('select', 'restore'):
+                if op == 'action_install':
+                    await self._action_install(self._item(entries, args.get('id')), args, snap)
+                elif op == 'action_uninstall':
+                    await self._action_uninstall(self._item(entries, args.get('id')), snap)
+                elif op in ('select', 'restore'):
                     slot = args.get('slot')
                     if slot not in SLOTS:
                         raise ModelError('无法识别这个模型运行槽')

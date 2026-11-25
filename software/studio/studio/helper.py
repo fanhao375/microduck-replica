@@ -344,6 +344,12 @@ def sensors_apply(by, camera=None, tof=None, timeout=90):
     return _call("sensors-apply", payload, timeout)
 
 
+def skill_table(by, timeout=30):
+    """把主程序配置里写成一整行的动作表改成 [[policy.skill]] 格式（skill-table）。回 (ok, result, detail)。
+    镜像带的配置是一整行的写法，主程序自己改动作表（robot.setSkill / removeSkill）不认。"""
+    return _call("skill-table", {"by": by}, timeout)
+
+
 def last_result():
     """读小助手最后一次写下的完整结果（Studio 重启 / 调用超时以后用）。读不到回 None。"""
     try:

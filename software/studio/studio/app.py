@@ -643,9 +643,15 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         filename = request.query_params.get("filename", "")
         if not filename or len(filename) > 200 or any(c in filename for c in ("/", "\\", ":", "\x00")):
             return model_response({"ok": False, "error": "请选择模型部署包文件"}, 400)
-        suffix = next((s for s in (".tar.gz", ".tgz", ".zip") if filename.lower().endswith(s)), None)
+        # kind=action 是「更多动作」：还收单个 .onnx。不认识的 kind 直接拒，不落到默认的部署包流程里。
+        kind = request.query_params.get("kind") or None
+        if kind not in (None, "action"):
+            return model_response({"ok": False, "error": "不认识的导入类型"}, 400)
+        suffixes = (".tar.gz", ".tgz", ".zip") + ((".onnx",) if kind == "action" else ())
+        suffix = next((s for s in suffixes if filename.lower().endswith(s)), None)
         if suffix is None:
-            return model_response({"ok": False, "error": "请选择 ZIP、tar.gz 或 tgz 模型部署包"}, 400)
+            return model_response({"ok": False, "error": "请选择 .onnx 模型，或 ZIP、tar.gz 动作包" if kind == "action"
+                                   else "请选择 ZIP、tar.gz 或 tgz 模型部署包"}, 400)
         name = request.query_params.get("name", "")
         if len(name) > 80:
             return model_response({"ok": False, "error": "模型名称最多 80 个字符"}, 400)
@@ -669,6 +675,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         await asyncio.to_thread(output.write, chunk)
                 if not total:
                     raise ValueError("模型部署包是空的")
+                if kind == "action":
+                    return await model_result(lambda: models.import_package(Path(temporary), name=name, kind=kind))
                 return await model_result(lambda: models.import_package(Path(temporary), name=name))
             except OverflowError:
                 return model_response({"ok": False, "error": "模型部署包不能超过 64 MiB"}, 413)

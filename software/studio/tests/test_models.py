@@ -45,6 +45,9 @@ class Runtime:
         self.known_skills = ['kick_left', 'kick_right', 'roulade']
         self.report_overridden = True
         self.skills = [{'name': s, 'path': self.paths[s], 'duration': 2.0} for s in ('kick_left', 'kick_right', 'roulade')]
+        # 「更多动作」用：名字在这里的动作，登记会成功但重新加载失败（主程序把原因写进 change_error）。
+        self.fail_load = set()
+        self.change_error = None
 
     async def __call__(self, method, params=None, timeout=2.0):
         params = params or {}
@@ -59,7 +62,7 @@ class Runtime:
                     'loaded_models': {s: {'path': p} for s, p in self.loaded.items() if p},
                     'active_model': None}
         if method == 'robot.policies':
-            return {'enabled': True, 'change_error': None, 'skills': self.known_skills,
+            return {'enabled': True, 'change_error': self.change_error, 'skills': list(self.known_skills),
                     'slots': [{'slot': s, 'path': p, 'overridden': self.report_overridden, 'error': None} for s, p in self.paths.items()]}
         if method == 'robot.skills':
             return {'skills': copy.deepcopy(self.skills), 'built_in': ['ground_pick', 'sit_toggle']}
@@ -74,13 +77,37 @@ class Runtime:
                 self.loaded[params['slot']] = self.paths[params['slot']]
             return {'accepted': True}
         if method == 'robot.setSkill':
-            sk = next(s for s in self.skills if s['name'] == params['name'])
-            sk['path'] = params['path']
-            if params['path'] != self.accept_only:
-                self.loaded[params['name']] = params['path']
+            name = params['name']
+            sk = next((s for s in self.skills if s['name'] == name), None)
+            if sk is None:
+                if 'duration' not in params:
+                    return {'accepted': False, 'reason': 'new skill needs a duration'}
+                sk = {'name': name, 'overridden': True}
+                self.skills.append(sk)
+            sk.update({k: v for k, v in params.items() if k != 'name'})
+            if name in self.fail_load:
+                self.change_error = f'cannot load {name}'
+                if name in self.known_skills:
+                    self.known_skills.remove(name)
+            elif params['path'] != self.accept_only:
+                self.change_error = None
+                self.loaded[name] = params['path']
+                if name not in self.known_skills:
+                    self.known_skills.append(name)
             return {'accepted': True}
+        if method == 'robot.removeSkill':
+            name = params['name']
+            before = len(self.skills)
+            self.skills = [s for s in self.skills if s['name'] != name]
+            if name in self.known_skills:
+                self.known_skills.remove(name)
+            self.loaded.pop(name, None)
+            self.change_error = None
+            return {'accepted': True, 'reason': None if len(self.skills) < before else 'no such skill'}
         if method == 'pad.bind':
             b = params['button']
+            if params.get('skill') and params['skill'] not in self.known_skills + ['ground_pick', 'sit_toggle']:
+                return {'accepted': False, 'reason': 'no such skill'}
             if 'skill' in params:
                 self.binds[b] = params['skill']
                 self.overrides.add(b)
