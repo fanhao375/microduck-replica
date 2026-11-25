@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_on": "2026-11-24",
+  "recorded_on": "2026-11-25",
   "display_timezone": "Asia/Tokyo",
   "scope": "Upstream documentation tracking; this snapshot does not certify integration into the replica image.",
   "repositories": {
@@ -36010,6 +36010,45 @@
             "sound": "MIDI chorale importer would report pitches dropped when a chord exceeds four voices; playback and sound assets unchanged."
           },
           "priority": "Medium for the sound-content import workflow; no hardware/runtime effect."
+        },
+        {
+          "number": 452,
+          "repository": "pollen-robotics/microduck",
+          "title": "pet-detect: make training evaluation session-safe",
+          "state": "open",
+          "draft": false,
+          "url": "https://github.com/pollen-robotics/microduck/pull/452",
+          "created_at": "2026-10-25T01:25:00Z",
+          "created_at_jst": "2026-10-25T19:25:00+09:00",
+          "updated_at": "2026-11-24T10:56:29Z",
+          "updated_at_jst": "2026-11-24T19:56:29+09:00",
+          "merged_at": null,
+          "closed_at": null,
+          "head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+          "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+          "base_branch": "main",
+          "commit_count": 3,
+          "changed_file_count": 8,
+          "additions": 1223,
+          "deletions": 94,
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/93b26bbf2acf73babb53cd6b47e800d2661f54f4...d094639bdf382576379eb3bf14769d9dc9886f96",
+          "classification": "Open, unmerged pet-detect training/evaluation change; not a new model release and not integrated into replica.",
+          "change_summary": "Prevents leakage by splitting overlapping audio windows by capture session; adds optional data provenance manifest, seeded training, early stopping, reporting and ONNX/PyTorch parity checks. Does not replace shipped model or alter production runtime.",
+          "author_reported_validation": "PR reports 10 Python tests, 7 Rust pet-detect tests, lint/format checks, and synthetic multi-session end-to-end smoke. Not rerun by tracker.",
+          "check_status": "Commit status pending; no check-runs available at observation.",
+          "included_in_formal_release": false,
+          "replica_integration": "not_integrated",
+          "impact": {
+            "HD1910": "No servo or motion change.",
+            "camera": "No camera or ISP change.",
+            "ToF": "No change.",
+            "model_management": "Adds provenance for candidate training artifacts, no new weights or runtime contract.",
+            "training": "Session-isolated validation improves protection against overlapping-window leakage; data labels, licensing and target thresholds still require review.",
+            "motion": "No action or gait change.",
+            "sound": "No assets or playback change."
+          },
+          "priority": "Medium for training reproducibility; high before model/data adoption."
         }
       ],
       "previous_stable_releases": [
@@ -58074,7 +58113,7 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-24T12:48:25Z",
+  "checked_at_utc": "2026-11-25T08:05:56.658Z",
   "latest_review": {
     "default_branch_changes": false,
     "new_stable_release": false,
@@ -58088,16 +58127,17 @@
     "robot_connected": false,
     "image_built_or_published_by_tracker": false,
     "previous_substantive_review_utc": "2026-11-24T11:01:27Z",
-    "source_snapshot_utc": "2026-11-24T12:48:25Z",
-    "source_snapshot_jst": "2026-11-24T21:48:25+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-24T12:48:25Z",
+    "source_snapshot_utc": "2026-11-25T08:05:56.658Z",
+    "source_snapshot_jst": "2026-11-25T17:05:56.658+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-25T08:05:56.658Z",
     "stable_release_tag": "daemon-v0.23.1",
     "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "stable_asset_count": 8,
     "new_pull_requests": {
       "pollen-robotics/microduck": [
         624,
-        625
+        625,
+        452
       ]
     },
     "updated_pull_requests": {},
@@ -58123,11 +58163,34 @@
     "newly_discovered_pull_requests": {
       "pollen-robotics/microduck": [
         624,
-        625
+        625,
+        452
       ]
     },
-    "notes": "At 2026-11-24T12:48:25Z, Microduck main/release/dev references remain 93b26bbf / daemon-v0.23.1 / API68. New PR #625 (head 6b568429f8ed6d40ebfa019c65291a0bc6383757) proposes reporting excess MIDI chord notes in sounds/src/chorale/midi.rs; open/unmerged, no GitHub checks yet. PR #624 adds only renovate.json and is closed unmerged. Yocto main/OS release, PR #147 and public channel metadata are unchanged; official blog remains three articles, latest 2026-10-23. No tracker tests/builds, downloads, hardware connection, or runtime integration.",
+    "notes": "At 2026-11-25T08:05:56.658Z / 17:05:56.658+09:00, the four official repository default heads, Microduck daemon-v0.23.1/API68 stable source, tracked PR states, Yocto PR #147 and channel metadata remain unchanged. PR #452 (head d094639bdf382576379eb3bf14769d9dc9886f96, base 93b26bbf2acf73babb53cd6b47e800d2661f54f4) is open/unmerged and proposes session-isolated, reproducible pet-detect training/evaluation with dataset provenance and ONNX parity checks; it does not replace the shipped model or change runtime behavior. Author reports tests/smokes; GitHub commit status is pending and no checks are available. Blog remains three articles, latest 2026-10-23. No tracker tests/builds, downloads, hardware connection, or runtime integration.",
     "updated_pull_request_details": {
+      "pollen-robotics/microduck#452": {
+        "state": "open",
+        "draft": false,
+        "created_at_utc": "2026-10-25T01:25:00Z",
+        "updated_at_utc": "2026-11-24T10:56:29Z",
+        "head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+        "base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "commit_count": 3,
+        "changed_file_count": 8,
+        "additions": 1223,
+        "deletions": 94,
+        "classification": "Open training/evaluation proposal; not merged, not a release, and not integrated.",
+        "change": "Splits pet-detection examples by capture session to prevent overlapping windows from the same recording leaking across train/validation. Adds optional JSONL provenance manifest, seeded training, early stopping, metrics and hashes, ONNX graph validation and PyTorch/ONNX Runtime parity check. A WAV is treated as one session.",
+        "files": [".github/workflows/ci.yml", ".gitignore", "pet-detect/README.md", "pet-detect/data/README.md", "pet-detect/data/manifest.example.jsonl", "pet-detect/training/dataset.py", "pet-detect/training/test_dataset.py", "pet-detect/training/train.py"],
+        "author_reported_validation": "10 Python unit tests, 7 pet-detect Rust tests, formatting/lint, and synthetic multi-session training/ONNX smoke reportedly passed; tracker did not rerun them.",
+        "current_check_status": "commit status pending; no check-runs available at observation",
+        "explicit_scope_limit": "PR states it does not add private recordings, replace the shipped model, or change production runtime behavior.",
+        "impact": {"HD1910": "No servo or motion change.", "camera": "No camera or ISP change.", "ToF": "No change.", "model_management": "Adds candidate training artifact and dataset/model provenance; no new weights or runtime contract.", "training": "Session-separated validation reduces leakage from overlapping audio windows; review real-session labels, licensing and target thresholds before adoption.", "motion": "No action or gait change.", "sound": "No audio assets or playback change."},
+        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96",
+        "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/93b26bbf2acf73babb53cd6b47e800d2661f54f4...d094639bdf382576379eb3bf14769d9dc9886f96",
+        "priority": "Medium for training reproducibility; high before any model/data adoption."
+      },
       "pollen-robotics/microduck#577": {
         "previous_head_sha": "db5a968cf3a496bb5305995213aedf6d99acb301",
         "head_sha": "cf51c8ba714a06dcb40109f4b0d24bb02e06a8cf",
@@ -64767,6 +64830,29 @@
       "yocto_pr147_unchanged": true,
       "beta_and_faceboard_channel_metadata_unchanged": true,
       "blog_latest": "2026-10-23",
+      "tracker_ran_tests_or_builds": false,
+      "tracker_downloaded_bundles_or_images": false,
+      "tracker_touched_hardware": false,
+      "replica_runtime_integrated": false
+    },
+    {
+      "checked_at_utc": "2026-11-25T08:05:56.658Z",
+      "checked_at_jst": "2026-11-25T17:05:56.658+09:00",
+      "record": "Upstream check; document previously untracked pet-detect training/evaluation PR #452",
+      "source_snapshot_url": "https://github.com/pollen-robotics/microduck/commit/d094639bdf382576379eb3bf14769d9dc9886f96",
+      "stable_release_unchanged": true,
+      "stable_release_tag": "daemon-v0.23.1",
+      "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+      "new_pull_requests": {"pollen-robotics/microduck": [452]},
+      "pr452_state": "open_unmerged",
+      "pr452_head_sha": "d094639bdf382576379eb3bf14769d9dc9886f96",
+      "pr452_base_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+      "pr452_scope": "Session-isolated reproducible pet-detect training/evaluation, dataset provenance and ONNX parity; no shipped-model replacement or production runtime change.",
+      "pr452_current_checks": "commit status pending; no check-runs available",
+      "tracked_prs_unchanged": ["microduck#621", "microduck#622", "microduck#625", "microduck_rl#92", "elec_RPI_Robot_HAT#8", "microduck_emotions#1", "microduck_yocto#147"],
+      "official_os_stable_unchanged": true,
+      "blog_latest": "2026-10-23",
+      "blog_article_count": 3,
       "tracker_ran_tests_or_builds": false,
       "tracker_downloaded_bundles_or_images": false,
       "tracker_touched_hardware": false,
