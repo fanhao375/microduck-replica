@@ -203,6 +203,27 @@ class Robotd:
             self._relax_watch = loop.create_task(self._watch_relax())
         return await asyncio.shield(self._relax_send)
 
+    async def set_autonomous(self, on, by):
+        """开关自主（robot.autonomous {active}）。回 (发出去了没有, 原因)。
+
+        每次新开一条连接，跟卸力的发送一样：不占用轮询连接，也不用可能已经死掉的 cmd 长连接。
+        没有补发、没有回读确认——主程序收下就是收下（它只改一个开关，不动舵机）。"""
+        with log_cmd(self.log, "自主", "robot.autonomous", who=by,
+                     ctx={"mode": self._mode(), "phase": self._phase()}) as t:
+            try:
+                r = await call_once(self.addr, "robot.autonomous", {"active": bool(on)},
+                                    timeout=3.0, name="自主", log=self.log)
+            except (Unreachable, Timeout, RpcError) as e:
+                why = f"没发出去：{e}"
+                t.fail(why)
+                return False, why
+            if isinstance(r, dict) and r.get("accepted") is False:
+                why = f"主程序没接受：{r.get('reason') or '没说原因'}"
+                t.fail(why, raw=r)
+                return False, why
+            t.ok(r)
+            return True, None
+
     def _start_send(self, by, what):
         started = time.monotonic()
         self._relax_send_started = started

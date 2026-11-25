@@ -242,6 +242,25 @@ def servo_orphan_view(servo):
     return {"why": o.get("why")}
 
 
+def autonomy_of(present, st):
+    """Fresh robot.state → (autonomous, driver).
+
+    robotd omits `autonomous` when the switch is off (serde skip_serializing_if = "not"),
+    so a missing key on a fresh frame is False, not unknown. No fresh frame, or robotd
+    not present, is unknown: (None, None). `move.source` / `limited_by` are omitted when empty.
+    Does not read soccer.autonomous, and does not translate source names.
+    """
+    if present is not True or not isinstance(st, dict):
+        return None, None
+    move = st.get("move") if isinstance(st.get("move"), dict) else {}
+    source = move.get("source")
+    if not isinstance(source, str):
+        source = None
+    raw = move.get("limited_by")
+    limited = [x for x in raw if isinstance(x, str)] if isinstance(raw, list) else []
+    return st.get("autonomous") is True, {"source": source, "limited_by": limited}
+
+
 def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commit=None, auth=None):
     """bat：电量估算（studio/battery_svc.BatteryService，1 Hz 循环里喂）；这里只读它的结果。没给就按 robotd 的直线（老样子）。"""
     now = time.monotonic() if now is None else now
@@ -344,6 +363,8 @@ def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commi
     if bat is not None:
         battery = bat.view(now)         # 电压查表的估算（调舵机时它自己从 Studio 的总线读数取）：battery-plan.md v2
     starting_s = starting_secs(rd, bus, now) if pose == "starting" else None
+    # 只用上面 _fresh 的 st（超过 1.5 秒的旧帧不当「关着」）。st_any 是给关节去色的，这里不用。
+    autonomous, driver = autonomy_of(rd.present, st)
     return {
         "t": "state",
         "robotd_ok": robotd_ok,
@@ -377,6 +398,8 @@ def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commi
         "guard": (bus or {}).get("home_start_guard"),
         "hold": hold,                  # 标定模式站姿使能：{stage: ramping|holding, max_error_deg, directions}
         "estop": est,
+        "autonomous": autonomous,
+        "driver": driver,
         # startup_todo（调参方案 T1）：「还在启动」换成第几步的原话、补「走路模型没加载」
         "todo": startup_todo(rd, todo(health, bus, servos, imu_status, cpu, loop, battery, pose, rd.health.age(now),
                      battery_shutdown=getattr(ob, "battery_shutdown", None) if ob is not None else None,

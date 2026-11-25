@@ -239,6 +239,50 @@ function EStop({ st, live, open }) {
       ${es.state === 'pending' ? '卸力中…' : '卸力'}<span class="kbd">空格</span></button></span>`;
 }
 
+// 自主：按钮上的字只跟最后一帧的 st.autonomous，不跟这一下点击。飞行中加「…」。
+// 灯：关灰、开绿、没帧或连接断了红闪。文案跟页面其它地方一样用简体。
+const AUTO_TIP = '自主模式：无人操控时鸭子自己活动；手柄一碰立即接管';
+function driverLine(st) {
+  const d = st?.driver;
+  if (d == null) return '当前操控: 未知';
+  const src = d.source;
+  let who = src == null ? '无人'
+    : src === 'padd' ? '手柄'
+    : src === 'autod' ? '自主'
+    : src === 'studio' ? '控制台'
+    : `${src}（其他）`;
+  if (Array.isArray(d.limited_by) && d.limited_by.includes('deadman')) who += '（暂停）';
+  return `当前操控: ${who}`;
+}
+
+function AutoToggle({ st, open }) {
+  const [inflight, setInflight] = useState(false);
+  const [err, setErr] = useState(null);
+  const [asked, setAsked] = useState(null);
+  const known = st?.autonomous === true || st?.autonomous === false;
+  const on = st?.autonomous === true;
+  useEffect(() => {
+    if (asked !== null && st?.autonomous === asked) { setErr(null); setAsked(null); }
+  }, [st?.autonomous, asked]);
+  const fire = useCallback(async () => {
+    if (!open || !known || inflight) return;
+    const next = !on;
+    setInflight(true); setErr(null); setAsked(next);
+    const r = await link.cmd('autonomous', { on: next }, 5000);
+    setInflight(false);
+    if (!r.ok) setErr(r.reason || r.error || '没发出去');
+  }, [open, known, inflight, on]);
+  const word = known ? (on ? '推' : '熄') : '未知';
+  const light = (!open || st?.autonomous == null) ? ' unk' : (on ? ' on' : '');
+  const click = (e) => { e.currentTarget.blur(); fire(); };
+  return html`<span class="auto-wrap">
+    <span class=${'auto-dot' + light} title=${AUTO_TIP}></span>
+    ${err ? html`<span class="why" role="alert">${err}</span>` : null}
+    <button class="auto-btn" disabled=${!open || !known || inflight} onClick=${click} title=${AUTO_TIP}>
+      自主 · ${word}${inflight ? '…' : ''}</button>
+  </span>`;
+}
+
 function TopBar({ duck, st, live, age, open, hideEStop, imu }) {
   // 顶栏先说现在是什么模式（出厂标定模式 / 写完切运动模式），再带姿势；标定模式没有策略，别写成「调试中」。
   // 连续报启动阶段超过 30 秒（Studio 从这次连上算）：写「一直报启动中」（10-20 真机：旧 fork 的标定模式永远报 configuring_bus）
@@ -262,7 +306,10 @@ function TopBar({ duck, st, live, age, open, hideEStop, imu }) {
       ${st?.servo_session ? html`<span class="sv-badge">调舵机中</span>` : null}
       <span class="meta num">${live ? '' : `${Math.round(age / 1000)} 秒前 · `}${modeText}${typeof pct === 'number' ? ` · ${Math.round(pct)}%` : ''}</span>
     </div>
-    <span class=${hideEStop ? 'estop-hidden' : ''}><${EStop} st=${st} live=${live} open=${open} /></span>
+    <span class="top-acts">
+      <${AutoToggle} st=${st} open=${open} />
+      <span class=${hideEStop ? 'estop-hidden' : ''}><${EStop} st=${st} live=${live} open=${open} /></span>
+    </span>
   </header>`;
 }
 
@@ -378,6 +425,7 @@ function Stage({ st, live, age, name }) {
     <div class="copy">
       <h1>${c.h}</h1>
       <p class="sub">${c.sub}</p>
+      ${st ? html`<p class="auto-drive">${driverLine(st)}</p>` : null}
       ${c.act ? html`<div class="btns"><button class="btn2 stage-act" onClick=${(e) => { e.currentTarget.blur(); location.hash = c.act.href; }}>${c.act.label}</button></div>` : null}
       ${msg ? html`<span class="tip" role="alert">${msg}</span>` : c.tip ? html`<span class="tip">${c.tip}</span>` : null}
     </div>

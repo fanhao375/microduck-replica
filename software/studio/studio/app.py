@@ -67,7 +67,7 @@ except (OSError,ValueError,KeyError):
 MODEL_UPLOAD_LIMIT = 64 * 1024 * 1024
 MODEL_OP_LIMIT = 32768
 STATE_HZ = 10
-COMMANDS = {"relax", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
+COMMANDS = {"relax", "autonomous", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
 HB_QUIET_S = 5.0         # 页面这么久没发心跳：当作看不见（停推状态、可能退订）
 HB_DEAD_S = 30.0         # 这么久没任何消息：当作半开的连接（手机走出 WiFi），直接关掉
 MUSIC_PONG_TIMEOUT_S = 5.0
@@ -915,6 +915,25 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             except Exception:  # noqa: BLE001 —— 页面已经断了：卸力照样发出去了，回执送不到无所谓
                 pass
 
+        async def run_autonomous(cid, args):
+            """开关自主。回执跟卸力一样：{"t":"result","id","ok","reason"}。主程序不在就直接拒，不发。"""
+            args = args or {}
+            if robotd.present is not True:
+                accepted, reason = False, "主程序没在跑"
+            elif not isinstance(args.get("on"), bool):
+                accepted, reason = False, "要给 on（true 或 false）"
+            else:
+                try:
+                    accepted, reason = await robotd.set_autonomous(args["on"], by)
+                except Exception as e:  # noqa: BLE001
+                    log.error("处理自主开关时 Studio 出错", cat="命令", raw=f"{type(e).__name__}: {e}", exc=True,
+                              hint="这是 Studio 自己的 bug")
+                    accepted, reason = False, f"Studio 出错：{type(e).__name__}"
+            try:
+                await send({"t": "result", "id": cid, "ok": accepted, "reason": reason})
+            except Exception:  # noqa: BLE001
+                pass
+
         async def run_servo(name, cid, args=None):
             if servo is None:
                 await send({"t": "result", "id": cid, "ok": False, "reason": "这只鸭子没配舵机总线"})
@@ -1378,6 +1397,14 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         continue
                     if name == "battery.op":
                         task = asyncio.create_task(run_battery_op(cid, msg.get("args") or {}))
+                        cmd_tasks.add(task)
+                        update_commands.add(task)
+                        task.add_done_callback(update_commands.discard)
+                        task.add_done_callback(cmd_tasks.discard)
+                        continue
+                    if name == "autonomous":
+                        # 跟卸力一样不在这里 await：页面断了也不取消已经发出的开关
+                        task = asyncio.create_task(run_autonomous(cid, args))
                         cmd_tasks.add(task)
                         update_commands.add(task)
                         task.add_done_callback(update_commands.discard)

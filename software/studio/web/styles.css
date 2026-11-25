@@ -82,6 +82,14 @@ button:disabled { cursor: default; }
 .estop.done { background: var(--text); }
 .estop-wrap { display: inline-flex; align-items: center; gap: 12px; }
 .estop-wrap .why { font-size: 13px; color: var(--text-2); }
+.top-acts { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; min-width: 0; }
+.auto-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.auto-dot { width: 10px; height: 10px; border-radius: 50%; background: #C7C7CC; flex: none; }
+.auto-dot.on { background: var(--ok); }
+.auto-dot.unk { background: var(--danger); animation: onb-pulse 1s ease-in-out infinite; }
+.auto-btn { height: 36px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--board-edge); background: var(--board); color: var(--text); font-size: 15px; font-weight: 600; }
+.auto-btn:disabled { opacity: .45; }
+.auto-wrap .why { font-size: 13px; color: var(--text-2); max-width: 12em; }
 
 /* ---- 横幅 ---- */
 .banner { min-height: 40px; margin-bottom: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 16px; border-radius: 12px; font-size: 14px; }
@@ -150,6 +158,7 @@ button:disabled { cursor: default; }
 .stage .btn2 { height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 17px; font-weight: 500; }
 .stage button:disabled { opacity: 0.45; }
 .stage .tip { margin-top: 12px; font-size: 13px; color: var(--stage-fg-2); }
+.stage .auto-drive { margin: 8px 0 0; font-size: 14px; color: var(--stage-fg-2); }
 .stage .reset-view { position: absolute; z-index: 2; right: 20px; top: 16px; height: 30px; padding: 0 14px; border: 0; border-radius: 999px;
   background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 13px; }
 .stage .age { position: absolute; right: 24px; bottom: 20px; padding: 4px 12px; border-radius: 999px; background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 13px; }
