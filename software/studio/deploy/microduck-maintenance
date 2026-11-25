@@ -62,6 +62,10 @@ def read_config(path):
         return data, st
 
 
+class RpcUnknownMethod(ValueError):
+    """Raised when robotd replies with JSON-RPC -32601 (method not found)."""
+
+
 def rpc(method):
     with socket.socket(socket.AF_UNIX) as s:
         s.settimeout(5)
@@ -77,8 +81,31 @@ def rpc(method):
             raise ValueError("主程序状态回复不完整")
         r = json.loads(line)
         if "error" in r:
-            raise ValueError("主程序未接受操作：" + str(r["error"].get("message", ""))[:200])
+            err = r["error"] if isinstance(r["error"], dict) else {}
+            msg = str(err.get("message", ""))[:200]
+            if err.get("code") == -32601 or "unknown method" in msg.lower() or "method not found" in msg.lower():
+                raise RpcUnknownMethod("主程序未接受操作：" + msg)
+            raise ValueError("主程序未接受操作：" + msg)
         return r["result"]
+
+
+def read_state_frame(timeout=3.0):
+    """Subscribe to robot.state on v0.23 daemons and return the first frame."""
+    with socket.socket(socket.AF_UNIX) as s:
+        s.settimeout(timeout)
+        s.connect("/run/robotd.sock")
+        s.sendall((json.dumps({"jsonrpc": "2.0", "id": 1, "method": "robot.subscribe", "params": {"hz": 10}}) + "\n").encode())
+        with s.makefile("rb") as stream:
+            for _ in range(20):
+                line = stream.readline(4 * 1024 * 1024 + 1)
+                if not line or len(line) > 4 * 1024 * 1024 or not line.endswith(b"\n"):
+                    raise ValueError("主程序实时状态流中断")
+                msg = json.loads(line)
+                if msg.get("id") == 1 and "error" in msg:
+                    raise ValueError("主程序拒绝订阅状态：" + str(msg["error"])[:200])
+                if msg.get("method") == "robot.state" and isinstance(msg.get("params"), dict):
+                    return msg["params"]
+    raise ValueError("未收到主程序实时状态帧")
 
 
 def atomic(p, data, mode=0o600, owner=None):
@@ -226,8 +253,23 @@ def load(data):
     return m, restore, skipped
 
 
+def _off_from_state(st):
+    if not isinstance(st, dict):
+        return False
+    safety = st.get("safety")
+    if not isinstance(safety, dict):
+        return False
+    torqued = safety.get("torqued")
+    if isinstance(torqued, bool):
+        return torqued is False
+    return safety.get("limp") is True and safety.get("fallen") is not True
+
+
 def off():
-    b = rpc("robot.busStatus")
+    try:
+        b = rpc("robot.busStatus")
+    except RpcUnknownMethod:
+        return _off_from_state(read_state_frame())
     if not isinstance(b, dict) or any(
         b.get(k)
         for k in (
@@ -302,12 +344,16 @@ def verify_restarted(timeout=15):
     good_since = None
     while True:
         try:
-            bus = rpc("robot.busStatus")
-            ready = (isinstance(bus, dict) and bus.get("mode") in ("motion", "commissioning")
-                     and bus.get("phase") in ("configuring_bus", "waiting_for_bus", "control", "ready",
-                                              "holding", "moving", "power_pending", "read_error",
-                                              "stop_unconfirmed")
-                     and unit_state("robotd.service") == "active")
+            try:
+                bus = rpc("robot.busStatus")
+                ready = (isinstance(bus, dict) and bus.get("mode") in ("motion", "commissioning")
+                         and bus.get("phase") in ("configuring_bus", "waiting_for_bus", "control", "ready",
+                                                  "holding", "moving", "power_pending", "read_error",
+                                                  "stop_unconfirmed")
+                         and unit_state("robotd.service") == "active")
+            except RpcUnknownMethod:
+                health = rpc("robot.health")
+                ready = isinstance(health, dict) and unit_state("robotd.service") == "active"
         except (OSError, TypeError, KeyError, ValueError):
             ready = False
         now = time.monotonic()

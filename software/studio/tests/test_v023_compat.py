@@ -229,6 +229,24 @@ class ConsumerCompatTests(unittest.TestCase):
 
         self.assertEqual(mod.startup_step4(_FakeOp()), "unsupported")
 
+    def test_maintenance_off_falls_back_to_v023_state_frame(self):
+        maint_path = pathlib.Path(__file__).resolve().parents[1] / "deploy" / "microduck-maintenance"
+        loader = importlib.machinery.SourceFileLoader("microduck_maint_mod", str(maint_path))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        mod = importlib.util.module_from_spec(spec)
+        loader.exec_module(mod)
+
+        def fake_rpc(method, params=None):
+            if method == "robot.busStatus":
+                raise mod.RpcUnknownMethod("unknown method")
+            raise AssertionError(f"unexpected rpc: {method}")
+
+        with patch.object(mod, "rpc", side_effect=fake_rpc):
+            with patch.object(mod, "read_state_frame", return_value={"safety": {"torqued": False, "limp": False}}):
+                self.assertTrue(mod.off())
+            with patch.object(mod, "read_state_frame", return_value={"safety": {"torqued": True, "limp": False}}):
+                self.assertFalse(mod.off())
+
 
 if __name__ == "__main__":
     unittest.main()
