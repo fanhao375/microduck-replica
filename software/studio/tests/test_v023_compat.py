@@ -247,6 +247,46 @@ class ConsumerCompatTests(unittest.TestCase):
             with patch.object(mod, "read_state_frame", return_value={"safety": {"torqued": True, "limp": False}}):
                 self.assertFalse(mod.off())
 
+    def test_maintenance_off_accepts_v023_compat_bus_status_without_hd1910(self):
+        maint_path = pathlib.Path(__file__).resolve().parents[1] / "deploy" / "microduck-maintenance"
+        loader = importlib.machinery.SourceFileLoader("microduck_maint_mod2", str(maint_path))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        mod = importlib.util.module_from_spec(spec)
+        loader.exec_module(mod)
+
+        v023_bus_off = {
+            "mode": "motion",
+            "phase": "control",
+            "policy_enabled": False,
+            "homed": False,
+            "fallen": False,
+            "native": {"torque_state_confirmed": False, "joints": []},
+        }
+        v023_bus_on = {
+            **v023_bus_off,
+            "native": {"torque_state_confirmed": True, "joints": []},
+        }
+        legacy_hd_pending = {
+            **v023_bus_off,
+            "native": {
+                "torque_state_confirmed": False,
+                "hd1910": {"restore_pending": True, "temporary_gains_applied": False},
+            },
+        }
+        legacy_hd_null = {
+            **v023_bus_off,
+            "native": {"torque_state_confirmed": False, "hd1910": None},
+        }
+
+        with patch.object(mod, "rpc", return_value=v023_bus_off):
+            self.assertTrue(mod.off())
+        with patch.object(mod, "rpc", return_value=v023_bus_on):
+            self.assertFalse(mod.off())
+        with patch.object(mod, "rpc", return_value=legacy_hd_pending):
+            self.assertFalse(mod.off())
+        with patch.object(mod, "rpc", return_value=legacy_hd_null):
+            self.assertFalse(mod.off())
+
 
 if __name__ == "__main__":
     unittest.main()

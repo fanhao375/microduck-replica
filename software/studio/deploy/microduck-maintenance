@@ -290,11 +290,15 @@ def off():
     confirmed = native.get("torque_state_confirmed")
     if b.get("mode") == "commissioning":
         return b.get("phase") == "ready" and top == "off" and confirmed is not True
-    hd = native.get("hd1910")
-    return (b.get("mode") == "motion" and b.get("phase") == "control"
+    if not (b.get("mode") == "motion" and b.get("phase") == "control"
             and b.get("policy_enabled") is False and top in (None, "off")
-            and confirmed is False and isinstance(hd, dict)
-            and hd.get("restore_pending") is False and hd.get("temporary_gains_applied") is False)
+            and confirmed is False):
+        return False
+    if "hd1910" in native:
+        hd = native.get("hd1910")
+        return (isinstance(hd, dict) and hd.get("restore_pending") is False
+                and hd.get("temporary_gains_applied") is False)
+    return True
 
 
 INPUT_SERVICES = ("padd.service", "gamesir-xboxd.service")
