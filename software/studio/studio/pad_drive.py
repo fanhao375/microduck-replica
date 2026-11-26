@@ -119,10 +119,15 @@ MODES = ("drive", "head", "body")
 MODE_CN = {"drive": "走路", "head": "头模式", "body": "身体模式"}
 DRIVE_MODE_CN = {"walk": "走路", "roller": "轮滑"}     # robot.setMode / robot.policies 的 mode（十字上按住 3 秒切）
 HELD_KEYS = ("lt", "rt", "x")
-KEY_CN = {"a": "A", "x": "X", "lb": "LB", "rb": "RB", "dpad_down": "十字下", "lt": "LT", "rt": "RT"}
+KEY_CN = {"a": "A", "b": "B", "x": "X", "y": "Y", "lb": "LB", "rb": "RB", "dpad_down": "十字下", "lt": "LT", "rt": "RT"}
 BIND_KEYS = ("a", "x", "lb", "rb", "dpad_down")
-# 官方默认绑定（fork robotd-params lib.rs:175-215）；读不到 pad.bindings 时按它
-DEFAULT_BIND = {"a": "ground_pick", "x": "roulade", "lb": "kick_left", "rb": "kick_right", "dpad_down": "sit_toggle"}
+ALL_BIND_BUTTONS = ("a", "b", "x", "y", "lb", "rb", "dpad_down")
+MODE_TOGGLES = ("laser_track", "autonomous")
+MODE_TOGGLE_RPC = {"laser_track": "robot.laserTrack", "autonomous": "robot.autonomous"}
+MODE_TOGGLE_CN = {"laser_track": "追激光", "autonomous": "自主模式"}
+EMOTIONS = ("yes", "no", "excited")
+# 保留旧 fork 的默认绑定，但 LB / RB 改为 yes / no；读不到 pad.bindings 时按它
+DEFAULT_BIND = {"a": "ground_pick", "x": "roulade", "lb": "yes", "rb": "no", "dpad_down": "sit_toggle"}
 HEAD_ZERO = {"neck_pitch": 0.0, "head_pitch": 0.0, "head_yaw": 0.0, "head_roll": 0.0}
 POSE_OFF = {"active": False}                                   # 一定写 active:false（默认是 true）
 POSE_CENTER = {"z": 0.0, "roll": 0.0, "pitch": 0.0, "active": True}
@@ -1161,6 +1166,8 @@ class DriveMixin:
             raise Refused(row["why"])
         self.log.info(f"网页手柄 {name} → {row['does']}（{by or '页面'}）", cat="手柄", dedup=False)
         label = f"网页手柄 {name} → {row['does']}"
+        if row["op"] in MODE_TOGGLES:
+            return self._mode_toggle_cmd(row["op"], conn, by, label=label)
         if row["op"] == "skill":
             with self._lk:
                 st = self._keys.get(conn)
@@ -1179,6 +1186,78 @@ class DriveMixin:
                 self._tick_evt.set()
             return r
         return self._motion_cmd(row["op"], {}, conn, by, label=label)
+
+    def _mode_toggle_active(self, kind):
+        st = (self._robot or {}).get("state")
+        if not isinstance(st, dict):
+            return False
+        if kind == "laser_track":
+            return bool(st.get("laser"))
+        if kind == "autonomous":
+            return bool(st.get("autonomous"))
+        return False
+
+    def _mode_toggle_cmd(self, kind, conn, by, label=None):
+        now = self.clock()
+        name = MODE_TOGGLE_CN[kind]
+        method = MODE_TOGGLE_RPC[kind]
+        with self._lk:
+            base = self._base_block(now)
+            if base:
+                raise Refused(base)
+            if self._cmd_busy:
+                raise Refused("上一个指令还没回话，等一下")
+            active = self._mode_toggle_active(kind)
+            target = not active
+            what = label or f"{name}：{'开启' if target else '关闭'}"
+            self._cmd_busy = True
+            pose = self._posture()
+        try:
+            r = self._call(what, method, {"active": target}, by, {"posture": pose})
+        except Refused as e:
+            with self._lk:
+                self._last_cmd = {"what": what, "by": by, "ok": False, "reason": str(e), "at": self.clock()}
+            raise
+        finally:
+            with self._lk:
+                self._cmd_busy = False
+        note = r.get("reason") if isinstance(r, dict) else None
+        with self._lk:
+            self._last_cmd = {"what": what, "by": by, "ok": True, "reason": note or ("已开启" if target else "已关闭"), "at": self.clock()}
+        return {"accepted": True, "reason": note, "did": kind, "active": target}
+
+    def _bind_op(self, args, conn, by):
+        button = args.get("button")
+        if button not in ALL_BIND_BUTTONS:
+            raise Refused(f"不支持绑定的按键：{button}")
+        skill = args.get("skill")
+        if skill is not None and not isinstance(skill, str):
+            raise Refused("绑定目标必须是字符串或空")
+        now = self.clock()
+        with self._lk:
+            base = self._base_block(now)
+            if base:
+                raise Refused(base)
+            if self._cmd_busy:
+                raise Refused("上一个指令还没回话，等一下")
+            self._cmd_busy = True
+        params = {"button": button} if skill is None else {"button": button, "skill": skill}
+        target_label = "恢复默认" if skill is None else (C.SKILL_CN.get(skill, skill) if skill else "关闭")
+        what = f"手柄按键绑定：{KEY_CN.get(button, button)} → {target_label}"
+        try:
+            r = self._call(what, "pad.bind", params, by)
+            rows = self._fetch_bindings()
+        except Refused as e:
+            with self._lk:
+                self._last_cmd = {"what": what, "by": by, "ok": False, "reason": str(e), "at": self.clock()}
+            raise
+        finally:
+            with self._lk:
+                self._cmd_busy = False
+        note = r.get("reason") if isinstance(r, dict) else None
+        with self._lk:
+            self._last_cmd = {"what": what, "by": by, "ok": True, "reason": note, "at": self.clock()}
+        return {"accepted": True, "reason": note, "bindings": rows}
 
     def _start(self, args, conn, by):
         """网页手柄图上的 Start（三 V7、V8）：按现在的姿势挑「停下（站好）/ 开始走 / 站起来」，跟页面看到的（expect）不一样就拒。"""
@@ -1457,7 +1536,26 @@ class DriveMixin:
                           "src": "官方默认" + ("（读不到 pad.bindings）" if self.bindings is None else "")}
         return out
 
-    def _key_rows(self, buttons, sitting, skills, skills_why, known, need_drive, pol):
+    def _bind_choices(self, known):
+        """供手柄页按键绑定下拉选单使用的候选项。"""
+        choices = [
+            {"value": "laser_track", "label": C.SKILL_CN["laser_track"], "group": "模式切换"},
+            {"value": "autonomous", "label": C.SKILL_CN["autonomous"], "group": "模式切换"},
+        ]
+        seen = {"laser_track", "autonomous"}
+        skill_list = known if known is not None else ["ground_pick", "sit_toggle", "roulade", "kick_left", "kick_right"]
+        for name in skill_list:
+            if name not in seen:
+                seen.add(name)
+                choices.append({"value": name, "label": C.SKILL_CN.get(name, name), "group": "技能"})
+        for name in EMOTIONS:
+            if name not in seen:
+                seen.add(name)
+                choices.append({"value": name, "label": C.SKILL_CN.get(name, name), "group": "表情"})
+        choices.append({"value": "", "label": "（关闭此键）", "group": "其他"})
+        return choices
+
+    def _key_rows(self, buttons, sitting, skills, skills_why, known, need_drive, pol, base=None):
         """网页手柄图上 A / X / LB / RB / 十字下 各做什么、现在能不能按（推给页面画图，按的时候 _key_press 用同一份）。"""
         out = {}
         for k, b in self._bind_map().items():
@@ -1468,6 +1566,10 @@ class DriveMixin:
                 row.update(ok=False, why=f"绑的「{skill}」这只鸭子用不了：{b['error']}")
             elif not skill:
                 row.update(ok=False, why="这个键被关掉了（robotd.toml 的 [pad] 里设成了空）")
+            elif skill in MODE_TOGGLES:
+                active = self._mode_toggle_active(skill)
+                row.update(ok=base is None, why=base, op=skill, active=active,
+                           does=f"{MODE_TOGGLE_CN[skill]}：{'关' if active else '开'}")
             elif skill == "sit_toggle":
                 # 不直接发 robot.do sit_toggle：按坐没坐走「站起来 / 坐下」（审查二 S2，三 V14）
                 if sitting is None:
@@ -1475,6 +1577,8 @@ class DriveMixin:
                 else:
                     btn = buttons["stand" if sitting else "sit"]
                     row.update(ok=btn["ok"], why=btn["why"], op=btn["op"], does=btn["label"])
+            elif skill in EMOTIONS or (b["src"] == "pad.bindings" and b["error"] is None and (known is None or skill not in known)):
+                row.update(ok=need_drive is None, why=need_drive, op="skill")
             else:
                 s = next((x for x in skills if x["name"] == skill), None)
                 why = s["why"] if s is not None else (skills_why or self._skill_why(skill, need_drive, known, pol))
@@ -1663,7 +1767,10 @@ class DriveMixin:
         buttons = {"stand": stand, "walk": walk, "sit": sit}
         return {"posture": pose, "posture_cn": POSTURE_CN.get(pose, pose), "block": block, "sitting": sitting,
                 "buttons": buttons, "start": start, "reboot": reboot, "drive_mode": drive_mode,
-                "keys": self._key_rows(buttons, sitting, skills, skills_why, known, need_drive, pol),
+                "keys": self._key_rows(buttons, sitting, skills, skills_why, known, need_drive, pol, base=base),
+                "mode_states": {"laser_track": self._mode_toggle_active("laser_track"),
+                                "autonomous": self._mode_toggle_active("autonomous")},
+                "bind_choices": self._bind_choices(known),
                 "triggers": triggers, "driving": pose in DRIVING,
                 "skills": skills, "skills_why": skills_why,
                 "sounds": sounds, "actions": actions, "combos": combos, "running": running, "last": last,
@@ -1814,9 +1921,15 @@ class DriveMixin:
                 name = args.get("name")
                 row = next((s for s in mv["skills"] if s["name"] == name), None)
                 if row is None:
-                    raise Refused(mv["skills_why"] or f"这只鸭子没有「{C.SKILL_CN.get(name, name)}」")
-                what = f"技能：{row['label']}"
-                ok, why = row["ok"], row["why"]
+                    bound_row = next((r for r in mv["keys"].values() if r.get("op") == "skill" and r.get("skill") == name), None)
+                    if bound_row is not None:
+                        what = f"技能：{C.SKILL_CN.get(name, name)}"
+                        ok, why = bound_row["ok"], bound_row["why"]
+                    else:
+                        raise Refused(mv["skills_why"] or f"这只鸭子没有「{C.SKILL_CN.get(name, name)}」")
+                else:
+                    what = f"技能：{row['label']}"
+                    ok, why = row["ok"], row["why"]
             elif op == "sound":
                 tag = args.get("tag")
                 row = next((s for s in mv["sounds"] if s["tag"] == tag), None)

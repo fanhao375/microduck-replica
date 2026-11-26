@@ -63,6 +63,11 @@ SKILL_CN = {
     "kick_right": "右脚踢",
     "roller_stand": "轮滑起身",
     "sit_toggle": "坐下 ↔ 站起",
+    "yes": "点头（Yes）",
+    "no": "摇头（No）",
+    "excited": "兴奋",
+    "laser_track": "追激光（开关）",
+    "autonomous": "自主模式（开关）",
 }
 # 技能做完要多久（组合动作里下一步等它）：robotd-params lib.rs:1311-1341 的默认 duration（踢 0.5 秒、滚 1 秒），
 # 低头捡是相位动作、窗口 2.8 秒（原版训练配方说明）；不知道的按 2 秒等

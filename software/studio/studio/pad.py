@@ -562,6 +562,8 @@ class PadOps(DriveMixin):
             return self._start(args, conn, by)
         if op == "key":
             return self._key_press(args, conn, by)
+        if op == "bind":
+            return self._bind_op(args, conn, by)
         if op == "reboot":
             return self._reboot(args, conn, by)
         if op == "drive_mode":

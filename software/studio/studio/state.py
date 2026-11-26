@@ -78,6 +78,8 @@ def project_bus(bus, st, policies=None):
         out["mode"] = "motion"
         out["phase"] = "control"
         out["policy_enabled"] = isinstance(policy, str) and policy not in ("", "held")
+        out["home_recovery"] = policy == "homing"
+        out["torque_off_pending"] = policy == "rest"
         native = dict(out["native"]) if isinstance(out.get("native"), dict) else {}
         native["torque_state_confirmed"] = confirmed
         hd = dict(native["hd1910"]) if isinstance(native.get("hd1910"), dict) else {}

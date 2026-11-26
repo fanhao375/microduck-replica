@@ -159,8 +159,8 @@ const FUNCS = [
   { role: 'dd', group: 'main', name: () => '十字下', does: '坐下 ↔ 站起', bind: 'dpad_down', web: '网页上：按坐没坐着走「坐下」或「站起来」' },
   { role: 'south', group: 'skill', does: '低头捡（ground pick）', bind: 'a' },
   { role: 'west', group: 'skill', does: '前滚翻；按住连着滚', bind: 'x' },
-  { role: 'lb', group: 'skill', does: '左脚踢', bind: 'lb' },
-  { role: 'rb', group: 'skill', does: '右脚踢', bind: 'rb' },
+  { role: 'lb', group: 'skill', does: '点头（Yes）；足球模式下左脚踢', bind: 'lb' },
+  { role: 'rb', group: 'skill', does: '摇头（No）；足球模式下右脚踢', bind: 'rb' },
   { role: 'rt', group: 'skill', does: '张嘴，同时嘎一声（站好了就能动嘴，不用在走）' },
   { role: 'lt', group: 'skill', does: '张嘴；按住时一直「wheee」' },
   { role: 'north', group: 'mode', does: '头模式：摇杆改成管头，身体不动；再按回到走路', imu: true },
@@ -180,9 +180,9 @@ const ROLE_BIND = { south: 'a', west: 'x', lb: 'lb', rb: 'rb', dd: 'dpad_down' }
 const ROLE_HELD = { lt: 'lt', rt: 'rt', west: 'x' };
 const MODE_CN = { drive: '走路', head: '头模式', body: '身体模式' };
 const DRIVE_CN = { walk: '走路', roller: '轮滑' };
-const SKILL_CN = { ground_pick: '低头捡', roulade: '前滚翻', kick_left: '左脚踢', kick_right: '右脚踢', sit_toggle: '坐下 ↔ 站起', roller_stand: '轮滑起身' };
-// 官方默认的按键绑定（fork robotd-params lib.rs:175-215，后端 pad_drive.DEFAULT_BIND 同一份）；robotd 的 pad.bindings 改过的以它为准
-const DEFAULT_BIND = { a: 'ground_pick', x: 'roulade', lb: 'kick_left', rb: 'kick_right', dpad_down: 'sit_toggle' };
+const SKILL_CN = { ground_pick: '低头捡', roulade: '前滚翻', kick_left: '左脚踢', kick_right: '右脚踢', sit_toggle: '坐下 ↔ 站起', roller_stand: '轮滑起身', yes: '点头（Yes）', no: '摇头（No）', excited: '兴奋', laser_track: '追激光（开关）', autonomous: '自主模式（开关）' };
+// 保留旧 fork 默认绑定，但 LB / RB 改为 yes / no（后端 pad_drive.DEFAULT_BIND 同一份）；robotd 的 pad.bindings 改过的以它为准
+const DEFAULT_BIND = { a: 'ground_pick', x: 'roulade', lb: 'yes', rb: 'no', dpad_down: 'sit_toggle' };
 const BIND_ROLE = { a: 'south', x: 'west', lb: 'lb', rb: 'rb', dpad_down: 'dd' };
 
 const STEP_ICON = { ok: '✓', fail: '×', bad: '×', doing: '', todo: '', skip: '–', unk: '?' };
@@ -402,6 +402,65 @@ function Legend({ kind, live, bindings, imuHead }) {
     ${k.layout === 'switch' ? html`<p class="pd-note">Switch 类手柄 A 和 B 的位置跟 Xbox 是反的。表里按位置算：右边四个键「最下面那颗」干「A」的活，手柄上印的是 ${k.names.south}。上鸭子还要再核对一次。</p>` : null}
     ${live?.device?.keys_unverified ? html`<p class="pd-note">Xbox 手柄 X、Y 两颗键的位置是推测的，还没在鸭子上核对：按 X 时图上亮的如果是 Y，告诉我们。</p>` : null}
     ${live?.other?.length ? html`<p class="pd-note">还按着表里没有的键：${live.other.join('、')}（padd 不一定认；多半是这款手柄的额外键）</p>` : null}
+  </div>`;
+}
+
+const BIND_BTN_LABEL = { a: 'A', b: 'B', x: 'X', y: 'Y', lb: 'LB', rb: 'RB', dpad_down: '十字下' };
+
+function KeyBindings({ pad, op }) {
+  const [saving, setSaving] = useState(null);
+  const [note, setNote] = useState(null);
+  const rows = (Array.isArray(pad?.bindings) && pad.bindings.length)
+    ? pad.bindings
+    : Object.entries(DEFAULT_BIND).map(([button, skill]) => ({ button, skill, overridden: false, error: null }));
+  const choices = pad?.motion?.bind_choices || [
+    { value: 'laser_track', label: SKILL_CN.laser_track, group: '模式切换' },
+    { value: 'autonomous', label: SKILL_CN.autonomous, group: '模式切换' },
+    { value: 'ground_pick', label: SKILL_CN.ground_pick, group: '技能' },
+    { value: 'sit_toggle', label: SKILL_CN.sit_toggle, group: '技能' },
+    { value: 'roulade', label: SKILL_CN.roulade, group: '技能' },
+    { value: 'kick_left', label: SKILL_CN.kick_left, group: '技能' },
+    { value: 'kick_right', label: SKILL_CN.kick_right, group: '技能' },
+    { value: 'yes', label: SKILL_CN.yes, group: '表情' },
+    { value: 'no', label: SKILL_CN.no, group: '表情' },
+    { value: 'excited', label: SKILL_CN.excited, group: '表情' },
+    { value: '', label: '（关闭此键）', group: '其他' },
+  ];
+  const groups = ['模式切换', '技能', '表情', '其他'];
+  const ms = pad?.motion?.mode_states || {};
+  const apply = async (button, skill) => {
+    setSaving(button); setNote(null);
+    const r = await op(skill === null ? { op: 'bind', button } : { op: 'bind', button, skill }, 10000);
+    setSaving(null);
+    if (r?.ok) {
+      const label = skill === null ? '已恢复默认' : (SKILL_CN[skill] || (skill ? skill : '已关闭'));
+      setNote({ ok: true, text: `${BIND_BTN_LABEL[button] || button} → ${label}（实体手柄 1 秒内生效）` });
+    } else if (r) {
+      setNote({ ok: false, text: r.reason || r.error || '绑定没成功' });
+    }
+  };
+  return html`<div class="pd-legend">
+    <p class="pd-small-p">可在下方将 <b>LB / RB</b> 或其他可绑定键设为「追激光（开关）」「自主模式（开关）」，按一下开启、再按一下关闭（当前：追激光 <b>${ms.laser_track ? '开' : '关'}</b> · 自主模式 <b>${ms.autonomous ? '开' : '关'}</b>）。进入足球模式时，LB / RB 仍优先踢球。</p>
+    ${rows.map((row) => {
+      const cur = typeof row.skill === 'string' ? row.skill : '';
+      const hasCur = choices.some((c) => c.value === cur);
+      return html`<div class="pd-row" key=${row.button} style=${{ alignItems: 'center', gap: '8px' }}>
+        <span class="pd-chip">${BIND_BTN_LABEL[row.button] || row.button}</span>
+        <select aria-label=${`${BIND_BTN_LABEL[row.button] || row.button} 功能`} value=${cur} disabled=${saving !== null}
+          style=${{ flex: '1', minWidth: '140px', padding: '4px 6px', borderRadius: '6px' }}
+          onChange=${(e) => apply(row.button, e.target.value)}>
+          ${!hasCur && cur ? html`<option value=${cur}>${SKILL_CN[cur] || cur}</option>` : null}
+          ${groups.map((g) => {
+            const opts = choices.filter((c) => c.group === g);
+            return opts.length ? html`<optgroup label=${g}>${opts.map((o) => html`<option value=${o.value}>${o.label}</option>`)}</optgroup>` : null;
+          })}
+        </select>
+        ${row.overridden ? html`<button class="btn-light" type="button" disabled=${saving !== null}
+          onClick=${() => apply(row.button, null)}>恢复默认</button>` : null}
+        ${row.error ? html`<small class="pd-bad-t">${row.error}</small>` : null}
+      </div>`;
+    })}
+    ${note ? html`<p class=${cx('pd-small-p', !note.ok && 'pd-bad-t')}>${note.ok ? '✓ ' : '× '}${note.text}</p>` : null}
   </div>`;
 }
 
@@ -1348,6 +1407,10 @@ export function PadPage({ st, pad, link, api, previewActive = false, live: duckL
         <${VpadBar} vp=${vp} pad=${pad} />
         ${['error', 'absent', 'denied'].includes(live.state) ? html`<p class="pd-small-p">${live.why || '读不到按键'}</p>` : null}
         ${!connected && live.state !== 'attached' ? html`<p class="pd-small-p">还没连实体手柄：上面的图就是网页手柄，图上的键能按，跟实体手柄一样（按键作用照鸭子上的 padd）。图是${kindOf(activeKind).label}的样子。</p>` : null}
+        <details class="pd-legend-box">
+          <summary>按键功能绑定（可配追激光 / 自主模式开关）</summary>
+          <${KeyBindings} pad=${pad} op=${op} />
+        </details>
         <details class="pd-legend-box">
           <summary>按键表：每个键做什么</summary>
           <${Legend} kind=${activeKind} live=${shown} bindings=${pad?.bindings} imuHead=${pad?.virtual?.pad_imu_head} />

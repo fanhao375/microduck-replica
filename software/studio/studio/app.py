@@ -67,7 +67,7 @@ except (OSError,ValueError,KeyError):
 MODEL_UPLOAD_LIMIT = 64 * 1024 * 1024
 MODEL_OP_LIMIT = 32768
 STATE_HZ = 10
-COMMANDS = {"relax", "autonomous", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
+COMMANDS = {"relax", "autonomous", "servo.open", "servo.close", "servo.op", "servo.ports", "servo.zero", "imu.op", "imu.mount", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
 HB_QUIET_S = 5.0         # 页面这么久没发心跳：当作看不见（停推状态、可能退订）
 HB_DEAD_S = 30.0         # 这么久没任何消息：当作半开的连接（手机走出 WiFi），直接关掉
 MUSIC_PONG_TIMEOUT_S = 5.0
@@ -202,7 +202,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
     update_commands = set()
     mapping_requests = set()
 
-    def update_readiness(*,software=False,native_transaction=None):
+    def update_readiness(*,software=False,native_transaction=None,ignore_motion_lock=False):
         busy = any(not task.done() for task in update_commands) or model_upload_gate.locked()
         motion = getattr(pad,'motion_studio',None)
         native=updates.native_state()
@@ -212,8 +212,11 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         # The software updater writes its own marker before this query, so the plain
         # query must not count it or no install can ever pass preflight. Native updates
         # check that marker themselves as root; native recovery still counts it here.
+        # Shutdown already holds the motion lock when it asks, so that one query
+        # sets ignore_motion_lock. Any other holder still blocks this check.
         guarded=((native_transaction is not None and updates.marker.exists())
-                 or (native.get('active') is True and not own_prepared))
+                 or (native.get('active') is True and not own_prepared)
+                 or (not ignore_motion_lock and bool(getattr(updates,'motion_locked',None) and updates.motion_locked())))
         if guarded or busy:
             return {'ready':False,'error':'另一项更新或控制指令正在执行，请稍后重试'}
         if software:
@@ -729,15 +732,6 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 if temporary is not None:
                     await asyncio.to_thread(Path(temporary).unlink, missing_ok=True)
 
-    async def meshes(request):
-        """3D 模型 2.8 MB：有 gzip 时直接发送预压缩文件。"""
-        raw = web_dir / "model" / "meshes.bin"
-        gz = raw.with_suffix(".bin.gz")
-        headers = {"Vary": "Accept-Encoding"}
-        if gz.is_file() and "gzip" in request.headers.get("accept-encoding", ""):
-            headers["Content-Encoding"] = "gzip"
-            return WebFileResponse(gz, media_type="application/octet-stream", headers=headers)
-        return WebFileResponse(raw, media_type="application/octet-stream", headers=headers)
 
     # ---- WebSocket ----
 
@@ -891,6 +885,76 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 await send({"t": "log", "entry": entry})
 
         cmd_tasks = set()
+
+        async def run_servo_zero(cid, args):
+            from . import product
+            from .rpc import RpcError, Timeout, Unreachable
+            try:
+                if servo is not None and servo.state == "open":
+                    await send({"t": "result", "id": cid, "ok": False,
+                                "reason": "舵机总线在这页手里：先交还主程序。中位校准由主程序发位置校准指令。"})
+                    return
+                try:
+                    ids = product.parse_servo_ids(args.get("ids", ""))
+                except ValueError as e:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": str(e)})
+                    return
+                if not ids:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": "没有舵机号"})
+                    return
+                done, bad = [], []
+                for sid in ids:
+                    try:
+                        result = await robotd.cmd.call(
+                            product.CALIBRATE_METHOD, product.calibrate_params(sid), timeout=5)
+                    except (RpcError, Timeout, Unreachable) as e:
+                        bad.append(f"{sid}: {e}")
+                        continue
+                    if isinstance(result, dict) and result.get("accepted") is False:
+                        bad.append(f"{sid}: {result.get('reason') or '主程序拒绝了'}")
+                    else:
+                        done.append(sid)
+                ok = bool(done) and not bad
+                await send({"t": "result", "id": cid, "ok": ok,
+                            "reason": None if ok else "；".join(bad),
+                            "data": {"ok": done, "bad": bad}})
+            except Exception as e:  # noqa: BLE001
+                log.error("中位校准出错", cat="命令", raw=f"{type(e).__name__}: {e}", exc=True,
+                          hint="这是 Studio 自己的 bug")
+                try:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": f"Studio 出错：{type(e).__name__}"})
+                except Exception:  # noqa: BLE001
+                    pass
+
+        async def run_imu_mount(cid, args):
+            from . import product
+            from .rpc import RpcError, Timeout, Unreachable
+            try:
+                params = product.mount_params(args.get("mount"))
+                result = await robotd.cmd.call(product.MOUNT_METHOD, params, timeout=5)
+                restarted = False
+                note = "已写入"
+                if args.get("reload", True):
+                    try:
+                        await asyncio.to_thread(product.restart_robotd)
+                        restarted = True
+                        note = "已写入 [bus.feetech]，正在重载主程序"
+                    except Exception as e:  # noqa: BLE001
+                        note = f"已写入，重载没成：{e}"
+                mount = result.get("mount") if isinstance(result, dict) else params["mount"]
+                await send({"t": "result", "id": cid, "ok": True,
+                            "data": {"mount": mount, "restarted": restarted, "note": note}})
+            except ValueError as e:
+                await send({"t": "result", "id": cid, "ok": False, "reason": str(e)})
+            except (RpcError, Timeout, Unreachable) as e:
+                await send({"t": "result", "id": cid, "ok": False, "reason": str(e)})
+            except Exception as e:  # noqa: BLE001
+                log.error("写 IMU 安装方向出错", cat="命令", raw=f"{type(e).__name__}: {e}", exc=True,
+                          hint="这是 Studio 自己的 bug")
+                try:
+                    await send({"t": "result", "id": cid, "ok": False, "reason": f"Studio 出错：{type(e).__name__}"})
+                except Exception:  # noqa: BLE001
+                    pass
 
         async def run_relax(cid):
             if pad is not None:
@@ -1369,6 +1433,20 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                     if name == "net.op":
                         # 扫 WiFi 最坏约 10 秒、连 WiFi 在后台跑：都不挡住同一页面的卸力
                         task = asyncio.create_task(run_net_op(cid, msg.get("args") or {}))
+                        cmd_tasks.add(task)
+                        update_commands.add(task)
+                        task.add_done_callback(update_commands.discard)
+                        task.add_done_callback(cmd_tasks.discard)
+                        continue
+                    if name == "servo.zero":
+                        task = asyncio.create_task(run_servo_zero(cid, msg.get("args") or {}))
+                        cmd_tasks.add(task)
+                        update_commands.add(task)
+                        task.add_done_callback(update_commands.discard)
+                        task.add_done_callback(cmd_tasks.discard)
+                        continue
+                    if name == "imu.mount":
+                        task = asyncio.create_task(run_imu_mount(cid, msg.get("args") or {}))
                         cmd_tasks.add(task)
                         update_commands.add(task)
                         task.add_done_callback(update_commands.discard)
@@ -1876,7 +1954,6 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         Route("/api/models", api_models),
         Route("/api/models/op", api_model_op, methods=["POST"]),
         Route("/api/models/import", api_model_import, methods=["POST"]),
-        Route("/model/meshes.bin", meshes),
         Route("/m", lambda request: RedirectResponse("/m.html", status_code=307)),
         # 手机走 https 之后才用得上：本地 CA 下载、摄像头信令同域转发、手机录音转文字
         Route("/ca.crt", api_ca),
@@ -1921,14 +1998,6 @@ def _diag_zip(log, snap, raw):
 
 
 def precompress(web_dir):
-    """meshes.bin 先压一份 .gz（只在 .gz 比原文件旧时重压）。"""
-    raw = Path(web_dir) / "model" / "meshes.bin"
-    gz = raw.with_suffix(".bin.gz")
-    try:
-        if raw.is_file() and (not gz.is_file() or gz.stat().st_mtime < raw.stat().st_mtime):
-            with open(raw, "rb") as f, gzip.open(gz, "wb", compresslevel=9) as g:
-                g.write(f.read())
-    except OSError:
-        # 网页目录只读（装到 /opt、换专用用户以后）：不压了，直接给原文件
-        return None
-    return gz
+    """Startup still calls this. The stage is drawn in the page, so there is nothing to gzip."""
+    del web_dir
+    return None
