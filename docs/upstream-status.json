@@ -29901,7 +29901,7 @@
           "state": "open",
           "draft": false,
           "created_at": "2026-10-22T07:20:45Z",
-          "updated_at": "2026-11-12T03:26:36Z",
+          "updated_at": "2026-11-26T10:36:39Z",
           "merged_at": null,
           "merge_commit_sha": null,
           "url": "https://github.com/pollen-robotics/microduck/pull/432",
@@ -29912,7 +29912,7 @@
           "commit_count": 1,
           "changed_file_count": 8,
           "created_at_jst": "2026-10-22T16:20:45+09:00",
-          "updated_at_jst": "2026-11-12T12:26:36+09:00",
+          "updated_at_jst": "2026-11-26T19:36:39+09:00",
           "merged_at_jst": null,
           "source_version": "0.19.0",
           "api_version": 53,
@@ -29927,11 +29927,11 @@
             "behind_by": 0,
             "file_count": 8
           },
-          "classification": "Open rebased frame-timestamp proposal. Same eight-file feature patch.",
+          "classification": "Open unmerged frame-timestamp proposal; new contributor field report covers only a mediad cherry-pick on a 0.23.1 Face Board v1 deployment, with FEC and diagnostic-script limits.",
           "review": {
             "change": "Four previous commits were consolidated and rebased to a single commit on main; the non-context additions/removals in all eight files match.",
             "contract": "Capture-side monotonic time can align decoded video frames with robot.state. RTCP sender reports use capture time and RTP uses RFC 6051 ntp-64 per frame. Diagnostic receiver compares frame timestamp metadata with robot state. FEC opt-out is per diagnostic consumer.",
-            "author_validation": "Author reports a host GStreamer 1.24.2 build, clippy and 135 mediad tests. The FEC numbers in the PR are earlier loopback results. Actual board and replica browser alignment still need validation.",
+            "author_validation": "Earlier host 135-test/loopback evidence remains historical. A new contributor board report is separately scoped below; no fresh full-source CI rerun or replica validation.",
             "old_fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/942e58e3aa6dbb28e7037203fff11866122c7567...5d1f4066d6f751dec1fa43db787257887f33a7e9",
             "fixed_sources": {
               "mediad/src/pipeline.rs": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/mediad/src/pipeline.rs",
@@ -29943,14 +29943,171 @@
               "check": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061790",
               "board": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061744",
               "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061472"
+            },
+            "field_report": {
+              "source_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+              "reporter_association": "CONTRIBUTOR",
+              "details_scope": "See field_validation_observation in this PR record; contributor report, not tracker reproduction."
             }
           },
-          "impact": "Camera and robot-state time correlation reference; no ToF protocol, model, training, motion or audio changes.",
-          "priority": "Medium for camera-to-state synchronization; confirm receiver metadata, FEC behavior and actual hardware.",
+          "impact": {
+            "HD1910": "No servo implementation change. Face Board v1 report does not establish Feetech or ZERO3W original-card compatibility.",
+            "camera": "High before adoption: conditional field evidence for capture-time/state-clock alignment, FEC mapping loss and unrepaired diagnostic script remain material limits.",
+            "ToF": "No ToF implementation change; possible future video/state/sensor alignment only.",
+            "model_management": "No model-management or weight change.",
+            "training": "No policy training or dataset delivery; the measurements are media timing observations.",
+            "motion": "No gait/action change or local robot acceptance.",
+            "sound": "No playback or audio-asset change."
+          },
+          "priority": "High before capture-time/sensor alignment adoption; fix/review diagnostics and validate target board/GStreamer/FEC separately.",
           "replica_integration": "not_integrated",
           "included_in_formal_release": false,
           "previous_head_sha": "5d1f4066d6f751dec1fa43db787257887f33a7e9",
-          "previous_base_sha": "942e58e3aa6dbb28e7037203fff11866122c7567"
+          "previous_base_sha": "942e58e3aa6dbb28e7037203fff11866122c7567",
+          "history": [
+            {
+              "number": 432,
+              "title": "mediad: date frames on the robot clock",
+              "state": "open",
+              "draft": false,
+              "created_at": "2026-10-22T07:20:45Z",
+              "updated_at": "2026-11-12T03:26:36Z",
+              "merged_at": null,
+              "merge_commit_sha": null,
+              "url": "https://github.com/pollen-robotics/microduck/pull/432",
+              "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+              "base_sha": "e0c7369d5ac60f3548f957861c355d140e735e21",
+              "base_branch": "main",
+              "actual_merge_base": "e0c7369d5ac60f3548f957861c355d140e735e21",
+              "commit_count": 1,
+              "changed_file_count": 8,
+              "created_at_jst": "2026-10-22T16:20:45+09:00",
+              "updated_at_jst": "2026-11-12T12:26:36+09:00",
+              "merged_at_jst": null,
+              "source_version": "0.19.0",
+              "api_version": 53,
+              "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/e0c7369d5ac60f3548f957861c355d140e735e21...f98b7f8d7e62987f40e135bb5e8506615d7df528",
+              "comparison_to_recorded_main": {
+                "from_sha": "e0c7369d5ac60f3548f957861c355d140e735e21",
+                "to_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+                "merge_base_sha": "e0c7369d5ac60f3548f957861c355d140e735e21",
+                "fixed_url": "https://github.com/pollen-robotics/microduck/compare/e0c7369d5ac60f3548f957861c355d140e735e21...f98b7f8d7e62987f40e135bb5e8506615d7df528",
+                "status": "ahead",
+                "ahead_by": 1,
+                "behind_by": 0,
+                "file_count": 8
+              },
+              "classification": "Open rebased frame-timestamp proposal. Same eight-file feature patch.",
+              "review": {
+                "change": "Four previous commits were consolidated and rebased to a single commit on main; the non-context additions/removals in all eight files match.",
+                "contract": "Capture-side monotonic time can align decoded video frames with robot.state. RTCP sender reports use capture time and RTP uses RFC 6051 ntp-64 per frame. Diagnostic receiver compares frame timestamp metadata with robot state. FEC opt-out is per diagnostic consumer.",
+                "author_validation": "Author reports a host GStreamer 1.24.2 build, clippy and 135 mediad tests. The FEC numbers in the PR are earlier loopback results. Actual board and replica browser alignment still need validation.",
+                "old_fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/942e58e3aa6dbb28e7037203fff11866122c7567...5d1f4066d6f751dec1fa43db787257887f33a7e9",
+                "fixed_sources": {
+                  "mediad/src/pipeline.rs": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/mediad/src/pipeline.rs",
+                  "docs/design/remote-webrtc.md": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/docs/design/remote-webrtc.md",
+                  "scripts/check-frame-dating.py": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/scripts/check-frame-dating.py",
+                  "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/duck-ipc-proto/src/lib.rs"
+                },
+                "upstream_successful_jobs": {
+                  "check": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061790",
+                  "board": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061744",
+                  "coverage": "https://github.com/pollen-robotics/microduck/actions/runs/43148247252/job/130951061472"
+                }
+              },
+              "impact": "Camera and robot-state time correlation reference; no ToF protocol, model, training, motion or audio changes.",
+              "priority": "Medium for camera-to-state synchronization; confirm receiver metadata, FEC behavior and actual hardware.",
+              "replica_integration": "not_integrated",
+              "included_in_formal_release": false,
+              "previous_head_sha": "5d1f4066d6f751dec1fa43db787257887f33a7e9",
+              "previous_base_sha": "942e58e3aa6dbb28e7037203fff11866122c7567"
+            }
+          ],
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/f98b7f8d7e62987f40e135bb5e8506615d7df528",
+          "head_committed_at_utc": "2026-11-12T03:26:34Z",
+          "head_committed_at_jst": "2026-11-12T12:26:34+09:00",
+          "field_validation_observation": {
+            "observed_at_utc": "2026-11-26T10:42:43.318Z",
+            "observed_at_jst": "2026-11-26T19:42:43.318000+09:00",
+            "source_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+            "comment_id": 7189593915,
+            "reported_at_utc": "2026-11-26T10:36:39Z",
+            "reported_at_jst": "2026-11-26T19:36:39+09:00",
+            "comment_updated_at_utc": "2026-11-26T10:36:39Z",
+            "reporter": "FabienDanieau",
+            "github_author_association": "CONTRIBUTOR",
+            "classification": "Contributor field report in the official repository; not tracker reproduction, formal approval, merge or replica acceptance.",
+            "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+            "head_changed": false,
+            "reported_deployment": {
+              "board": "Face Board v1 beta",
+              "base_daemon_version": "0.23.1",
+              "gst_version_on_board": "1.28.5",
+              "change": "PR commit cherry-picked, only mediad swapped.",
+              "separate_composite_build_sha_provided": false,
+              "binary_digest_provided": false,
+              "entire_pr_branch_or_release_tested": false
+            },
+            "reported_frame_dating_runs": [
+              {
+                "mediad": "official 0.23.1",
+                "fec": false,
+                "dated": 431,
+                "total": 439,
+                "clock": "wall clock / NTP epoch"
+              },
+              {
+                "mediad": "cherry-picked PR mediad",
+                "fec": false,
+                "dated": 584,
+                "total": 584,
+                "clock": "CLOCK_MONOTONIC, same axis as robot.state t_ns"
+              },
+              {
+                "mediad": "cherry-picked PR mediad",
+                "fec": true,
+                "dated": 39,
+                "total": 587,
+                "clock": "monotonic; jitterbuffer mapping loss"
+              }
+            ],
+            "reported_frame_interval_ms": 33.33,
+            "reported_frame_minus_newest_state_ms": {
+              "min": -105,
+              "max": 148,
+              "median": -18
+            },
+            "timing_interpretation": "Reporter attributes the spread to ~120ms state sampling and network delay; not measured replica end-to-end camera latency.",
+            "reported_playback": "Android Chrome and phone app 30fps/no loss on that deployment. Answers retain TWCC and drop ntp-64; RED/ULPFEC/RTX remain negotiated.",
+            "reported_fec_cause": "rtpjitterbuffer resets RTP-to-NTP mapping on PT changes; ULPFEC alternates PT96/98 on one SSRC, with 252 changes in 10s in the report.",
+            "gstreamer_fix_status": "Reporter intends an upstream proposal; no published fix established by this observation.",
+            "current_diagnostic_limit": "Fixed source check-frame-dating.py filters decodebin pads with startswith(video), but reported pads are src_0, so it can stop with not-linked/0-of-0 before a frame. No committed diagnostic correction accompanies the report.",
+            "required_changes_reported": [
+              "Fix decodebin pad linkage.",
+              "Restore cross-sysroot.sh executable mode and make the diagnostic executable.",
+              "Review hard-coded script API_VERSION=44 against the actual daemon contract; historical API numbers in the comment are not current release metadata.",
+              "Add diagnostic to CONTRIBUTING scripts list.",
+              "Update remote-webrtc documentation with scoped board measurements."
+            ],
+            "approval_state": "Comment says approval after nits are fixed; no approval or merge claimed.",
+            "published_diagnostic_reproduction_confirmed": false,
+            "earlier_validation_scope": "135 host mediad tests and 2026-11-12 CI remain earlier evidence; not relabeled as this board report or a new full-source rerun.",
+            "fixed_pipeline_source_url": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/mediad/src/pipeline.rs",
+            "fixed_diagnostic_source_url": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/scripts/check-frame-dating.py",
+            "tracker_tests_executed": false,
+            "tracker_connected_robot": false,
+            "replica_preview_or_webpage_verified": false,
+            "replica_integrated": false,
+            "impact": {
+              "HD1910": "No servo implementation change. Face Board v1 report does not establish Feetech or ZERO3W original-card compatibility.",
+              "camera": "High before adoption: conditional field evidence for capture-time/state-clock alignment, FEC mapping loss and unrepaired diagnostic script remain material limits.",
+              "ToF": "No ToF implementation change; possible future video/state/sensor alignment only.",
+              "model_management": "No model-management or weight change.",
+              "training": "No policy training or dataset delivery; the measurements are media timing observations.",
+              "motion": "No gait/action change or local robot acceptance.",
+              "sound": "No playback or audio-asset change."
+            }
+          }
         },
         {
           "number": 571,
@@ -59092,90 +59249,53 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-26T08:39:05.820Z",
+  "checked_at_utc": "2026-11-26T10:42:43.318Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-25T10:02:28.687Z",
-    "source_snapshot_utc": "2026-11-26T08:39:05.820Z",
-    "source_snapshot_jst": "2026-11-26T17:39:05.820000+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-26T08:49:59.411567+00:00",
-    "default_branch_changes": true,
-    "default_branch_changes_by_repository": {
-      "pollen-robotics/microduck": {
-        "from_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
-        "to_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
-      }
-    },
+    "previous_substantive_review_utc": "2026-11-26T08:39:05.820Z",
+    "source_snapshot_utc": "2026-11-26T10:42:43.318Z",
+    "source_snapshot_jst": "2026-11-26T19:42:43.318000+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-26T11:18:13.849087+00:00",
+    "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.23.1",
     "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
     "stable_api_version": 68,
     "main_api_version": 69,
+    "main_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
     "stable_release_assets_changed": false,
-    "stable_asset_count": 8,
-    "new_pull_requests": {
-      "pollen-robotics/microduck": [
-        626
-      ]
-    },
+    "new_pull_requests": {},
     "updated_pull_requests": {
       "pollen-robotics/microduck": [
-        621,
-        448,
-        449
+        432
       ]
     },
     "updated_pull_request_details": {
-      "621": {
-        "state": "merged",
-        "merged_at_utc": "2026-11-25T14:41:30Z",
-        "head_sha": "630dadf255a89322ef8f9618c8fd29fabac3c280",
-        "merge_commit_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
-        "api_version": 69,
-        "formal_release_contains_change": false
-      },
-      "448": {
-        "kind": "One merge of upstream main into the existing feature branch; do not count accumulated main ancestry as new feature commits.",
-        "merge_commit_sha": "4d2b5c579e6aaec394013b046882d149d7ea46b4",
-        "parents": [
-          "dd4c8f6771117c7d5a73689735d8fd398bc6c2e0",
-          "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
-        ],
-        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/4d2b5c579e6aaec394013b046882d149d7ea46b4",
-        "current_pr_file_count": 5,
-        "current_head_check_runs": [],
-        "author_validation_scope": "Existing PR body test reports are historical, not evidence of a new post-merge rerun."
-      },
-      "449": {
-        "kind": "One merge of upstream main into the existing feature branch; do not count accumulated main ancestry as new feature commits.",
-        "merge_commit_sha": "08fb03c7c68f5f36c6b5aac6ccf61af85cf0e471",
-        "parents": [
-          "1fe4355f8b2bb83f8cf3e9fe61e37c5f246d530b",
-          "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
-        ],
-        "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/08fb03c7c68f5f36c6b5aac6ccf61af85cf0e471",
-        "current_pr_file_count": 11,
-        "current_head_check_runs": [],
-        "author_validation_scope": "Existing PR body test reports are historical, not evidence of a new post-merge rerun."
+      "pollen-robotics/microduck#432": {
+        "kind": "New contributor field-validation comment only; no source or merge change.",
+        "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+        "head_changed": false,
+        "state": "open",
+        "report_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+        "reporter_association": "CONTRIBUTOR",
+        "reported_deployment": {
+          "board": "Face Board v1 beta",
+          "base_daemon_version": "0.23.1",
+          "gst_version_on_board": "1.28.5",
+          "change": "PR commit cherry-picked, only mediad swapped.",
+          "separate_composite_build_sha_provided": false,
+          "binary_digest_provided": false,
+          "entire_pr_branch_or_release_tested": false
+        },
+        "reported_fec_off_dated_frames": "584/584",
+        "reported_fec_on_dated_frames": "39/587",
+        "diagnostic_fix_committed": false
       }
     },
-    "previous_tracked_prs_merged": true,
-    "merged_previously_tracked_pull_requests": {
-      "pollen-robotics/microduck": [
-        621
-      ]
-    },
-    "new_development_releases": [
-      "daemon-dev-chorale-reliable"
-    ],
-    "moved_development_tags": [
-      "daemon-dev-main"
-    ],
-    "retired_development_tags": [
-      "daemon-dev-seated-skills"
-    ],
-    "development_package_matches_main": true,
-    "development_package_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
-    "development_release_version": "daemon 0.23.1-dev.1881.4024f6e (main)",
+    "previous_tracked_prs_merged": false,
+    "merged_previously_tracked_pull_requests": {},
+    "new_development_releases": [],
+    "moved_development_tags": [],
+    "retired_development_tags": [],
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_date": "2026-10-23",
@@ -59191,7 +59311,7 @@
     "image_built_or_published_by_tracker": false,
     "package_bytes_downloaded": false,
     "substantive_update_detected": true,
-    "notes": "PR621 merged into unreleased API69 main 4024f6ee, with final seated tuning/shared pose gate changes and matching dev1881 metadata. Formal0.23.1/API68 remains unchanged. Draft626/dev1882 uses API69 but has no entry_pose fields and changes chorale C0 to C1; author simulation still has75/3000 timing drift rooms and no hardware/twin validation. PR448 and449 merge current main; current APIs69/70, still unmerged with no current-head check-runs. Retire dedicated seated-skills tag preserving d585 and metadata. Other official heads, OS/model/channel metadata and blog unchanged. No local implementation, tests, binary download, install or device work."
+    "notes": "No source, release, development-ref, model or blog changes. PR432 remains open at f98b7f8d; FabienDanieau (GitHub CONTRIBUTOR) reports Face Board v1 beta/GStreamer1.28.5 measurements on daemon0.23.1 with only mediad cherry-picked. FEC off:584/584 frames monotonic-dated; FEC on:39/587. Current diagnostic still has reported pad-linkage/file-mode/handshake nits, and approval is conditional. Record the composite deployment and uncommitted diagnostic scope; do not relabel earlier135 host tests/November12 CI as new board/full-source/replica tests. No tracker tests, repairs, restarts, preview access or robot work."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -66212,6 +66332,200 @@
       },
       "tracker_ran_tests_or_builds": false,
       "replica_runtime_integrated": false
+    },
+    {
+      "record": "Preserved preceding latest_review before PR432 field-report observation",
+      "source_snapshot_utc": "2026-11-26T08:39:05.820Z",
+      "historical_snapshot": {
+        "previous_substantive_review_utc": "2026-11-25T10:02:28.687Z",
+        "source_snapshot_utc": "2026-11-26T08:39:05.820Z",
+        "source_snapshot_jst": "2026-11-26T17:39:05.820000+09:00",
+        "final_relevant_sources_checked_at_utc": "2026-11-26T08:49:59.411567+00:00",
+        "default_branch_changes": true,
+        "default_branch_changes_by_repository": {
+          "pollen-robotics/microduck": {
+            "from_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+            "to_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
+          }
+        },
+        "new_stable_release": false,
+        "stable_release_tag": "daemon-v0.23.1",
+        "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "stable_api_version": 68,
+        "main_api_version": 69,
+        "stable_release_assets_changed": false,
+        "stable_asset_count": 8,
+        "new_pull_requests": {
+          "pollen-robotics/microduck": [
+            626
+          ]
+        },
+        "updated_pull_requests": {
+          "pollen-robotics/microduck": [
+            621,
+            448,
+            449
+          ]
+        },
+        "updated_pull_request_details": {
+          "621": {
+            "state": "merged",
+            "merged_at_utc": "2026-11-25T14:41:30Z",
+            "head_sha": "630dadf255a89322ef8f9618c8fd29fabac3c280",
+            "merge_commit_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+            "api_version": 69,
+            "formal_release_contains_change": false
+          },
+          "448": {
+            "kind": "One merge of upstream main into the existing feature branch; do not count accumulated main ancestry as new feature commits.",
+            "merge_commit_sha": "4d2b5c579e6aaec394013b046882d149d7ea46b4",
+            "parents": [
+              "dd4c8f6771117c7d5a73689735d8fd398bc6c2e0",
+              "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
+            ],
+            "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/4d2b5c579e6aaec394013b046882d149d7ea46b4",
+            "current_pr_file_count": 5,
+            "current_head_check_runs": [],
+            "author_validation_scope": "Existing PR body test reports are historical, not evidence of a new post-merge rerun."
+          },
+          "449": {
+            "kind": "One merge of upstream main into the existing feature branch; do not count accumulated main ancestry as new feature commits.",
+            "merge_commit_sha": "08fb03c7c68f5f36c6b5aac6ccf61af85cf0e471",
+            "parents": [
+              "1fe4355f8b2bb83f8cf3e9fe61e37c5f246d530b",
+              "4024f6ee4373d38ac0a60a79157bcfb57642be9c"
+            ],
+            "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/08fb03c7c68f5f36c6b5aac6ccf61af85cf0e471",
+            "current_pr_file_count": 11,
+            "current_head_check_runs": [],
+            "author_validation_scope": "Existing PR body test reports are historical, not evidence of a new post-merge rerun."
+          }
+        },
+        "previous_tracked_prs_merged": true,
+        "merged_previously_tracked_pull_requests": {
+          "pollen-robotics/microduck": [
+            621
+          ]
+        },
+        "new_development_releases": [
+          "daemon-dev-chorale-reliable"
+        ],
+        "moved_development_tags": [
+          "daemon-dev-main"
+        ],
+        "retired_development_tags": [
+          "daemon-dev-seated-skills"
+        ],
+        "development_package_matches_main": true,
+        "development_package_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+        "development_release_version": "daemon 0.23.1-dev.1881.4024f6e (main)",
+        "official_blog_new_articles": false,
+        "official_blog_article_count": 3,
+        "official_blog_latest_date": "2026-10-23",
+        "model_metadata_changed": false,
+        "official_os_release_changed": false,
+        "official_os_main_changed": false,
+        "official_os_pull_requests_changed": false,
+        "official_os_development_channels_changed": false,
+        "local_migration_record_changed": false,
+        "runtime_code_changed_by_heartbeat": false,
+        "tests_executed_by_tracker": false,
+        "robot_connected": false,
+        "image_built_or_published_by_tracker": false,
+        "package_bytes_downloaded": false,
+        "substantive_update_detected": true,
+        "notes": "PR621 merged into unreleased API69 main 4024f6ee, with final seated tuning/shared pose gate changes and matching dev1881 metadata. Formal0.23.1/API68 remains unchanged. Draft626/dev1882 uses API69 but has no entry_pose fields and changes chorale C0 to C1; author simulation still has75/3000 timing drift rooms and no hardware/twin validation. PR448 and449 merge current main; current APIs69/70, still unmerged with no current-head check-runs. Retire dedicated seated-skills tag preserving d585 and metadata. Other official heads, OS/model/channel metadata and blog unchanged. No local implementation, tests, binary download, install or device work."
+      }
+    },
+    {
+      "record": "PR432 contributor reports scoped Face Board frame dating; FEC and diagnostic limits remain",
+      "checked_at_utc": "2026-11-26T10:42:43.318Z",
+      "checked_at_jst": "2026-11-26T19:42:43.318000+09:00",
+      "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+      "head_changed": false,
+      "report_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+      "report": {
+        "observed_at_utc": "2026-11-26T10:42:43.318Z",
+        "observed_at_jst": "2026-11-26T19:42:43.318000+09:00",
+        "source_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+        "comment_id": 7189593915,
+        "reported_at_utc": "2026-11-26T10:36:39Z",
+        "reported_at_jst": "2026-11-26T19:36:39+09:00",
+        "comment_updated_at_utc": "2026-11-26T10:36:39Z",
+        "reporter": "FabienDanieau",
+        "github_author_association": "CONTRIBUTOR",
+        "classification": "Contributor field report in the official repository; not tracker reproduction, formal approval, merge or replica acceptance.",
+        "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+        "head_changed": false,
+        "reported_deployment": {
+          "board": "Face Board v1 beta",
+          "base_daemon_version": "0.23.1",
+          "gst_version_on_board": "1.28.5",
+          "change": "PR commit cherry-picked, only mediad swapped.",
+          "separate_composite_build_sha_provided": false,
+          "binary_digest_provided": false,
+          "entire_pr_branch_or_release_tested": false
+        },
+        "reported_frame_dating_runs": [
+          {
+            "mediad": "official 0.23.1",
+            "fec": false,
+            "dated": 431,
+            "total": 439,
+            "clock": "wall clock / NTP epoch"
+          },
+          {
+            "mediad": "cherry-picked PR mediad",
+            "fec": false,
+            "dated": 584,
+            "total": 584,
+            "clock": "CLOCK_MONOTONIC, same axis as robot.state t_ns"
+          },
+          {
+            "mediad": "cherry-picked PR mediad",
+            "fec": true,
+            "dated": 39,
+            "total": 587,
+            "clock": "monotonic; jitterbuffer mapping loss"
+          }
+        ],
+        "reported_frame_interval_ms": 33.33,
+        "reported_frame_minus_newest_state_ms": {
+          "min": -105,
+          "max": 148,
+          "median": -18
+        },
+        "timing_interpretation": "Reporter attributes the spread to ~120ms state sampling and network delay; not measured replica end-to-end camera latency.",
+        "reported_playback": "Android Chrome and phone app 30fps/no loss on that deployment. Answers retain TWCC and drop ntp-64; RED/ULPFEC/RTX remain negotiated.",
+        "reported_fec_cause": "rtpjitterbuffer resets RTP-to-NTP mapping on PT changes; ULPFEC alternates PT96/98 on one SSRC, with 252 changes in 10s in the report.",
+        "gstreamer_fix_status": "Reporter intends an upstream proposal; no published fix established by this observation.",
+        "current_diagnostic_limit": "Fixed source check-frame-dating.py filters decodebin pads with startswith(video), but reported pads are src_0, so it can stop with not-linked/0-of-0 before a frame. No committed diagnostic correction accompanies the report.",
+        "required_changes_reported": [
+          "Fix decodebin pad linkage.",
+          "Restore cross-sysroot.sh executable mode and make the diagnostic executable.",
+          "Review hard-coded script API_VERSION=44 against the actual daemon contract; historical API numbers in the comment are not current release metadata.",
+          "Add diagnostic to CONTRIBUTING scripts list.",
+          "Update remote-webrtc documentation with scoped board measurements."
+        ],
+        "approval_state": "Comment says approval after nits are fixed; no approval or merge claimed.",
+        "published_diagnostic_reproduction_confirmed": false,
+        "earlier_validation_scope": "135 host mediad tests and 2026-11-12 CI remain earlier evidence; not relabeled as this board report or a new full-source rerun.",
+        "fixed_pipeline_source_url": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/mediad/src/pipeline.rs",
+        "fixed_diagnostic_source_url": "https://github.com/pollen-robotics/microduck/blob/f98b7f8d7e62987f40e135bb5e8506615d7df528/scripts/check-frame-dating.py",
+        "tracker_tests_executed": false,
+        "tracker_connected_robot": false,
+        "replica_preview_or_webpage_verified": false,
+        "replica_integrated": false,
+        "impact": {
+          "HD1910": "No servo implementation change. Face Board v1 report does not establish Feetech or ZERO3W original-card compatibility.",
+          "camera": "High before adoption: conditional field evidence for capture-time/state-clock alignment, FEC mapping loss and unrepaired diagnostic script remain material limits.",
+          "ToF": "No ToF implementation change; possible future video/state/sensor alignment only.",
+          "model_management": "No model-management or weight change.",
+          "training": "No policy training or dataset delivery; the measurements are media timing observations.",
+          "motion": "No gait/action change or local robot acceptance.",
+          "sound": "No playback or audio-asset change."
+        }
+      }
     }
   ],
   "replica_public_image": {
