@@ -20640,6 +20640,146 @@
           },
           "source_committed_at_utc": "2026-11-25T16:24:06Z",
           "source_committed_at_jst": "2026-11-26T01:24:06+09:00"
+        },
+        {
+          "tag": "daemon-dev-ideas-autonomous-cognition",
+          "url": "https://github.com/pollen-robotics/microduck/releases/tag/daemon-dev-ideas-autonomous-cognition",
+          "release_id": 459452910,
+          "release_name": "daemon 0.23.1-dev.1883.0a49419 (ideas-autonomous-cognition)",
+          "version": "daemon 0.23.1-dev.1883.0a49419 (ideas-autonomous-cognition)",
+          "head_sha": "0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "tag_object_sha": "0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "artifact_source_sha": "0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "published_at": "2026-11-26T13:29:20Z",
+          "published_at_jst": "2026-11-26T22:29:20+09:00",
+          "release_updated_at_utc": "2026-11-26T13:29:20Z",
+          "source_committed_at_utc": "2026-11-26T13:25:07Z",
+          "source_committed_at_jst": "2026-11-26T22:25:07+09:00",
+          "prerelease": true,
+          "source_version": "0.23.1",
+          "api_version": 69,
+          "development_api_version": 69,
+          "base_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+          "asset_inventory": [
+            {
+              "name": "0.23.1-dev.1883.0a49419.manifest.json",
+              "size": 386,
+              "digest": "sha256:84028ea9a1777db33469ed40ebe757f1b38b30dbd1682aaeedd47cc8624b2f32"
+            },
+            {
+              "name": "0.23.1-dev.1883.0a49419.manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:4b6d809516412a4797574724003beb441c69bbbbec6678bc85f2791fe82180a0"
+            },
+            {
+              "name": "daemon-0.23.1-dev.1883.0a49419.tar.zst",
+              "size": 20805919,
+              "digest": "sha256:87bf76936f8f1eccb9f5573105ee9872c253083873b6548874ea8317044b3a00"
+            },
+            {
+              "name": "daemon-0.23.1-dev.1883.0a49419.tar.zst.minisig",
+              "size": 279,
+              "digest": "sha256:3ba6781c92476670209a6e47d27f53ae2e5e9f3874533f952a1535d95824d312"
+            },
+            {
+              "name": "duckctl-0.23.1-py3-none-macosx_10_12_x86_64.whl",
+              "size": 2309502,
+              "digest": "sha256:55548e9b1ede90cfeeb60d7ddeaf6bacfa9eb616a372d7e58a67572855d75891"
+            },
+            {
+              "name": "duckctl-0.23.1-py3-none-macosx_11_0_arm64.whl",
+              "size": 2203534,
+              "digest": "sha256:782b9204dd5a550ff6d87100994ef0e825730a341fa4c2729817ec64ff2a2c3e"
+            },
+            {
+              "name": "duckctl-0.23.1-py3-none-manylinux_2_28_aarch64.whl",
+              "size": 3529231,
+              "digest": "sha256:727dd6f34677d70ce8997cdcce17701b49f12b4ab75df769c5d7e3049b108fc9"
+            },
+            {
+              "name": "duckctl-0.23.1-py3-none-manylinux_2_28_x86_64.whl",
+              "size": 3754184,
+              "digest": "sha256:88833002e48554a38141cceeb602cf1d855c590580ba366d8474e23e97e66546"
+            },
+            {
+              "name": "duckctl-0.23.1-py3-none-win_amd64.whl",
+              "size": 2144233,
+              "digest": "sha256:7d1b4120f547dda74c52b738b7a956aacd4597ca97b813096335e921d7a8e425"
+            },
+            {
+              "name": "duckctl-linux-aarch64.tar.gz",
+              "size": 360,
+              "digest": "sha256:690a58bdb46e75402161347f67e74a57fb1979308836292805b5db2d052c7a3f"
+            },
+            {
+              "name": "duckctl-linux-x86_64.tar.gz",
+              "size": 361,
+              "digest": "sha256:eb61d902a360f0485b97c3f786cce0a96c9c6980cea9ec7ebb040360658e00a4"
+            },
+            {
+              "name": "duckctl-macos-arm64.tar.gz",
+              "size": 2075104,
+              "digest": "sha256:e4c1e0015155b8e616be752bc2d1f0448597db1fd962b7e5b6b4562abeb65d74"
+            },
+            {
+              "name": "duckctl-macos-x86_64.tar.gz",
+              "size": 2209765,
+              "digest": "sha256:41ccd98602f3a192f738562c7fd1120900972a81d8a3fb374d68c7d6426c3ea3"
+            },
+            {
+              "name": "duckctl-windows-x86_64.zip",
+              "size": 1965245,
+              "digest": "sha256:e15723a26143cb33569e477b22e19e2ac3096e8fbb06d8cc061189db0dfc5f86"
+            },
+            {
+              "name": "manifest.json",
+              "size": 588,
+              "digest": "sha256:2a7338c676e47421cdb50869cd883c2ecd6c3bdb4b9bb5fa5edf387b839629b8"
+            },
+            {
+              "name": "manifest.json.minisig",
+              "size": 279,
+              "digest": "sha256:2bb6a6a81dca74491e834634f24b716c9c814f068b5e430aad3e1c45d19cf854"
+            }
+          ],
+          "asset_count": 16,
+          "assets_checked_at_utc": "2026-11-26T13:42:38.859Z",
+          "daemon_asset": "daemon-0.23.1-dev.1883.0a49419.tar.zst",
+          "daemon_asset_size": 20805919,
+          "daemon_asset_digest": "sha256:87bf76936f8f1eccb9f5573105ee9872c253083873b6548874ea8317044b3a00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "classification": "Development build attached to a documentation-only ideas branch; not a new runtime feature, formal release or approved roadmap.",
+          "associated_pull_requests": [
+            627
+          ],
+          "runtime_source_equal_to_fixed_base": true,
+          "protocol_contract": {
+            "inherited_from_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+            "api_version": 69,
+            "entry_pose_fields": true,
+            "chorale_wire_tag": "0xC0",
+            "same_as_chorale_C1_prototype": false
+          },
+          "binary_equal_to_main_package_verified": false,
+          "artifact_matches_current_ref": true,
+          "matching_package_confirmed": true,
+          "matching_scope": "Git ref, release source declaration and versioned artifact names agree; package/manifest content and signatures not verified.",
+          "signing_scope": "team.dev; development channel, not a customer/formal release.",
+          "package_bytes_downloaded": false,
+          "raw_manifest_bytes_checked": false,
+          "package_signature_verified_by_tracker": false,
+          "replica_integration": "not_integrated",
+          "impact": {
+            "HD1910": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "camera": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "ToF": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "model_management": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "training": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "motion": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "sound": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance."
+          },
+          "priority": "Low, documentation planning only."
         }
       ],
       "pending_pull_requests": [
@@ -35924,6 +36064,75 @@
           "priority": "Medium for multi-robot chorale; high compatibility review before use.",
           "source_committed_at_utc": "2026-11-25T16:24:06Z",
           "source_committed_at_jst": "2026-11-26T01:24:06+09:00"
+        },
+        {
+          "number": 627,
+          "repository": "pollen-robotics/microduck",
+          "title": "docs/ideas: a smarter duck, and a behavior library",
+          "url": "https://github.com/pollen-robotics/microduck/pull/627",
+          "state": "open",
+          "draft": false,
+          "merged_at": null,
+          "closed_at": null,
+          "created_at": "2026-11-26T13:25:17Z",
+          "created_at_jst": "2026-11-26T22:25:17+09:00",
+          "updated_at": "2026-11-26T13:25:17Z",
+          "updated_at_jst": "2026-11-26T22:25:17+09:00",
+          "head_sha": "0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "base_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+          "base_branch": "main",
+          "actual_merge_base": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+          "source_committed_at_utc": "2026-11-26T13:25:07Z",
+          "source_committed_at_jst": "2026-11-26T22:25:07+09:00",
+          "source_version": "0.23.1",
+          "api_version": 69,
+          "commit_count": 1,
+          "changed_file_count": 2,
+          "additions": 121,
+          "deletions": 0,
+          "files": [
+            "docs/README.md",
+            "docs/ideas/autonomous_cognition.md"
+          ],
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+          "classification": "Open documentation/ideas proposal, explicitly not a decision. Not new autonomous cognition runtime.",
+          "proposal": {
+            "classification": "Holding pen, not a decision; open unmerged documentation proposal.",
+            "directions": [
+              "Three speeds: onboard reflexes and behaviors, event-driven remote deliberation.",
+              "Onboard gaze/attention and person detection are proposed.",
+              "Behavior units with goals, outcomes and time limits; authoring as default, online runtime composition optional.",
+              "Semantic place labels/memory from a remote VLM, explicitly waiting for next mapd."
+            ],
+            "dependency": "Current map is not adequate for the suggested cross-room behavior; the proposal waits for the next mapd.",
+            "validation_scope": "No new runtime, model weights, training recipe, behavior library implementation or safety validation. Proposed invariants are design intent.",
+            "fixed_document_url": "https://github.com/pollen-robotics/microduck/blob/0a494190be74d9326a25d6fe6a29a0f3b7227b88/docs/ideas/autonomous_cognition.md"
+          },
+          "runtime_source_equal_to_fixed_base": true,
+          "runtime_source_equality_basis": "One child commit of fixed main 4024f6ee; commit and compare APIs both list only the two documentation files.",
+          "runtime_contract": {
+            "inherited_from_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+            "api_version": 69,
+            "entry_pose_fields": true,
+            "chorale_wire_tag": "0xC0",
+            "same_as_chorale_C1_prototype": false
+          },
+          "development_release_tag": "daemon-dev-ideas-autonomous-cognition",
+          "new_model_weights": false,
+          "runtime_code_changed": false,
+          "included_in_formal_release": false,
+          "replica_integration": "not_integrated",
+          "impact": {
+            "HD1910": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "camera": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "ToF": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "model_management": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "training": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "motion": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+            "sound": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance."
+          },
+          "priority": "Low planning watch; high control/arbitration/protocol review only if implementation is later adopted."
         }
       ],
       "previous_stable_releases": [
@@ -59249,12 +59458,12 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-26T10:42:43.318Z",
+  "checked_at_utc": "2026-11-26T13:42:38.859Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-26T08:39:05.820Z",
-    "source_snapshot_utc": "2026-11-26T10:42:43.318Z",
-    "source_snapshot_jst": "2026-11-26T19:42:43.318000+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-26T11:18:13.849087+00:00",
+    "previous_substantive_review_utc": "2026-11-26T10:42:43.318Z",
+    "source_snapshot_utc": "2026-11-26T13:42:38.859Z",
+    "source_snapshot_jst": "2026-11-26T22:42:38.859000+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-26T13:46:27.976734+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.23.1",
@@ -59263,39 +59472,32 @@
     "main_api_version": 69,
     "main_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
     "stable_release_assets_changed": false,
-    "new_pull_requests": {},
-    "updated_pull_requests": {
+    "new_pull_requests": {
       "pollen-robotics/microduck": [
-        432
+        627
       ]
     },
-    "updated_pull_request_details": {
-      "pollen-robotics/microduck#432": {
-        "kind": "New contributor field-validation comment only; no source or merge change.",
-        "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
-        "head_changed": false,
-        "state": "open",
-        "report_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
-        "reporter_association": "CONTRIBUTOR",
-        "reported_deployment": {
-          "board": "Face Board v1 beta",
-          "base_daemon_version": "0.23.1",
-          "gst_version_on_board": "1.28.5",
-          "change": "PR commit cherry-picked, only mediad swapped.",
-          "separate_composite_build_sha_provided": false,
-          "binary_digest_provided": false,
-          "entire_pr_branch_or_release_tested": false
-        },
-        "reported_fec_off_dated_frames": "584/584",
-        "reported_fec_on_dated_frames": "39/587",
-        "diagnostic_fix_committed": false
-      }
-    },
+    "updated_pull_requests": {},
     "previous_tracked_prs_merged": false,
     "merged_previously_tracked_pull_requests": {},
-    "new_development_releases": [],
+    "new_development_releases": [
+      "daemon-dev-ideas-autonomous-cognition"
+    ],
     "moved_development_tags": [],
     "retired_development_tags": [],
+    "new_documentation_proposal": {
+      "classification": "Holding pen, not a decision; open unmerged documentation proposal.",
+      "directions": [
+        "Three speeds: onboard reflexes and behaviors, event-driven remote deliberation.",
+        "Onboard gaze/attention and person detection are proposed.",
+        "Behavior units with goals, outcomes and time limits; authoring as default, online runtime composition optional.",
+        "Semantic place labels/memory from a remote VLM, explicitly waiting for next mapd."
+      ],
+      "dependency": "Current map is not adequate for the suggested cross-room behavior; the proposal waits for the next mapd.",
+      "validation_scope": "No new runtime, model weights, training recipe, behavior library implementation or safety validation. Proposed invariants are design intent.",
+      "fixed_document_url": "https://github.com/pollen-robotics/microduck/blob/0a494190be74d9326a25d6fe6a29a0f3b7227b88/docs/ideas/autonomous_cognition.md"
+    },
+    "new_runtime_capabilities": false,
     "official_blog_new_articles": false,
     "official_blog_article_count": 3,
     "official_blog_latest_date": "2026-10-23",
@@ -59311,7 +59513,7 @@
     "image_built_or_published_by_tracker": false,
     "package_bytes_downloaded": false,
     "substantive_update_detected": true,
-    "notes": "No source, release, development-ref, model or blog changes. PR432 remains open at f98b7f8d; FabienDanieau (GitHub CONTRIBUTOR) reports Face Board v1 beta/GStreamer1.28.5 measurements on daemon0.23.1 with only mediad cherry-picked. FEC off:584/584 frames monotonic-dated; FEC on:39/587. Current diagnostic still has reported pad-linkage/file-mode/handshake nits, and approval is conditional. Record the composite deployment and uncommitted diagnostic scope; do not relabel earlier135 host tests/November12 CI as new board/full-source/replica tests. No tracker tests, repairs, restarts, preview access or robot work."
+    "notes": "New PR627 at 0a494190 adds only docs/ideas/autonomous_cognition.md and one navigation line (+121/-0). Author explicitly calls it a holding pen, not a decision: gaze, behavior library, remote event-driven cognition and semantic places waiting for next mapd are proposed, not delivered. Associated dev1883 release/tag metadata matches the same SHA. Runtime source inherits fixed main4024f6ee/API69/entry_pose/C0; no feature or weight change and no binary-equality claim. Formal0.23.1/API68, default heads, existing PRs, models/OS channels and blog unchanged. No local integration, tests, builds, package download, installation, preview or robot access."
   },
   "replica_migration": {
     "recorded_on": "2026-11-01",
@@ -66526,6 +66728,108 @@
           "sound": "No playback or audio-asset change."
         }
       }
+    },
+    {
+      "record": "Preserved preceding latest_review before documentation-only cognition proposal",
+      "source_snapshot_utc": "2026-11-26T10:42:43.318Z",
+      "historical_snapshot": {
+        "previous_substantive_review_utc": "2026-11-26T08:39:05.820Z",
+        "source_snapshot_utc": "2026-11-26T10:42:43.318Z",
+        "source_snapshot_jst": "2026-11-26T19:42:43.318000+09:00",
+        "final_relevant_sources_checked_at_utc": "2026-11-26T11:18:13.849087+00:00",
+        "default_branch_changes": false,
+        "new_stable_release": false,
+        "stable_release_tag": "daemon-v0.23.1",
+        "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "stable_api_version": 68,
+        "main_api_version": 69,
+        "main_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+        "stable_release_assets_changed": false,
+        "new_pull_requests": {},
+        "updated_pull_requests": {
+          "pollen-robotics/microduck": [
+            432
+          ]
+        },
+        "updated_pull_request_details": {
+          "pollen-robotics/microduck#432": {
+            "kind": "New contributor field-validation comment only; no source or merge change.",
+            "head_sha": "f98b7f8d7e62987f40e135bb5e8506615d7df528",
+            "head_changed": false,
+            "state": "open",
+            "report_url": "https://github.com/pollen-robotics/microduck/pull/432#issuecomment-7189593915",
+            "reporter_association": "CONTRIBUTOR",
+            "reported_deployment": {
+              "board": "Face Board v1 beta",
+              "base_daemon_version": "0.23.1",
+              "gst_version_on_board": "1.28.5",
+              "change": "PR commit cherry-picked, only mediad swapped.",
+              "separate_composite_build_sha_provided": false,
+              "binary_digest_provided": false,
+              "entire_pr_branch_or_release_tested": false
+            },
+            "reported_fec_off_dated_frames": "584/584",
+            "reported_fec_on_dated_frames": "39/587",
+            "diagnostic_fix_committed": false
+          }
+        },
+        "previous_tracked_prs_merged": false,
+        "merged_previously_tracked_pull_requests": {},
+        "new_development_releases": [],
+        "moved_development_tags": [],
+        "retired_development_tags": [],
+        "official_blog_new_articles": false,
+        "official_blog_article_count": 3,
+        "official_blog_latest_date": "2026-10-23",
+        "model_metadata_changed": false,
+        "official_os_release_changed": false,
+        "official_os_main_changed": false,
+        "official_os_pull_requests_changed": false,
+        "official_os_development_channels_changed": false,
+        "local_migration_record_changed": false,
+        "runtime_code_changed_by_heartbeat": false,
+        "tests_executed_by_tracker": false,
+        "robot_connected": false,
+        "image_built_or_published_by_tracker": false,
+        "package_bytes_downloaded": false,
+        "substantive_update_detected": true,
+        "notes": "No source, release, development-ref, model or blog changes. PR432 remains open at f98b7f8d; FabienDanieau (GitHub CONTRIBUTOR) reports Face Board v1 beta/GStreamer1.28.5 measurements on daemon0.23.1 with only mediad cherry-picked. FEC off:584/584 frames monotonic-dated; FEC on:39/587. Current diagnostic still has reported pad-linkage/file-mode/handshake nits, and approval is conditional. Record the composite deployment and uncommitted diagnostic scope; do not relabel earlier135 host tests/November12 CI as new board/full-source/replica tests. No tracker tests, repairs, restarts, preview access or robot work."
+      }
+    },
+    {
+      "record": "New unmerged ideas PR627 and associated documentation-only development build",
+      "checked_at_utc": "2026-11-26T13:42:38.859Z",
+      "checked_at_jst": "2026-11-26T22:42:38.859000+09:00",
+      "source_sha": "0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...0a494190be74d9326a25d6fe6a29a0f3b7227b88",
+      "proposal": {
+        "classification": "Holding pen, not a decision; open unmerged documentation proposal.",
+        "directions": [
+          "Three speeds: onboard reflexes and behaviors, event-driven remote deliberation.",
+          "Onboard gaze/attention and person detection are proposed.",
+          "Behavior units with goals, outcomes and time limits; authoring as default, online runtime composition optional.",
+          "Semantic place labels/memory from a remote VLM, explicitly waiting for next mapd."
+        ],
+        "dependency": "Current map is not adequate for the suggested cross-room behavior; the proposal waits for the next mapd.",
+        "validation_scope": "No new runtime, model weights, training recipe, behavior library implementation or safety validation. Proposed invariants are design intent.",
+        "fixed_document_url": "https://github.com/pollen-robotics/microduck/blob/0a494190be74d9326a25d6fe6a29a0f3b7227b88/docs/ideas/autonomous_cognition.md"
+      },
+      "development_release_tag": "daemon-dev-ideas-autonomous-cognition",
+      "development_release_id": 459452910,
+      "runtime_code_changed": false,
+      "new_model_weights": false,
+      "impact": {
+        "HD1910": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "camera": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "ToF": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "model_management": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "training": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "motion": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance.",
+        "sound": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance."
+      },
+      "tracker_ran_tests_or_builds": false,
+      "replica_runtime_integrated": false
     }
   ],
   "replica_public_image": {
