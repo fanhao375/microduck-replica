@@ -2748,7 +2748,10 @@ def detach(op, raw, verb="bus-give-back"):
 def startup_step4(op):
     try:
         rep = op.ctx.startup_report(1.0)
-    except RpcError:
+    except RpcError as e:
+        text = str(e).lower()
+        if "-32601" in text or "unknown method" in text:
+            return "unsupported"
         return None
     steps = rep.get("steps") if isinstance(rep, dict) else None
     s4 = steps.get("4") if isinstance(steps, dict) else None
@@ -2863,7 +2866,7 @@ def give_marker(op, given, requested):
                                  {"mode": "commissioning", "phase": phase})
             if phase == "control":
                 s4 = startup_step4(op)
-                if s4 == "success":
+                if s4 in ("success", "unsupported"):
                     if ho.get("result") == "adopted":
                         remove(op.ctx, ABORT)
                         pads_start(op)
@@ -2911,7 +2914,7 @@ def give_soft(op, requested):
         if bus is not None:
             last_bus = bus
         # 起来了 = 运动模式 control，或者标定模式的实时快照（ready / moving / read_error / stop_unconfirmed / power_pending）
-        if robotd_up(bus) and startup_step4(op) == "success":
+        if robotd_up(bus) and startup_step4(op) in ("success", "unsupported"):
             pads_start(op)
             hold_stop(op)
             if bus.get("mode") == "commissioning":

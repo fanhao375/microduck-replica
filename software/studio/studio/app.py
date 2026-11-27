@@ -43,7 +43,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 from .auth import COOKIE, REMEMBER_S, Auth, OriginGuard
 from . import helper
 from .rpc import open_conn
-from .servo import boot_id, view_from_robotd
+from .servo import boot_id, readonly_view
 from .sshkeys import BadKey, SshKeys
 try:                      # https 之后手机要用到的两个功能，详见 phone_bridge 的注释
     from . import phone_bridge
@@ -67,7 +67,7 @@ except (OSError,ValueError,KeyError):
 MODEL_UPLOAD_LIMIT = 64 * 1024 * 1024
 MODEL_OP_LIMIT = 32768
 STATE_HZ = 10
-COMMANDS = {"relax", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
+COMMANDS = {"relax", "autonomous", "servo.open", "servo.close", "servo.op", "servo.ports", "imu.op", "calib.op", "pad.op", "onboard.op", "battery.op", "tune.op", "net.op"}
 HB_QUIET_S = 5.0         # 页面这么久没发心跳：当作看不见（停推状态、可能退订）
 HB_DEAD_S = 30.0         # 这么久没任何消息：当作半开的连接（手机走出 WiFi），直接关掉
 MUSIC_PONG_TIMEOUT_S = 5.0
@@ -202,7 +202,7 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
     update_commands = set()
     mapping_requests = set()
 
-    def update_readiness(*,software=False,native_transaction=None):
+    def update_readiness(*,software=False,native_transaction=None,ignore_motion_lock=False):
         busy = any(not task.done() for task in update_commands) or model_upload_gate.locked()
         motion = getattr(pad,'motion_studio',None)
         native=updates.native_state()
@@ -212,8 +212,11 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
         # The software updater writes its own marker before this query, so the plain
         # query must not count it or no install can ever pass preflight. Native updates
         # check that marker themselves as root; native recovery still counts it here.
+        # Shutdown already holds the motion lock when it asks, so that one query
+        # sets ignore_motion_lock. Any other holder still blocks this check.
         guarded=((native_transaction is not None and updates.marker.exists())
-                 or (native.get('active') is True and not own_prepared))
+                 or (native.get('active') is True and not own_prepared)
+                 or (not ignore_motion_lock and bool(getattr(updates,'motion_locked',None) and updates.motion_locked())))
         if guarded or busy:
             return {'ready':False,'error':'另一项更新或控制指令正在执行，请稍后重试'}
         if software:
@@ -841,8 +844,8 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                             or (servo.state in ("open", "opening") and me.get("route") not in ("/", "/pad"))):
                         # 接管了总线：推总线上读到的整张表；没接管：用主程序的数据拼一张只读的表
                         await send(servo.snapshot(diagnostics=diagnostics_active) if servo.state == "open"
-                                   else view_from_robotd(robotd, servo.directions, servo.state,
-                                                         servo.error, servo.sim))
+                                   else readonly_view(robotd, servo.directions, servo.state,
+                                                      servo.error, servo.sim))
                     imu_live = me.get("route") == "/imu" or diagnostics_active
                     if imu is not None and (imu_live or time.monotonic() - last_imu >= .5):
                         last_imu = time.monotonic()        # Live views share the state tick and use only the owner cache.
@@ -914,6 +917,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                 await send({"t": "result", "id": cid, "ok": accepted, "reason": reason})
             except Exception:  # noqa: BLE001 —— 页面已经断了：卸力照样发出去了，回执送不到无所谓
                 pass
+
+        async def run_autonomous(cid, args):
+            if not isinstance(args.get("on"), bool):
+                await send({"t": "result", "id": cid, "ok": False,
+                            "reason": "要给 on（true 或 false）"})
+                return
+            await run_pad_op(cid, {"op": "autonomous", "on": args["on"]})
 
         async def run_servo(name, cid, args=None):
             if servo is None:
@@ -1292,13 +1302,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         await send({'t':'result','id':cid,'ok':False,'reason':'软件更新正在进行，请等待完成；急停仍可使用'})
                         continue
                     if (imu is not None and getattr(imu, 'blocks_updates', lambda: False)()
-                            and name in {'pad.op', 'tune.op', 'servo.open', 'servo.op', 'calib.op'}
+                            and name in {'autonomous', 'pad.op', 'tune.op', 'servo.open', 'servo.op', 'calib.op'}
                             and not safe_during_update(name, args)):
                         await send({'t':'result','id':cid,'ok':False,
                                     'reason':'IMU 标定 / 类型切换会话未结束：先验证完成或取消；卸力仍可使用'})
                         continue
                     if ((mapping_requests or (pad is not None and getattr(getattr(pad, 'mapping', None), 'blocked', False)))
-                            and name in {'tune.op', 'servo.open', 'servo.op', 'calib.op', 'imu.op'}
+                            and name in {'autonomous', 'tune.op', 'servo.open', 'servo.op', 'calib.op', 'imu.op'}
                             and not safe_during_update(name, args)):
                         await send({'t':'result','id':cid,'ok':False,
                                     'reason':'请先完成或取消手柄映射并回中；网页卸力仍可使用'})
@@ -1378,6 +1388,14 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
                         continue
                     if name == "battery.op":
                         task = asyncio.create_task(run_battery_op(cid, msg.get("args") or {}))
+                        cmd_tasks.add(task)
+                        update_commands.add(task)
+                        task.add_done_callback(update_commands.discard)
+                        task.add_done_callback(cmd_tasks.discard)
+                        continue
+                    if name == "autonomous":
+                        # 跟卸力一样不在这里 await：页面断了也不取消已经发出的开关
+                        task = asyncio.create_task(run_autonomous(cid, args))
                         cmd_tasks.add(task)
                         update_commands.add(task)
                         task.add_done_callback(update_commands.discard)
@@ -1631,12 +1649,13 @@ def build_app(*, auth, robotd, log, web_dir, duck, names=(), state_dir=None, dev
             now = time.monotonic()
             if servo.state != "open":
                 since = None
-                fresh = robotd.present is True and robotd.bus.at is not None
-                if servo.handed_back_at is not None and fresh and robotd.bus.at > servo.handed_back_at and not robotd.paused:
+                rd_at = robotd.state.at if getattr(robotd, "legacy_bus", None) is False else robotd.bus.at
+                fresh = robotd.present is True and rd_at is not None
+                if servo.handed_back_at is not None and fresh and rd_at > servo.handed_back_at and not robotd.paused:
                     servo.handed_back_at = None                    # 主程序连上了：「已交还……手动起 robotd」那句收起来
                     servo.handback_note = None
                     servo.giveback_error = servo.giveback_hint = None
-                if servo.orphan and fresh and robotd.bus.at > servo.orphan["at"] and not robotd.paused:
+                if servo.orphan and fresh and rd_at > servo.orphan["at"] and not robotd.paused:
                     servo.orphan = None                            # 主程序起来了（它会全部松开）：不用再去接管
                     await asyncio.to_thread(marker_drop)
                     log.info("上次退出时开着的舵机会话：主程序起来了（它会把舵机全部松开），不用再接管", cat="总线", dedup=False)

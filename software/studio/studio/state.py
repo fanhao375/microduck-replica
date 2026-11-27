@@ -45,6 +45,73 @@ def _ms(age):
     return None if age is None else int(age * 1000)
 
 
+def _number(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def state_frame_live(st):
+    """v0.23 `robot.state`：线上字段是 `loop` 和 `safety.limp`。"""
+    if not isinstance(st, dict):
+        return False
+    loop = st.get("loop")
+    safety = st.get("safety")
+    hz = loop.get("hz") if isinstance(loop, dict) else None
+    return _number(hz) and isinstance(safety, dict) and "limp" in safety
+
+
+def project_bus(bus, st, policies=None):
+    """把一帧活的 `robot.state` 收成 estop / posture 已经在读的 bus 字典。
+    帧不活就原样退回 `bus`（旧固件）。`loop.hz > 0` 写成 motion/control；`hz == 0` 只写成启动阶段。"""
+    if not state_frame_live(st):
+        return bus if isinstance(bus, dict) else None
+    out = dict(bus) if isinstance(bus, dict) else {}
+    hz = st["loop"]["hz"]
+    if hz > 0:
+        policy = st.get("policy")
+        safety = st["safety"]
+        torqued = safety.get("torqued")
+        confirmed = torqued if isinstance(torqued, bool) else None
+        out["mode"] = "motion"
+        out["phase"] = "control"
+        out["policy_enabled"] = isinstance(policy, str) and policy not in ("", "held")
+        out["home_recovery"] = policy == "homing"
+        out["torque_off_pending"] = policy == "rest"
+        native = dict(out["native"]) if isinstance(out.get("native"), dict) else {}
+        native["torque_state_confirmed"] = confirmed
+        hd = dict(native["hd1910"]) if isinstance(native.get("hd1910"), dict) else {}
+        hd["restore_pending"] = False
+        hd["temporary_gains_applied"] = False
+        native["hd1910"] = hd
+        out["native"] = native
+        if isinstance(policies, dict) and isinstance(policies.get("homed"), bool):
+            out["homed"] = policies["homed"]
+    else:
+        out["phase"] = "configuring_bus"
+        if out.get("mode") == "commissioning":
+            out.pop("mode", None)
+    return out
+
+
+def viewed_bus(rd, now=None):
+    """清单和「写进主程序」用的 bus。旧固件就是 busStatus；v0.23 用活的 robot.state 投影。"""
+    sample = getattr(rd, "bus", None)
+    raw = sample.value if sample is not None and isinstance(sample.value, dict) else None
+    if getattr(rd, "legacy_bus", None) is not False:
+        return raw
+    clock = time.monotonic() if now is None else now
+
+    def fresh(item, key):
+        if item is None:
+            return None
+        age = item.age(clock)
+        return item.value if age is not None and age <= MAX_AGE[key] else None
+
+    st = fresh(getattr(rd, "state", None), "state")
+    pol = fresh(getattr(rd, "policies", None), "policies")
+    got = project_bus(raw, st if isinstance(st, dict) else None, pol if isinstance(pol, dict) else None)
+    return got if isinstance(got, dict) else None
+
+
 def starting_secs(rd, bus, now=None):
     """主程序从这次连上起、连续报启动阶段多少秒（robotd.Robotd.starting_since，轮询里记）。不在启动阶段 / 不知道回 None。
     超过 STARTING_LONG_S 页面就不再说「通常 10 秒内完成」（10-20 真机：旧 fork 的标定模式永远报 configuring_bus）。"""
@@ -173,17 +240,52 @@ def servo_orphan_view(servo):
     return {"why": o.get("why")}
 
 
+def control_features(rd):
+    """Control RPCs are introduced at IPC52 (laser) and IPC60 (autonomous)."""
+    hello = getattr(getattr(rd, "hello", None), "value", None)
+    version = hello.get("api_version") if isinstance(hello, dict) else None
+    known = rd.present is True and isinstance(version, int) and not isinstance(version, bool)
+    return {"autonomous": bool(known and version >= 60),
+            "laser_track": bool(known and version >= 52)}
+
+
+def autonomy_of(present, st, supported=False):
+    """Omitted autonomous means off only after its protocol capability is established."""
+    if present is not True or not isinstance(st, dict):
+        return None, None
+    move = st.get("move") if isinstance(st.get("move"), dict) else {}
+    source = move.get("source")
+    if not isinstance(source, str):
+        source = None
+    raw = move.get("limited_by")
+    limited = [x for x in raw if isinstance(x, str)] if isinstance(raw, list) else []
+    value = st.get("autonomous")
+    auto = value if isinstance(value, bool) else (False if supported else None)
+    return auto, {"source": source, "limited_by": limited}
+
+
 def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commit=None, auth=None):
     """bat：电量估算（studio/battery_svc.BatteryService，1 Hz 循环里喂）；这里只读它的结果。没给就按 robotd 的直线（老样子）。"""
     now = time.monotonic() if now is None else now
-    bus = rd.bus.value
+    raw_bus = rd.bus.value if isinstance(rd.bus.value, dict) else None
     health, pol, st = _fresh(rd.health, "health", now), _fresh(rd.policies, "policies", now), _fresh(rd.state, "state", now)
     bus_age, st_age = rd.bus.age(now), rd.state.age(now)
+    # legacy_bus 为 False 时走 v0.23 state 帧投影；缺省 / True 保持原有 busStatus 路径。
+    use_state = getattr(rd, "legacy_bus", None) is False
+    if use_state:
+        bus = project_bus(None, st, pol)
+        status_age = st_age
+    else:
+        bus = raw_bus
+        status_age = bus_age
     native = (bus or {}).get("native") if isinstance((bus or {}).get("native"), dict) else {}
 
     # 新鲜度：Studio 自己多久没拿到新数据（浏览器那边再加上传输的年龄）
     freshest = min([a for a in (bus_age, st_age) if a is not None], default=None)
-    robotd_ok = rd.present is True and bus_age is not None and bus_age < STALE_S
+    if use_state:
+        robotd_ok = rd.present is True and st_age is not None and st_age < STALE_S
+    else:
+        robotd_ok = rd.present is True and bus_age is not None and bus_age < STALE_S
 
     # 仪表带
     b = (health or {}).get("battery") or {}
@@ -247,7 +349,7 @@ def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commi
             st_age_live = bus_age
             state_t_ns = ls.get("at_us") * 1000 if isinstance(ls.get("at_us"), int) else None
     pose = posture(rd.present, bus, pol, st)
-    est = rd.estop.status(present=rd.present is not False, bus=bus, bus_age_s=bus_age, now=now)
+    est = rd.estop.status(present=rd.present is not False, bus=bus, bus_age_s=status_age, now=now)
     if servo_orphan_view(servo) is not None and rd.present is not True:
         # 上次退出时会话开着、这次没接管上（审查 D1）：robotd 不在，总线上又没接管——卸力要先去舵机页接管
         est = {"state": "unavailable", "why": "上次 Studio 退出时可能还有舵机保持着：去舵机页接管后才能卸力"}
@@ -264,6 +366,9 @@ def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commi
     if bat is not None:
         battery = bat.view(now)         # 电压查表的估算（调舵机时它自己从 Studio 的总线读数取）：battery-plan.md v2
     starting_s = starting_secs(rd, bus, now) if pose == "starting" else None
+    # 只用上面 _fresh 的 st（超过 1.5 秒的旧帧不当「关着」）。st_any 是给关节去色的，这里不用。
+    features = control_features(rd)
+    autonomous, driver = autonomy_of(rd.present, st, features["autonomous"])
     return {
         "t": "state",
         "robotd_ok": robotd_ok,
@@ -297,6 +402,8 @@ def summarize(rd, duck, servo=None, now=None, ob=None, bat=None, net=None, commi
         "guard": (bus or {}).get("home_start_guard"),
         "hold": hold,                  # 标定模式站姿使能：{stage: ramping|holding, max_error_deg, directions}
         "estop": est,
+        "autonomous": autonomous, "control_features": features,
+        "driver": driver,
         # startup_todo（调参方案 T1）：「还在启动」换成第几步的原话、补「走路模型没加载」
         "todo": startup_todo(rd, todo(health, bus, servos, imu_status, cpu, loop, battery, pose, rd.health.age(now),
                      battery_shutdown=getattr(ob, "battery_shutdown", None) if ob is not None else None,

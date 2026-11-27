@@ -62,7 +62,7 @@ function ServoStage({ sv, pose, setPose, selected, onSelect }) {
     if (pose === 'live') {
       if (sv?.diagnostic) return;   // Raw startup feedback does not establish a calibrated pose.
       if (!sv?.rows?.length) return;
-      d.setJoints(sv.rows.map((r) => (r.raw == null ? 0 : r.dir * (r.raw - 2048) * 2 * Math.PI / 4096)));
+      d.setJoints(sv.rows.map((r) => (Number.isFinite(r.rad) ? r.rad : (r.raw == null ? 0 : r.dir * (r.raw - 2048) * 2 * Math.PI / 4096))));
     } else {
       d.setJoints(POSES[pose].rad);
     }

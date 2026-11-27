@@ -235,6 +235,16 @@ class VpadE2E(unittest.TestCase):
         self.assertEqual(poses[-1], {"active": False})
         self.assertTrue(any(p["vx"] > 0.15 for p in moves(self.recs("back_again"))), "回到手柄页以后摇杆不管用了（V5 open）")
 
+    def test_binding_controls_and_emergency_button_fit_mobile_and_desktop(self):
+        for layout in self.out['binding_layouts']:
+            with self.subTest(width=layout['width']):
+                self.assertLessEqual(layout['scroll'], layout['width'])
+                self.assertTrue(layout['stopVisible'])
+                self.assertTrue(layout['autoDisabled'], 'legacy daemon lacks autonomous RPC')
+                self.assertIn('yes', layout['choices'])
+                self.assertNotIn('autonomous', layout['choices'])
+                self.assertNotIn('laser_track', layout['choices'])
+
     def test_mirror_sends_nothing(self):
         """V16：实体手柄连着，图上点的、拖的、按的都不发。"""
         self.assertEqual(self.recs("mirror"), [])

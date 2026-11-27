@@ -197,6 +197,8 @@ class Updates:
                 request=json.loads(raw)
                 if request=={'op':'readiness'}:
                     result=snapshot()
+                elif request=={'op':'maintenance-readiness'}:
+                    result=snapshot(ignore_motion_lock=True)
                 elif request=={'op':'software-readiness'}:
                     result=snapshot(software=True)
                 elif (isinstance(request,dict) and set(request)=={'op','transaction_id'}

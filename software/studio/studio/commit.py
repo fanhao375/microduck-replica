@@ -629,8 +629,10 @@ class CommitService:
         return None, (calib if isinstance(calib, dict) else None)
 
     def _current_bus(self, rd=None):
+        from .state import viewed_bus
         rd = rd or self.rd
-        return rd.bus.value if isinstance(rd.bus.value, dict) else {}
+        bus = viewed_bus(rd)
+        return bus if isinstance(bus, dict) else {}
 
     def _last_commit(self):
         row = _read_json(_path(self.state_dir, COMMIT_LAST))

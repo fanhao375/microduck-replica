@@ -30,6 +30,8 @@ KNOWN_BUILDS = ("1fa8438-feetech-ft6-control.43", "4734cbb-feetech-imu-auto-cont
 BACKOFF = (0.5, 1.0, 2.0, 5.0)
 STREAM_HZ = 10
 STREAM_LINGER_S = 10.0
+# v0.23 does not expose robot.busCommand; fall back to the 0644 calibration file.
+CALIB_FILE = "/etc/robot/feetech-ft5/hd1910-calibration.toml"
 
 
 class Sample:
@@ -59,6 +61,9 @@ class Robotd:
         self.cfg = Conn(configd_addr, "configd", log)
         self.hello, self.health, self.bus = Sample(), Sample(), Sample()
         self.policies, self.calib, self.state = Sample(), Sample(), Sample()
+        self.legacy_bus = None          # None = not probed; True = busStatus daemon; False = v0.23 state-frame daemon
+        self.model_api_version = None   # robot.modelApi u32
+        self.daemon_mode = None         # robot.mode (e.g. walk / roller)
         self.pad, self.sysinfo = Sample(), Sample()
         self.present = None          # robotd 的 socket 在不在；None = 还没试过
         self.absent_since = None
@@ -185,7 +190,8 @@ class Robotd:
         - 监视任务负责 2 秒补发一次、8 秒超时，确认或超时就结束（代码审查 #1）。"""
         now = time.monotonic()
         self.estop.press(by, now)
-        self._due["bus"] = 0.0          # 排在后面的 busStatus 提前：马上开始每 0.1 秒回读
+        if self.legacy_bus is not False:
+            self._due["bus"] = 0.0      # 旧固件：排在后面的 busStatus 提前，马上开始每 0.1 秒回读
         self._wake_poll.set()           # 轮询要是正在退避里睡（robotd 刚回来），叫醒它
         loop = asyncio.get_running_loop()
         # 在路上的发送刚开始（< 0.3 秒）就跟它；早就开始的（robotd 卡住了）另发一个，不吞掉这次按下（复核 #3）
@@ -222,6 +228,8 @@ class Robotd:
             if isinstance(r, dict) and r.get("accepted") is False:
                 return self._relax_failed(t, started, f"主程序没接受卸力：{r.get('reason') or '没说原因'}", reply=r)
             self.estop.sent(started)
+            if self.legacy_bus is False:
+                self._wake_stream.set()
             self._mark_present(True)        # robotd 回话了：它在（轮询可能还在退避里，没发现它回来）
             note = "已发出，等回读确认"
             if not (isinstance(r, dict) and "accepted" in r):
@@ -238,7 +246,7 @@ class Robotd:
         while self.estop.active:
             el = self.estop.elapsed()
             if el >= CONFIRM_TIMEOUT_S:
-                bus = self.bus.value
+                bus = self._estop_view()
                 why = "按了 8 秒还没确认卸力"
                 if self.estop.send_error:
                     why += f"（后来那次{self.estop.send_error}）"
@@ -297,16 +305,20 @@ class Robotd:
                 self.log.info("跟主程序的轮询连接重连过：当成新连上，重新 hello、重读标定状态", cat="robotd")
             try:
                 if not hello_done:
-                    self.bus.fail("等待这次连接的总线状态")
+                    if self.legacy_bus is not False:
+                        self.bus.fail("等待这次连接的总线状态")
                     r = await self.poll.call("hello", {"api_version": API_VERSION}, timeout=2.0)
                     self.hello.set(r)
+                    for sample in (self.bus, self.state, self.policies):
+                        sample.value, sample.at, sample.error = None, None, "等待本次连接的新状态"
                     self.calib_valid_after = self.hello.at    # 这之前读到的标定状态作废（审查 O5）
                     self._last_phase = None
                     self.starting_since = None                # 「一直报启动中」从这次连上重新算
                     self._mark_present(True)
-                    hello_done = True
                     hello_link = self.poll.reconnects
                     self._ask_calib(again=True)
+                    await self._probe_daemon()
+                    hello_done = True
                     v = r.get("api_version") if isinstance(r, dict) else None
                     if v != API_VERSION:
                         self.log.warn(f"主程序的接口版本是 {v}，Studio 按 {API_VERSION} 写的", cat="robotd",
@@ -314,7 +326,7 @@ class Robotd:
                     ver = r.get("daemon_version") if isinstance(r, dict) else None
                     self.log.info(f"连上主程序（接口 v{v}，版本 {ver}）", cat="robotd")
                 now = time.monotonic()
-                if now >= due["bus"]:
+                if self.legacy_bus is not False and now >= due["bus"]:
                     # 标定模式 10 Hz：IMU 页的实时读数、站着校准都从 last_sample 拿（标定模式没有 robot.state）
                     every = self.bus_poll_interval()
                     bus, asked = await self._ask("bus", "robot.busStatus", every=every)
@@ -346,7 +358,7 @@ class Robotd:
                     if r is not None:
                         self.health.set(r)
                 if now >= due["policies"]:
-                    if self._mode() == "motion" and self._phase() == "control":
+                    if self.legacy_bus is False or (self._mode() == "motion" and self._phase() == "control"):
                         r, _ = await self._ask("policies", "robot.policies", every=2.0)
                         if r is not None:
                             self.policies.set(r)
@@ -354,14 +366,16 @@ class Robotd:
                         due["policies"] = now + 2.0
                 fails = 0
             except Unreachable as e:
-                self.bus.fail(e)
+                if self.legacy_bus is not False:
+                    self.bus.fail(e)
                 hello_done = False
                 self._mark_present(False, e)
                 fails += 1
                 await self._nap(BACKOFF[min(fails - 1, len(BACKOFF) - 1)])
                 continue
             except (Timeout, RpcError) as e:
-                # 只有 hello 会走到这里
+                # hello 或 hello 之后那一次 modelApi 探测（失败就整次重来）
+                hello_done = False
                 fails += 1
                 self.log.warn("主程序没回好 hello", cat="robotd", raw=str(e),
                               hint="主程序可能正在启动；一直这样，看 robotd 日志")
@@ -401,7 +415,21 @@ class Robotd:
                     self.calib.set(r)
                     return
                 self.calib.fail(f"回的不是对象（{type(r).__name__}）")
-            except (Unreachable, Timeout, RpcError) as e:
+            except RpcError as e:
+                if e.code == -32601:
+                    loaded = await asyncio.to_thread(calib_from_file)
+                    if loaded is not None:
+                        self.calib.set(loaded)
+                        self.log.info("主程序没有 calibration-status，改读标定文件", cat="校准",
+                                      raw=loaded.get("path"), dedup=False)
+                        return
+                    self.calib.fail(e)
+                    self.log.warn("读不到标定状态", cat="校准", raw=str(e), hint="不影响站和走；页面上标定那一项显示「不知道」")
+                    return
+                self.calib.fail(e)
+                if attempt == 2:
+                    self.log.warn("读不到标定状态", cat="校准", raw=str(e), hint="不影响站和走；页面上标定那一项显示「不知道」")
+            except (Unreachable, Timeout) as e:
                 self.calib.fail(e)
                 if attempt == 2:
                     self.log.warn("读不到标定状态", cat="校准", raw=str(e), hint="不影响站和走；页面上标定那一项显示「不知道」")
@@ -425,6 +453,42 @@ class Robotd:
             self.log.warn(f"主程序版本 {build} Studio 还没核对过", cat="robotd",
                           hint="只读显示和卸力照常；以后的运动按钮会先置灰")
 
+    async def _probe_daemon(self):
+        """Prefer the native busStatus contract, also exposed by older modelApi daemons."""
+        self.legacy_bus = None
+        self.model_api_version = None
+        self.daemon_mode = None
+        try:
+            bus = await call_once(self.addr, "robot.busStatus", {}, timeout=2.0, name="总线", log=self.log)
+        except RpcError as error:
+            if error.code != -32601:
+                raise
+        else:
+            if not isinstance(bus, dict) or bus.get("mode") not in ("motion", "commissioning"):
+                raise RpcError("robot.busStatus", None, "主程序返回的总线状态不完整")
+            self.bus.set(bus)
+            self._last_phase = bus.get("phase")
+            self.legacy_bus = True
+            return
+        try:
+            r = await call_once(self.addr, "robot.modelApi", {}, timeout=2.0, name="modelApi", log=self.log)
+        except RpcError as e:
+            if e.code == -32601:
+                self.legacy_bus = True
+                return
+            raise
+        api = r.get("model_api") if isinstance(r, dict) else None
+        if not isinstance(api, int) or isinstance(api, bool):
+            raise RpcError("robot.modelApi", None, f"回的不是 model_api（{r!r}）")
+        self.model_api_version = api
+        self.legacy_bus = False
+        try:
+            mode = await call_once(self.addr, "robot.mode", {}, timeout=2.0, name="模式", log=self.log)
+        except (RpcError, Timeout, Unreachable):
+            return
+        if isinstance(mode, dict) and isinstance(mode.get("mode"), str):
+            self.daemon_mode = mode["mode"]
+
     def _mode(self):
         b = self.bus.value
         return b.get("mode") if isinstance(b, dict) else None
@@ -433,19 +497,68 @@ class Robotd:
         b = self.bus.value
         return b.get("phase") if isinstance(b, dict) else None
 
+    def _motion_stream_ready(self):
+        """v0.23 不拿 state 帧当订阅门槛（帧要订上才有）。旧固件仍要 motion + control。"""
+        if self.legacy_bus is False:
+            return True
+        return self._mode() == "motion" and self._phase() == "control"
+
+    def _estop_bus(self, st):
+        """给 EStop.on_bus / status 的投影。
+        优先看 v0.23 补上的 safety.torqued；旧版未发 torqued 时退回 safety.limp。"""
+        if not isinstance(st, dict):
+            return None
+        safety = st.get("safety") if isinstance(st.get("safety"), dict) else None
+        if not isinstance(safety, dict) or ("torqued" not in safety and "limp" not in safety):
+            return None
+        confirmed = safety.get("torqued")
+        if not isinstance(confirmed, bool):
+            return None
+        return {
+            "mode": "motion",
+            "phase": "control",
+            "torque_off_pending": False,
+            "native": {
+                "torque_state_confirmed": confirmed,
+                "hd1910": {"restore_pending": False, "temporary_gains_applied": False},
+            },
+        }
+
+    def _estop_view(self):
+        if self.legacy_bus is False:
+            return self._estop_bus(self.state.value)
+        return self.bus.value
+
+    def _estop_on_state(self, st):
+        """只认回执之后才收到的帧。回执前的帧反映的是卸力前的状态。"""
+        if self.legacy_bus is not False or not self.estop.active or self.estop.sent_at is None:
+            return False
+        projected = self._estop_bus(st)
+        if projected is None:
+            return False
+        stamp = st.get("t_ns")
+        if not isinstance(stamp, int) or isinstance(stamp, bool) or stamp < self.estop.sent_at * 1e9:
+            return False
+        if self.estop.on_bus(projected, stamp / 1e9):
+            self.log.info(f"卸力已确认（按下到确认 {self.estop.confirm_ms} ms）", cat="安全",
+                          step="state 回读")
+            return True
+        return False
+
     # ---- 订阅 ----
 
     def _want_stream(self):
         if self.paused:
             return False
-        if self.force_subscribe or self.background_music or self.viewers > 0:
+        state_confirmation = self.legacy_bus is False and self.estop.active and self.estop.sent_at is not None
+        if state_confirmation or self.force_subscribe or self.background_music or self.viewers > 0:
             return True
         return time.monotonic() - self._last_viewer_at < STREAM_LINGER_S
 
     async def _stream_loop(self):
         fails = 0
         while True:
-            if not self._want_stream() or self._mode() != "motion" or self._phase() != "control":
+            if not self._want_stream() or not self._motion_stream_ready():
                 self._wake_stream.clear()
                 try:
                     await asyncio.wait_for(self._wake_stream.wait(), 1.0)
@@ -483,7 +596,9 @@ class Robotd:
                         raise RpcError("robot.subscribe", err.get("code"), err.get("message", ""))
                     continue
                 if msg.get("method") == "robot.state":
-                    self.state.set(msg.get("params"))
+                    params = msg.get("params")
+                    self.state.set(params)
+                    self._estop_on_state(params)
                 if not self._want_stream():
                     self.log.info("没人在看了，停止订阅", cat="robotd")
                     return
@@ -564,6 +679,24 @@ class Robotd:
 
 def _round(x, nd=2):
     return None if x is None else round(x, nd)
+
+
+def calib_from_file(path=CALIB_FILE):
+    """把 hd1910-calibration.toml 收成 calibration-status 的形状。读不到、或没有 joints，回 None。"""
+    import tomllib
+    try:
+        with open(path, "rb") as fh:
+            data = tomllib.load(fh)
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    joints = data.get("joints") if isinstance(data, dict) else None
+    if not isinstance(joints, list) or not joints:
+        return None
+    out = {"calibration": data, "imu_source": "bus", "from_file": True, "path": path}
+    quat = data.get("imu_mount_quat")
+    if isinstance(quat, list) and len(quat) == 4:
+        out["imu_mount"] = {"quat": quat, "verified": data.get("imu_mount_verified")}
+    return out
 
 
 def fresh_calib(rd):

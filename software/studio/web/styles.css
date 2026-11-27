@@ -82,6 +82,14 @@ button:disabled { cursor: default; }
 .estop.done { background: var(--text); }
 .estop-wrap { display: inline-flex; align-items: center; gap: 12px; }
 .estop-wrap .why { font-size: 13px; color: var(--text-2); }
+.top-acts { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; min-width: 0; }
+.auto-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.auto-dot { width: 10px; height: 10px; border-radius: 50%; background: #C7C7CC; flex: none; }
+.auto-dot.on { background: var(--ok); }
+.auto-dot.unk { background: var(--danger); animation: onb-pulse 1s ease-in-out infinite; }
+.auto-btn { height: 36px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--board-edge); background: var(--board); color: var(--text); font-size: 15px; font-weight: 600; }
+.auto-btn:disabled { opacity: .45; }
+.auto-wrap .why { font-size: 13px; color: var(--text-2); max-width: 12em; }
 
 /* ---- 横幅 ---- */
 .banner { min-height: 40px; margin-bottom: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 16px; border-radius: 12px; font-size: 14px; }
@@ -150,6 +158,7 @@ button:disabled { cursor: default; }
 .stage .btn2 { height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 17px; font-weight: 500; }
 .stage button:disabled { opacity: 0.45; }
 .stage .tip { margin-top: 12px; font-size: 13px; color: var(--stage-fg-2); }
+.stage .auto-drive { margin: 8px 0 0; font-size: 14px; color: var(--stage-fg-2); }
 .stage .reset-view { position: absolute; z-index: 2; right: 20px; top: 16px; height: 30px; padding: 0 14px; border: 0; border-radius: 999px;
   background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 13px; }
 .stage .age { position: absolute; right: 24px; bottom: 20px; padding: 4px 12px; border-radius: 999px; background: var(--stage-btn2-bg); color: var(--stage-btn2-fg); font-size: 13px; }
@@ -272,7 +281,15 @@ button:disabled { cursor: default; }
 @media (max-width: 700px) {
   .nav { display: none; }
   .main { padding: 0 12px 96px; }
-  .topbar { gap: 8px; }
+  .topbar { gap: 8px; margin: 0 -12px; padding: 0 12px; }
+  .top-acts { gap: 8px; }
+  .auto-wrap { gap: 4px; position: relative; }
+  .auto-state { display: none; }
+  .auto-btn { padding: 0 10px; }
+  .auto-wrap .why { position: fixed; top: 56px; left: 12px; right: 12px;
+    padding: 8px; white-space: normal; background: var(--board); border: 1px solid var(--board-edge); }
+  .duckid { overflow: hidden; }
+  .duckid .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .duckid .meta, .estop-wrap .why, .estop .kbd { display: none; }   /* 手机上让出地方给卸力按钮；手机没有空格键 */
   .estop { padding: 0 18px; flex-shrink: 0; }
   .stage-ov { height: 300px; }      /* 手机上舞台矮一点：第一屏露得出仪表带和清单（审查 O11） */
@@ -280,8 +297,8 @@ button:disabled { cursor: default; }
   .stage h1 { font-size: 24px; line-height: 30px; }
   .stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%; pointer-events: none;
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.42)); }   /* 字在鸭子脚边，垫一层暗底保证看得清 */
-  .band { grid-template-columns: 1fr 1fr; }
-  .band > * { padding: 14px 18px; }
+  .band { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .band > * { padding: 14px 18px; min-width: 0; overflow: hidden; }
   .band > * + * { box-shadow: none; }
   .band > :nth-child(even) { box-shadow: inset 1px 0 0 #E5E5EA; }
   .band > :nth-child(n+3) { box-shadow: inset 0 1px 0 #E5E5EA; }

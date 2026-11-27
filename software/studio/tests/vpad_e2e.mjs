@@ -352,7 +352,9 @@ await step('phone_head', async () => {
   await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await waitFor(`/摇杆管：头模式/.test(document.querySelector('.pd-vbar')?.textContent || '')`, '手机上进了头模式');
   await shot('phone-3-head.png', '.pd-live', '.pd-vbar');
-  await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: b.x, y: b.y, id: 4 }] });
+  const back = await box(key('north'));
+  await sleep(650);
+  await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: back.x, y: back.y, id: 4 }] });
   await sleep(80);
   await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await waitFor(`/摇杆管：走路/.test(document.querySelector('.pd-vbar')?.textContent || '')`, '手机上回到走路');
@@ -365,6 +367,26 @@ await shot('phone-4-mirror.png', '.pd-live', '.pd-vbar');
 await js('window.__fakeLive = null');
 out.phone_mirror = await js(`({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth })`);
 await fakeSet({ pad_connected: false });
+
+out.binding_layouts = [];
+for (const width of [320, 375, 1366]) {
+  await open(width, 900, false);
+  await js(`(() => {
+    const panel = [...document.querySelectorAll('details')].find(e => e.querySelector('summary')?.textContent.includes('按键绑定与功能开关'));
+    if (!panel) throw new Error('Missing binding settings');
+    panel.open = true;
+  })()`);
+  await waitFor(`!!document.querySelector('select[aria-label="LB 功能"]')`, '按键绑定设置出现');
+  out.binding_layouts.push(await js(`(() => {
+    const select = document.querySelector('select[aria-label="LB 功能"]');
+    const stop = document.querySelector('.estop').getBoundingClientRect();
+    return {width: innerWidth, scroll: document.documentElement.scrollWidth,
+      stopVisible: stop.left >= 0 && stop.right <= innerWidth,
+      autoDisabled: document.querySelector('.auto-btn').disabled,
+      choices: [...select.options].map(o => o.value)};
+  })()`));
+  await shot(`bindings-${width}.png`, 'full');
+}
 
 process.stdout.write(JSON.stringify(out));
 ws.close();

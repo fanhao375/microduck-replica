@@ -100,7 +100,8 @@ class ArchiveTest(unittest.TestCase):
                  ({**commissioning, 'phase':'stop_unconfirmed'}, False),
                  ({**commissioning, 'power_pending':True}, False), ({},False),
                  ({**motion,'torque_state':'on'},False), ({**motion,'policy_enabled':True},False),
-                 ({**motion,'torque_state':'off','native':{}},False)]
+                 ({**motion,'torque_state':'off','native':{}},False),
+                 ({**motion,'native':{'torque_state_confirmed':False}},True)]
         for flag in hd:
             for value in (True, None, 0):
                 cases.append(({**motion,'native':{**native,'hd1910':{**hd,flag:value}}}, False))

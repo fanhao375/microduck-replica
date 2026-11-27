@@ -60,25 +60,46 @@ class BatteryService:
             return vs, fr, B.classify_servo_session(rows), ("servo", int(now)), "servo", names
         bus = self.rd.bus.value
         age = self.rd.bus.age(now)
-        if bus is None or age is None or age > BUS_STALE_S:
+        if bus is not None and age is not None and age <= BUS_STALE_S:
+            vs, fr = B.robotd_volts(bus)
+            if vs is not None and any(B._num(v) for v in vs):
+                st_age = self.rd.state.age(now)
+                st = self.rd.state.value if st_age is not None and st_age <= MAX_AGE["state"] else None
+                joints = ((bus.get("native") or {}).get("joints") or []) if isinstance(bus.get("native"), dict) else []
+                names = [JOINT_CN.get(j.get("name"), j.get("name")) if isinstance(j, dict) else None for j in joints]
+                cls = B.classify_robotd(bus, st) if st is not None else None
+                if cls is None and st is None and isinstance(bus.get("native"), dict):
+                    # 状态流没在推（没人看页面时 robotd 不推 robot.state）：只看 busStatus。卸力就是卸力；
+                    # 扭矩开着、策略没开 = 保持 HOME（不会走）；策略开着可能在走，算不知道
+                    torque = bus["native"].get("torque_state_confirmed")
+                    if torque is False:
+                        cls = "rest"
+                    elif torque is True and bus.get("policy_enabled") is False:
+                        cls = "light"
+                return vs, fr, cls, ("bus", self.rd.bus.at), "robotd", names
+        pack = self._health_pack(now)
+        if pack is None:
             return None
-        vs, fr = B.robotd_volts(bus)
-        if vs is None:
+        volts, cls = pack
+        return ("pack", volts, cls, ("health", int(now)))
+
+    def _health_pack(self, now):
+        """v0.23 的 busStatus / robot.state 没有逐颗电压。robot.health 的 battery.volts 是主程序自己的电池电压。"""
+        from .state import project_bus
+        health_s = self.rd.health
+        age = health_s.age(now)
+        health = health_s.value if age is not None and age <= MAX_AGE["health"] else None
+        bat = health.get("battery") if isinstance(health, dict) else None
+        volts = bat.get("volts") if isinstance(bat, dict) else None
+        if not B._num(volts):
             return None
         st_age = self.rd.state.age(now)
         st = self.rd.state.value if st_age is not None and st_age <= MAX_AGE["state"] else None
-        joints = ((bus.get("native") or {}).get("joints") or []) if isinstance(bus.get("native"), dict) else []
-        names = [JOINT_CN.get(j.get("name"), j.get("name")) if isinstance(j, dict) else None for j in joints]
-        cls = B.classify_robotd(bus, st) if st is not None else None
-        if cls is None and st is None and isinstance(bus.get("native"), dict):
-            # 状态流没在推（没人看页面时 robotd 不推 robot.state）：只看 busStatus。卸力就是卸力；
-            # 扭矩开着、策略没开 = 保持 HOME（不会走）；策略开着可能在走，算不知道
-            torque = bus["native"].get("torque_state_confirmed")
-            if torque is False:
-                cls = "rest"
-            elif torque is True and bus.get("policy_enabled") is False:
-                cls = "light"
-        return vs, fr, cls, ("bus", self.rd.bus.at), "robotd", names
+        pol_age = self.rd.policies.age(now)
+        pol = self.rd.policies.value if pol_age is not None and pol_age <= MAX_AGE["policies"] else None
+        bus = project_bus(None, st if isinstance(st, dict) else None, pol if isinstance(pol, dict) else None)
+        cls = B.classify_robotd(bus, st) if isinstance(bus, dict) else None
+        return float(volts), cls
 
     def tick(self, now=None):
         now = time.monotonic() if now is None else now
@@ -86,6 +107,10 @@ class BatteryService:
         t = self.clock(now)
         if s is None:
             events = self.est.feed(t, None)
+        elif s[0] == "pack":
+            _tag, volts, cls, key = s
+            self.names = None
+            events = self.est.feed(t, volts, None, cls, key=key if self.speed == 1.0 else None, source="health", pack=True)
         else:
             vs, fr, cls, key, source, names = s
             self.names = names

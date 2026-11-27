@@ -34,7 +34,7 @@
 }
 /* 遥控后面：配对向导、测急停、配过的手柄（审查 O11：遥控紧跟着手柄图） */
 /* 手柄区下面这排卡片：有几张就平分整行、一样高（用户 10-19：不要一张宽一张窄、右边空一大块） */
-.pd-page .pd-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: stretch; }
+.pd-page .pd-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; align-items: stretch; }
 /* 卡片里的浅色按钮跟深色的一样大（用户 10-19：「忘掉」那么小，跟默认的一起搭） */
 .pd-page .pd-card .btn-light { height: 38px; padding: 0 18px; font-size: 15px; }
 .pd-page .pd-card:focus { outline: none; box-shadow: inset 0 0 0 1px var(--board-edge), 0 0 0 2px var(--blue); }
@@ -210,6 +210,7 @@
   .pd-page .pd-3d-stage { height: 220px; }
 }
 @media (max-width: 700px) {
+  .pd-page .pd-row { flex-wrap: wrap; }
   .pd-page .pd-card { padding: 14px 16px; }
   /* 手机上图小：只留 Start / Select 两处说明，别挤在一起 */
   .pd-page .pd-key-note:not(.pd-key-note-main) { display: none; }

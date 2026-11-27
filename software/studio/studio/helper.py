@@ -58,10 +58,14 @@ def flag_present():
     return os.path.exists(FLAG)
 
 
+PROBE_TIMEOUT = 15
+
+
 def available(refresh=False):
     """小助手在不在、sudoers 放行没（结果缓存：装不装在运行中不会变）。
     用 `sudo -n microduck-helper bus-nope` 探：能调就返回 2（动词不认识，说明文件在、sudoers 放行）；
-    返回别的 = 没装 / 没放行 / 不在 Linux。refresh=True 时重新探一次（配网每次连接都要看）。"""
+    返回别的 = 没装 / 没放行 / 不在 Linux。refresh=True 时重新探一次（配网每次连接都要看）。
+    超时不缓存：慢板子冷启动时 sudo + python 可能偶尔慢，下次再探。"""
     global _avail
     if refresh:
         _avail = None
@@ -71,9 +75,12 @@ def available(refresh=False):
         _avail = False
         return False
     try:
-        r = subprocess.run(["sudo", "-n", HELPER, "bus-nope"], capture_output=True, text=True, timeout=5)
+        r = subprocess.run(["sudo", "-n", HELPER, "bus-nope"], stdin=subprocess.DEVNULL,
+                           capture_output=True, text=True, timeout=PROBE_TIMEOUT)
         _avail = r.returncode == 2
-    except (OSError, subprocess.TimeoutExpired):
+    except subprocess.TimeoutExpired:
+        return False
+    except OSError:
         _avail = False
     return _avail
 

@@ -364,4 +364,26 @@ class NativeHttp(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([row['ready'] for row in observations],[True,False])
 
 
+    @unittest.skipUnless(os.name == 'posix', 'Linux advisory motion lock')
+    async def test_maintenance_readiness_does_not_block_on_its_own_motion_lock(self):
+        import fcntl
+        snapshot = self.updates.readiness_snapshot
+        await self.updates.stop_readiness()
+        self.updates.readiness = Path(self.tmp.name) / 'maintenance-ready.sock'
+        self.updates.marker = Path(self.tmp.name) / 'maintenance-installing'
+        await self.updates.start_readiness(snapshot)
+        def ask(op):
+            with socket.socket(socket.AF_UNIX) as connection:
+                connection.settimeout(2)
+                connection.connect(str(self.updates.readiness))
+                connection.sendall(json.dumps({'op': op}).encode() + b'\n')
+                return json.loads(connection.recv(8192))
+        with (self.updates.marker.parent / 'motion.lock').open('wb') as gate:
+            fcntl.flock(gate, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.assertFalse((await asyncio.to_thread(ask, 'readiness'))['ready'])
+            self.assertTrue((await asyncio.to_thread(ask, 'maintenance-readiness'))['ready'])
+            self.servo.state = 'open'
+            self.assertFalse((await asyncio.to_thread(ask, 'maintenance-readiness'))['ready'])
+
+
 if __name__=='__main__':unittest.main()

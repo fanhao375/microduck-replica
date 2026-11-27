@@ -69,8 +69,11 @@ const f2 = (v) => (typeof v === 'number' && isFinite(v) ? v.toFixed(2) : '—');
 /** 小字一行：电压 · 怎么估的 */
 function smallLine(b) {
   if (!b || !b.mode) return '—';
-  if (b.mode === 'no_data') return '读不到电压';
-  if (b.mode === 'estimating') return `估算中${typeof b.estimating_left_s === 'number' ? `，${b.estimating_left_s} 秒` : ''}`;
+  if (b.mode === 'no_data') return typeof b.rd_volts === 'number' ? `${f2(b.rd_volts)} V · 主程序读数` : '读不到电压';
+  if (b.mode === 'estimating') {
+    const v = typeof b.volts === 'number' ? `${f2(b.volts)} V · ` : (typeof b.rd_volts === 'number' ? `${f2(b.rd_volts)} V · ` : '');
+    return `${v}估算中${typeof b.estimating_left_s === 'number' ? `，${b.estimating_left_s} 秒` : ''}`;
+  }
   if (b.mode === 'bench') return b.why || '台架电源';         // 大字已经是电压了
   return `${f2(b.volts)} V · ${b.why || ''}`;
 }
@@ -103,7 +106,8 @@ export function BatteryCell({ b }) {
   }, [open]);
 
   const bench = b.mode === 'bench';
-  const pct = typeof b.pct === 'number' ? Math.round(b.pct) : null;
+  const pct = typeof b.pct === 'number' ? Math.round(b.pct)
+    : (typeof b.rd_pct === 'number' && (b.mode === 'no_data' || b.mode === 'estimating') ? Math.round(b.rd_pct) : null);
   const kind = b.level === 'error' ? 'bad' : b.level === 'warn' ? 'warn' : '';
   const color = kind === 'bad' ? 'var(--danger)' : kind === 'warn' ? 'var(--warn)' : 'var(--text)';
   const big = bench ? html`<span class="big">${f2(b.volts)}</span><span class="unit">V</span>`
