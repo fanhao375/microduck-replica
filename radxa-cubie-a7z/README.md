@@ -2,6 +2,14 @@
 
 本目录提供 **Radxa Cubie A7Z + 飞特 HD-1910 舵机/总线 IMU 装配** 的配网、控制、Studio、温控与整机镜像准备源码。主仓库默认镜像仍面向 Zero 3W；A7Z 使用独立镜像和硬件适配。
 
+## 2026-11-27 · A7Z Studio 与行走模型 preview6
+
+[下载烧录镜像](https://github.com/Liangjin5437/microduck-replica/releases/download/a7z-duck-image-20261127-studio-preview6/cubie-a7z-duck-20261127-studio-preview6.img.xz) · [SHA256 校验文件](https://github.com/Liangjin5437/microduck-replica/releases/download/a7z-duck-image-20261127-studio-preview6/cubie-a7z-duck-20261127-studio-preview6.img.xz.sha256) · [全部附件](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261127-studio-preview6)
+
+适用于 Cubie A7Z、飞特 HD1910 和总线 IMU。烧录后用热点配网，在 Studio 完成本机标定，再使用网页手柄。预装的 9600 用于默认行走及独立恢复，9000 可在模型库中切换。[首次调试与行走](image/first-use-preview6.md) · [构建与校验](image/release-studio-preview6.md)
+
+## 历史版本与适配源码
+
 [下载 A7Z preview1 历史镜像及校验附件](https://github.com/Liangjin5437/microduck-replica/releases/tag/a7z-duck-image-20261109-preview1) · [镜像烧录、首次使用与构建说明](image/README.md) · [维护分支源码](https://github.com/Liangjin5437/microduck-replica/tree/codex/cubie-a7z-preview/radxa-cubie-a7z)
 
 Release 的 `cubie-a7z-duck-20261109-preview1.img.xz` 是修复前发布的历史预览版。当前源码中的只读安装器、镜像目录权限和 Wi-Fi 配网修复仍待重新打包和实机验证。历史镜像已有文件结构、摘要、文件系统和压缩校验记录，尚未完成烧录后的实机启动、联网、完整动作或声音验收。既有总线偶发读取失败仍待排查。
