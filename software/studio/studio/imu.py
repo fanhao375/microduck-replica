@@ -952,11 +952,9 @@ class ImuBackend:
                         raise Refused("已采数据的安装方向或主程序连接已改变：重新采静止和前倾")
             old = (view["mount"] or {}).get("quat")
             if live_full:
+                # 算只是算，不往鸭子写东西：不要求鸭子此刻就站稳（刚被手提起来倾过，关节一时停不稳）。
+                # 跟 1104 出厂版一样；写进鸭子之前「验证并保存」那一步照旧要求站稳（用户 11-27）。
                 bus = await self._bus_once()
-                self._coarse_guard(bus)
-                sampling = self._motion_sampling(bus, view["source"], redo)
-                if not sampling["live_verify"] or sampling["verify_reason"]:
-                    raise Refused("先恢复 HOME 站姿并保持模型停止，再计算这次精校")
                 solve_basis = self._sampling_basis(bus)
                 if args["basis_mount_wxyz"] != old or solve_basis[1] != tuple(old or ()):
                     self.last_result = None

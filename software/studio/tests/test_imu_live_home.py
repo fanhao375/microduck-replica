@@ -33,6 +33,23 @@ class LiveHomeTest(unittest.TestCase):
         self.assertFalse(state['hold_ready'])
         self.assertIsNotNone(state['reason'])
 
+    def test_full_solve_does_not_need_a_settled_hold_but_saving_still_does(self):
+        """站着校准采完就能算（跟 1104 一样）：鸭子刚被提起来倾过、关节还没停稳也照算；写进鸭子之前才要求站稳。"""
+        from tests.test_imu_calib import Duck
+        backend = self.home()
+        backend.rd.calib.value['imu_home_verification_contract'] = 'home_mount_v1'
+        old = backend.view()['mount']['quat']
+        backend.rd.bus.value['imu_calibration_hold_ready'] = False        # 关节还没停稳
+        self.assertIsNotNone(backend.view()['coarse_sampling']['reason'])
+        data = Duck(old, old_mount=old, noise_deg=0.1).run()
+        samples = [{'step': step, 'g': s['g']} for step, rows in data.items() for s in rows]
+        res = asyncio.run(backend.handle({'op': 'solve', 'samples': samples, 'basis_mount_wxyz': old}, '测试'))
+        self.assertTrue(res['ok'], res)
+        self.assertTrue(res['live_verify'])
+        with mock.patch.object(backend.rd.cmd, 'call') as rpc, self.assertRaises(Refused):
+            asyncio.run(backend.handle({'op': 'verify', 'confirmed': True, 'mount_wxyz': res['mount']}))
+        rpc.assert_not_called()                                            # 没站稳：不往鸭子写
+
     def test_legacy_host_joint_sample_age_cannot_replace_missing_imu_age(self):
         backend = self.home()
         backend.rd.bus.value['imu_bus'] = {'protocol':'dxl2', 'board':'sflp_124_12', 'identity':[1, 2, 3]}
