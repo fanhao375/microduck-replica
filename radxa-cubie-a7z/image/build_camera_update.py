@@ -44,11 +44,21 @@ def range_sha(path, start, size):
 def move_tail(source, destination, start, offset):
     """Move bytes from a disposable file tail, keeping only one on-disk copy."""
     end = source.seek(0, os.SEEK_END)
+    destination.truncate(offset + end - start)
     while end > start:
         cursor = max(start, end - 8 * image.CHUNK)
         source.seek(cursor)
         destination.seek(offset + cursor - start)
-        image.copy_bytes(source, destination, end - cursor)
+        remaining = end - cursor
+        while remaining:
+            block = source.read(min(1024 * 1024, remaining))
+            if not block:
+                raise ValueError("unexpected end of scratch image")
+            if block.count(0) == len(block):
+                destination.seek(len(block), os.SEEK_CUR)
+            else:
+                destination.write(block)
+            remaining -= len(block)
         destination.flush()
         source.truncate(cursor)
         end = cursor

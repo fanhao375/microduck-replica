@@ -1,0 +1,97 @@
+--- a/web/app.js
++++ b/web/app.js
+@@ -225,6 +225,7 @@
+   const [r, setR] = useState(get());
+   const cur = useRef(r);
+   useEffect(() => {
++    padActivity.setRoute(cur.current);
+     const f = () => {
+       const next = get();
+       const guard = leaveGuards[cur.current];
+--- a/web/console-overview.js
++++ b/web/console-overview.js
+@@ -10,7 +10,14 @@
+ function LiveDuck({st,live}) {
+   const canvas=useRef(null),viewer=useRef(null),[message,setMessage]=useState('3D 模型加载中…');
+   useEffect(()=>{
+-    const d=new Duck3D(canvas.current,{view:'front34',pageScroll:true,centerX:.5,centerY:.48,fill:.76});viewer.current=d;
++    let d;
++    try {
++      d = new Duck3D(canvas.current,{view:'front34',pageScroll:true,centerX:.5,centerY:.48,fill:.76});
++    } catch (error) {
++      setMessage('三维预览不可用：' + error.message);
++      return;
++    }
++    viewer.current=d;
+     let alive=true;d.load('model/').then(()=>{if(alive)setMessage('');}).catch(error=>{if(alive)setMessage('3D 模型未加载：'+error.message);});
+     return ()=>{alive=false;d.dispose();};
+   },[]);
+--- a/web/servo.js
++++ b/web/servo.js
+@@ -45,14 +45,21 @@
+ function ServoStage({ sv, pose, setPose, selected, onSelect, fixed = false }) {
+   const boxRef = useRef(null), canvasRef = useRef(null), duckRef = useRef(null);
+   const [ready, setReady] = useState(false);
++  const [previewError, setPreviewError] = useState(null);
+   const [moved, setMoved] = useState(false);
+ 
+   useEffect(() => {
+-    const d = new Duck3D(canvasRef.current, { view: 'front', centerX: 0.5, centerY: 0.52, fill: 0.82 });
++    let d;
++    try {
++      d = new Duck3D(canvasRef.current, { view: 'front', centerX: 0.5, centerY: 0.52, fill: 0.82 });
++    } catch (error) {
++      setPreviewError('三维预览不可用：' + error.message);
++      return;
++    }
+     duckRef.current = d;
+     d.onUserMove = () => setMoved(true);
+     d.onPick = (name) => ID_OF[name] && onSelect(ID_OF[name]);
+-    d.load('model/').then(() => setReady(true)).catch(() => {});
++    d.load('model/').then(() => setReady(true)).catch(error => setPreviewError('三维预览不可用：' + error.message));
+     return () => d.dispose();
+   }, []);
+ 
+@@ -86,7 +93,7 @@
+       ${[['live', '实时'], ...Object.entries(POSES).map(([k, p]) => [k, p.label])].map(([k, label]) =>
+         html`<button role="tab" aria-selected=${pose === k} class=${pose === k ? 'on' : ''} onClick=${(e) => { e.currentTarget.blur(); setPose(k); }}>${label}</button>`)}
+     </div>` : null}
+-    ${!ready ? html`<span class="sv-loading">3D 模型加载中…</span>` : null}
++    ${!ready ? html`<span class="sv-loading">${previewError || '3D 模型加载中…'}</span>` : null}
+     <span class="sv-note">${pose !== 'live' ? '参考姿势 · 不是鸭子现在的样子' : sv?.diagnostic ? '启动诊断只有原始反馈，暂不显示标定姿态' : '拖动转视角 · 点舵机选中'}</span>
+     ${moved ? html`<button class="reset-view" onClick=${(e) => { e.currentTarget.blur(); duckRef.current?.resetView(); setMoved(false); }}>回正</button>` : null}
+   </div>`;
+--- a/web/imu.js
++++ b/web/imu.js
+@@ -394,7 +394,13 @@
+   const [err, setErr] = useState(null);
+ 
+   useEffect(() => {
+-    const d = new Duck3D(canvasRef.current, { view: 'front34', centerX: 0.5, centerY: 0.56, fill: 0.7 });
++    let d;
++    try {
++      d = new Duck3D(canvasRef.current, { view: 'front34', centerX: 0.5, centerY: 0.56, fill: 0.7 });
++    } catch (error) {
++      setErr('三维预览不可用：' + error.message);
++      return;
++    }
+     duckRef.current = d;
+     d.onUserMove = () => setMoved(true);
+     d.load('model/').then(() => setReady(true)).catch((e) => setErr(`3D 模型没加载：${e.message}`));
+--- a/web/pad.js
++++ b/web/pad.js
+@@ -1185,7 +1185,13 @@
+   const duckRef = useRef(null);
+   const [err, setErr] = useState(null);
+   useEffect(() => {
+-    const d = new Duck3D(canvasRef.current, { view: 'front34', centerX: 0.5, centerY: 0.5, fill: 0.86, pageScroll: true });
++    let d;
++    try {
++      d = new Duck3D(canvasRef.current, { view: 'front34', centerX: 0.5, centerY: 0.5, fill: 0.86, pageScroll: true });
++    } catch (error) {
++      setErr('三维预览不可用：' + error.message);
++      return;
++    }
+     duckRef.current = d;
+     d.load('model/').catch((e) => setErr(`3D 模型没加载：${e.message}`));
+     return () => d.dispose();

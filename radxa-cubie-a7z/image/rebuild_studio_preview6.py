@@ -10,8 +10,8 @@ import build_camera_update as update
 import build_image as image
 
 BASE = "b48086a2727bb96ed274af15a6a35ed900eafe98f66efef47048e34126a7f903"
-OVERLAY = "87f2125a52031e679ce0810ecc0d1d9058c7c7bba9518992293c605e0be7dcaa"
-MANIFEST = "d363a828e9836d572aea0085d33709ce664395e98165f2b8e52c19a41bfc5a1e"
+OVERLAY = "39f7edf2a595cf08a54bddbb00344faee5733ab92ea6ecb18d57d3932c6ae342"
+MANIFEST = "01fc87237e078e7339b51b88cc0e8fcd1a83cc624f444adec64f44c877591bb7"
 
 
 def rebuild(base, payload, manifest, output):
