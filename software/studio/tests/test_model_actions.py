@@ -344,6 +344,78 @@ class ActionServiceTest(test_models.LibraryTest):
         self.assertEqual([i['id'] for i in view['items'] if i['source'] == 'imported'], [item['id']])
         self.assertEqual(len(view['actions']), 1)
 
+    # ── 随 Studio 发的动作包（深蹲、抖一抖）────────────────────────────────
+
+    def bundled_service(self, bundled):
+        service = self.new_service()
+        service.bundled = bundled
+        return service
+
+    async def test_bundled_actions_show_up_once_and_stay_deleted(self):
+        bundled = Path(self.tmp.name) / 'bundled'
+        bundled.mkdir()
+        make_zip(bundled / 'crouch.zip', {'policy.onnx': b'crouch-model', 'skill.toml': SKILL_TOML})
+        make_zip(bundled / 'idle_chest.zip', {'policy.onnx': b'chest-model', 'skill.toml': SKILL_TOML.replace(
+            'name = "crouch"', 'name = "idle_chest"')})
+        self.service = self.bundled_service(bundled)
+        actions = (await self.service.view())['actions']
+        # 只进库、不登记：页面上是「还没装」，装的参数照包里的 skill.toml 预填
+        self.assertEqual([(a['name'], a['state'], a['suggest'].get('name')) for a in actions],
+                         [('深蹲', 'none', 'crouch'), ('抖一抖', 'none', 'idle_chest')] if actions[0]['name'] == '深蹲'
+                         else [('抖一抖', 'none', 'idle_chest'), ('深蹲', 'none', 'crouch')])
+        self.assertFalse(self.sent('robot.setSkill'))
+        # 重启 Studio 不会再放一份
+        self.service = self.bundled_service(bundled)
+        self.assertEqual(len((await self.service.view())['actions']), 2)
+        # 用户删掉的，下次启动也不会回来
+        crouch = next(a for a in actions if a['name'] == '深蹲')
+        await self.service.handle({'op': 'delete', 'id': crouch['id']})
+        self.service = self.bundled_service(bundled)
+        self.assertEqual([a['name'] for a in (await self.service.view())['actions']], ['抖一抖'])
+
+    async def test_bundled_action_already_imported_is_not_doubled(self):
+        await self.import_action()
+        bundled = Path(self.tmp.name) / 'bundled'
+        bundled.mkdir()
+        make_zip(bundled / 'crouch.zip', {'policy.onnx': b'crouch-model', 'skill.toml': SKILL_TOML})
+        self.service = self.bundled_service(bundled)
+        self.assertEqual(len((await self.service.view())['actions']), 1)
+        self.assertTrue((self.state / 'models/actions/.bundled.json').is_file())
+
+    async def test_bundled_action_that_fails_preflight_is_retried_next_start(self):
+        bundled = Path(self.tmp.name) / 'bundled'
+        bundled.mkdir()
+        make_zip(bundled / 'crouch.zip', {'policy.onnx': b'crouch-model'})
+        self.service = self.bundled_service(bundled)
+        self.service.validator = lambda p: {'valid': False, 'error': 'bad'}
+        self.assertEqual((await self.service.view())['actions'], [])
+        self.service = self.bundled_service(bundled)
+        self.assertEqual([a['name'] for a in (await self.service.view())['actions']], ['深蹲'])
+
+    async def test_unreadable_bundled_record_puts_nothing_back(self):
+        bundled = Path(self.tmp.name) / 'bundled'
+        bundled.mkdir()
+        make_zip(bundled / 'crouch.zip', {'policy.onnx': b'crouch-model'})
+        (self.state / 'models/actions').mkdir(parents=True)
+        (self.state / 'models/actions/.bundled.json').write_text('{oops', encoding='utf-8')
+        self.service = self.bundled_service(bundled)
+        self.assertEqual((await self.service.view())['actions'], [])
+
+
+class ShippedBundleTest(unittest.TestCase):
+    """仓库里真随包发的两个动作：解得开、参数对（幅度 1.0，深蹲带蹲的指令），模型旁边没有合同文件。"""
+
+    def test_shipped_packages(self):
+        from studio.models import BUNDLED_ACTIONS, BUNDLED_DIR
+        expect = {'crouch': (3.0, [1.0, 0.0, 0.0], 1.5), 'idle_chest': (3.1, [0.0, 0.0, 0.0], 0.0)}
+        with tempfile.TemporaryDirectory() as tmp:
+            for key, _ in BUNDLED_ACTIONS:
+                data = extract_action_package(BUNDLED_DIR / (key + '.zip'), Path(tmp) / key)
+                s = data['suggest']
+                self.assertEqual((s['name'], s['duration'], s['command'], s['unwind_s'], s['action_scale']),
+                                 (key, *expect[key], 1.0))
+                self.assertEqual(sorted(p.name for p in (Path(tmp) / key).iterdir()), ['extras', 'policy.onnx'])
+
 
 # 只借用模型库测试的环境搭建；那边的用例已经在 test_models 里跑，这里不重复。
 for _name in dir(test_models.LibraryTest):

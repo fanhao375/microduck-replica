@@ -13,6 +13,7 @@ import threading
 import time
 import tomllib
 import uuid
+import zipfile
 from pathlib import Path
 
 from .model_package import ACTION_NAME, PackageError, extract_action_package, extract_package, validate_policy
@@ -35,6 +36,12 @@ MAX_ACTIONS = 28
 # 不能拿来当自定义动作名的：出厂动作、主程序自己驱动的、按键默认值和运行槽名。
 RESERVED = frozenset(SLOTS) | frozenset(SKILLS.values()) | frozenset(DEFAULT_KEYS.values()) | {
     'stand_test', 'roller_stand', 'swizzle', 'crouch_roller', 'spin'}
+# 随 Studio 一起发的动作包（software/studio/bundled-actions/）。升级后第一次打开「动作」页时放进「我的动作」，
+# 跟自己导入的一样只进库不登记，要在页面上点「装上」才会装到鸭子上。放过的记在动作目录的 .bundled.json 里：
+# 只放一次，用户删了不会再冒出来；已经自己导入过同一个模型的也不重复放。
+BUNDLED_DIR = Path(__file__).resolve().parents[1] / 'bundled-actions'
+BUNDLED_ACTIONS = (('crouch', '深蹲'), ('idle_chest', '抖一抖'))
+BUNDLED_MARK = '.bundled.json'
 READBACK_TIMEOUT = 25.0
 READBACK_POLL = 0.2
 
@@ -109,8 +116,11 @@ def _signature(contract):
 
 
 class Models:
-    def __init__(self, rd, log, state_dir, tune=None, root='/', validator=None, rpc=None, skill_table=None):
+    def __init__(self, rd, log, state_dir, tune=None, root='/', validator=None, rpc=None, skill_table=None, bundled=None):
         self.rd, self.log, self.tune = rd, log, tune
+        # 出厂动作包目录；None = 不放（测试和电脑端默认）
+        self.bundled = Path(bundled) if bundled is not None else None
+        self._bundled_checked = False
         # 改动作表格式要 root（配置归 root），走小助手；测试里换成假的
         self.skill_table = skill_table
         self.root = Path(root)
@@ -426,6 +436,51 @@ class Models:
             if stage.exists():
                 shutil.rmtree(stage)
 
+    def _seed_bundled(self):
+        """把随 Studio 发的动作包放进「我的动作」（只进库，不登记到主程序）。出错只记日志，下次启动再试。"""
+        if self.bundled is None or not self.bundled.is_dir():
+            return
+        with self._disk_lock:
+            marker = self.actions_dir / BUNDLED_MARK
+            try:
+                self._init_actions_dir()
+                done = set()
+                if marker.exists():
+                    rows = _json(marker, 64 << 10).get('seeded')
+                    if not isinstance(rows, list) or not all(isinstance(r, str) for r in rows):
+                        raise ValueError('记录格式不对')
+                    done = set(rows)
+            except (OSError, ValueError, ModelError) as exc:
+                # 记录读不出来就不放：宁可少放，也别把用户删掉的又放回来
+                self._note(f'出厂动作的记录读不出来，这次不放：{exc}')
+                return
+            have = set()
+            for child in self.actions_dir.iterdir():
+                try:
+                    if re.fullmatch(r'[a-f0-9]{32}', child.name) and child.is_dir() and not child.is_symlink():
+                        have.add(_json(child / META, 64 << 10).get('sha256'))
+                except (OSError, ValueError, RecursionError):
+                    continue
+            for key, title in BUNDLED_ACTIONS:
+                package = self.bundled / (key + '.zip')
+                if key in done or not package.is_file():
+                    continue
+                try:
+                    with zipfile.ZipFile(package) as z:
+                        digest = hashlib.sha256(z.read('policy.onnx')).hexdigest()
+                    if digest not in have:
+                        self._install_action(package, title)
+                        have.add(digest)
+                        self._note(f'出厂动作「{title}」已放进动作库（还没装到鸭子上）')
+                    done.add(key)
+                    _atomic_json(marker, {'seeded': sorted(done)})
+                except (ModelError, OSError, KeyError, ValueError, zipfile.BadZipFile) as exc:
+                    self._note(f'出厂动作「{title}」没放进动作库：{exc}')
+
+    def _note(self, text):
+        if self.log:
+            self.log.write(text, cat='models')
+
     async def import_package(self, path, name='', kind=None):
         if not isinstance(name, str):
             raise ModelError('模型名称必须是文字')
@@ -521,6 +576,9 @@ class Models:
         return None
 
     async def view(self):
+        if not self._bundled_checked:
+            self._bundled_checked = True
+            await asyncio.to_thread(self._seed_bundled)
         snap = await self._snapshot()
         try:
             catalog, entries, library_error = await asyncio.to_thread(self._read_library, snap)

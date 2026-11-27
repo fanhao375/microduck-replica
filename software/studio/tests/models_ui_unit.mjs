@@ -162,7 +162,7 @@ test('the actions page lists factory moves, walking and imported actions togethe
   assert.match(roll.image, /stills\/roulade\.webp$/);
   const idle = list.find((x) => x.name === '抖一抖');
   assert.equal(idle.ready, false);
-  assert.equal(idle.image, null);  // 公开版没有这个动作的缩略图（模型作者没公开）
+  assert.match(idle.image, /stills\/idle_chest\.webp$/);  // 11-27 作者同意随 Studio 发布
   assert.equal(list.find((x) => x.name === '深蹲').duration, '3 秒');
 });
 

@@ -193,8 +193,8 @@ def main(argv=None):
         if a.dev_duck_root and not a.robotd.startswith("tcp:"):
             raise SystemExit("--dev-duck-root 只能在电脑上配假 robotd（--robotd tcp:…）用")
         tune = Tune(rd, log, state_dir, root=a.dev_duck_root or "/", duck=duck)
-        from .models import Models
-        models = Models(rd, log, state_dir, tune=tune, root=a.dev_duck_root or "/")
+        from .models import BUNDLED_DIR, Models
+        models = Models(rd, log, state_dir, tune=tune, root=a.dev_duck_root or "/", bundled=BUNDLED_DIR)
     from .sensors import Sensors
     sensors = Sensors(log=log, root=a.dev_duck_root or "/", tof_addr=a.tof,
                       camera_signaling_port=a.camera_signaling_port, camera_addr=a.camera_socket)

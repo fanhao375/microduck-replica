@@ -28,7 +28,7 @@ export const BUILTIN = [
 ];
 // 有渲染缩略图的动作（web/model/stills/）。导入的动作如果用的是这些名字，也用同一张图。
 const STILLS = { roulade: 'roulade', kick_left: 'kick_left', kick_right: 'kick_right', ground_pick: 'ground_pick',
-  sit_toggle: 'sitstand', sitstand: 'sitstand', walk: 'walk', crouch: 'crouch' };
+  sit_toggle: 'sitstand', sitstand: 'sitstand', walk: 'walk', crouch: 'crouch', idle_chest: 'idle_chest' };
 const still = (key) => (STILLS[key] ? new URL(`./model/stills/${STILLS[key]}.webp`, import.meta.url).href : null);
 const keyLabel = (b) => KEYS.find((k) => k.button === b)?.label || b;
 const seconds = (v) => (typeof v === 'number' && Number.isFinite(v) ? `${Math.round(v * 10) / 10} 秒` : null);

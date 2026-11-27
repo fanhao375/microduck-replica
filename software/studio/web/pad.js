@@ -180,7 +180,8 @@ const ROLE_BIND = { south: 'a', west: 'x', lb: 'lb', rb: 'rb', dd: 'dpad_down' }
 const ROLE_HELD = { lt: 'lt', rt: 'rt', west: 'x' };
 const MODE_CN = { drive: '走路', head: '头模式', body: '身体模式' };
 const DRIVE_CN = { walk: '走路', roller: '轮滑' };
-const SKILL_CN = { ground_pick: '低头捡', roulade: '前滚翻', kick_left: '左脚踢', kick_right: '右脚踢', sit_toggle: '坐下 ↔ 站起', roller_stand: '轮滑起身', yes: '点头（Yes）', no: '摇头（No）', excited: '兴奋', laser_track: '追激光（开关）', autonomous: '自主模式（开关）' };
+const SKILL_CN = { ground_pick: '低头捡', roulade: '前滚翻', kick_left: '左脚踢', kick_right: '右脚踢', sit_toggle: '坐下 ↔ 站起', roller_stand: '轮滑起身', yes: '点头（Yes）', no: '摇头（No）', excited: '兴奋', laser_track: '追激光（开关）', autonomous: '自主模式（开关）',
+  crouch: '深蹲', idle_chest: '抖一抖' };
 // 默认绑定与后端一致，用户设置以主程序返回为准
 const DEFAULT_BIND = { a: 'ground_pick', x: 'roulade', lb: 'kick_left', rb: 'kick_right', dpad_down: 'sit_toggle' };
 const BIND_ROLE = { a: 'south', x: 'west', lb: 'lb', rb: 'rb', dpad_down: 'dd' };
