@@ -133,7 +133,7 @@
 <!-- 首页各保留一行当前软件和烧卡镜像，完整版本说明按日期倒序写入历史更新。 -->
 | 日期 | ZERO 3W 版本 | 用途 |
 |---|---|---|
-| 2026-11-27 | [正式软件 2026.11.27](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.27) | 已有卡在 Studio 里检查更新。「动作」页自带深蹲和抖一抖，点「装上」就能用；兼容 v0.23 主程序。[动作广场](https://fanhao375.github.io/microduck-replica/motion-plaza/) |
+| 2026-11-28 | [正式软件 2026.11.28](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.28) | 已有卡在 Studio 里检查更新。修复舵机页改的方向正负号写不进主程序（手柄站立还是反的）；含 11.27 自带的深蹲和抖一抖。[动作广场](https://fanhao375.github.io/microduck-replica/motion-plaza/) |
 | 2026-11-04 | [烧卡镜像 20261104](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) | 给新 SD 卡安装系统。发布页列出当前预装的软件版本和镜像校验值。[烧录说明](docs/更新说明-20261104.md) |
 
 <details>

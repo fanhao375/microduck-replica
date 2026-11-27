@@ -133,7 +133,7 @@ As of **2026-10-25**, **the Feetech replica, first-use workflow and robot motion
 <!-- Keep one row each for the current software and disk image. Put full release notes in the history, newest first. -->
 | Date | ZERO 3W release | When to use it |
 |---|---|---|
-| 2026-11-27 | [Stable software 2026.11.27](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.27) | Update an existing card in Studio. The Motions page now ships with Crouch and Chest Shake — tap Install to use them; adds v0.23 robotd compatibility. [Motion plaza](https://fanhao375.github.io/microduck-replica/motion-plaza/) |
+| 2026-11-28 | [Stable software 2026.11.28](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-software-v2026.11.28) | Update an existing card in Studio. Fixes servo direction changes not reaching robotd (gamepad stand stayed reversed); includes the Crouch and Chest Shake motions from 11.27. [Motion plaza](https://fanhao375.github.io/microduck-replica/motion-plaza/) |
 | 2026-11-04 | [Disk image 20261104](https://github.com/fanhao375/microduck-replica/releases/tag/microduck-replica-image-20261104) | Flash a new SD card. The release page lists the preinstalled software version and image checksum. [Flashing guide (Chinese)](docs/更新说明-20261104.md) |
 
 <details>
