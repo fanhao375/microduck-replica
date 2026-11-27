@@ -220,7 +220,7 @@ function Row({ r, open, selected, onSelect, op, follow, setHint, motion }) {
       ${r.status ? html`<span class="sv-alarm">状态位 ${r.status}</span>` : null}
       <span class="sv-spacer"></span>
       <span>方向</span><button class="sv-mini" disabled=${!open} onClick=${() => op({ op: 'set_dir', id: r.id, dir: -r.dir })}
-        title="方向 ±：读数变大对应模型里哪个方向（只影响显示和换算，不动舵机）">${r.dir > 0 ? '+1' : '−1'}</button>
+        title="方向 ±：这颗舵机转的方向跟模型反了就点这里。改完要在第 3 步「写进主程序」，手柄站立和走路才会跟着变（不动舵机本身）">${r.dir > 0 ? '+1' : '−1'}</button>
     </div>` : null}
   </div>`;
 }

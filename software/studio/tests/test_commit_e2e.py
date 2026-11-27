@@ -258,7 +258,7 @@ class CommitE2E(unittest.TestCase):
         self.assertNotEqual(m["afterOne"], "完成", m)                          # 点一下不算
         self.assertEqual(m["after"]["row"], "完成", m)
         self.assertIn("你标了已完成", m["after"]["text"])
-        self.assertIn("你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向", m["after"]["check"])
+        self.assertIn("你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位（方向照舵机页的写）", m["after"]["check"])
         self.assertEqual(m["errors"], [])
 
     def test_01d_ssh_card_on_the_more_page(self):

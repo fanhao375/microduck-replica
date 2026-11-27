@@ -279,10 +279,20 @@ class CommitTest(Base):
             joint.update(zero_raw=1980+i, direction=1 if i % 2 else -1,
                          min_rad=-1.31, max_rad=1.42)
         self.path.write_text(H.render_calibration(old), encoding="utf-8")
-        code, _ = self.call(self.payload(joint_mode="keep"))
+        # Studio 对没在舵机页设过的舵机传的就是文件里的方向
+        same = [{"id": j["id"], "direction": j["direction"]} for j in old["joints"]]
+        code, _ = self.call(self.payload(joint_mode="keep", joints=same))
         self.assertEqual(code, H.EXIT_OK, self.last())
         self.assertEqual(H.tomllib.loads(self.path.read_text("utf-8"))["joints"], old["joints"])
         self.assertTrue(self.last()["detail"]["readback_ok"])
+        # 舵机页改了一颗的正负号：「保留」也要把方向写进去（11-27 手柄站立还是反的），中位一颗都不动
+        same[2]["direction"] = -same[2]["direction"]
+        self.commissioning()
+        code, _ = self.call(self.payload(joint_mode="keep", joints=same))
+        self.assertEqual(code, H.EXIT_OK, self.last())
+        want = [dict(j) for j in old["joints"]]
+        want[2]["direction"] = same[2]["direction"]
+        self.assertEqual(H.tomllib.loads(self.path.read_text("utf-8"))["joints"], want)
 
     def test_keep_factory_centers_when_finishing_first_setup(self):
         self.commissioning()

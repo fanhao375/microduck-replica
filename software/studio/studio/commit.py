@@ -161,10 +161,11 @@ def build_calibration(current, joints, imu, joint_mode="recorded"):
         if not _is_int(jid):
             raise CalibError(f"{name} 的 id 不是整数")
         row = dict(src)
-        if joint_mode == "recorded":
-            row["direction"] = dirs[jid]
-            if jid in centered_ids:
-                row["zero_raw"] = 2048
+        # 方向每种写法都用这次给的：Studio 只对舵机页明确设过的那几颗给新值，其余给的就是文件里原来的。
+        # （11-27：「保留」原来连方向一起保留，舵机页改的正负号写不进主程序，手柄站立还是反的）
+        row["direction"] = dirs[jid]
+        if joint_mode == "recorded" and jid in centered_ids:
+            row["zero_raw"] = 2048
         if joint_mode != "imu_only":
             if row.get("min_rad") is None and row.get("max_rad") is None and row.get("calibrated") is False:
                 lo, hi = LIMITS_DEG[name]
@@ -206,7 +207,8 @@ def build_calibration(current, joints, imu, joint_mode="recorded"):
                                        "verified": bool(mount.get("verified", False))}
 
     if joint_mode == "imu_only":
-        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {})}
+        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {}),
+               "joints": [dict(row, direction=dirs[row["id"]]) for row in rows]}
     if not isinstance(imu, dict):
         raise CalibError("imu 要是一个对象")
     source = imu.get("source")
@@ -646,10 +648,11 @@ class CommitService:
         _, _, fresh = self._center_events(mark, marked_at)
         if fresh:
             why.append("舵机零位记录比上次成功写入新")
-        # 只比舵机页里明确设过方向的那几颗：没设过的写的时候沿用文件里的，不算改动
+        # 只比舵机页里明确设过方向的那几颗：没设过的写的时候沿用文件里的，不算改动。
+        # 标了第 1 步「跳过 / 已完成」也要提醒：方向照样会写（只有中位沿用），不写手柄站立还是旧方向
         rows = {j.get("id"): j for j in (cal or {}).get("joints") or [] if isinstance(j, dict)}
-        if not mark and rows and any(jid in rows and rows[jid].get("direction") != d for jid, d in self.directions.items()):
-            why.append("舵机页设的方向和主程序文件不一样")
+        if rows and any(jid in rows and rows[jid].get("direction") != d for jid, d in self.directions.items()):
+            why.append("舵机页设的方向还没写进主程序：手柄站立、走路还在用旧方向")
         return why
 
     def _user_mark(self, step):
@@ -794,7 +797,7 @@ class CommitService:
             servo_ok, servo_text = True, "只写导入的 IMU 方向，保留全部舵机标定"
         elif servo_mark in ("done", "skip"):
             servo_text = (("你标了第 1 步已完成" if servo_mark == "done" else "你跳过了第 1 步")
-                          + "：沿用主程序里每颗舵机原有的中位和方向")
+                          + "：沿用主程序里每颗舵机原有的中位（方向照舵机页的写）")
         elif not missing:
             servo_text = "15 颗的零位都记在 servo-centered.json 里了"
         else:
@@ -813,7 +816,15 @@ class CommitService:
         dir_text = ("要写成 +1 的有 " + "、".join(f"{r['cn']}" for r in changed) + "：核对一下方向对不对"
                     if changed else "15 颗都是 −1")
         if joint_mode in ("keep", "imu_only"):
-            dir_text, changed = "沿用主程序文件里每颗舵机的方向", []
+            # 中位沿用文件；方向只有舵机页改过、跟文件不一样的那几颗会变，只列这几颗
+            moved = [{"id": jid, "name": name, "cn": JOINT_CN.get(name, name), "direction": final[jid]}
+                     for name, jid in JOINT_ID.items()
+                     if jid in self.directions and self.directions[jid] != file_dirs.get(jid, -1)]
+            moved.sort(key=lambda r: JOINT_ORDER.index(r["name"]))
+            changed = moved
+            dir_text = ("沿用主程序文件里每颗舵机的方向" if not moved else
+                        "舵机页改过方向的会写进去：" + "、".join(f"{r['cn']} → {'+1' if r['direction'] > 0 else '−1'}" for r in moved)
+                        + "；其余沿用主程序文件里的")
         elif self.directions:
             dir_text += "（舵机页设过的用舵机页的，其余沿用主程序文件里的）"
         else:
@@ -917,7 +928,6 @@ class CommitService:
         mark, marked_at = self._servo_mark()
         joint_mode = self._joint_mode(mark)
         applied, events, fresh_ids = self._center_events(mark, marked_at)
-        use_directions = joint_mode == "recorded"
         if joint_mode == "keep" and fresh_ids:
             joint_mode = "recorded"
         joints = []
@@ -927,7 +937,8 @@ class CommitService:
                 raise Refused(f"主程序的标定文件里 {name} 不对：读不到 id")
             file_dir = row.get("direction") if row.get("direction") in (1, -1) else -1
             jid = row["id"]
-            joint = {"id": jid, "direction": self.directions.get(jid, file_dir) if use_directions else file_dir}
+            # 方向不管哪种写法都用舵机页设的（没设过的沿用文件）；「保留」只保留中位
+            joint = {"id": jid, "direction": self.directions.get(jid, file_dir)}
             if joint_mode == "recorded" and jid in fresh_ids:
                 joint["centered"] = True
             joints.append(joint)

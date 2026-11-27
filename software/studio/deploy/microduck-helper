@@ -71,7 +71,7 @@ import time
 import tomllib
 import types
 
-VERSION = "0.8.2"
+VERSION = "0.8.3"
 VERBS = ("bus-take", "bus-give-back", "bus-abort", "pad-pair", "pad-forget",
          "wifi-hotspot-down", "wifi-hotspot-up", "calib-read", "calib-commit", "ssh-status", "ssh-password",
          "imu-recalibrate", "robotd-update", "sensors-apply", "phone-tls",
@@ -807,10 +807,11 @@ def build_calibration(current, joints, imu, joint_mode="recorded"):
         if not _is_int(jid):
             raise CalibError(f"{name} 的 id 不是整数")
         row = dict(src)
-        if joint_mode == "recorded":
-            row["direction"] = dirs[jid]
-            if jid in centered_ids:
-                row["zero_raw"] = 2048
+        # 方向每种写法都用这次给的：Studio 只对舵机页明确设过的那几颗给新值，其余给的就是文件里原来的。
+        # （11-27：「保留」原来连方向一起保留，舵机页改的正负号写不进主程序，手柄站立还是反的）
+        row["direction"] = dirs[jid]
+        if joint_mode == "recorded" and jid in centered_ids:
+            row["zero_raw"] = 2048
         if joint_mode != "imu_only":
             if row.get("min_rad") is None and row.get("max_rad") is None and row.get("calibrated") is False:
                 lo, hi = LIMITS_DEG[name]
@@ -852,7 +853,8 @@ def build_calibration(current, joints, imu, joint_mode="recorded"):
                                        "verified": bool(mount.get("verified", False))}
 
     if joint_mode == "imu_only":
-        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {})}
+        out = {**current, "imu_mounts": dict(current.get("imu_mounts") or {}),
+               "joints": [dict(row, direction=dirs[row["id"]]) for row in rows]}
     if not isinstance(imu, dict):
         raise CalibError("imu 要是一个对象")
     source = imu.get("source")

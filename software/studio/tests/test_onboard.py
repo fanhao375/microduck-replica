@@ -1363,7 +1363,7 @@ class CommitStepTest(unittest.TestCase):
             self.assertEqual(row(ob.view(), "servo")["state"], "ok")
             s = item("servo")
             self.assertTrue(s["ok"])
-            self.assertEqual(s["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向")
+            self.assertEqual(s["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位（方向照舵机页的写）")
             self.assertIsNone(s["action"])
             self.assertFalse(item("imu")["ok"])
             ob.tick(rd)

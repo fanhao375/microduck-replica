@@ -228,7 +228,7 @@ class ReadinessTest(Base):
         Ob.marks = {"servo": "done", "imu": "done"}
         servo = self.item("servo")
         self.assertTrue(servo["ok"])
-        self.assertEqual(servo["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位和方向")
+        self.assertEqual(servo["text"], "你标了第 1 步已完成：沿用主程序里每颗舵机原有的中位（方向照舵机页的写）")
         self.assertEqual(servo["by_mark"], "done")
         imu = self.item("imu")
         self.assertTrue(imu["ok"])
@@ -354,7 +354,7 @@ class ReadinessTest(Base):
             json.dump({"20": 1}, f)
         self.svc.reload(force=True)
         view = self.svc.view(self.rd)
-        self.assertIn("舵机页设的方向和主程序文件不一样", view["dirty_why"])
+        self.assertIn("舵机页设的方向还没写进主程序：手柄站立、走路还在用旧方向", view["dirty_why"])
 
         # 反过来：舵机页没设过方向、主程序文件是 +1：不算改动，写的时候沿用文件里的 +1，
         # 不能拿默认 −1 把它盖掉（二号鸭的文件里就有 +1）。
@@ -364,7 +364,7 @@ class ReadinessTest(Base):
         self.rd.calib.set(flipped)
         self.svc.reload(force=True)
         view = self.svc.view(self.rd)
-        self.assertNotIn("舵机页设的方向和主程序文件不一样", view.get("dirty_why") or [])
+        self.assertNotIn("舵机页设的方向还没写进主程序：手柄站立、走路还在用旧方向", view.get("dirty_why") or [])
         payload = self.svc._payload(self.rd)
         first_id = flipped["calibration"]["joints"][0]["id"]
         self.assertEqual([j["direction"] for j in payload["joints"] if j["id"] == first_id], [1])
@@ -398,6 +398,31 @@ class PreviewCommitTest(Base):
                         helper, "_call", return_value=(True, "committed", {})) as call:
                     self.assertTrue(self.svc.commit()["ok"])
                 self.assertEqual(call.call_args.args[1]["joint_mode"], "imu_only" if imported else "keep")
+
+    def test_servo_page_direction_is_written_even_when_step_one_was_skipped(self):
+        # 11-27 用户反馈：舵机装反了，舵机页把 −1 改成 +1，Studio 里站姿对了，手柄站立还是反的。
+        # 原因：第 1 步标了「跳过 / 已完成」（或导入了 IMU）时，写进主程序连方向一起沿用文件，舵机页改的号被丢掉。
+        for mark, imported in (("skip", False), ("done", False), (None, True)):
+            with self.subTest(mark=mark, imported=imported):
+                current = calibration(True)
+                rows = current["calibration"]["joints"]
+                for i, joint in enumerate(rows):
+                    joint.update(zero_raw=1980 + i, direction=-1)
+                self.ready(rd=Rd(current, mode="motion", phase="control"))
+                C.save_pending(self.dir, "bus", BUS_QUAT, {"imported": imported})
+                flipped = rows[3]["id"]
+                with open(os.path.join(self.dir, "servo-directions.json"), "w", encoding="utf-8") as f:
+                    json.dump({str(flipped): 1}, f)
+                self.svc.onboard = mock.Mock()
+                self.svc.onboard.user_mark.side_effect = lambda key: mark if key == "servo" else None
+                self.svc.reload(force=True)
+                self.assertIn("舵机页设的方向还没写进主程序：手柄站立、走路还在用旧方向",
+                              self.svc.view(self.rd)["dirty_why"])
+                with mock.patch.object(helper, "available", return_value=False):
+                    written = H.tomllib.loads(self.svc.preview()["toml"])["joints"]
+                # 改过的那颗是 +1，其余照旧 −1；中位（zero_raw）一颗都不动
+                self.assertEqual([j["direction"] for j in written], [1 if j["id"] == flipped else -1 for j in rows])
+                self.assertEqual([j["zero_raw"] for j in written], [j["zero_raw"] for j in rows])
 
     def test_only_new_successful_center_operations_change_the_saved_zero(self):
         current = calibration(True)
