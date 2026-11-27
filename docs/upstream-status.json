@@ -36133,6 +36133,186 @@
             "sound": "No current implementation change; document-only ideas proposal, not capability delivery or acceptance."
           },
           "priority": "Low planning watch; high control/arbitration/protocol review only if implementation is later adopted."
+        },
+        {
+          "number": 628,
+          "title": "robotd: a ground pick that runs past one cycle, reads its heading, and ends on a stop signal",
+          "url": "https://github.com/pollen-robotics/microduck/pull/628",
+          "state": "open",
+          "draft": false,
+          "merged": false,
+          "author": "giuvilas",
+          "author_association": "NONE",
+          "head_repository": "giuvilas/microduck",
+          "head_branch": "moonwalk-ground-pick-keys",
+          "head_sha": "a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+          "base_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+          "base_branch": "main",
+          "actual_merge_base": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+          "merge_commit_sha": null,
+          "merge_commit_note": "Unmerged; API generated test merge is not an actual main merge.",
+          "source_version": "0.23.1",
+          "api_version": 69,
+          "commit_count": 1,
+          "changed_file_count": 6,
+          "additions": 125,
+          "deletions": 12,
+          "source_committed_at_utc": "2026-11-27T13:01:21Z",
+          "source_committed_at_jst": "2026-11-27T22:01:21+09:00",
+          "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+          "classification": "Open unmerged community runtime/config proposal for cyclic ground-pick policies; not official main, stable release or hardware validation.",
+          "included_in_formal_release": false,
+          "included_in_formal_release_tag": null,
+          "replica_integration": "not_integrated",
+          "priority": "High contract and HD1910 motion review before adoption; reference tracking only.",
+          "source_comparison": {
+            "status": "ahead",
+            "ahead_by": 1,
+            "behind_by": 0,
+            "files": [
+              "deploy/robotd.toml",
+              "robotd-params/src/edit.rs",
+              "robotd-params/src/lib.rs",
+              "robotd-params/src/registry.rs",
+              "robotd/src/control.rs",
+              "robotd/src/main.rs"
+            ]
+          },
+          "review": {
+            "configuration": {
+              "ground_pick_end_phase": {
+                "default": "unset -> installed set end_phase -> 0.7 cycles",
+                "change": "New explicit override; values above one allow repeated phase cycles."
+              },
+              "ground_pick_heading": {
+                "default": 0.0,
+                "change": "gain times negative yaw change from the first active pick tick, wrapped to +/-pi and clipped to +/-0.5 rad BEFORE multiplying gain, in twist[2]."
+              },
+              "ground_pick_settle_s": {
+                "default": 0.0,
+                "change": "Keep driving GroundPick after end_phase, with [0,0,heading], then hand back. Negative settle is clamped to zero in duration calculation."
+              }
+            },
+            "default_behavior": "Defaults preserve prior end phase and zero heading/no settle; a stock pick is not automatically changed into a moonwalk.",
+            "phase_clock": "Increment phase by dt/period after each driving tick. Finish at phase >= end_phase + max(settle_s,0)/period. During settle the same ground-pick network drives with zeroed phase slots; heading remains live.",
+            "gain_clip": "Clip yaw error before gain. With community gain8 the yaw observation can reach +/-4; it is not clipped to +/-0.5 after gain.",
+            "manifest_boundary": "Actual implementation adds config keys and registry entries; it does not implement the PR-body alternative of reading heading_gain/settle_s from each loaded policy manifest. Timing still resolves from config/installed set as before.",
+            "api_and_downgrade": "Source0.23.1/API69 inherits main entry_pose/C0 but adds a distinct configuration/observation contract. Equal API69 is not feature compatibility. PolicyParams deny_unknown_fields means returning to current main/stable with these new keys left in TOML can reject configuration.",
+            "safety_boundary": {
+              "fixed_controller_url": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd/src/control.rs",
+              "fixed_eligibility_gate_url": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd/src/main.rs#L3640",
+              "observation": "GroundPick makes Controller.busy true for the whole glide plus settle. Existing main.rs limp-fall predictor eligibility requires !busy. Longer configured duration extends that exclusion; no newly implemented emergency stop or complete fall-safety proof."
+            },
+            "new_tests_in_diff": [
+              "heading-observation unit test for quaternion yaw, sign, wrapping, clip and gain",
+              "existing parameter-resolution test changed to assert end_phase override 15.0"
+            ],
+            "parameter_bounds_scope": "No new finite/range validation for these three keys was added in this six-file diff; adoption requires reviewing allowed values and periods rather than assuming the API number supplies validation."
+          },
+          "author_report": {
+            "rust_unit_tests": {
+              "passed": 461,
+              "failed": 0,
+              "command_as_reported": "cargo test -p robotd-params -p robotd",
+              "fmt_reported": "clean",
+              "clippy_reported": "no added warnings",
+              "independent_rerun_by_tracker": false
+            },
+            "daemon_simulation": {
+              "daemon_version": "0.17.8 with local keys",
+              "body": "duck-sim",
+              "stop_signal_at_s": 5.0,
+              "median_heading_change_deg": 1.45,
+              "within_5_deg": "10/10",
+              "actual_source_sha_provided": false,
+              "not_a_final_pr_head_rerun": true
+            },
+            "physical_robot": "Author explicitly reports no real robot and no robot run.",
+            "current_head_check_runs": [],
+            "current_head_ci_run_verified": false,
+            "scope": "461 tests are PR-author claims; older modified0.17.8 daemon-vs-simulator measurements are not final a49b2da/API69, HD1910 or physical tests. Tracker did not run tests."
+          },
+          "associated_community_policy": {
+            "repository": "giuvilasvito/microduck-moonwalk",
+            "classification": "Community model linked by contributor PR; not a Pollen Robotics formal policy release or an integrated replica model.",
+            "sha": "06d14fb9a1b6517ce2439121b2af827c646f9dfe",
+            "last_modified_utc": "2026-11-27T13:13:50.000Z",
+            "fixed_manifest_url": "https://huggingface.co/giuvilasvito/microduck-moonwalk/blob/06d14fb9a1b6517ce2439121b2af827c646f9dfe/manifest.json",
+            "fixed_card_url": "https://huggingface.co/giuvilasvito/microduck-moonwalk/blob/06d14fb9a1b6517ce2439121b2af827c646f9dfe/README.md",
+            "model_api": 1,
+            "obs_len": 61,
+            "action_len": 14,
+            "declared_robot": {
+              "model": "microduck",
+              "hw_rev": 1,
+              "servos": "xl330",
+              "control_hz": 50
+            },
+            "slot": "ground_pick",
+            "entry_pose": "standing",
+            "command": {
+              "encoding": "phase",
+              "period_s": 1.0,
+              "end_phase": 5.0,
+              "settle_s": 2.0,
+              "heading_gain": 8.0
+            },
+            "duration_note": "Manifest duration_s is 5.0 gliding seconds; proposed config then keeps driving for settle_s=2.0 before stand hand-back, about seven seconds total. No torque-off claim.",
+            "composition_report": "Card/manifest describe walk and stop networks combined in one graph, selecting stop when phase observation norm squared is below 0.25; ONNX bytes were not downloaded or inspected.",
+            "training_provenance": {
+              "reported_short_base": "b02fdea4",
+              "resolved_base_sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+              "base_committed_at_utc": "2026-10-12T11:58:55Z",
+              "fixed_base_url": "https://github.com/pollen-robotics/microduck_rl/commit/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+              "dirty": true,
+              "local_changes_published_upstream": false,
+              "report": "Local mjlab/MuJoCo Warp PPO training with BAM XL330 actuators, 2-degree backlash and modelled soles/toes; no corresponding changes on current official develop."
+            },
+            "simulation_only": true,
+            "author_reported_extra_delay": {
+              "plus_20_ms_survived": "64/64",
+              "plus_40_ms_survived": "1-4/64"
+            },
+            "physical_robot_tested": false,
+            "weights_downloaded": false,
+            "weights_replaced_in_replica": false,
+            "manifest_http_bytes_sha256": "94b141ab21cc684d7ab58f76056e46cbb7ff18f62b6e5499018de8c292d08ee4",
+            "manifest_http_byte_length": 2390,
+            "manifest_digest_scope": "Raw HTTP response bytes at fixed model revision; not the historical/local Windows newline text export and not ONNX weights."
+          },
+          "fixed_sources": {
+            "deploy/robotd.toml": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/deploy/robotd.toml",
+            "robotd-params/src/edit.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd-params/src/edit.rs",
+            "robotd-params/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd-params/src/lib.rs",
+            "robotd-params/src/registry.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd-params/src/registry.rs",
+            "robotd/src/control.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd/src/control.rs",
+            "robotd/src/main.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/robotd/src/main.rs",
+            "duck-ipc-proto/src/lib.rs": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/duck-ipc-proto/src/lib.rs",
+            "Cargo.toml": "https://github.com/pollen-robotics/microduck/blob/a49b2dabad1b0d6179828b8241f02fdc86ec8113/Cargo.toml"
+          },
+          "impact": {
+            "HD1910": "High before adoption: community model is explicitly XL330/BAM/backlash, not Feetech. IMU trunk/world quaternion convention, heading sign/gain, loop latency, action/gain scaling, motor limits and control hand-back require separate review; no HD-1910 acceptance.",
+            "camera": "No camera capture, ISP, encoder or local preview change.",
+            "ToF": "No ToF sensor, depth geometry or avoidance change. This is an IMU-yaw observation, not a camera/ToF navigation feature.",
+            "model_management": "High: API69 is unchanged while TOML configuration and ground-pick command semantics expand. Current official set metadata is unchanged. Community manifest heading_gain/settle_s are not automatically consumed by this proposal; explicit matching config is required. Downgrade must remove new keys.",
+            "training": "Community moonwalk is simulation-only; dirty local microduck_rl changes on a historical base are not published upstream training code. Official develop and policy set are unchanged.",
+            "motion": "High: end phase may span multiple cycles and settle continues policy motor outputs before stand hand-back; phase zero is not torque-off or emergency stop. Longer busy duration also extends exclusion from the existing limp-fall predictor eligibility gate.",
+            "sound": "No audio assets, playback or microphone change."
+          },
+          "checked_at_utc": "2026-11-27T13:40:52.680Z",
+          "checked_at_jst": "2026-11-27T22:40:52.680000+09:00",
+          "tests_executed_by_tracker": false,
+          "model_weights_downloaded": false,
+          "robot_connected": false,
+          "created_at": "2026-11-27T13:09:41Z",
+          "created_at_jst": "2026-11-27T22:09:41+09:00",
+          "updated_at": "2026-11-27T13:09:41Z",
+          "updated_at_jst": "2026-11-27T22:09:41+09:00",
+          "closed_at": null,
+          "closed_at_jst": null,
+          "merged_at": null,
+          "merged_at_jst": null
         }
       ],
       "previous_stable_releases": [
@@ -59458,12 +59638,12 @@
       "status": "Existing official article newly indexed in this snapshot; contact odometry and official validation are not replica hardware validation."
     }
   ],
-  "checked_at_utc": "2026-11-27T02:31:11.727Z",
+  "checked_at_utc": "2026-11-27T13:40:52.680Z",
   "latest_review": {
-    "previous_substantive_review_utc": "2026-11-26T13:42:38.859Z",
-    "source_snapshot_utc": "2026-11-27T02:31:11.727Z",
-    "source_snapshot_jst": "2026-11-27T11:31:11.727000+09:00",
-    "final_relevant_sources_checked_at_utc": "2026-11-27T02:35:42Z",
+    "previous_substantive_review_utc": "2026-11-27T02:31:11.727Z",
+    "source_snapshot_utc": "2026-11-27T13:40:52.680Z",
+    "source_snapshot_jst": "2026-11-27T22:40:52.680000+09:00",
+    "final_relevant_sources_checked_at_utc": "2026-11-27T13:46:11.937705+00:00",
     "default_branch_changes": false,
     "new_stable_release": false,
     "stable_release_tag": "daemon-v0.23.1",
@@ -59473,8 +59653,8 @@
     "main_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
     "stable_release_assets_changed": false,
     "new_pull_requests": {
-      "pollen-robotics/microduck_yocto": [
-        162
+      "pollen-robotics/microduck": [
+        628
       ]
     },
     "updated_pull_requests": {},
@@ -59491,7 +59671,7 @@
     "model_metadata_changed": false,
     "official_os_release_changed": false,
     "official_os_main_changed": false,
-    "official_os_pull_requests_changed": true,
+    "official_os_pull_requests_changed": false,
     "official_os_development_channels_changed": false,
     "local_migration_record_changed": false,
     "runtime_code_changed_by_heartbeat": false,
@@ -59500,13 +59680,22 @@
     "image_built_or_published_by_tracker": false,
     "package_bytes_downloaded": false,
     "substantive_update_detected": true,
-    "notes": "New open unmerged OS PR162 adds runqemu metadata and a microduck-qemu machine, 3 commits/5 files (+94/-7). Final head 1d6a12f is README-only; latest build config is preceding 8d2c51a. Author reports microduck-qemu dev/shipping image builds, 43/43 and 48/48 system checks with separate PR147, and a MuJoCo link with reported daemon0.23.0 but no exact daemon/composite-test SHA. Beta/face-board builds and bitbake qemu-helper-native were not tried. Direct kernel boot does not validate U-Boot/A-B/radios/camera/NPU/encoder or HD1910. Three exact-head GitHub checks succeed; no QEMU CI/publish gate or final-source rerun is inferred. Four primary repo heads, formal daemon0.23.1/API68, main/API69, dev tags/releases, models, OS main/release/channels and blog unchanged. PR147 unchanged. No tracker tests/builds/packages/preview/device work or local integration.",
-    "new_os_development_proposal": {
-      "number": 162,
-      "head_sha": "1d6a12f5c6ffe2606e56689d6059e1b4845d6f07",
-      "classification": "Open unmerged OS build/developer-tool proposal; not a formal OS release, current-main capability or hardware validation.",
-      "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/6edf276c3006aa8f8863e11af495a5e5c1b5f7f0...1d6a12f5c6ffe2606e56689d6059e1b4845d6f07",
-      "validation_scope": "Three GitHub check runs successful at exact head; check status alone does not prove the author-reported QEMU/image/MuJoCo runs or a candidate publish gate."
+    "notes": "New open community PR628 at a49b2da, one commit/six files (+125/-12), adds end_phase override, yaw-error observation gain and continued phase-zero settle for the ground-pick slot. Source remains0.23.1/API69; current main/stable do not acquire these config/observation semantics. Default behavior unchanged. Referenced community moonwalk06d14fb9 is XL330/BAM simulation-only; dirty local RL base b02fdea4 resolves to b02fdea4902c2b93b7d34a83a6f05da4ececb7d3, not published training changes. Phase-zero settle still drives motors; busy excludes the existing limp-fall predictor eligibility gate. Author claims461 unit tests and separately modified0.17.8 daemon/simulator heading results, not a final-source physical run; current-head check-runs empty. No new official release/dev tag, official policy/model metadata, primary heads, OS source/channels or blog change. Synced origin/master fast-forward preserving published local2026.11.27 documentation; no migration/runtime/model/preview/device changes, tests or builds by tracker.",
+    "new_os_development_proposal": null,
+    "new_pending_runtime_proposal": {
+      "number": 628,
+      "head_sha": "a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+      "source_version": "0.23.1",
+      "api_version": 69,
+      "classification": "Open unmerged community runtime/config proposal for cyclic ground-pick policies; not official main, stable release or hardware validation.",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...a49b2dabad1b0d6179828b8241f02fdc86ec8113"
+    },
+    "new_associated_community_model": {
+      "repo": "giuvilasvito/microduck-moonwalk",
+      "sha": "06d14fb9a1b6517ce2439121b2af827c646f9dfe",
+      "official_policy_set_changed": false,
+      "weights_downloaded": false,
+      "simulation_only": true
     }
   },
   "replica_migration": {
@@ -67003,6 +67192,152 @@
         "motion": "Author reports robotd enable/standing and motion against MuJoCo, with unexplained turning gap. No gait code change, board actuation or replica acceptance.",
         "sound": "No new sound assets, audio code or physical microphone/speaker validation.",
         "system": "Proposes qemuboot metadata for board disks and a microduck-qemu machine. Direct kernel boot selects rootfs_a and opens the existing SSH service for the VM; U-Boot and A/B switching remain untested."
+      },
+      "replica_integration": "not_integrated",
+      "tests_executed_by_tracker": false
+    },
+    {
+      "record": "Preserved preceding latest_review before community ground-pick proposal",
+      "source_snapshot_utc": "2026-11-27T02:31:11.727Z",
+      "historical_snapshot": {
+        "previous_substantive_review_utc": "2026-11-26T13:42:38.859Z",
+        "source_snapshot_utc": "2026-11-27T02:31:11.727Z",
+        "source_snapshot_jst": "2026-11-27T11:31:11.727000+09:00",
+        "final_relevant_sources_checked_at_utc": "2026-11-27T02:35:42Z",
+        "default_branch_changes": false,
+        "new_stable_release": false,
+        "stable_release_tag": "daemon-v0.23.1",
+        "stable_release_actual_sha": "93b26bbf2acf73babb53cd6b47e800d2661f54f4",
+        "stable_api_version": 68,
+        "main_api_version": 69,
+        "main_sha": "4024f6ee4373d38ac0a60a79157bcfb57642be9c",
+        "stable_release_assets_changed": false,
+        "new_pull_requests": {
+          "pollen-robotics/microduck_yocto": [
+            162
+          ]
+        },
+        "updated_pull_requests": {},
+        "previous_tracked_prs_merged": false,
+        "merged_previously_tracked_pull_requests": {},
+        "new_development_releases": [],
+        "moved_development_tags": [],
+        "retired_development_tags": [],
+        "new_documentation_proposal": null,
+        "new_runtime_capabilities": false,
+        "official_blog_new_articles": false,
+        "official_blog_article_count": 3,
+        "official_blog_latest_date": "2026-10-23",
+        "model_metadata_changed": false,
+        "official_os_release_changed": false,
+        "official_os_main_changed": false,
+        "official_os_pull_requests_changed": true,
+        "official_os_development_channels_changed": false,
+        "local_migration_record_changed": false,
+        "runtime_code_changed_by_heartbeat": false,
+        "tests_executed_by_tracker": false,
+        "robot_connected": false,
+        "image_built_or_published_by_tracker": false,
+        "package_bytes_downloaded": false,
+        "substantive_update_detected": true,
+        "notes": "New open unmerged OS PR162 adds runqemu metadata and a microduck-qemu machine, 3 commits/5 files (+94/-7). Final head 1d6a12f is README-only; latest build config is preceding 8d2c51a. Author reports microduck-qemu dev/shipping image builds, 43/43 and 48/48 system checks with separate PR147, and a MuJoCo link with reported daemon0.23.0 but no exact daemon/composite-test SHA. Beta/face-board builds and bitbake qemu-helper-native were not tried. Direct kernel boot does not validate U-Boot/A-B/radios/camera/NPU/encoder or HD1910. Three exact-head GitHub checks succeed; no QEMU CI/publish gate or final-source rerun is inferred. Four primary repo heads, formal daemon0.23.1/API68, main/API69, dev tags/releases, models, OS main/release/channels and blog unchanged. PR147 unchanged. No tracker tests/builds/packages/preview/device work or local integration.",
+        "new_os_development_proposal": {
+          "number": 162,
+          "head_sha": "1d6a12f5c6ffe2606e56689d6059e1b4845d6f07",
+          "classification": "Open unmerged OS build/developer-tool proposal; not a formal OS release, current-main capability or hardware validation.",
+          "fixed_diff_url": "https://github.com/pollen-robotics/microduck_yocto/compare/6edf276c3006aa8f8863e11af495a5e5c1b5f7f0...1d6a12f5c6ffe2606e56689d6059e1b4845d6f07",
+          "validation_scope": "Three GitHub check runs successful at exact head; check status alone does not prove the author-reported QEMU/image/MuJoCo runs or a candidate publish gate."
+        }
+      }
+    },
+    {
+      "record": "New open community PR628 and associated simulation-only moonwalk",
+      "checked_at_utc": "2026-11-27T13:40:52.680Z",
+      "checked_at_jst": "2026-11-27T22:40:52.680000+09:00",
+      "source_sha": "a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+      "fixed_source_url": "https://github.com/pollen-robotics/microduck/commit/a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+      "fixed_diff_url": "https://github.com/pollen-robotics/microduck/compare/4024f6ee4373d38ac0a60a79157bcfb57642be9c...a49b2dabad1b0d6179828b8241f02fdc86ec8113",
+      "classification": "Open unmerged community runtime/config proposal for cyclic ground-pick policies; not official main, stable release or hardware validation.",
+      "api_version": 69,
+      "associated_community_policy": {
+        "repository": "giuvilasvito/microduck-moonwalk",
+        "classification": "Community model linked by contributor PR; not a Pollen Robotics formal policy release or an integrated replica model.",
+        "sha": "06d14fb9a1b6517ce2439121b2af827c646f9dfe",
+        "last_modified_utc": "2026-11-27T13:13:50.000Z",
+        "fixed_manifest_url": "https://huggingface.co/giuvilasvito/microduck-moonwalk/blob/06d14fb9a1b6517ce2439121b2af827c646f9dfe/manifest.json",
+        "fixed_card_url": "https://huggingface.co/giuvilasvito/microduck-moonwalk/blob/06d14fb9a1b6517ce2439121b2af827c646f9dfe/README.md",
+        "model_api": 1,
+        "obs_len": 61,
+        "action_len": 14,
+        "declared_robot": {
+          "model": "microduck",
+          "hw_rev": 1,
+          "servos": "xl330",
+          "control_hz": 50
+        },
+        "slot": "ground_pick",
+        "entry_pose": "standing",
+        "command": {
+          "encoding": "phase",
+          "period_s": 1.0,
+          "end_phase": 5.0,
+          "settle_s": 2.0,
+          "heading_gain": 8.0
+        },
+        "duration_note": "Manifest duration_s is 5.0 gliding seconds; proposed config then keeps driving for settle_s=2.0 before stand hand-back, about seven seconds total. No torque-off claim.",
+        "composition_report": "Card/manifest describe walk and stop networks combined in one graph, selecting stop when phase observation norm squared is below 0.25; ONNX bytes were not downloaded or inspected.",
+        "training_provenance": {
+          "reported_short_base": "b02fdea4",
+          "resolved_base_sha": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+          "base_committed_at_utc": "2026-10-12T11:58:55Z",
+          "fixed_base_url": "https://github.com/pollen-robotics/microduck_rl/commit/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+          "dirty": true,
+          "local_changes_published_upstream": false,
+          "report": "Local mjlab/MuJoCo Warp PPO training with BAM XL330 actuators, 2-degree backlash and modelled soles/toes; no corresponding changes on current official develop."
+        },
+        "simulation_only": true,
+        "author_reported_extra_delay": {
+          "plus_20_ms_survived": "64/64",
+          "plus_40_ms_survived": "1-4/64"
+        },
+        "physical_robot_tested": false,
+        "weights_downloaded": false,
+        "weights_replaced_in_replica": false,
+        "manifest_http_bytes_sha256": "94b141ab21cc684d7ab58f76056e46cbb7ff18f62b6e5499018de8c292d08ee4",
+        "manifest_http_byte_length": 2390,
+        "manifest_digest_scope": "Raw HTTP response bytes at fixed model revision; not the historical/local Windows newline text export and not ONNX weights."
+      },
+      "validation_scope": {
+        "rust_unit_tests": {
+          "passed": 461,
+          "failed": 0,
+          "command_as_reported": "cargo test -p robotd-params -p robotd",
+          "fmt_reported": "clean",
+          "clippy_reported": "no added warnings",
+          "independent_rerun_by_tracker": false
+        },
+        "daemon_simulation": {
+          "daemon_version": "0.17.8 with local keys",
+          "body": "duck-sim",
+          "stop_signal_at_s": 5.0,
+          "median_heading_change_deg": 1.45,
+          "within_5_deg": "10/10",
+          "actual_source_sha_provided": false,
+          "not_a_final_pr_head_rerun": true
+        },
+        "physical_robot": "Author explicitly reports no real robot and no robot run.",
+        "current_head_check_runs": [],
+        "current_head_ci_run_verified": false,
+        "scope": "461 tests are PR-author claims; older modified0.17.8 daemon-vs-simulator measurements are not final a49b2da/API69, HD1910 or physical tests. Tracker did not run tests."
+      },
+      "impact": {
+        "HD1910": "High before adoption: community model is explicitly XL330/BAM/backlash, not Feetech. IMU trunk/world quaternion convention, heading sign/gain, loop latency, action/gain scaling, motor limits and control hand-back require separate review; no HD-1910 acceptance.",
+        "camera": "No camera capture, ISP, encoder or local preview change.",
+        "ToF": "No ToF sensor, depth geometry or avoidance change. This is an IMU-yaw observation, not a camera/ToF navigation feature.",
+        "model_management": "High: API69 is unchanged while TOML configuration and ground-pick command semantics expand. Current official set metadata is unchanged. Community manifest heading_gain/settle_s are not automatically consumed by this proposal; explicit matching config is required. Downgrade must remove new keys.",
+        "training": "Community moonwalk is simulation-only; dirty local microduck_rl changes on a historical base are not published upstream training code. Official develop and policy set are unchanged.",
+        "motion": "High: end phase may span multiple cycles and settle continues policy motor outputs before stand hand-back; phase zero is not torque-off or emergency stop. Longer busy duration also extends exclusion from the existing limp-fall predictor eligibility gate.",
+        "sound": "No audio assets, playback or microphone change."
       },
       "replica_integration": "not_integrated",
       "tests_executed_by_tracker": false
