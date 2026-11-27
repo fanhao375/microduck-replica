@@ -416,6 +416,16 @@ class ShippedBundleTest(unittest.TestCase):
                                  (key, *expect[key], 1.0))
                 self.assertEqual(sorted(p.name for p in (Path(tmp) / key).iterdir()), ['extras', 'policy.onnx'])
 
+    def test_shipped_packages_survive_the_update_package_filter(self):
+        # 升级包只收 Studio 下面几个目录；动作包放错地方会被悄悄丢掉（11-27 第一次出包就这样）
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'updater'))
+        from package import runtime_path
+        from studio.models import BUNDLED_ACTIONS, BUNDLED_DIR
+        studio = Path(__file__).resolve().parents[1]
+        for key, _ in BUNDLED_ACTIONS:
+            rel = (BUNDLED_DIR / (key + '.zip')).relative_to(studio).as_posix()
+            self.assertEqual(runtime_path('software/studio/' + rel), 'studio/' + rel)
+
 
 # 只借用模型库测试的环境搭建；那边的用例已经在 test_models 里跑，这里不重复。
 for _name in dir(test_models.LibraryTest):

@@ -36,10 +36,10 @@ MAX_ACTIONS = 28
 # 不能拿来当自定义动作名的：出厂动作、主程序自己驱动的、按键默认值和运行槽名。
 RESERVED = frozenset(SLOTS) | frozenset(SKILLS.values()) | frozenset(DEFAULT_KEYS.values()) | {
     'stand_test', 'roller_stand', 'swizzle', 'crouch_roller', 'spin'}
-# 随 Studio 一起发的动作包（software/studio/bundled-actions/）。升级后第一次打开「动作」页时放进「我的动作」，
+# 随 Studio 一起发的动作包（software/studio/studio/bundled-actions/；必须在 studio/ 里，升级包只收这几个目录）。升级后第一次打开「动作」页时放进「我的动作」，
 # 跟自己导入的一样只进库不登记，要在页面上点「装上」才会装到鸭子上。放过的记在动作目录的 .bundled.json 里：
 # 只放一次，用户删了不会再冒出来；已经自己导入过同一个模型的也不重复放。
-BUNDLED_DIR = Path(__file__).resolve().parents[1] / 'bundled-actions'
+BUNDLED_DIR = Path(__file__).resolve().parent / 'bundled-actions'
 BUNDLED_ACTIONS = (('crouch', '深蹲'), ('idle_chest', '抖一抖'))
 BUNDLED_MARK = '.bundled.json'
 READBACK_TIMEOUT = 25.0
